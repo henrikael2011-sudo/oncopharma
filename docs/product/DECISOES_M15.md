@@ -24,3 +24,7 @@ Adotadas como padrão de trabalho; podem ser revistas sem retrabalho estrutural.
 | P-SAM-3 | Rascunhos só podem ser descartados **antes do envio**. | M15.5 |
 | P-SAM-4 | Urgência em **3 níveis (rotina / prioritária / urgente)** com SLA configurável por serviço; **nenhum temporizador padrão que encerre automaticamente**; farmacêutico **e** enfermagem podem abrir; notificação **somente no app**. | M15.5 |
 | P-UI | Não adicionar novos rótulos "teste/fictício" na interface (pedido do responsável); as marcações internas `synthetic=true` permanecem obrigatórias no banco. | todos |
+| P-CARE-1 | Termos de uso do Care (versão `care-termos-2026-10`) com texto **provisório**, pendente de revisão jurídica/LGPD da instituição; aceite gravado (versão + data) e auditado; sem aceite, nenhum conteúdo é exibido. | M15.2 |
+| P-CARE-2 | Relato estruturado com perguntas **demonstrativas** (`care-demo-v1`): febre, qualquer sinal de alerta ou intensidade "forte" ⇒ prioridade para a equipe + mensagem imediata ao paciente para procurar atendimento/ligar 192 (texto provisório, sem promessa de monitoramento). Conteúdo clínico final depende de validação institucional. | M15.2 |
+| P-CARE-3 | "Meus medicamentos" mostra **nome e horário em linguagem simples, nunca dose/via**; adesão relatada (tomei / tomei só parte / não tomei) é imutável e auditada; nada altera a prescrição. | M15.2 |
+| P-CARE-4 | Contatos de "Preciso de ajuda" vêm de `organization_help_contacts` (configuração institucional; vazios até cadastro). | M15.2 |

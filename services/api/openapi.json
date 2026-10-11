@@ -1,31 +1,618 @@
 {
   "openapi": "3.1.0",
-  "info": { "title": "ONCOPHARMA API", "version": "0.15.1-dev", "description": "API versionada (/v1). Somente dados sintéticos fora de produção; uso clínico não aprovado. Autorização: JWT OIDC (Bearer) + vínculo no banco + RLS por organização." },
-  "servers": [{ "url": "/v1" }],
+  "info": {
+    "title": "ONCOPHARMA API",
+    "version": "0.15.2-dev",
+    "description": "API versionada (/v1). Somente dados sintéticos fora de produção; uso clínico não aprovado. Autorização: JWT OIDC (Bearer) + vínculo no banco + RLS por organização."
+  },
+  "servers": [
+    {
+      "url": "/v1"
+    }
+  ],
   "components": {
-    "securitySchemes": { "oidc": { "type": "http", "scheme": "bearer", "bearerFormat": "JWT" } },
+    "securitySchemes": {
+      "oidc": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
     "parameters": {
-      "Org": { "name": "x-organization-id", "in": "header", "required": true, "schema": { "type": "string", "format": "uuid" } },
-      "PatientId": { "name": "patientId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+      "Org": {
+        "name": "x-organization-id",
+        "in": "header",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "PatientId": {
+        "name": "patientId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      }
     },
     "responses": {
-      "Unauthorized": { "description": "Token ausente/inválido" },
-      "Forbidden": { "description": "Sem MFA, vínculo, atribuição ou organização" },
-      "Unavailable": { "description": "Modo sintético desabilitado ou banco indisponível" }
+      "Unauthorized": {
+        "description": "Token ausente/inválido"
+      },
+      "Forbidden": {
+        "description": "Sem MFA, vínculo, atribuição ou organização"
+      },
+      "Unavailable": {
+        "description": "Modo sintético desabilitado ou banco indisponível"
+      }
     }
   },
   "paths": {
-    "/health": { "get": { "summary": "Liveness", "security": [], "responses": { "200": { "description": "Vivo" } } } },
-    "/ready": { "get": { "summary": "Readiness (banco)", "security": [], "responses": { "200": { "description": "Pronto" }, "503": { "$ref": "#/components/responses/Unavailable" } } } },
-    "/me": { "get": { "summary": "Identidade e vínculos do usuário autenticado", "security": [{ "oidc": [] }], "responses": { "200": { "description": "Principal e memberships" }, "401": { "$ref": "#/components/responses/Unauthorized" } } } },
-    "/patients": { "get": { "summary": "Pacientes do profissional (MFA + vínculo)", "security": [{ "oidc": [] }], "parameters": [{ "$ref": "#/components/parameters/Org" }], "responses": { "200": { "description": "Lista mínima" }, "401": { "$ref": "#/components/responses/Unauthorized" }, "403": { "$ref": "#/components/responses/Forbidden" } } } },
-    "/patients/{patientId}/record": { "get": { "summary": "Prontuário longitudinal sintético (auditado)", "security": [{ "oidc": [] }], "parameters": [{ "$ref": "#/components/parameters/PatientId" }, { "$ref": "#/components/parameters/Org" }], "responses": { "200": { "description": "Registro" }, "403": { "$ref": "#/components/responses/Forbidden" } } } },
-    "/workflow/care/patients/{patientId}/symptoms": { "post": { "summary": "Paciente registra sintoma (vínculo patient_portal_links, idempotente)", "security": [{ "oidc": [] }], "parameters": [{ "$ref": "#/components/parameters/PatientId" }, { "$ref": "#/components/parameters/Org" }],
-      "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["symptomCode", "description", "requestId"], "properties": { "symptomCode": { "enum": ["nausea", "neuropathy", "fever", "other"] }, "description": { "type": "string", "maxLength": 1000 }, "requestId": { "type": "string", "format": "uuid" } } } } } },
-      "responses": { "201": { "description": "Relato e alerta criados" }, "200": { "description": "Repetição idempotente" }, "403": { "$ref": "#/components/responses/Forbidden" } } } },
-    "/workflow/clinical/patients/{patientId}/alerts": { "get": { "summary": "Alertas do paciente (MFA + vínculo + atribuição)", "security": [{ "oidc": [] }], "parameters": [{ "$ref": "#/components/parameters/PatientId" }, { "$ref": "#/components/parameters/Org" }], "responses": { "200": { "description": "Alertas" }, "403": { "$ref": "#/components/responses/Forbidden" } } } },
-    "/workflow/clinical/patients/{patientId}/interventions": { "post": { "summary": "Intervenção profissional sobre alerta (auditada)", "security": [{ "oidc": [] }], "parameters": [{ "$ref": "#/components/parameters/PatientId" }, { "$ref": "#/components/parameters/Org" }],
-      "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["alertId", "note", "decision"], "properties": { "alertId": { "type": "string", "format": "uuid" }, "note": { "type": "string", "maxLength": 2000 }, "decision": { "enum": ["pending", "accepted", "declined", "referred"] } } } } } },
-      "responses": { "201": { "description": "Intervenção registrada" }, "403": { "$ref": "#/components/responses/Forbidden" } } } }
+    "/health": {
+      "get": {
+        "summary": "Liveness",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Vivo"
+          }
+        }
+      }
+    },
+    "/ready": {
+      "get": {
+        "summary": "Readiness (banco)",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Pronto"
+          },
+          "503": {
+            "$ref": "#/components/responses/Unavailable"
+          }
+        }
+      }
+    },
+    "/me": {
+      "get": {
+        "summary": "Identidade e vínculos do usuário autenticado",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Principal e memberships"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/patients": {
+      "get": {
+        "summary": "Pacientes do profissional (MFA + vínculo)",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista mínima"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/patients/{patientId}/record": {
+      "get": {
+        "summary": "Prontuário longitudinal sintético (auditado)",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PatientId"
+          },
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Registro"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/workflow/clinical/patients/{patientId}/alerts": {
+      "get": {
+        "summary": "Alertas do paciente (MFA + vínculo + atribuição)",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PatientId"
+          },
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Alertas"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/workflow/clinical/patients/{patientId}/interventions": {
+      "post": {
+        "summary": "Intervenção profissional sobre alerta (auditada)",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PatientId"
+          },
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "alertId",
+                  "note",
+                  "decision"
+                ],
+                "properties": {
+                  "alertId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "note": {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  "decision": {
+                    "enum": [
+                      "pending",
+                      "accepted",
+                      "declined",
+                      "referred"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Intervenção registrada"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/care/me": {
+      "get": {
+        "summary": "Paciente derivado da identidade (R3): nome de exibição, consentimento e preferências",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Conta sem vínculo de paciente ativo (R3)"
+          }
+        }
+      }
+    },
+    "/care/me/consent": {
+      "put": {
+        "summary": "Aceite da versão vigente dos termos (auditado)",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Conta sem vínculo de paciente ativo (R3)"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "termsVersion",
+                  "accept"
+                ],
+                "properties": {
+                  "termsVersion": {
+                    "type": "string"
+                  },
+                  "accept": {
+                    "const": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/care/me/preferences": {
+      "put": {
+        "summary": "Preferências de acessibilidade",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Conta sem vínculo de paciente ativo (R3)"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "fontScale",
+                  "highContrast"
+                ],
+                "properties": {
+                  "fontScale": {
+                    "enum": [
+                      "normal",
+                      "large",
+                      "xlarge"
+                    ]
+                  },
+                  "highContrast": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/care/me/home": {
+      "get": {
+        "summary": "Início: próxima sessão, lembretes, orientações aprovadas",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Conta sem vínculo de paciente ativo (R3)"
+          }
+        }
+      }
+    },
+    "/care/me/journey": {
+      "get": {
+        "summary": "Minha jornada: ciclos e relatos",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Conta sem vínculo de paciente ativo (R3)"
+          }
+        }
+      }
+    },
+    "/care/me/medications": {
+      "get": {
+        "summary": "Meus medicamentos (sem dose) e adesão de hoje",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Conta sem vínculo de paciente ativo (R3)"
+          }
+        }
+      }
+    },
+    "/care/me/medications/{orderId}/adherence": {
+      "post": {
+        "summary": "Adesão relatada (imutável, idempotente)",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Conta sem vínculo de paciente ativo (R3)"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "status",
+                  "requestId"
+                ],
+                "properties": {
+                  "status": {
+                    "enum": [
+                      "taken",
+                      "missed",
+                      "partial"
+                    ]
+                  },
+                  "requestId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/care/me/symptoms": {
+      "post": {
+        "summary": "Relato estruturado de sintoma (care-demo-v1); sinais de alerta => prioridade + orientação de procurar atendimento",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Conta sem vínculo de paciente ativo (R3)"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "symptomCode",
+                  "intensity",
+                  "onset",
+                  "requestId"
+                ],
+                "properties": {
+                  "symptomCode": {
+                    "enum": [
+                      "nausea",
+                      "neuropathy",
+                      "fever",
+                      "diarrhea",
+                      "fatigue",
+                      "pain",
+                      "mouth",
+                      "other"
+                    ]
+                  },
+                  "intensity": {
+                    "enum": [
+                      "leve",
+                      "moderada",
+                      "forte"
+                    ]
+                  },
+                  "onset": {
+                    "enum": [
+                      "hoje",
+                      "1-3-dias",
+                      "mais-3-dias"
+                    ]
+                  },
+                  "redFlags": {
+                    "type": "array",
+                    "maxItems": 5,
+                    "items": {
+                      "enum": [
+                        "febre",
+                        "falta_ar",
+                        "sangramento",
+                        "nao_bebe",
+                        "confusao"
+                      ]
+                    }
+                  },
+                  "description": {
+                    "type": "string",
+                    "maxLength": 1000
+                  },
+                  "requestId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/care/me/help": {
+      "get": {
+        "summary": "Orientação de urgência e contatos configurados da organização",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Conta sem vínculo de paciente ativo (R3)"
+          }
+        }
+      }
+    }
   }
 }

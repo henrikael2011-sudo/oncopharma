@@ -26,7 +26,7 @@ test('OpenAPI documenta exatamente as rotas da API', () => {
 test('modo sintético: nunca habilita em prod; exige ONCO_ENVIRONMENT conhecido', async () => {
   const src = read('services/api/src/synthetic-mode.ts');
   assert.match(src, /SYNTHETIC_ENVIRONMENTS = \['dev', 'hml', 'test'\]/);
-  for (const f of ['services/api/src/workflow.controller.ts', 'services/api/src/clinical.controller.ts', 'apps/care-web/lib/workflow-proxy.ts', 'apps/clinical-web/lib/workflow-proxy.ts'])
+  for (const f of ['services/api/src/workflow.controller.ts', 'services/api/src/clinical.controller.ts', 'apps/clinical-web/lib/workflow-proxy.ts'])
     assert.doesNotMatch(read(f), /NODE_ENV\s*===?\s*'production'\s*\|\|\s*process\.env\.(ALLOW|NEXT_PUBLIC)/, f);
 });
 test('Care não contém componentes do Clinical e vice-versa (D-002)', () => {

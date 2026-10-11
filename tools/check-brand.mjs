@@ -31,7 +31,7 @@ for (const f of SRC) { const s = read(f);
 // 3. títulos
 const titles = { 'apps/care-web': 'ONCOPHARMA Care', 'apps/clinical-web': 'ONCOPHARMA Clinical', 'apps/admin-web': 'ONCOPHARMA Admin' };
 for (const [a, t] of Object.entries(titles)) if (!read(`${a}/app/layout.tsx`).includes(`title: '${t}'`)) errors.push(`${a}: <title> deve ser "${t}"`);
-if (!read('apps/care-web/app/care/page.tsx').includes('Um passo de cada vez. Juntos no cuidado.')) errors.push('Care: assinatura ausente (Plano §2.1)');
+if (!files('apps/care-web').some((f) => read(f).includes('Um passo de cada vez. Juntos no cuidado.'))) errors.push('Care: assinatura ausente (Plano §2.1)');
 // 4. contraste (WCAG 2.2: texto 4.5:1; foco/bordas de controle 3:1)
 const all = { ...PLANO, ...derived, white: '#ffffff' };
 const rgb = (h) => { h = h.replace('#', ''); if (h.length === 3) h = [...h].map((c) => c + c).join(''); return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16) / 255); };
@@ -40,7 +40,7 @@ const ratio = (a, b) => { const [x, y] = [lum(rgb(all[a])), lum(rgb(all[b]))].so
 const PAIRS = [
   ['texto Care', 'ink-teal', 'mint-50', 4.5], ['texto Care em cartão', 'ink-teal', 'white', 4.5], ['rótulo Care', 'emerald', 'mint-50', 4.5],
   ['botão Care', 'white', 'emerald', 4.5], ['botão Clinical', 'white', 'navy', 4.5], ['cabeçalho Care', 'white', 'teal', 4.5], ['cabeçalho Clinical', 'white', 'navy-800', 4.5],
-  ['texto Clinical', 'ink-navy', 'navy-50', 4.5], ['rótulo Clinical', 'gold-700', 'navy-50', 4.5], ['texto auxiliar', 'ink-muted', 'white', 4.5], ['texto secundário', 'navy-text', 'navy-50', 4.5],
+  ['texto Clinical', 'ink-navy', 'navy-50', 4.5], ['rótulo Clinical', 'gold-700', 'navy-50', 4.5], ['texto auxiliar', 'ink-muted', 'white', 4.5], ['nota Care', 'ink-muted', 'mint-50', 4.5], ['navegação Care', 'ink-teal', 'white', 4.5], ['botão secundário Care', 'teal', 'white', 4.5], ['botão Ligar 192', 'white', 'danger', 4.5], ['título urgente', 'danger', 'white', 4.5], ['borda de escolha', 'border-strong', 'white', 3], ['texto secundário', 'navy-text', 'navy-50', 4.5],
   ['aviso claro', 'gold-ink', 'gold-50', 4.5], ['rótulo planejado', 'emerald-ink', 'mint-100', 4.5], ['alerta crítico', 'danger', 'white', 4.5], ['texto claro', 'ink', 'canvas', 4.5],
   ['foco claro (Care)', 'navy', 'mint-50', 3], ['foco claro (Clinical)', 'navy', 'navy-50', 3], ['foco escuro (Care)', 'gold', 'teal', 3], ['foco escuro (Clinical)', 'gold', 'navy-800', 3],
   ['borda de controle', 'border-strong', 'white', 3], ['borda de controle (Care)', 'border-strong', 'mint-50', 3], ['borda de controle (painel)', 'border-strong', 'navy-100', 3],

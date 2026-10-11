@@ -81,7 +81,7 @@ test.describe.serial('M14.5 E2E sintético', () => {
     expect((await request.get(`${API}/v1/me`, { headers: { authorization: 'Bearer abc.def.ghi' } })).status()).toBe(401);
     expect((await request.get(`${API}/v1/patients`, { headers: { 'x-organization-id': ORG } })).status()).toBe(401);
     expect((await request.get(`${CLIN}/api/clinical/summary`)).status()).toBe(401);
-    const r = await request.post(`${CARE}/api/workflow/patients/${PAT_A}/symptoms`, { headers: { origin: CARE, 'content-type': 'application/json' }, data: { symptomCode: 'nausea', description: 'x', requestId: randomUUID() } });
+    const r = await request.post(`${CARE}/api/care/me/symptoms`, { headers: { origin: CARE, 'content-type': 'application/json' }, data: { symptomCode: 'nausea', intensity: 'leve', onset: 'hoje', requestId: randomUUID() } });
     expect(r.status()).toBe(401);
   });
 
@@ -109,7 +109,7 @@ test.describe.serial('M14.5 E2E sintético', () => {
     await page.goto(CARE + '/care');
     await expect(page.getByText('Um passo de cada vez. Juntos no cuidado.')).toBeVisible();
     expect(parseFloat(await page.locator('.care-page').evaluate((e) => getComputedStyle(e).fontSize))).toBeGreaterThanOrEqual(18);
-    for (const h of await page.locator('.care-page button, .care-page input, .care-page select').evaluateAll((es) => es.map((e) => e.getBoundingClientRect().height)))
+    for (const h of await page.locator('.care-page button, .care-page input:not([type=radio]):not([type=checkbox]), .care-page select, .care-page .btn-primary, .care-page .choice').evaluateAll((es) => es.map((e) => e.getBoundingClientRect().height)))
       expect(h).toBeGreaterThanOrEqual(48);
     // foco em fundo claro = azul-petróleo (navy), não dourado
     const field = page.locator('.care-main input, .care-main button').first();
@@ -122,7 +122,7 @@ test.describe.serial('M14.5 E2E sintético', () => {
     const context = await browser.newContext(); const page = await context.newPage();
     await page.goto(`${CARE}/care`);
     const authReq = page.waitForRequest((r) => r.url().startsWith(`${STATE.issuer}/protocol/openid-connect/auth`));
-    await page.getByRole('link', { name: 'Entrar com sua conta de teste' }).click();
+    await page.getByRole('link', { name: 'Entrar', exact: true }).click();
     const u = new URL((await authReq).url());
     expect(u.searchParams.get('code_challenge_method')).toBe('S256'); expect(u.searchParams.get('code_challenge')).toMatch(/^[A-Za-z0-9_-]{43}$/);
     expect(u.searchParams.get('state')).toBeTruthy(); expect(u.searchParams.get('client_id')).toBe('oncopharma-care-web');
@@ -134,44 +134,85 @@ test.describe.serial('M14.5 E2E sintético', () => {
     expect((await context.cookies(CARE)).some((c) => c.name === 'onco_login_flow')).toBe(false);
     const c = claims(s.token); evidence.tokens.patientA = { iss: c.iss, aud: c.aud, amr: c.amr, exp_minus_iat: c.exp - c.iat, sub_matches: c.sub === sub('paciente.a') };
     expect(c.iss).toBe(STATE.issuer); expect([].concat(c.aud)).toContain('oncopharma-api'); expect(c.sub).toBe(sub('paciente.a'));
-    // Formulário operado por teclado.
-    await page.locator('#care-patient').focus(); await page.keyboard.type(PAT_A);
-    await page.keyboard.press('Tab'); await page.keyboard.press('Tab');
-    await expect(page.locator(':focus')).toHaveAttribute('id', 'care-description');
-    await page.keyboard.type(`Relato SINTÉTICO E2E M14.5 [${RUN}]: náusea leve fictícia.`);
-    await page.keyboard.press('Tab'); await expect(page.locator(':focus')).toHaveText('Registrar relato de teste'); await page.keyboard.press('Enter');
-    const status = page.getByRole('status'); await expect(status).toContainText('Relato sintético registrado');
-    reportId = (await status.innerText()).match(/[0-9a-f-]{36}/)[0]; await shot(page, 'care-symptom-registered');
+    // M15.2 — consentimento na primeira entrada (gravado e auditado), depois o Início com nome do IdP (sem UUID na tela).
+    await expect(page.getByRole('heading', { name: 'Antes de começar' })).toBeVisible(); await shot(page, 'care-consent');
+    await page.getByLabel('Li e concordo').check(); await page.getByRole('button', { name: 'Continuar' }).click();
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Olá, Ana. Como você está hoje?');
+    await expect(page.getByText('Um passo de cada vez. Juntos no cuidado.')).toBeVisible();
+    await expect(page.locator('input#care-patient')).toHaveCount(0); await expect(page.getByText(/UUID|fictíci|de teste/i)).toHaveCount(0);
+    await expect(page.getByRole('heading', { name: 'Próxima sessão' })).toBeVisible(); await expect(page.getByText('Ciclo 3 ·')).toBeVisible();
+    await expect(page.getByText('Evite bebidas e alimentos muito gelados')).toBeVisible(); // orientação approved
+    await expect(page.getByText('Rascunho não aprovado')).toHaveCount(0); // draft nunca aparece
+    expect(sql(`SELECT count(*) FROM audit_events WHERE action='care.consent.accepted' AND actor_sub='${sub('paciente.a')}'`)).not.toBe('0');
+    await shot(page, 'care-home');
+    // Relato estruturado operado por teclado: uma pergunta por tela.
+    await page.getByRole('link', { name: 'Registrar como estou' }).click(); await expect(page.getByRole('heading', { name: 'Como estou hoje' })).toBeVisible();
+    await page.getByLabel('Enjoo ou vômito').focus(); await page.keyboard.press('Space'); await page.keyboard.press('Enter');
+    await page.getByLabel(/Leve —/).check(); await page.getByRole('button', { name: 'Continuar' }).click();
+    await page.getByLabel('Hoje', { exact: true }).check(); await page.getByRole('button', { name: 'Continuar' }).click();
+    await expect(page.getByText('Você tem algum destes sinais agora?')).toBeVisible(); await shot(page, 'care-symptom-red-flags');
+    await page.getByRole('button', { name: 'Continuar' }).click();
+    await page.locator('#care-description').fill(`Relato SINTÉTICO E2E M14.5 [${RUN}]: náusea leve fictícia.`);
+    await expect(page.getByLabel('Resumo do relato')).toContainText('Enjoo ou vômito');
+    const a11yForm = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze(); evidence.a11y.careSymptomForm = a11yForm.violations.map((v) => ({ id: v.id, impact: v.impact, nodes: v.nodes.length }));
+    await page.getByRole('button', { name: 'Enviar para a equipe' }).click();
+    const status = page.getByRole('status'); await expect(status).toContainText('Relato enviado');
+    await expect(status).toContainText('ligue 192');
+    const shortId = await page.locator('[data-report-id]').getAttribute('data-report-id'); reportId = shortId; await shot(page, 'care-symptom-registered');
+    // R3: o relato foi gravado para o paciente da identidade (A), sem identificador vindo do cliente.
+    expect(sql(`SELECT patient_id||'|'||(details->>'intensity')||'|'||actor_sub FROM patient_symptom_reports WHERE id='${reportId}'`)).toBe(`${PAT_A}|leve|${sub('paciente.a')}`);
     const res = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
     evidence.a11y.careLoggedIn = a11yMap(res);
-
-    // Negativo: patientId fornecido pelo cliente para paciente NÃO vinculado à conta.
-    await page.fill('#care-patient', PAT_B); await page.fill('#care-description', 'Tentativa sintética para outro paciente'); await page.click('button[type=submit]:has-text("Registrar relato de teste")');
-    await expect(page.getByRole('status')).toContainText('Conta não vinculada ao paciente'); await shot(page, 'care-negative-other-patient');
+    // Sinal de alerta => orientação imediata de procurar atendimento (texto provisório) e alerta prioritário para a equipe.
+    await page.goto(`${CARE}/care/sintoma`);
+    await page.getByLabel('Cansaço').check(); await page.getByRole('button', { name: 'Continuar' }).click();
+    await page.getByLabel(/Moderada —/).check(); await page.getByRole('button', { name: 'Continuar' }).click();
+    await page.getByLabel('De 1 a 3 dias').check(); await page.getByRole('button', { name: 'Continuar' }).click();
+    await page.getByLabel('Falta de ar').check(); await page.getByRole('button', { name: 'Continuar' }).click();
+    await page.getByRole('button', { name: 'Enviar para a equipe' }).click();
+    await expect(page.getByRole('alert').filter({ hasText: 'Procure atendimento agora' })).toBeVisible(); await shot(page, 'care-symptom-urgent');
+    const urgentId = await page.locator('[data-report-id]').getAttribute('data-report-id');
+    expect(sql(`SELECT r.triage_status||'|'||a.level FROM patient_symptom_reports r JOIN clinical_alerts a ON a.source_report_id=r.id WHERE r.id='${urgentId}'`)).toBe('urgent_review|urgent_review');
+    // Minha jornada, Meus medicamentos (sem dose; adesão relatada), Ajuda, Preferências.
+    await page.getByRole('link', { name: 'Minha jornada' }).click(); await expect(page.getByText(/Ciclo 1/)).toBeVisible(); await expect(page.getByText(/Enjoo ou vômito · Recebido pela equipe/).first()).toBeVisible(); await shot(page, 'care-journey');
+    await page.getByRole('link', { name: 'Meus medicamentos' }).click(); await expect(page.getByRole('heading', { name: 'Ondansetrona (comprimido)' })).toBeVisible();
+    await expect(page.getByText(/\b8 ?mg\b/)).toHaveCount(0);
+    await page.getByRole('group', { name: /Ondansetrona \(comprimido\)/ }).getByRole('button', { name: 'Tomei', exact: true }).click();
+    await expect(page.getByRole('status')).toContainText('registrado "Tomei"'); await shot(page, 'care-medications');
+    expect(sql(`SELECT count(*) FROM patient_adherence_reports WHERE patient_id='${PAT_A}' AND status='taken' AND actor_sub='${sub('paciente.a')}'`)).not.toBe('0');
+    await page.getByRole('link', { name: 'Preciso de ajuda' }).click(); await expect(page.getByRole('link', { name: 'Ligar 192' })).toHaveAttribute('href', 'tel:192'); await shot(page, 'care-help');
+    const a11yHelp = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze(); evidence.a11y.careHelp = a11yMap(a11yHelp);
+    await page.getByRole('link', { name: 'Preferências' }).click(); await page.getByLabel('Muito grande').check(); await page.getByRole('button', { name: 'Salvar' }).click();
+    await expect(page.getByRole('status')).toContainText('Preferências salvas'); await expect(page.locator('.care-page')).toHaveAttribute('data-font', 'xlarge');
+    expect(parseFloat(await page.locator('.care-page').evaluate((e) => getComputedStyle(e).fontSize))).toBeGreaterThanOrEqual(23);
+    await page.getByLabel('Normal', { exact: true }).check(); await page.getByRole('button', { name: 'Salvar' }).click(); await expect(page.locator('.care-page')).toHaveAttribute('data-font', 'normal');
+    // BFF: rotas fora da lista permitida e identificador de paciente na URL não existem.
+    expect((await page.request.get(`${CARE}/api/care/patients/${PAT_B}`)).status()).toBe(404);
+    expect((await page.request.post(`${CARE}/api/workflow/patients/${PAT_B}/symptoms`, { headers: { origin: CARE, 'content-type': 'application/json' }, data: {} })).status()).toBe(404);
     // CSRF: origem estranha e content-type indevido são recusados pelo proxy.
-    const evil = await page.request.post(`${CARE}/api/workflow/patients/${PAT_A}/symptoms`, { headers: { origin: 'http://evil.example', 'content-type': 'application/json' }, data: { symptomCode: 'nausea', description: 'x', requestId: randomUUID() } });
+    const evil = await page.request.post(`${CARE}/api/care/me/symptoms`, { headers: { origin: 'http://evil.example', 'content-type': 'application/json' }, data: { symptomCode: 'nausea', intensity: 'leve', onset: 'hoje', requestId: randomUUID() } });
     expect(evil.status()).toBe(403);
-    const noOrigin = await page.request.fetch(`${CARE}/api/workflow/patients/${PAT_A}/symptoms`, { method: 'POST', headers: { 'content-type': 'application/json' }, data: { symptomCode: 'nausea', description: 'x', requestId: randomUUID() } });
+    const noOrigin = await page.request.fetch(`${CARE}/api/care/me/symptoms`, { method: 'POST', headers: { 'content-type': 'application/json' }, data: { symptomCode: 'nausea', intensity: 'leve', onset: 'hoje', requestId: randomUUID() } });
     expect(noOrigin.status()).toBe(403);
-    const ctype = await page.request.post(`${CARE}/api/workflow/patients/${PAT_A}/symptoms`, { headers: { origin: CARE, 'content-type': 'text/plain' }, data: '{}' });
+    const ctype = await page.request.post(`${CARE}/api/care/me/symptoms`, { headers: { origin: CARE, 'content-type': 'text/plain' }, data: '{}' });
     expect(ctype.status()).toBe(415);
     // Idempotência: mesmo requestId não duplica.
-    const rid = randomUUID(); const body = { symptomCode: 'fever', description: 'Febre FICTÍCIA para simular alerta urgente', requestId: rid };
-    const r1 = await page.request.post(`${CARE}/api/workflow/patients/${PAT_A}/symptoms`, { headers: { origin: CARE, 'content-type': 'application/json' }, data: body });
-    const r2 = await page.request.post(`${CARE}/api/workflow/patients/${PAT_A}/symptoms`, { headers: { origin: CARE, 'content-type': 'application/json' }, data: body });
-    expect(r1.status()).toBe(201); expect((await r1.json()).triageStatus).toBe('urgent_review'); expect((await r2.json()).duplicate).toBe(true);
+    const rid = randomUUID(); const body = { symptomCode: 'fever', intensity: 'moderada', onset: 'hoje', redFlags: [], description: 'Febre FICTÍCIA para simular alerta urgente', requestId: rid };
+    const r1 = await page.request.post(`${CARE}/api/care/me/symptoms`, { headers: { origin: CARE, 'content-type': 'application/json' }, data: body });
+    const r2 = await page.request.post(`${CARE}/api/care/me/symptoms`, { headers: { origin: CARE, 'content-type': 'application/json' }, data: body });
+    expect(r1.status()).toBe(201); expect((await r1.json()).urgent).toBe(true); expect((await r2.json()).duplicate).toBe(true);
     expect(sql(`SELECT count(*) FROM patient_symptom_reports WHERE source_reference='${rid}'`)).toBe('1');
     // Logout com origem inválida é recusado; logout legítimo remove a sessão local.
     expect((await page.request.post(`${CARE}/api/auth/logout`, { headers: { origin: 'http://evil.example' }, maxRedirects: 0 })).status()).toBe(403);
-    await page.getByRole('button', { name: 'Encerrar sessão' }).click();
+    await page.getByRole('button', { name: 'Sair' }).click();
     // RP-initiated logout: o IdP pede confirmação (sem id_token_hint) e encerra a sessão SSO.
     await page.waitForURL(/\/protocol\/openid-connect\/logout/); await shot(page, 'idp-logout-confirm');
     await page.click('#kc-logout'); await page.waitForURL(`${CARE}/care`);
     expect(await sessionToken(context, CARE)).toBeNull();
     // Novo "Entrar" exige credenciais novamente (SSO encerrado, sem reautenticação silenciosa).
-    await page.getByRole('link', { name: 'Entrar com sua conta de teste' }).click(); await page.waitForURL(/localhost:8080\/realms\//);
+    await page.getByRole('link', { name: 'Entrar', exact: true }).click(); await page.waitForURL(/localhost:8080\/realms\//);
     await expect(page.locator('#username')).toBeVisible(); await page.goto(`${CARE}/care`);
-    const after = await page.request.post(`${CARE}/api/workflow/patients/${PAT_A}/symptoms`, { headers: { origin: CARE, 'content-type': 'application/json' }, data: { symptomCode: 'nausea', description: 'x', requestId: randomUUID() } });
+    const after = await page.request.post(`${CARE}/api/care/me/symptoms`, { headers: { origin: CARE, 'content-type': 'application/json' }, data: { symptomCode: 'nausea', intensity: 'leve', onset: 'hoje', requestId: randomUUID() } });
     expect(after.status()).toBe(401);
     saveEvidence(); await context.close();
   });
@@ -210,7 +251,7 @@ test.describe.serial('M14.5 E2E sintético', () => {
     expect(audit).toEqual([`symptom.created|${sub('paciente.a')}`, `intervention.created|${sub('farmaceutico')}`]);
     const reads = sql(`SELECT string_agg(DISTINCT action, ',' ORDER BY action) FROM audit_events WHERE organization_id='${ORG}' AND actor_sub='${sub('farmaceutico')}'`);
     expect(reads).toBe('alert.list,intervention.created,patient.list,patient.record.read');
-    expect(sql(`SELECT count(*) FROM patient_guidance`)).toBe('0'); // nenhuma orientação automática ao paciente
+    expect(sql(`SELECT count(*) FROM patient_guidance WHERE intervention_id IS NOT NULL OR (status<>'draft' AND approved_by IS NULL)`)).toBe('0'); // nenhuma orientação automática ao paciente (M15.2: só orientações aprovadas semeadas)
     evidence.db = { reportId, alertId: alert[0], alertStatus: alert[1], interventionActorIsPharmacist: true, auditTrail: audit.map((x) => x.split('|')[0]), pharmacistAuditActions: reads };
     saveEvidence(); await context.close();
   });
@@ -243,13 +284,22 @@ test.describe.serial('M14.5 E2E sintético', () => {
     // Paciente e cuidador: sem papel profissional; cuidador sem autorização não registra pelo paciente A.
     for (const user of ['paciente.b', 'cuidador.a']) {
       const ctx = await browser.newContext(); const p = await ctx.newPage();
-      await p.goto(`${CARE}/care`); await p.getByRole('link', { name: 'Entrar com sua conta de teste' }).click(); await kcLogin(p, user); await p.waitForURL(`${CARE}/care`);
+      await p.goto(`${CARE}/care`); await p.getByRole('link', { name: 'Entrar', exact: true }).click(); await kcLogin(p, user); await p.waitForURL(`${CARE}/care`);
       const t = (await sessionToken(ctx, CARE)).token;
       expect((await apiGet(request, 'patients', t)).status()).toBe(403);
       const post = await request.post(`${API}/v1/workflow/clinical/patients/${PAT_B}/interventions`, { headers: { authorization: `Bearer ${t}`, 'x-organization-id': ORG, 'content-type': 'application/json' }, data: { alertId: randomUUID(), note: 'x', decision: 'accepted' } });
       expect(post.status()).toBe(403);
-      const sym = await request.post(`${API}/v1/workflow/care/patients/${PAT_A}/symptoms`, { headers: { authorization: `Bearer ${t}`, 'x-organization-id': ORG, 'content-type': 'application/json' }, data: { symptomCode: 'nausea', description: 'tentativa sintética', requestId: randomUUID() } });
-      expect(sym.status()).toBe(403);
+      // R3: rota antiga com patientId do cliente não existe mais; /care/me resolve só o vínculo da própria identidade.
+      expect((await request.post(`${API}/v1/workflow/care/patients/${PAT_A}/symptoms`, { headers: { authorization: `Bearer ${t}`, 'x-organization-id': ORG, 'content-type': 'application/json' }, data: {} })).status()).toBe(404);
+      const me = await request.get(`${API}/v1/care/me`, { headers: { authorization: `Bearer ${t}`, 'x-organization-id': ORG } });
+      if (user === 'cuidador.a') { expect(me.status()).toBe(403); await expect(p.getByRole('heading', { name: 'Seu acesso ainda não foi liberado' })).toBeVisible(); }
+      else {
+        expect(me.status()).toBe(200);
+        const rid = randomUUID(); const sym = await request.post(`${API}/v1/care/me/symptoms`, { headers: { authorization: `Bearer ${t}`, 'x-organization-id': ORG, 'content-type': 'application/json' }, data: { symptomCode: 'nausea', intensity: 'leve', onset: 'hoje', requestId: rid } });
+        expect(sym.status()).toBe(201); expect(sql(`SELECT patient_id FROM patient_symptom_reports WHERE source_reference='${rid}'`)).toBe(PAT_B);
+        // Outra organização no cabeçalho: nenhum vínculo => 403.
+        expect((await request.get(`${API}/v1/care/me`, { headers: { authorization: `Bearer ${t}`, 'x-organization-id': '99999999-9999-4999-8999-999999999999' } })).status()).toBe(403);
+      }
       await ctx.close();
     }
   });
@@ -279,9 +329,10 @@ test.describe.serial('M14.5 E2E sintético', () => {
       }
     }
     await page.setViewportSize({ width: 390, height: 844 }); await page.goto(`${CARE}/care`);
-    await page.fill('#care-patient', PAT_A); await page.fill('#care-description', 'Relato sintético sem sessão');
-    await page.click('button[type=submit]:has-text("Registrar relato de teste")');
-    await expect(page.getByRole('status')).toContainText('Autenticação necessária'); await shot(page, 'care-error-unauthenticated');
+    await expect(page.getByRole('link', { name: 'Entrar', exact: true })).toBeVisible(); await expect(page.locator('.care-nav')).toHaveCount(0);
+    await page.goto(`${CARE}/care/sintoma`); await expect(page.getByRole('link', { name: 'Entrar', exact: true })).toBeVisible(); await expect(page.getByText('O que você está sentindo?')).toHaveCount(0);
+    expect((await page.request.post(`${CARE}/api/care/me/symptoms`, { headers: { origin: CARE, 'content-type': 'application/json' }, data: { symptomCode: 'nausea', intensity: 'leve', onset: 'hoje', requestId: randomUUID() } })).status()).toBe(401);
+    await shot(page, 'care-error-unauthenticated');
     expect(errors).toEqual([]); await ctx.close();
   });
 

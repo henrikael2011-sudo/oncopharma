@@ -38,7 +38,41 @@
 
 /* M15.1 — Care: ações em verde-esmeralda, alvos de toque ≥48px, corpo ≥18px. Clinical: ação primária azul-petróleo. */
 .care-page{font-size:18px}
-.care-page :where(button,input,select,textarea,.back){min-height:48px}
+.care-page :where(button,input:not([type=radio],[type=checkbox]),select,textarea,.back){min-height:48px}
 .care-page .workflow-form button,.care-page .next-step button,.care-page .btn-primary{background:var(--emerald)}
 .clinical-page .workflow-form button,.clinical-page .next-step button,.clinical-page .btn-primary{background:var(--navy)}
 .care-signature{font-size:20px;font-weight:700;color:var(--emerald);margin:-6px 0 18px}
+/* M15.2 — Care do paciente: navegação simples, escolhas grandes, uma tarefa por tela. Somente tokens/derivados. */
+.care-nav{background:#fff;border-bottom:2px solid var(--mint-200)}
+.care-nav ul{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin:0 auto;max-width:1100px;padding:10px 24px}
+.care-nav a{display:inline-flex;align-items:center;min-height:48px;padding:0 14px;border-radius:12px;text-decoration:none;font-weight:700;color:var(--ink-teal)}
+.care-nav a[aria-current=page]{background:var(--emerald);color:#fff}
+.btn-primary,.btn-secondary,.btn-danger,.btn-on-dark{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:12px 20px;border-radius:12px;font:inherit;font-weight:700;text-decoration:none;cursor:pointer;border:2px solid transparent;margin:0}
+.btn-primary{background:var(--emerald);color:#fff}
+.btn-primary:disabled{opacity:.55;cursor:not-allowed}
+.care-page :is(.btn-secondary,.workflow-form .btn-secondary){background:#fff;color:var(--teal);border:2px solid var(--emerald)}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-on-dark{background:transparent;color:#fff;border-color:var(--mint)}
+.btn-large{font-size:1.15em;padding:16px 28px;margin:8px 0 20px}
+.care-panel{background:#fff;border:2px solid var(--mint-200);border-radius:24px;padding:24px;margin:24px 0}
+.care-urgent{border-color:var(--danger)}
+.care-urgent h1,.care-urgent h2{color:var(--danger)}
+.care-list,.care-timeline{padding-left:1.2em;line-height:1.6}
+.care-list li,.care-timeline li{margin:6px 0}
+.care-med-list{list-style:none;padding:0;display:grid;gap:16px}
+.care-page .care-card{min-height:0}
+.care-page .care-card p{font-size:1em}
+.choices{border:0;padding:0;margin:0;display:grid;gap:10px}
+.choices legend{font-size:1.2em;font-weight:800;margin-bottom:10px}
+.choice{display:flex;align-items:center;gap:12px;min-height:56px;padding:12px 16px;background:#fff;border:2px solid var(--border-strong);border-radius:14px;cursor:pointer;font-weight:600}
+.choice:has(input:checked){border-color:var(--emerald);background:var(--mint-50)}
+.choice input{width:24px;height:24px;margin:0;accent-color:var(--emerald)}
+.care-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px}
+.care-review{background:var(--mint-50);border-radius:14px;padding:16px;margin-top:12px}
+.care-review h2{margin-top:0;font-size:1.1em}
+.care-note{font-size:.9em;color:var(--ink-muted)}
+.care-page[data-font=large]{font-size:20px}
+.care-page[data-font=xlarge]{font-size:23px}
+.care-page[data-contrast=high]{background:#fff;color:var(--ink)}
+.care-page[data-contrast=high] :is(.care-card,.care-panel,.choice){border-color:var(--ink)}
+.care-page[data-contrast=high] .care-note{color:var(--ink)}

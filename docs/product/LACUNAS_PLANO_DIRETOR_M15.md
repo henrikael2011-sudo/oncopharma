@@ -26,7 +26,7 @@ Nada aqui altera D-001..D-008 nem os tokens de marca. "FEITO" nunca significa ho
 ## 3. Papéis e permissões (§3)
 | Req. | Situação | Evidência | Lacuna |
 |---|---|---|---|
-| Paciente registra o próprio sintoma | PARCIAL | `POST /v1/workflow/care/patients/:id/symptoms` + `patient_portal_links`; outro paciente → 403 (e2e 04) | **R3: paciente digita UUID** → derivar da identidade (M15.2) |
+| Paciente registra o próprio sintoma | FEITO (M15.2) | `GET /v1/care/me` + `POST /v1/care/me/symptoms` resolvem o paciente por `patient_portal_links` (org+issuer+sujeito); rota com `patientId` removida (404); e2e 04/07, `tests/m152-*.mjs` | — |
 | Cuidador: escopo autorizado, revogável | FALTA | cuidador hoje sempre 403 (e2e 07) | **R4: modelo convite + consentimento por escopo + prazo + revogação + auditoria** (M15.3) |
 | Farmacêutico revisa alerta / propõe intervenção | FEITO (DEV) | `GET alerts`, `POST interventions`; MFA + vínculo + atribuição (e2e 06/07) | — |
 | Enfermagem "conforme atribuição"; Médico | PARCIAL | papéis `nurse`/`physician` em `STAFF`; atribuição por paciente testada (e2e 07) | Matriz fina por recurso (enfermagem não propõe intervenção farmacêutica) → M15.4 |
@@ -39,12 +39,12 @@ Nada aqui altera D-001..D-008 nem os tokens de marca. "FEITO" nunca significa ho
 | # | Tela | Situação | Evidência | Plano |
 |---|---|---|---|---|
 | 1 | Boas-vindas/acesso, consentimentos, acessibilidade, cuidador | PARCIAL | login OIDC, logout RP | Consentimento de uso (termo) = texto BLOQUEADO-DECISÃO (jurídico); preferência de acessibilidade (fonte grande/contraste) → M15.6 |
-| 2 | Início "Como você está hoje?", próximo ciclo, lembretes, ajuda | FALTA | — | M15.2 (próximo ciclo a partir de `treatment_cycles`; lembretes sem push nesta fase) |
-| 3 | Registrar sintoma: questionário adaptativo (duração, intensidade, início, sinais de alerta), confirmação | PARCIAL | código + descrição livre; febre → `urgent_review` | Questionário estruturado sintético (perguntas = conteúdo **demonstrativo**, não aprovado clinicamente) → M15.2 |
-| 4 | Minha jornada (ciclos, histórico em linguagem simples) | FALTA | — | M15.2 (recorte permitido; somente dados autorizados) |
-| 5 | Meus medicamentos (prescrição validada, horários, adesão relatada) | FALTA | tabelas `clinical_medication_orders` | M15.2 (somente leitura + adesão relatada; nunca alterar dose) |
+| 2 | Início "Como você está hoje?", próximo ciclo, lembretes, ajuda | FEITO (M15.2) | — | M15.2 (próximo ciclo a partir de `treatment_cycles`; lembretes sem push nesta fase) |
+| 3 | Registrar sintoma: questionário adaptativo (duração, intensidade, início, sinais de alerta), confirmação | FEITO (M15.2, conteúdo demonstrativo P-CARE-2) | código + descrição livre; febre → `urgent_review` | Questionário estruturado sintético (perguntas = conteúdo **demonstrativo**, não aprovado clinicamente) → M15.2 |
+| 4 | Minha jornada (ciclos, histórico em linguagem simples) | FEITO (M15.2) | — | M15.2 (recorte permitido; somente dados autorizados) |
+| 5 | Meus medicamentos (prescrição validada, horários, adesão relatada) | FEITO (M15.2, sem dose P-CARE-3) | tabelas `clinical_medication_orders` | M15.2 (somente leitura + adesão relatada; nunca alterar dose) |
 | 6 | Mensagens e orientações (canal institucional real) | BLOQUEADO-DECISÃO | `patient_guidance` exige aprovação | Canal/horários reais dependem da instituição; exibir só orientações `approved` (M15.2) |
-| 7 | Preciso de ajuda (urgência, contatos reais) | PARCIAL | — | Tela com orientação genérica "procure atendimento/ligue 192" + contatos **configuráveis** (vazios em DEV); conteúdo final BLOQUEADO-DECISÃO → M15.2 |
+| 7 | Preciso de ajuda (urgência, contatos reais) | FEITO (M15.2; contatos configuráveis P-CARE-4) | — | Tela com orientação genérica "procure atendimento/ligue 192" + contatos **configuráveis** (vazios em DEV); conteúdo final BLOQUEADO-DECISÃO → M15.2 |
 | 8 | Cuidador e privacidade (granular, prazo, revogação, histórico de acessos) | FALTA | — | M15.3 (R4) |
 
 ## 4.2 Clinical
