@@ -31,28 +31,7 @@ export class WorkflowController {
       if (!assignments.length) throw new ForbiddenException('Paciente não atribuído');
     });
   }
-  @Post('care/patients/:patientId/symptoms')
-  async symptom(@Req() req: AuthenticatedRequest,@Param('patientId') patientId:string,@Headers('x-organization-id') orgHeader:string,@Body() body:Record<string,unknown>) {
-    syntheticOnly(); const org=tenant(orgHeader); patient(patientId);
-    const symptomCode=textValue(body?.symptomCode,64,'Código');
-    if (!['nausea','neuropathy','fever','other'].includes(symptomCode)) throw new BadRequestException('Sintoma não permitido');
-    const description=textValue(body?.description,1000,'Descrição');
-    const requestId=textValue(body?.requestId,100,'Idempotência');
-    if (!UUID.test(requestId)) throw new BadRequestException('requestId deve ser UUID');
-    return this.db.withTenant(org,async client=>{
-      const link=await client.query(`SELECT 1 FROM patient_portal_links l JOIN patients p ON p.id=l.patient_id AND p.organization_id=l.organization_id WHERE l.organization_id=$1 AND l.patient_id=$2 AND l.oidc_issuer=$3 AND l.oidc_sub=$4 AND l.active=true AND p.synthetic=true`,[org,patientId,req.principal.issuer,req.principal.sub]);
-      if (!link.rowCount) throw new ForbiddenException('Conta não vinculada ao paciente');
-      const existing=await client.query(`SELECT id,triage_status FROM patient_symptom_reports WHERE organization_id=$1 AND source_reference=$2`,[org,requestId]);
-      if (existing.rowCount) return { reportId:existing.rows[0].id,triageStatus:existing.rows[0].triage_status,duplicate:true,syntheticOnly:true };
-      // Regra conservadora de demonstração, não é triagem clínica validada.
-      const urgent=symptomCode==='fever'; const level=urgent?'urgent_review':'needs_review';
-      const reportId=randomUUID(); const alertId=randomUUID();
-      await client.query(`INSERT INTO patient_symptom_reports(id,organization_id,patient_id,symptom_code,description,source,source_reference,triage_status) VALUES($1,$2,$3,$4,$5,'care-portal',$6,$7)`,[reportId,org,patientId,symptomCode,description,requestId,urgent?'urgent_review':'pending']);
-      await client.query(`INSERT INTO clinical_alerts(id,organization_id,patient_id,source_report_id,code,level,status,rule_version,explanation) VALUES($1,$2,$3,$4,$5,$6,'open','demo-m10-v1',$7)`,[alertId,org,patientId,reportId,`symptom.${symptomCode}`,level,'Regra demonstrativa: exige avaliação profissional. Não representa diagnóstico ou conduta.']);
-      await client.query(`INSERT INTO audit_events(organization_id,actor_issuer,actor_sub,action,resource_type,metadata) VALUES($1,$2,$3,'symptom.created','symptom_report',jsonb_build_object('report_id',$4::text,'patient_id',$5::text))`,[org,req.principal.issuer,req.principal.sub,reportId,patientId]);
-      return {reportId,alertId,triageStatus:urgent?'urgent_review':'pending',syntheticOnly:true,clinicalAdvice:false};
-    });
-  }
+  // M15.2 (R3): o relato do paciente passou para POST /v1/care/me/symptoms (paciente derivado da identidade).
   @Get('clinical/patients/:patientId/alerts')
   async alerts(@Req() req:AuthenticatedRequest,@Param('patientId') patientId:string,@Headers('x-organization-id') orgHeader:string){
     syntheticOnly(); const org=tenant(orgHeader); patient(patientId); await this.checkStaff(req,org,patientId);

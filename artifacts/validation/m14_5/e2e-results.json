@@ -1,7 +1,7 @@
 {
   "config": {
     "argv": [
-      "/opt/node22/bin/node",
+      "/workspace/tools/node22/bin/node",
       "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/node_modules/.bin/playwright",
       "test",
       "-c",
@@ -142,12 +142,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 2388,
+                      "duration": 2765,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-11T21:09:00.652Z",
+                      "startTime": "2026-10-11T21:55:43.434Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -194,12 +194,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 877,
+                      "duration": 99,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-11T21:09:03.501Z",
+                      "startTime": "2026-10-11T21:55:48.650Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -246,12 +246,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 5885,
+                      "duration": 5628,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-11T21:09:04.386Z",
+                      "startTime": "2026-10-11T21:55:48.758Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -298,12 +298,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 4578,
+                      "duration": 4906,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-11T21:09:10.282Z",
+                      "startTime": "2026-10-11T21:55:54.397Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -350,12 +350,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 6973,
+                      "duration": 16850,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-11T21:09:14.871Z",
+                      "startTime": "2026-10-11T21:55:59.314Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -402,12 +402,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 12118,
+                      "duration": 9480,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-11T21:09:21.862Z",
+                      "startTime": "2026-10-11T21:56:16.174Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -426,7 +426,7 @@
               ],
               "id": "3597eb8adab86113f57d-086d36b09c5f489133e6",
               "file": "m145-flow.spec.mjs",
-              "line": 179,
+              "line": 220,
               "column": 3
             },
             {
@@ -454,12 +454,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 6729,
+                      "duration": 11689,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-11T21:09:34.001Z",
+                      "startTime": "2026-10-11T21:56:25.664Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -478,7 +478,7 @@
               ],
               "id": "3597eb8adab86113f57d-6aa1471d3e0629a06873",
               "file": "m145-flow.spec.mjs",
-              "line": 187,
+              "line": 228,
               "column": 3
             },
             {
@@ -506,12 +506,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 27821,
+                      "duration": 12787,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-11T21:09:40.739Z",
+                      "startTime": "2026-10-11T21:56:37.368Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -530,7 +530,7 @@
               ],
               "id": "3597eb8adab86113f57d-3514ee9dd6d418a5b72f",
               "file": "m145-flow.spec.mjs",
-              "line": 218,
+              "line": 259,
               "column": 3
             },
             {
@@ -558,12 +558,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 2123,
+                      "duration": 1734,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-11T21:10:08.570Z",
+                      "startTime": "2026-10-11T21:56:50.175Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -582,7 +582,7 @@
               ],
               "id": "3597eb8adab86113f57d-435b81f550af929f37e1",
               "file": "m145-flow.spec.mjs",
-              "line": 257,
+              "line": 307,
               "column": 3
             },
             {
@@ -610,12 +610,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 8766,
+                      "duration": 9192,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-11T21:10:10.703Z",
+                      "startTime": "2026-10-11T21:56:51.920Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -634,7 +634,7 @@
               ],
               "id": "3597eb8adab86113f57d-db156df3f0bafe4236fe",
               "file": "m145-flow.spec.mjs",
-              "line": 271,
+              "line": 321,
               "column": 3
             },
             {
@@ -662,12 +662,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 82590,
+                      "duration": 95922,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-11T21:10:19.492Z",
+                      "startTime": "2026-10-11T21:57:01.122Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -686,7 +686,7 @@
               ],
               "id": "3597eb8adab86113f57d-6961a2f6a31bf56512a2",
               "file": "m145-flow.spec.mjs",
-              "line": 288,
+              "line": 339,
               "column": 3
             },
             {
@@ -714,12 +714,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 2,
+                      "duration": 1,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-11T21:11:42.095Z",
+                      "startTime": "2026-10-11T21:58:37.056Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -738,7 +738,7 @@
               ],
               "id": "3597eb8adab86113f57d-5036b81c09b2cfda3528",
               "file": "m145-flow.spec.mjs",
-              "line": 304,
+              "line": 355,
               "column": 3
             }
           ]
@@ -748,8 +748,8 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-10-11T21:08:49.979Z",
-    "duration": 172337.972,
+    "startTime": "2026-10-11T21:55:25.955Z",
+    "duration": 191380.12,
     "expected": 12,
     "skipped": 0,
     "unexpected": 0,

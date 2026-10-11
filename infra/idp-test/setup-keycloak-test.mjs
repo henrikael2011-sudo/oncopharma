@@ -55,7 +55,7 @@ const users = [
 ];
 const state = { realm: REALM, issuer: `${KC}/realms/${REALM}`, users: {} };
 for (const [username, role, mfa] of users) {
-  await api('POST', `/realms/${REALM}/users`, { username, enabled: true, emailVerified: true, firstName: 'Sintético', lastName: username.replace('.', ' '), email: `${username}@synthetic.invalid`,
+  await api('POST', `/realms/${REALM}/users`, { username, enabled: true, emailVerified: true, firstName: ({ 'paciente.a': 'Ana', 'paciente.b': 'Bruno', 'cuidador.a': 'Carla' })[username] || 'Sintético', lastName: username.replace('.', ' '), email: `${username}@synthetic.invalid`,
     credentials: [{ type: 'password', value: USER_PW, temporary: false }], requiredActions: mfa ? ['CONFIGURE_TOTP'] : [] });
   const [u] = await api('GET', `/realms/${REALM}/users?exact=true&username=${encodeURIComponent(username)}`);
   state.users[username] = { sub: u.id, role, mfaEnrollment: mfa };
