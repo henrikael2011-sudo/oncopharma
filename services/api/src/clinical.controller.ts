@@ -50,7 +50,7 @@ export class ClinicalController {
         structured[key] = (await client.query(sql,[patientId,organizationId])).rows;
       }
       await client.query(`INSERT INTO audit_events(organization_id,actor_issuer,actor_sub,action,resource_type,metadata)
-        VALUES($1,$2,$3,'patient.record.read','patient',jsonb_build_object('patient_id',$4))`,
+        VALUES($1,$2,$3,'patient.record.read','patient',jsonb_build_object('patient_id',$4::text))`,
         [organizationId,req.principal.issuer,req.principal.sub,patientId]);
       return {patient:p.rows[0],cycles:cycles.rows,observations:observations.rows,structured,syntheticOnly:true,clinicalOperationsEnabled:false};
     });
@@ -74,7 +74,7 @@ export class ClinicalController {
          ORDER BY p.created_at ASC LIMIT 25`, [organizationId, req.principal.issuer, req.principal.sub]);
       await client.query(
         `INSERT INTO audit_events (organization_id, actor_issuer, actor_sub, action, resource_type, metadata)
-         VALUES ($1,$2,$3,'patient.list','patient',jsonb_build_object('result_count',$4))`,
+         VALUES ($1,$2,$3,'patient.list','patient',jsonb_build_object('result_count',$4::int))`,
          [organizationId, req.principal.issuer, req.principal.sub, result.rowCount]);
       return { patients: result.rows, syntheticOnly: true, clinicalOperationsEnabled: false };
     });

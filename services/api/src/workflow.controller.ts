@@ -23,8 +23,10 @@ export class WorkflowController {
     if (!req.principal.mfa) throw new ForbiddenException('MFA obrigatório');
     const rows = await this.db.query<{role:string}>(`SELECT role FROM memberships WHERE organization_id=$1 AND oidc_issuer=$2 AND oidc_sub=$3 AND active=true`,[org,req.principal.issuer,req.principal.sub]);
     if (!rows.some(x=>STAFF.includes(x.role))) throw new ForbiddenException('Profissional sem vínculo');
-    const assignments = await this.db.query<{patient_id:string}>(`SELECT patient_id FROM care_assignments WHERE organization_id=$1 AND patient_id=$2 AND oidc_issuer=$3 AND oidc_sub=$4 AND active=true`,[org,patientId,req.principal.issuer,req.principal.sub]);
-    if (!assignments.length) throw new ForbiddenException('Paciente não atribuído');
+    // M14.5: care_assignments tem FORCE RLS por organização; a consulta precisa do contexto de tenant da transação,
+    // caso contrário retorna zero linhas e todo profissional atribuído é negado.
+    const assigned = await this.db.withTenant(org, async client => (await client.query(`SELECT patient_id FROM care_assignments WHERE organization_id=$1 AND patient_id=$2 AND oidc_issuer=$3 AND oidc_sub=$4 AND active=true`,[org,patientId,req.principal.issuer,req.principal.sub])).rowCount);
+    if (!assigned) throw new ForbiddenException('Paciente não atribuído');
   }
   @Post('care/patients/:patientId/symptoms')
   async symptom(@Req() req: AuthenticatedRequest,@Param('patientId') patientId:string,@Headers('x-organization-id') orgHeader:string,@Body() body:Record<string,unknown>) {
@@ -44,7 +46,7 @@ export class WorkflowController {
       const reportId=randomUUID(); const alertId=randomUUID();
       await client.query(`INSERT INTO patient_symptom_reports(id,organization_id,patient_id,symptom_code,description,source,source_reference,triage_status) VALUES($1,$2,$3,$4,$5,'care-portal',$6,$7)`,[reportId,org,patientId,symptomCode,description,requestId,urgent?'urgent_review':'pending']);
       await client.query(`INSERT INTO clinical_alerts(id,organization_id,patient_id,source_report_id,code,level,status,rule_version,explanation) VALUES($1,$2,$3,$4,$5,$6,'open','demo-m10-v1',$7)`,[alertId,org,patientId,reportId,`symptom.${symptomCode}`,level,'Regra demonstrativa: exige avaliação profissional. Não representa diagnóstico ou conduta.']);
-      await client.query(`INSERT INTO audit_events(organization_id,actor_issuer,actor_sub,action,resource_type,metadata) VALUES($1,$2,$3,'symptom.created','symptom_report',jsonb_build_object('report_id',$4,'patient_id',$5))`,[org,req.principal.issuer,req.principal.sub,reportId,patientId]);
+      await client.query(`INSERT INTO audit_events(organization_id,actor_issuer,actor_sub,action,resource_type,metadata) VALUES($1,$2,$3,'symptom.created','symptom_report',jsonb_build_object('report_id',$4::text,'patient_id',$5::text))`,[org,req.principal.issuer,req.principal.sub,reportId,patientId]);
       return {reportId,alertId,triageStatus:urgent?'urgent_review':'pending',syntheticOnly:true,clinicalAdvice:false};
     });
   }
@@ -53,7 +55,7 @@ export class WorkflowController {
     syntheticOnly(); const org=tenant(orgHeader); patient(patientId); await this.checkStaff(req,org,patientId);
     return this.db.withTenant(org,async client=>{
       const result=await client.query(`SELECT a.id,a.code,a.level,a.status,a.rule_version,a.explanation,a.created_at,r.description,r.symptom_code FROM clinical_alerts a LEFT JOIN patient_symptom_reports r ON r.id=a.source_report_id WHERE a.organization_id=$1 AND a.patient_id=$2 ORDER BY a.created_at DESC LIMIT 50`,[org,patientId]);
-      await client.query(`INSERT INTO audit_events(organization_id,actor_issuer,actor_sub,action,resource_type,metadata) VALUES($1,$2,$3,'alert.list','patient',jsonb_build_object('patient_id',$4))`,[org,req.principal.issuer,req.principal.sub,patientId]);
+      await client.query(`INSERT INTO audit_events(organization_id,actor_issuer,actor_sub,action,resource_type,metadata) VALUES($1,$2,$3,'alert.list','patient',jsonb_build_object('patient_id',$4::text))`,[org,req.principal.issuer,req.principal.sub,patientId]);
       return {alerts:result.rows,syntheticOnly:true};
     });
   }
@@ -69,7 +71,7 @@ export class WorkflowController {
       const id=randomUUID();
       await client.query(`INSERT INTO clinical_interventions(id,organization_id,patient_id,alert_id,type,note,decision,actor_issuer,actor_sub) VALUES($1,$2,$3,$4,'clinical_review',$5,$6,$7,$8)`,[id,org,patientId,alertId,note,decision,req.principal.issuer,req.principal.sub]);
       await client.query(`UPDATE clinical_alerts SET status='acknowledged' WHERE id=$1 AND organization_id=$2 AND status='open'`,[alertId,org]);
-      await client.query(`INSERT INTO audit_events(organization_id,actor_issuer,actor_sub,action,resource_type,metadata) VALUES($1,$2,$3,'intervention.created','clinical_intervention',jsonb_build_object('intervention_id',$4,'alert_id',$5))`,[org,req.principal.issuer,req.principal.sub,id,alertId]);
+      await client.query(`INSERT INTO audit_events(organization_id,actor_issuer,actor_sub,action,resource_type,metadata) VALUES($1,$2,$3,'intervention.created','clinical_intervention',jsonb_build_object('intervention_id',$4::text,'alert_id',$5::text))`,[org,req.principal.issuer,req.principal.sub,id,alertId]);
       return {interventionId:id,guidanceDelivered:false,syntheticOnly:true};
     });
   }

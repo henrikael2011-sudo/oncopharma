@@ -40,9 +40,15 @@
     "test:lab:e2e": "node --test tests/m142-lab-e2e.test.mjs",
     "test:db:required": "node tests/require-postgres.mjs && node --test tests/m12-db.integration.mjs tests/m145-db-rls.integration.mjs",
     "verify:local": "npm test && npm run test:extended && npm run test:lab:e2e && npm run check:design && npm run check:governance && npm run test:readiness",
-    "validate:evidence": "node tools/validate-real.mjs"
+    "validate:evidence": "node tools/validate-real.mjs",
+    "test:e2e": "bash tests/e2e/run-e2e.sh",
+    "idp:test:setup": "node infra/idp-test/setup-keycloak-test.mjs"
   },
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.64.0"
   }
 }

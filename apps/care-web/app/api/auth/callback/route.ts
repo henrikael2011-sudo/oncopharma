@@ -3,7 +3,7 @@ import { cookieOptions, FLOW, oidcConfig, origin, seal, SESSION, unseal } from '
 export const runtime='nodejs';
 type Flow = {state:string;verifier:string;nonce:string;issuedAt:number};
 export async function GET(req:NextRequest){
- const back=NextResponse.redirect(`${origin()}/clinical`);
+ const back=NextResponse.redirect(`${origin()}/care`);
  back.cookies.delete(FLOW);
  try {
  const code=req.nextUrl.searchParams.get('code'),state=req.nextUrl.searchParams.get('state');
@@ -16,5 +16,5 @@ export async function GET(req:NextRequest){
  if(!tokens.access_token||tokens.token_type?.toLowerCase()!=='bearer'||!Number.isFinite(tokens.expires_in)||Number(tokens.expires_in)<30)throw Error('token inválido');
  const maxAge=Math.min(1800,Math.floor(Number(tokens.expires_in))-15);
  back.cookies.set(SESSION,seal({token:tokens.access_token,expiresAt:Date.now()+maxAge*1000}),cookieOptions(maxAge));return back;
- }catch{const fail=NextResponse.redirect(`${origin()}/clinical?login=failed`);fail.cookies.delete(FLOW);fail.cookies.delete(SESSION);return fail;}
+ }catch{const fail=NextResponse.redirect(`${origin()}/care?login=failed`);fail.cookies.delete(FLOW);fail.cookies.delete(SESSION);return fail;}
 }
