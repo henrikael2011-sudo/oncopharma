@@ -19,8 +19,11 @@ O ONCOPHARMA será uma plataforma PWA de acompanhamento oncológico com duas exp
 | D-006 | 1–2 pacientes sintéticos em DEV/HML; produção sem dados de teste | Aprovada |
 | D-007 | Integração Tasy/MV/FHIR apenas mediante autorização, contrato e validação técnica | Princípio aprovado |
 | D-008 | Hospedagem, provedor de login, instituição-piloto e modelo de operação de alertas | Em aberto |
+| D-013 | Rascunho de prescrição assistido por IA (fase posterior): IA identifica problema relacionado à quimioterapia, sugere medicação conforme protocolo, médico confirma, IA gera prescrição-rascunho (somente medicamentos com registro Anvisa, ordem de infusão, dose calculada por regras determinísticas a partir de dados registrados), médico confirma de novo, imprime e assina. Ver `RF_PRESCRICAO_ASSISTIDA_IA.md` | Aprovada (registro); implementação bloqueada até pré-requisitos: enquadramento Anvisa, validação clínica, integração com prontuário oficial — *Emenda D-013, 11/10/2026* |
 
 **Fora de escopo da primeira liberação:** prescrição automática, liberação de ciclos, mudança de doses sem profissional, atendimento emergencial 24h sem equipe real, diagnósticos autônomos e integração não autorizada com prontuários.
+
+> **Emenda D-013, 11/10/2026:** o texto acima permanece válido para a primeira liberação. Em **fase posterior**, a D-013 prevê *rascunho* de prescrição assistido por IA — não prescrição automática: nenhuma prescrição é gerada sem confirmação médica; cada confirmação do médico fica registrada na auditoria; o documento final só vale após impressão e assinatura do médico. A IA produz documento, não decide. Implementação bloqueada até enquadramento Anvisa (SaMD), validação clínica e integração autorizada com o prontuário/sistema oficial.
 
 ## 2. IDENTIDADE VISUAL E SISTEMA DE DESIGN
 ### 2.1 Marca e conceito
@@ -55,6 +58,14 @@ O ONCOPHARMA será uma plataforma PWA de acompanhamento oncológico com duas exp
 | Sempre explicar o próximo passo | Mostrar incerteza, dados faltantes e referência clínica |
 | Sem dose ou automedicação sugerida ao paciente | Sugestões condicionais apenas para revisão habilitada |
 
+> **Emenda UI, 11/10/2026 (requisitos de interface definidos por Henrikael):** complementa a tabela acima, sem revogá-la. Detalhes em `docs/diretrizes-design.md`.
+> 1. **Care (paciente/cuidador em casa):** bem facilitado e simples — letra grande, alto contraste, **um passo por tela**, botões grandes.
+> 2. **Clinical/hospitalar:** mais opções, mas **sem poluir a tela** — somente informações essenciais visíveis; detalhes sob demanda (expandir, abrir, aba).
+> 3. **Privacidade na tela:** dados do paciente **só aparecem ao clicar no paciente**. Lista/painel mostra apenas o mínimo para identificar e priorizar (nome/identificação segura, alerta/gravidade, pendência) — **nunca o detalhe de todos os pacientes ao mesmo tempo**.
+> 4. **Busca de pacientes (Clinical):** barra de busca para localizar pacientes por identificação segura, retornando apenas pacientes permitidos pelo vínculo assistencial/ABAC.
+> 5. **Organização por alocação hospitalar (Clinical):** pacientes agrupados por unidade/andar/quarto/leito, alocação puxada do sistema hospitalar por botão **Sincronizar** (via `integration-gateway`; FHIR `Location`/`Encounter.location` ou HL7 ADT A01/A02/A03), exibindo origem e horário da última sincronização.
+> 6. **Alocação manual (fallback):** se o hospital não fornecer alocação, preenchimento manual permitido, marcado como **manual**, com autor e hora na auditoria; dado sincronizado prevalece e o sistema avisa conflito. Integração real segue D-007 (somente com autorização); antes disso, usa o simulador.
+
 ## 3. PERSONAS, PAPÉIS E PERMISSÕES
 **Paciente:** relata sintomas, consulta orientações aprovadas, vê sua própria jornada e pode conceder acesso ao cuidador. **Cuidador:** vê somente o escopo autorizado e revogável. **Farmacêutico:** reconciliação, validação farmacoterapêutica, intervenções e monitoramento. **Enfermagem:** registro de sinais, administração, evolução e triagem conforme competências. **Médico:** decisões diagnósticas e terapêuticas e prescrição. **Gestor clínico:** filas, indicadores, protocolos e auditoria. **Administrador técnico:** usuários, infraestrutura e integração; não ganha acesso irrestrito a dados clínicos por padrão.
 
@@ -66,6 +77,8 @@ O ONCOPHARMA será uma plataforma PWA de acompanhamento oncológico com duas exp
 | Propor intervenção farmacêutica | Não | Não | Sim | Não | Conforme atribuição | Não |
 | Prescrever/alterar terapia | Não | Não | Não via sugestão de IA | Não | Conforme habilitação e sistema oficial | Não |
 | Aprovar protocolo institucional | Não | Não | Papel designado | Papel designado | Papel designado | Gestão de fluxo, não aprovação clínica |
+
+> **Emenda D-013, 11/10/2026 (fase posterior):** a linha "Prescrever/alterar terapia" permanece vigente. Quando a D-013 for liberada, o **Médico** poderá partir de um rascunho de prescrição gerado pela IA, sempre com dupla confirmação (sugestão e rascunho), registro de cada confirmação na auditoria, dupla checagem farmacêutica, impressão e assinatura do médico (ICP-Brasil se eletrônica). Paciente, cuidador, enfermagem, farmacêutico e admin continuam sem prescrever via sugestão de IA.
 
 **Controle de acesso:** RBAC + regras contextuais ABAC (organização, unidade, equipe assistencial, consentimentos, finalidade e emergência auditada). MFA para profissionais, sessões expiráveis e segregação por instituição.
 
@@ -98,6 +111,7 @@ O ONCOPHARMA será uma plataforma PWA de acompanhamento oncológico com duas exp
 | Dado hospitalar chega | FHIR/HL7/API autorizada | Autentica, reconcilia paciente, deduplica, normaliza, preserva origem | Linha do tempo atualizada ou erro de integração | Integração; provenance e audit |
 | Possível toxicidade | Sintomas + protocolo + administração + exames | Regras determinísticas, depois correlação explicativa da IA | Alerta, justificativa, evidências e lacunas | Equipe clínica; status aberto |
 | Sugestão de suporte | Sintoma + risco + antieméticos + alergias + exames | Consulta protocolos versionados e restrições | Opções de avaliação, nunca ordem médica automática | Profissional aceita/ajusta/rejeita |
+| Rascunho de prescrição (D-013, fase posterior — *Emenda D-013, 11/10/2026*) | Sugestão aceita pelo médico + peso/altura/função renal/hepática registrados + protocolo institucional versionado | Regras determinísticas de dose (limites, ajuste renal/hepático, superfície corporal); somente medicamentos com registro Anvisa | Rascunho de prescrição com ordem de infusão — nunca ordem médica automática | Médico confirma (2ª vez), imprime e assina; farmacêutico faz dupla checagem; cada confirmação auditada |
 | Revisão profissional | Alerta ou pré-ciclo | Exige ação explícita e registra justificativa | Plano, encaminhamento, prazo e status | Identidade profissional + trilha |
 | Encaminhamento | Intervenção validada | Cria tarefa, atribui equipe e confirma entrega | Pendente, recebido, em avaliação, resolvido | Destinatário e timestamps |
 | Dados insuficientes | Ausência de exame/medicação/registro | Bloqueia conclusão indevida; solicita verificação | “Não é possível concluir” + dado faltante | Auditoria de incerteza |
@@ -209,6 +223,7 @@ Uma funcionalidade só será marcada **CONCLUÍDA** se possuir: (1) objetivo e u
 | Operação de alertas | Falsa expectativa de atendimento imediato | Quem monitora, quando e com qual SLA? |
 | Responsabilidade clínica | Sugestões sem validação institucional | Comitê clínico e aprovadores de protocolos |
 | Regulação | Implantação inadequada de SaMD | Avaliação regulatória formal |
+| Prescrição assistida (D-013) — *Emenda D-013, 11/10/2026* | Rascunho de prescrição sem enquadramento SaMD, validação clínica ou regras CFM | Enquadramento Anvisa (RDC 657/2022, RDC 751/2022), validação clínica, integração com prontuário oficial |
 | Integração hospitalar | Acesso indevido/inconsistência de dados | Instituição e fornecedores parceiros |
 | Hospedagem | Segurança, custos e residência de dados | Provedor, região, contratos e orçamento |
 | Marca | Uso indevido de ® e conflito de registro | Pesquisa de marca/domínio e arte final SVG |
