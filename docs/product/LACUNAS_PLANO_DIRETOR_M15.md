@@ -135,3 +135,13 @@ Nada aqui altera D-001..D-008 nem os tokens de marca. "FEITO" nunca significa ho
 5. Todo acesso do cuidador gera `audit_events` e aparece ao paciente em "Histórico de acessos".
 6. Registro feito pelo cuidador fica marcado `source=caregiver` com a identidade do cuidador.
 7. Pendente de decisão (BLOQUEADO-DECISÃO): cuidador de paciente incapaz/menor (representação legal), aceite jurídico do termo de consentimento.
+
+## Atualização M15.4b — alocação hospitalar
+| Item | Status | Evidência |
+|---|---|---|
+| Agrupamento por unidade/andar/quarto/leito | FEITO (M15.4b) | `Worklist.tsx` (grupos), `GET /v1/clinical/worklist` (`allocation`, `lastSync`) |
+| "Sincronizar" via integration-gateway + hospital simulado (FHIR R4 Encounter.location / HL7 ADT PV1-3), origem e horário | FEITO (M15.4b) | `services/integration-gateway/src/{server,location-feed}.mjs`, `simulator/hospital-sim.mjs`, `POST /v1/clinical/allocations/sync` |
+| Manual quando o hospital não informa, com autoria/horário; aviso de divergência | FEITO (M15.4b) | migração `0012`, `AllocationPanel.tsx`, E2E 06c, `tests/m154b-*` |
+| Cabeçalho Clinical em 390px sem sobreposição (achado hml) | FEITO (M15.4b) | CSS `.clinical-header`, E2E 06 (asserção de sobreposição a 390px) |
+| Importação de PDF hospitalar | PENDENTE → M15.4c | — |
+

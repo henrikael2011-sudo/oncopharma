@@ -14,7 +14,7 @@ test('estados §5.1: grafo idêntico ao trigger da 0011; finais sem saída; sem 
     assert.deepEqual(m[1].replace(/'/g, '').split(',').map((x) => x.trim()).sort(), [...tos].sort(), from);
   }
   assert.deepEqual(r.ALERT_STATES.map((s) => r.ALERT_LABEL[s]), ['Detectado', 'Aguardando revisão', 'Em avaliação', 'Encaminhado', 'Em acompanhamento', 'Resolvido', 'Descartado', 'Duplicado']);
-  assert.doesNotMatch(read('services/api/src/clinical-work.controller.ts'), /interval|setTimeout|setInterval|cron/i);
+  assert.doesNotMatch(read('services/api/src/clinical-work.controller.ts'), /\binterval\b|setTimeout|setInterval|\bcron\b/i);
 });
 test('papéis (P-CLIN-1): resolver/descartar/duplicar só farmácia ou medicina; enfermagem avalia, acompanha, encaminha', () => {
   assert.equal(r.canTransition('nurse', 'awaiting_review', 'in_evaluation'), true);

@@ -11,6 +11,7 @@ const ALLOW: [string, RegExp][] = [
   ['GET', new RegExp(`^patients/${ID}$`)], ['GET', new RegExp(`^patients/${ID}/(precycle|timeline)$`)],
   ['POST', new RegExp(`^alerts/${ID}/transition$`)], ['POST', new RegExp(`^patients/${ID}/tasks$`)],
   ['POST', new RegExp(`^tasks/${ID}/(receive|complete|cancel)$`)], ['POST', new RegExp(`^patients/${ID}/precycle/reviews$`)],
+  ['POST', /^allocations\/sync$/], ['POST', new RegExp(`^patients/${ID}/allocation(/conflict)?$`)],
 ];
 export function allowed(method: string, path: string) {
   if (!ALLOW.some(([m, r]) => m === method && r.test(path))) return false;
