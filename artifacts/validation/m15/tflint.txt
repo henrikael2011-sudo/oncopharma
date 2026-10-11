@@ -1,0 +1,1 @@
+tflint exit 0

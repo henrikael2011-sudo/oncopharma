@@ -1,9 +1,9 @@
 {
   "schema": "oncopharma-validation-v2",
-  "date": "2026-10-11T19:21:15.481Z",
+  "date": "2026-10-11T20:46:07.874Z",
   "baseline": "Plano Diretor v3.0",
   "release": "M14.5-consolidado",
-  "sourceDigest": "452ef050c27aac8fd76bafd33eb1378c0c06b0b23792a1e869b2e0558d372d3d",
+  "sourceDigest": "1e5cca034d41ee1b55005ff834630240584fc24f7d68d8cd0e1ca6c59811d77e",
   "clinicalApproval": false,
   "checks": [
     {
@@ -86,7 +86,7 @@
       "name": "e2e-care-clinical",
       "status": "PASS",
       "exitCode": 0,
-      "reason": "(node:333275) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+      "reason": "(node:352918) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
       "command": "npm run test:e2e"
     },
     {
@@ -129,6 +129,6 @@
   ],
   "readyForIntegratedValidation": false,
   "readyForClinicalUse": false,
-  "completedAt": "2026-10-11T19:25:08.304Z",
-  "sourceDigestAfter": "452ef050c27aac8fd76bafd33eb1378c0c06b0b23792a1e869b2e0558d372d3d"
+  "completedAt": "2026-10-11T20:50:08.458Z",
+  "sourceDigestAfter": "1e5cca034d41ee1b55005ff834630240584fc24f7d68d8cd0e1ca6c59811d77e"
 }

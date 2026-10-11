@@ -18,4 +18,4 @@
 - O documento só tem validade após impressão e assinatura do médico.
 - A IA produz documento, não decide.
 
-**Nota:** este arquivo será consolidado em `docs/product/DECISOES_M15.md` quando esse documento estiver em `main` (PR #1), sem alterar o conteúdo.
+**Nota:** entrada resumida também registrada em `docs/product/DECISOES_M15.md` (linha D-013).

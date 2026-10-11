@@ -18,3 +18,10 @@ artifacts/validation/m14_5/playwright-output/
 *.tsbuildinfo
 playwright-report/
 test-results/
+
+# Terraform
+infra/aws/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+infra/aws/plan

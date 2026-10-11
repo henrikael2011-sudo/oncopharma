@@ -44,6 +44,11 @@ Necessidade → tela → regra → API → teste → aprovação. Tabela acima p
 | §12 Reprodutibilidade / CI | `npm ci`, secrets, testes extras no CI (Codex) | npm-ci.log; CI não executado (sem repositório) | PARCIAL |
 | D-008 decisões externas | — | oidc-mfa institucional e clinical-release BLOCKED | ABERTO |
 
+## M15 — novos requisitos aprovados
+| Requisito | Tela | Regra | API | Teste | Aprovação |
+|---|---|---|---|---|---|
+| RF-M15-SAM-01 Solicitação de alteração ao médico (D-012) | Clinical: "Solicitar alteração ao médico" (autor) e "Solicitações recebidas" (médico) | vínculo assistencial + MFA; estados rascunho→enviada/em revisão→aceita/ajustada/recusada→concluída; app nunca altera prescrição; IA só rascunho rotulado | `/v1/workflow/clinical/patients/:id/change-requests` (planejado M15.5) | unit (estados, plantão, drafter); DB/RLS negativos (sem vínculo, outra org, admin); E2E farmacêutico→plantonista→auditoria | Requisito aprovado pelo responsável; implementação pendente (M15.5) |
+
 ## Emenda UI / D-013 (11/10/2026)
 | Requisito | Implementação | Verificação | Estado |
 |---|---|---|---|
