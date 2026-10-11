@@ -1,0 +1,45 @@
+{
+  "schema": "oncopharma-validation-v1",
+  "date": "2026-10-11T17:58:46.625Z",
+  "baseline": "Plano Diretor v3.0",
+  "release": "M14.4",
+  "clinicalApproval": false,
+  "checks": [
+    {
+      "name": "local-tests",
+      "status": "PASS",
+      "exitCode": 0,
+      "reason": "",
+      "command": "npm run verify:local"
+    },
+    {
+      "name": "lab-unit-tests",
+      "status": "PASS",
+      "exitCode": 0,
+      "reason": "",
+      "command": "npm run test:lab"
+    },
+    {
+      "name": "postgres-required",
+      "status": "BLOCKED",
+      "reason": "DATABASE_URL ausente; nenhum teste PostgreSQL executado."
+    },
+    {
+      "name": "full-build",
+      "status": "BLOCKED",
+      "reason": "Dependências Next.js/NestJS não instaladas; build não executado."
+    },
+    {
+      "name": "oidc-mfa",
+      "status": "BLOCKED",
+      "reason": "Provedor e identidades de homologação não configurados; não simular autenticação."
+    },
+    {
+      "name": "browser-lab-render",
+      "status": "BLOCKED",
+      "reason": "Chromium indisponível operacionalmente no container (erro ou timeout); sem captura validada."
+    }
+  ],
+  "readyForIntegratedValidation": false,
+  "readyForClinicalUse": false
+}

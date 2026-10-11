@@ -1,0 +1,10 @@
+import { NextResponse } from 'next/server';
+import { challenge, cookieOptions, FLOW, oidcConfig, origin, random, seal } from '../../../../lib/auth';
+export const runtime='nodejs';
+export async function GET(){
+ try {const cfg=oidcConfig();const state=random(),verifier=random(),nonce=random();const url=new URL(cfg.authorizationEndpoint);
+ if(url.protocol!=='https:' && url.hostname!=='localhost') throw Error('OIDC requer HTTPS');
+ url.searchParams.set('response_type','code');url.searchParams.set('client_id',cfg.clientId);url.searchParams.set('redirect_uri',`${origin()}/api/auth/callback`);url.searchParams.set('scope','openid profile');url.searchParams.set('state',state);url.searchParams.set('nonce',nonce);url.searchParams.set('code_challenge',challenge(verifier));url.searchParams.set('code_challenge_method','S256');
+ const res=NextResponse.redirect(url);res.cookies.set(FLOW,seal({state,verifier,nonce,issuedAt:Date.now()}),cookieOptions(600));return res;
+ }catch{return NextResponse.json({error:'Autenticação indisponível; configuração pendente.'},{status:503});}
+}

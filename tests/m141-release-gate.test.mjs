@@ -1,0 +1,12 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {spawnSync} from 'node:child_process';
+import {mkdtempSync,writeFileSync,rmSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+const script='tools/release-gate.mjs';
+const exec=(file)=>spawnSync(process.execPath,[script,'--json'],{cwd:process.cwd(),env:{...process.env,ONCOPHARMA_EVIDENCE_FILE:file},encoding:'utf8'});
+test('gate falha fechado com aprovações pendentes',()=>{const r=exec('docs/quality/evidencias-release.json');assert.equal(r.status,1);const j=JSON.parse(r.stdout);assert.equal(j.clinical_use_allowed,false);assert.equal(j.gates.filter(g=>g.status==='blocked').length,9);});
+test('gate falha fechado sem arquivo',()=>{const r=exec('/tmp/oncopharma-nao-existe-evidencias.json');assert.equal(r.status,1);assert.ok(JSON.parse(r.stdout).parse_error);});
+test('gate rejeita alegação approved sem artefatos e aprovador',()=>{const d=mkdtempSync(join(tmpdir(),'onco-gate-'));try{const f=join(d,'e.json');writeFileSync(f,JSON.stringify({gates:{G01:{status:'approved'}}}));const r=exec(f);assert.equal(r.status,1);assert.equal(JSON.parse(r.stdout).gates[0].status,'blocked');}finally{rmSync(d,{recursive:true,force:true});}});
+test('gate nunca autoriza uso clínico mesmo com declarações completas',()=>{const d=mkdtempSync(join(tmpdir(),'onco-gate-'));try{const f=join(d,'e.json');const e={status:'approved',approver:'Equipe responsável',approved_at:'2026-10-11',artifacts:['evidencias/teste.pdf']};writeFileSync(f,JSON.stringify({gates:Object.fromEntries(Array.from({length:9},(_,i)=>['G'+String(i+1).padStart(2,'0'),e]))}));const r=exec(f);const j=JSON.parse(r.stdout);assert.equal(r.status,0);assert.equal(j.clinical_use_allowed,false);assert.equal(j.independent_verification_performed,false);}finally{rmSync(d,{recursive:true,force:true});}});

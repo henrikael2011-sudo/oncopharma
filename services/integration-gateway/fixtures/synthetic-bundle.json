@@ -1,0 +1,37 @@
+{
+  "resourceType": "Bundle",
+  "type": "collection",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "syn-patient-folfox",
+        "meta": {
+          "lastUpdated": "2026-10-10T12:00:00Z"
+        },
+        "name": [
+          {
+            "text": "Paciente Sintético A"
+          }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "syn-observation-weight",
+        "status": "final",
+        "code": {
+          "text": "Peso"
+        },
+        "valueQuantity": {
+          "value": 72,
+          "unit": "kg"
+        },
+        "subject": {
+          "reference": "Patient/syn-patient-folfox"
+        }
+      }
+    }
+  ]
+}

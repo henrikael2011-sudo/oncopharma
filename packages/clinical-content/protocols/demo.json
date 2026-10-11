@@ -1,0 +1,19 @@
+{
+  "status": "SYNTHETIC_NOT_APPROVED",
+  "protocols": [
+    {
+      "code": "FOLFOX-DEMO",
+      "name": "FOLFOX (simulação)",
+      "version": "0.1-demo",
+      "approved": false,
+      "reference": "Não utilizar para decisão clínica"
+    },
+    {
+      "code": "AC-T-DEMO",
+      "name": "AC-T (simulação)",
+      "version": "0.1-demo",
+      "approved": false,
+      "reference": "Não utilizar para decisão clínica"
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "name": "oncopharma",
+  "private": true,
+  "version": "0.14.4-dev",
+  "workspaces": [
+    "apps/*",
+    "services/*"
+  ],
+  "scripts": {
+    "dev:portal": "npm run dev -w @oncopharma/portal",
+    "dev:api": "npm run start:dev -w @oncopharma/api",
+    "build": "npm run build:apps && npm run build -w @oncopharma/api",
+    "test": "node --test tests/*.test.mjs",
+    "db:up": "docker compose --env-file .env -f infra/compose.dev.yml up -d",
+    "db:migrate": "bash infra/scripts/migrate-dev.sh",
+    "db:seed": "bash infra/scripts/seed-dev.sh",
+    "test:m1": "node --test tests/m1-security.test.mjs",
+    "test:m11": "node --test tests/m11-auth.test.mjs",
+    "doctor": "node infra/scripts/doctor.mjs",
+    "db:provision-app": "bash infra/scripts/provision-app-role.sh",
+    "db:reset-synthetic": "bash infra/scripts/reset-synthetic-dev.sh",
+    "test:db": "node --test tests/m12-db.integration.mjs",
+    "db:migrate:m2": "bash infra/scripts/migrate-m2-dev.sh",
+    "test:rules": "node --test packages/clinical-rules/tests/*.test.mjs",
+    "test:all": "node --test tests/*.test.mjs packages/clinical-rules/tests/*.test.mjs",
+    "lab:dev": "node tools/synthetic-lab/server.mjs",
+    "test:lab": "node --test tools/synthetic-lab/tests/*.test.mjs",
+    "test:m10": "node --test tests/m10-workflow.test.mjs",
+    "test:m101": "node --test tests/m101-ui-proxy.test.mjs",
+    "dev:care": "npm run dev -w @oncopharma/care-web",
+    "dev:clinical": "npm run dev -w @oncopharma/clinical-web",
+    "dev:admin": "npm run dev -w @oncopharma/admin-web",
+    "build:apps": "npm run build -w @oncopharma/care-web && npm run build -w @oncopharma/clinical-web && npm run build -w @oncopharma/admin-web",
+    "test:extended": "node --test services/integration-gateway/tests/*.test.mjs services/ai-orchestrator/tests/*.test.mjs tests/m103-m14.test.mjs",
+    "check:design": "node tools/check-design.mjs",
+    "check:governance": "node tools/check-governance.mjs",
+    "quality:gate": "node tools/release-gate.mjs",
+    "quality:report": "node tools/release-gate.mjs --json",
+    "test:readiness": "node --test tests/m141-release-gate.test.mjs",
+    "test:lab:e2e": "node --test tests/m142-lab-e2e.test.mjs",
+    "test:db:required": "node tests/require-postgres.mjs && node --test tests/m12-db.integration.mjs",
+    "verify:local": "npm test && npm run test:extended && npm run test:lab:e2e && npm run check:design && npm run check:governance && npm run test:readiness",
+    "validate:evidence": "node tools/validate-real.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

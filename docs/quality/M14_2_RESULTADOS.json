@@ -1,0 +1,8 @@
+{
+  "lab_e2e": "passed",
+  "postgres_integration": "blocked_missing_infrastructure",
+  "oidc": "not_executed",
+  "next_build": "not_executed",
+  "clinical_pilot": "not_authorized",
+  "baseline": "Plano Diretor v3.0"
+}

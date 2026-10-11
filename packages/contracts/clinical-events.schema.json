@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SyntheticClinicalEvent",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "eventId",
+    "organizationId",
+    "patientId",
+    "type",
+    "occurredAt",
+    "source",
+    "synthetic"
+  ],
+  "properties": {
+    "eventId": {
+      "type": "string"
+    },
+    "organizationId": {
+      "type": "string"
+    },
+    "patientId": {
+      "type": "string"
+    },
+    "type": {
+      "enum": [
+        "symptom.reported",
+        "cycle.review.requested",
+        "alert.created",
+        "intervention.recorded",
+        "guidance.approved"
+      ]
+    },
+    "occurredAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source": {
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true
+    },
+    "payload": {
+      "type": "object"
+    }
+  }
+}

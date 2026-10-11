@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "description": "Modelo de evidências. Nenhuma aprovação clínica, técnica ou institucional foi fornecida.",
+  "gates": {
+    "G01": {
+      "status": "pending",
+      "approver": null,
+      "approved_at": null,
+      "artifacts": []
+    },
+    "G02": {
+      "status": "pending",
+      "approver": null,
+      "approved_at": null,
+      "artifacts": []
+    },
+    "G03": {
+      "status": "pending",
+      "approver": null,
+      "approved_at": null,
+      "artifacts": []
+    },
+    "G04": {
+      "status": "pending",
+      "approver": null,
+      "approved_at": null,
+      "artifacts": []
+    },
+    "G05": {
+      "status": "pending",
+      "approver": null,
+      "approved_at": null,
+      "artifacts": []
+    },
+    "G06": {
+      "status": "pending",
+      "approver": null,
+      "approved_at": null,
+      "artifacts": []
+    },
+    "G07": {
+      "status": "pending",
+      "approver": null,
+      "approved_at": null,
+      "artifacts": []
+    },
+    "G08": {
+      "status": "pending",
+      "approver": null,
+      "approved_at": null,
+      "artifacts": []
+    },
+    "G09": {
+      "status": "pending",
+      "approver": null,
+      "approved_at": null,
+      "artifacts": []
+    }
+  }
+}

@@ -1,0 +1,60 @@
+name: Quality — Synthetic DEV
+on:
+  push:
+  pull_request:
+jobs:
+  unit-and-structure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: npm test
+      - run: npm run test:extended
+      - run: npm run check:design
+      - run: npm run check:governance
+      - run: npm run build
+      - run: npm run test:readiness
+      - run: npm run test:lab:e2e
+      - name: Generate validation evidence (unit runner; integration reported separately)
+        run: npm run validate:evidence
+      - name: Upload synthetic test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: oncopharma-synthetic-test-evidence
+          path: artifacts/validation/
+          if-no-files-found: ignore
+  integration:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: oncopharma_dev
+          POSTGRES_USER: oncopharma
+          POSTGRES_PASSWORD: test_only_ci_secret
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U oncopharma -d oncopharma_dev" --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: npm run build
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Apply migrations and provision least-privilege role
+        run: bash infra/scripts/bootstrap-ci-db.sh
+        env:
+          DATABASE_URL_ADMIN: postgres://oncopharma:test_only_ci_secret@localhost:5432/oncopharma_dev
+          APP_DB_PASSWORD: ci_runtime_test_password
+          NODE_ENV: test
+      - name: Verify PostgreSQL RLS with runtime role (fail closed)
+        run: npm run test:db:required
+        env:
+          DATABASE_URL: postgres://oncopharma_app:ci_runtime_test_password@localhost:5432/oncopharma_dev
