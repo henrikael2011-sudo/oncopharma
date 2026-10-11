@@ -1,5 +1,5 @@
 {
-  "startedAt": "2026-10-11T21:55:43.398Z",
+  "startedAt": "2026-10-11T22:21:10.081Z",
   "issuer": "http://localhost:8080/realms/oncopharma-test",
   "a11y": {
     "care": [],
@@ -8,7 +8,8 @@
     "careSymptomForm": [],
     "careLoggedIn": [],
     "careHelp": [],
-    "clinicalLoggedIn": []
+    "clinicalLoggedIn": [],
+    "careCaregivers": []
   },
   "tokens": {
     "patientA": {
@@ -17,7 +18,9 @@
         "oncopharma-api",
         "account"
       ],
-      "amr": [],
+      "amr": [
+        "pwd"
+      ],
       "exp_minus_iat": 120,
       "sub_matches": true
     },
@@ -33,11 +36,11 @@
       "exp_minus_iat": 120,
       "cookieMaxAgeSeconds": 103
     },
-    "waitedForExpiryMs": 95826
+    "waitedForExpiryMs": 82332
   },
   "db": {
-    "reportId": "7f7b0d1b-c5b9-4498-aee3-9c71eb37c939",
-    "alertId": "5396923d-572c-446b-a0d5-03d2e9aa142d",
+    "reportId": "1930d6fe-4c4a-4ae9-afea-76de64629e0f",
+    "alertId": "4ae6a83a-7531-45ba-813a-c90920100bd7",
     "alertStatus": "acknowledged",
     "interventionActorIsPharmacist": true,
     "auditTrail": [

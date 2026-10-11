@@ -28,7 +28,7 @@ test('sinais de alerta, febre ou intensidade forte => prioridade + orientação 
 });
 test('R3: API do Care não aceita identificador de paciente; rota antiga removida', () => {
   const s = read('services/api/src/care.controller.ts');
-  assert.doesNotMatch(s, /:patientId/); assert.match(s, /r\.rowCount !== 1/);
+  assert.doesNotMatch(s, /:patientId/); assert.match(s, /r\.rowCount === 1\) return \{ patientId/); assert.match(s, /r\.rowCount > 1\) throw/); assert.match(s, /c\.rowCount !== 1\) throw/);
   assert.doesNotMatch(read('services/api/src/workflow.controller.ts'), /@Post\('care\/patients/);
 });
 test('BFF do Care: somente rotas /me permitidas, CSRF por origem e JSON', async () => {

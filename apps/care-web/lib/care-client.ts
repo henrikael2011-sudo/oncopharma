@@ -8,4 +8,5 @@ export async function care<T>(path: string, init?: { method?: 'GET' | 'POST' | '
   return j as T;
 }
 export const dateBR = (d?: string | null) => (d ? new Date(`${d.slice(0, 10)}T12:00:00`).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' }) : '');
-export type Me = { actor: 'patient'; displayName: string | null; consent: { required: string; accepted: boolean; acceptedAt: string | null }; preferences: { fontScale: 'normal' | 'large' | 'xlarge'; highContrast: boolean } };
+export type Scope = 'ver_jornada' | 'ver_medicamentos' | 'registrar_sintoma';
+export type Me = { actor: 'patient' | 'caregiver'; displayName: string | null; patientName?: string | null; scopes: Scope[]; expiresAt?: string; consent: { required: string; accepted: boolean; acceptedAt: string | null }; preferences: { fontScale: 'normal' | 'large' | 'xlarge'; highContrast: boolean } };
