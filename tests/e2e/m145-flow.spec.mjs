@@ -336,6 +336,59 @@ test.describe.serial('M14.5 E2E sintético', () => {
     expect(errors).toEqual([]); await ctx.close();
   });
 
+  test('07d (M15.3) cuidador: convite do paciente, tudo desligado, permissões granulares, histórico e revogação imediata', async ({ browser }) => {
+    const careLogin = async (user) => { const ctx = await browser.newContext(); const p = await ctx.newPage(); await p.goto(`${CARE}/care`);
+      await p.getByRole('link', { name: 'Entrar', exact: true }).click(); await kcLogin(p, user); await p.waitForURL(`${CARE}/care`); return { ctx, p }; };
+    const post = (p, path, data) => p.request.fetch(`${CARE}/api/care/${path}`, { method: 'POST', headers: { origin: CARE, 'content-type': 'application/json' }, data });
+    const pat = await careLogin('paciente.a');
+    await pat.p.getByRole('link', { name: 'Cuidador e privacidade' }).click();
+    await pat.p.getByLabel('30 dias').check(); await pat.p.getByRole('button', { name: 'Criar código de convite' }).click();
+    const code = (await pat.p.getByLabel('Código de convite').innerText()).trim(); expect(code).toMatch(/^[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$/);
+    expect(sql(`SELECT count(*) FROM caregiver_invites WHERE code_hash LIKE '%${code.replace(/-/g, '')}%'`)).toBe('0'); // código nunca armazenado
+    await shot(pat.p, 'care-caregiver-invite');
+    const cg = await careLogin('cuidador.a');
+    await expect(cg.p.getByRole('heading', { name: 'Seu acesso ainda não foi liberado' })).toBeVisible();
+    // Código errado: recusado e auditado; nenhum vínculo.
+    await cg.p.fill('#invite-code', 'AAAA-BBBB-CCCC'); await cg.p.getByLabel(/Entendo que verei apenas/).check(); await cg.p.getByRole('button', { name: 'Usar código' }).click();
+    await expect(cg.p.getByRole('alert').filter({ hasText: 'Código inválido' })).toBeVisible();
+    expect(sql(`SELECT count(*) FROM audit_events WHERE action='care.caregiver.invite.rejected' AND actor_sub='${sub('cuidador.a')}'`)).not.toBe('0');
+    await cg.p.fill('#invite-code', code.toLowerCase()); await cg.p.getByRole('button', { name: 'Usar código' }).click();
+    await expect(cg.p.getByRole('heading', { level: 1 })).toContainText('Olá, Carla. Você acompanha Ana.');
+    await expect(cg.p.getByText('Ana ainda não liberou nenhuma informação para você.')).toBeVisible();
+    await expect(cg.p.getByRole('link', { name: 'Minha jornada' })).toHaveCount(0); await expect(cg.p.getByRole('link', { name: 'Cuidador e privacidade' })).toHaveCount(0);
+    await expect(cg.p.getByText('Próxima sessão')).toHaveCount(0); await shot(cg.p, 'care-caregiver-nothing-shared');
+    // Sem escopo: API recusa jornada, medicamentos, relato e qualquer gestão de cuidador.
+    for (const path of ['me/journey', 'me/medications', 'me/caregivers']) expect((await cg.p.request.get(`${CARE}/api/care/${path}`)).status(), path).toBe(403);
+    expect((await post(cg.p, 'me/symptoms', { symptomCode: 'nausea', intensity: 'leve', onset: 'hoje', requestId: randomUUID() })).status()).toBe(403);
+    expect((await post(cg.p, 'me/caregivers/invites', { termDays: 90 })).status()).toBe(403);
+    // Código já usado não serve de novo.
+    expect((await post(pat.p, 'caregiver/accept', { code, acceptTerms: true })).status()).toBe(403);
+    // Paciente libera a jornada e o registro de sintomas.
+    await pat.p.reload(); const card = pat.p.getByRole('article', { name: /Cuidador Carla/ });
+    await card.getByLabel('Ver minha jornada (sessões e relatos)').click(); await expect(pat.p.getByRole('status')).toContainText('Permissões atualizadas');
+    await expect(card.getByLabel('Ver minha jornada (sessões e relatos)')).toBeChecked();
+    await card.getByLabel('Registrar sintomas por mim').click(); await expect(card.getByLabel('Registrar sintomas por mim')).toBeChecked();
+    expect(sql(`SELECT array_to_string(scopes, ',' ) FROM caregiver_links WHERE revoked_at IS NULL AND caregiver_sub='${sub('cuidador.a')}'`)).toBe('ver_jornada,registrar_sintoma');
+    await cg.p.reload(); await expect(cg.p.getByRole('link', { name: 'Minha jornada' })).toBeVisible(); await expect(cg.p.getByRole('link', { name: 'Meus medicamentos' })).toHaveCount(0);
+    await cg.p.getByRole('link', { name: 'Minha jornada' }).click(); await expect(cg.p.getByText(/Ciclo 1/)).toBeVisible();
+    expect((await cg.p.request.get(`${CARE}/api/care/me/medications`)).status()).toBe(403);
+    const rid = randomUUID(); const sym = await post(cg.p, 'me/symptoms', { symptomCode: 'fatigue', intensity: 'leve', onset: 'hoje', requestId: rid });
+    expect(sym.status()).toBe(201);
+    expect(sql(`SELECT patient_id||'|'||(details->>'reported_by')||'|'||actor_sub FROM patient_symptom_reports WHERE source_reference='${rid}'`)).toBe(`${PAT_A}|caregiver|${sub('cuidador.a')}`);
+    expect((await post(cg.p, `me/medications/66666666-6666-4666-8666-666666666671/adherence`, { status: 'taken', requestId: randomUUID() })).status()).toBe(403); // adesão é do paciente
+    // Histórico de acessos visível ao paciente.
+    await pat.p.reload(); const log = pat.p.getByRole('region', { name: 'Histórico de acessos do cuidador' });
+    await expect(log.getByText(/Carla: Viu a jornada/).first()).toBeVisible(); await expect(log.getByText(/Carla: Registrou um sintoma/).first()).toBeVisible();
+    await shot(pat.p, 'care-caregiver-settings');
+    const a11y = await new AxeBuilder({ page: pat.p }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze(); evidence.a11y.careCaregivers = a11yMap(a11y);
+    // Revogação imediata.
+    await pat.p.getByRole('button', { name: 'Encerrar acesso agora' }).click(); await expect(pat.p.getByRole('status')).toContainText('Acesso encerrado');
+    expect((await cg.p.request.get(`${CARE}/api/care/me`)).status()).toBe(403);
+    await cg.p.reload(); await expect(cg.p.getByRole('heading', { name: 'Seu acesso ainda não foi liberado' })).toBeVisible();
+    expect(sql(`SELECT string_agg(DISTINCT action, ',' ORDER BY action) FROM audit_events WHERE metadata->>'actor_role'='patient' AND action LIKE 'care.caregiver.%' AND actor_sub='${sub('paciente.a')}'`)).toContain('care.caregiver.revoked');
+    saveEvidence(); await pat.ctx.close(); await cg.ctx.close();
+  });
+
   test('08 token adulterado, sessão forjada vencida e expiração real do token', async ({ browser, request }) => {
     const [h, p, sig] = pharmacistToken.split('.');
     const forged = JSON.parse(Buffer.from(p, 'base64url')); forged.sub = sub('enfermeira');

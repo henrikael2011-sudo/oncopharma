@@ -28,7 +28,7 @@ Nada aqui altera D-001..D-008 nem os tokens de marca. "FEITO" nunca significa ho
 | Req. | Situação | Evidência | Lacuna |
 |---|---|---|---|
 | Paciente registra o próprio sintoma | FEITO (M15.2) | `GET /v1/care/me` + `POST /v1/care/me/symptoms` resolvem o paciente por `patient_portal_links` (org+issuer+sujeito); rota com `patientId` removida (404); e2e 04/07, `tests/m152-*.mjs` | — |
-| Cuidador: escopo autorizado, revogável | FALTA | cuidador hoje sempre 403 (e2e 07) | **R4: modelo convite + consentimento por escopo + prazo + revogação + auditoria** (M15.3) |
+| Cuidador: escopo autorizado, revogável | FEITO (M15.3) | migração 0010, `care.controller.ts` (`need()`), e2e 07d, `tests/m153-*.mjs` | **R4: modelo convite + consentimento por escopo + prazo + revogação + auditoria** (M15.3) |
 | Farmacêutico revisa alerta / propõe intervenção | FEITO (DEV) | `GET alerts`, `POST interventions`; MFA + vínculo + atribuição (e2e 06/07) | — |
 | Enfermagem "conforme atribuição"; Médico | PARCIAL | papéis `nurse`/`physician` em `STAFF`; atribuição por paciente testada (e2e 07) | Matriz fina por recurso (enfermagem não propõe intervenção farmacêutica) → M15.4 |
 | Gestor clínico (filas, indicadores, auditoria) | FALTA | papel inexistente | Papel `clinical_manager` + telas → M15.4/M15.7 |
@@ -46,7 +46,7 @@ Nada aqui altera D-001..D-008 nem os tokens de marca. "FEITO" nunca significa ho
 | 5 | Meus medicamentos (prescrição validada, horários, adesão relatada) | FEITO (M15.2, sem dose P-CARE-3) | tabelas `clinical_medication_orders` | M15.2 (somente leitura + adesão relatada; nunca alterar dose) |
 | 6 | Mensagens e orientações (canal institucional real) | BLOQUEADO-DECISÃO | `patient_guidance` exige aprovação | Canal/horários reais dependem da instituição; exibir só orientações `approved` (M15.2) |
 | 7 | Preciso de ajuda (urgência, contatos reais) | FEITO (M15.2; contatos configuráveis P-CARE-4) | — | Tela com orientação genérica "procure atendimento/ligue 192" + contatos **configuráveis** (vazios em DEV); conteúdo final BLOQUEADO-DECISÃO → M15.2 |
-| 8 | Cuidador e privacidade (granular, prazo, revogação, histórico de acessos) | FALTA | — | M15.3 (R4) |
+| 8 | Cuidador e privacidade (granular, prazo, revogação, histórico de acessos) | FEITO (M15.3) | — | M15.3 (R4) |
 
 ## 4.2 Clinical
 | # | Tela | Situação | Evidência | Plano |

@@ -4,6 +4,7 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { care } from '../../lib/care-client';
+import { useMe } from './CareShell';
 const SYMPTOMS: [string, string][] = [['nausea', 'Enjoo ou vômito'], ['neuropathy', 'Formigamento'], ['fever', 'Febre'], ['diarrhea', 'Diarreia'], ['fatigue', 'Cansaço'], ['pain', 'Dor'], ['mouth', 'Feridas na boca'], ['other', 'Outro']];
 const INTENSITY: [string, string][] = [['leve', 'Leve — consigo fazer minhas atividades'], ['moderada', 'Moderada — atrapalha um pouco'], ['forte', 'Forte — não consigo fazer minhas atividades']];
 const ONSET: [string, string][] = [['hoje', 'Hoje'], ['1-3-dias', 'De 1 a 3 dias'], ['mais-3-dias', 'Há mais de 3 dias']];
@@ -15,6 +16,7 @@ function Radio({ name, legend, options, value, onChange }: { name: string; legen
   return <fieldset className="choices"><legend>{legend}</legend>{options.map(([k, l]) => <label key={k} className="choice"><input type="radio" name={name} value={k} checked={value === k} onChange={() => onChange(k)} /> {l}</label>)}</fieldset>;
 }
 export function SymptomFlow() {
+  const { me } = useMe(); const who = me.actor === 'caregiver' ? (me.patientName ?? 'a pessoa que você acompanha') : null;
   const [step, setStep] = useState(0), [symptomCode, setSymptom] = useState(''), [intensity, setIntensity] = useState(''), [onset, setOnset] = useState('');
   const [flags, setFlags] = useState<string[]>([]), [description, setDescription] = useState(''), [busy, setBusy] = useState(false), [err, setErr] = useState(''), [result, setResult] = useState<Result | null>(null);
   const requestId = useMemo(() => crypto.randomUUID(), []); // idempotência: repetir o envio não duplica
@@ -27,7 +29,7 @@ export function SymptomFlow() {
     <Link className="btn-primary" href="/care">Voltar ao início</Link>
   </section>;
   return <section aria-labelledby="sym-title">
-    <h1 id="sym-title">Como estou hoje</h1>
+    <h1 id="sym-title">{who ? `Como ${who} está hoje` : 'Como estou hoje'}</h1>
     <p className="care-note" aria-live="polite">Passo {step + 1} de {steps}</p>
     <form className="workflow-form" onSubmit={(e) => { e.preventDefault(); if (step < steps - 1) { if (canNext) setStep(step + 1); } else void send(); }}>
       {step === 0 && <Radio name="symptom" legend="O que você está sentindo?" options={SYMPTOMS} value={symptomCode} onChange={setSymptom} />}

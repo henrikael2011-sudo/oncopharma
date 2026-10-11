@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "ONCOPHARMA API",
-    "version": "0.15.2-dev",
+    "version": "0.15.3-dev",
     "description": "API versionada (/v1). Somente dados sintéticos fora de produção; uso clínico não aprovado. Autorização: JWT OIDC (Bearer) + vínculo no banco + RLS por organização."
   },
   "servers": [
@@ -610,6 +610,279 @@
           },
           "403": {
             "description": "Conta sem vínculo de paciente ativo (R3)"
+          }
+        }
+      }
+    },
+    "/care/me/caregivers": {
+      "get": {
+        "summary": "Paciente: cuidadores, convites pendentes e histórico de acessos do cuidador",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem vínculo, ação exclusiva do paciente ou sem permissão concedida (P-R4)"
+          }
+        }
+      }
+    },
+    "/care/me/caregivers/invites": {
+      "post": {
+        "summary": "Paciente cria convite (código de uso único, 72 h; prazo do vínculo 30/60/90 dias)",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem vínculo, ação exclusiva do paciente ou sem permissão concedida (P-R4)"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "termDays"
+                ],
+                "properties": {
+                  "termDays": {
+                    "enum": [
+                      30,
+                      60,
+                      90
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/care/me/caregivers/invites/{inviteId}/cancel": {
+      "post": {
+        "summary": "Paciente cancela convite pendente",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "inviteId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem vínculo, ação exclusiva do paciente ou sem permissão concedida (P-R4)"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/care/me/caregivers/{linkId}/scopes": {
+      "put": {
+        "summary": "Paciente define permissões do cuidador (todas desligadas por padrão)",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "linkId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem vínculo, ação exclusiva do paciente ou sem permissão concedida (P-R4)"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "scopes"
+                ],
+                "properties": {
+                  "scopes": {
+                    "type": "array",
+                    "uniqueItems": true,
+                    "items": {
+                      "enum": [
+                        "ver_jornada",
+                        "ver_medicamentos",
+                        "registrar_sintoma"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/care/me/caregivers/{linkId}/revoke": {
+      "post": {
+        "summary": "Paciente encerra o acesso imediatamente (definitivo)",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "linkId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem vínculo, ação exclusiva do paciente ou sem permissão concedida (P-R4)"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/care/caregiver/accept": {
+      "post": {
+        "summary": "Cuidador usa o código de convite e aceita os termos",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem vínculo, ação exclusiva do paciente ou sem permissão concedida (P-R4)"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "code",
+                  "acceptTerms"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "acceptTerms": {
+                    "const": true
+                  }
+                }
+              }
+            }
           }
         }
       }

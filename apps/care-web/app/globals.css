@@ -76,3 +76,5 @@
 .care-page[data-contrast=high]{background:#fff;color:var(--ink)}
 .care-page[data-contrast=high] :is(.care-card,.care-panel,.choice){border-color:var(--ink)}
 .care-page[data-contrast=high] .care-note{color:var(--ink)}
+.care-code{font-size:1.6em;font-weight:800;letter-spacing:.12em;color:var(--teal);background:#fff;border:2px dashed var(--emerald);border-radius:12px;padding:12px 16px;display:inline-block}
+.care-review h3{margin-top:0}

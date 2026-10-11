@@ -7,12 +7,21 @@ import { usePathname } from 'next/navigation';
 import { Brand } from '../Brand';
 import { care, CareError, type Me } from '../../lib/care-client';
 import { Consent } from './Consent';
+import { AcceptInvite } from './AcceptInvite';
 
 type State = { kind: 'loading' } | { kind: 'anon' } | { kind: 'nolink' } | { kind: 'error'; message: string } | { kind: 'ready'; me: Me };
 const Ctx = createContext<{ me: Me; reload: () => Promise<void> } | null>(null);
 export const useMe = () => { const v = useContext(Ctx); if (!v) throw Error('CareShell ausente'); return v; };
 export const SIGNATURE = 'Um passo de cada vez. Juntos no cuidado.';
-const NAV = [['/care', 'Início'], ['/care/jornada', 'Minha jornada'], ['/care/medicamentos', 'Meus medicamentos'], ['/care/ajuda', 'Preciso de ajuda'], ['/care/preferencias', 'Preferências']] as const;
+// Cuidador vê só o que o paciente liberou (P-R4); gestão de cuidadores e preferências são do paciente.
+const NAV: [string, string, (m: Me) => boolean][] = [
+  ['/care', 'Início', () => true],
+  ['/care/jornada', 'Minha jornada', (m) => m.actor === 'patient' || m.scopes.includes('ver_jornada')],
+  ['/care/medicamentos', 'Meus medicamentos', (m) => m.actor === 'patient' || m.scopes.includes('ver_medicamentos')],
+  ['/care/ajuda', 'Preciso de ajuda', () => true],
+  ['/care/cuidador', 'Cuidador e privacidade', (m) => m.actor === 'patient'],
+  ['/care/preferencias', 'Preferências', (m) => m.actor === 'patient'],
+];
 
 export function CareShell({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<State>({ kind: 'loading' });
@@ -27,13 +36,13 @@ export function CareShell({ children }: { children: React.ReactNode }) {
   let content: React.ReactNode;
   if (state.kind === 'loading') content = <p role="status" className="care-lead">Carregando…</p>;
   else if (state.kind === 'anon') content = <Welcome />;
-  else if (state.kind === 'nolink') content = <section className="care-panel"><h1>Seu acesso ainda não foi liberado</h1><p className="care-lead">Sua conta ainda não está ligada a um acompanhamento. Fale com a equipe do hospital para liberar o acesso.</p></section>;
+  else if (state.kind === 'nolink') content = <section className="care-panel"><h1>Seu acesso ainda não foi liberado</h1><p className="care-lead">Sua conta ainda não está ligada a um acompanhamento. Se você é paciente, fale com a equipe do hospital para liberar o acesso.</p><AcceptInvite onDone={load} /></section>;
   else if (state.kind === 'error') content = <section className="care-panel" role="alert"><h1>Não foi possível abrir agora</h1><p className="care-lead">{state.message}</p><button className="btn-primary" onClick={() => void load()}>Tentar de novo</button></section>;
   else if (!state.me.consent.accepted) content = <Consent version={state.me.consent.required} onDone={load} />;
   else content = <Ctx.Provider value={{ me: state.me, reload: load }}>{children}</Ctx.Provider>;
   return <div className="care-page" data-font={me?.preferences.fontScale ?? 'normal'} data-contrast={me?.preferences.highContrast ? 'high' : 'normal'}>
     <header className="care-header"><Brand variant="care" />{loggedIn && <form action="/api/auth/logout" method="post"><button type="submit" className="btn-on-dark">Sair</button></form>}</header>
-    {me?.consent.accepted && <nav className="care-nav" aria-label="Menu principal"><ul>{NAV.map(([href, label]) => <li key={href}><Link href={href} aria-current={path === href ? 'page' : undefined}>{label}</Link></li>)}</ul></nav>}
+    {me?.consent.accepted && <nav className="care-nav" aria-label="Menu principal"><ul>{NAV.filter(([, , ok]) => ok(me)).map(([href, label]) => <li key={href}><Link href={href} aria-current={path === href ? 'page' : undefined}>{label}</Link></li>)}</ul></nav>}
     <main id="conteudo" className="care-main">{content}</main>
   </div>;
 }

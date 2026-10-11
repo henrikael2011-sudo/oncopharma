@@ -10,11 +10,13 @@ const ALLOW: [string, RegExp][] = [
   ['GET', /^me$/], ['GET', /^me\/(home|journey|medications|help)$/],
   ['PUT', /^me\/(consent|preferences)$/], ['POST', /^me\/symptoms$/],
   ['POST', /^me\/medications\/[0-9a-f-]{36}\/adherence$/],
+  // M15.3 (R4): gestão do cuidador pelo paciente + aceite do convite pelo cuidador.
+  ['GET', /^me\/caregivers$/], ['POST', /^me\/caregivers\/invites$/], ['POST', /^me\/caregivers\/invites\/[0-9a-f-]{36}\/cancel$/],
+  ['PUT', /^me\/caregivers\/[0-9a-f-]{36}\/scopes$/], ['POST', /^me\/caregivers\/[0-9a-f-]{36}\/revoke$/], ['POST', /^caregiver\/accept$/],
 ];
 export function allowed(method: string, path: string) {
   if (!ALLOW.some(([m, r]) => m === method && r.test(path))) return false;
-  const id = path.match(/^me\/medications\/([^/]+)\//)?.[1];
-  return !id || UUID.test(id);
+  return (path.match(/[0-9a-f-]{36}/g) || []).every((id) => UUID.test(id));
 }
 export async function careProxy(request: Request, segments: string[]) {
   if (!syntheticUiEnabled()) return json('Serviço indisponível neste ambiente', 503);
