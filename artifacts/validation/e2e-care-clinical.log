@@ -5,7 +5,7 @@
 Realm oncopharma-test pronto: 8 contas sintéticas; estado em arquivo fora do repositório.
 BEGIN
 DO
-INSERT 0 0
+INSERT 0 1
               set_config              
 --------------------------------------
  11111111-1111-4111-8111-111111111111
@@ -13,7 +13,7 @@ INSERT 0 0
 
 ALTER TABLE
 ALTER TABLE
-INSERT 0 0
+INSERT 0 2
 INSERT 0 1
 INSERT 0 2
 ALTER TABLE
@@ -24,224 +24,224 @@ DO
 ALTER TABLE
 ALTER TABLE
 ALTER TABLE
-INSERT 0 0
-INSERT 0 0
-INSERT 0 0
+INSERT 0 2
+INSERT 0 2
+INSERT 0 4
 ALTER TABLE
 ALTER TABLE
 ALTER TABLE
 COMMIT
 Seeds sintéticos E2E aplicados.
-[WebServer] [Nest] 333130  - 10/11/2026, 4:22:07 PM     LOG [NestFactory] Starting Nest application...
-[WebServer] [Nest] 333130  - 10/11/2026, 4:22:07 PM     LOG [InstanceLoader] AppModule dependencies initialized +8ms
-[WebServer] [Nest] 333130  - 10/11/2026, 4:22:07 PM     LOG [RoutesResolver] HealthController {/v1/health}: +3ms
-[WebServer] [Nest] 333130  - 10/11/2026, 4:22:07 PM     LOG [RouterExplorer] Mapped {/v1/health, GET} route +1ms
-[WebServer] [Nest] 333130  - 10/11/2026, 4:22:07 PM     LOG [RoutesResolver] ReadyController {/v1/ready}: +0ms
-[WebServer] [Nest] 333130  - 10/11/2026, 4:22:07 PM     LOG [RouterExplorer] Mapped {/v1/ready, GET} route +1ms
-[WebServer] [Nest] 333130  - 10/11/2026, 4:22:07 PM     LOG [RoutesResolver] ClinicalController {/v1}: +0ms
-[WebServer] [Nest] 333130  - 10/11/2026, 4:22:07 PM     LOG [RouterExplorer] Mapped {/v1/me, GET} route +0ms
-[WebServer] [Nest] 333130  - 10/11/2026, 4:22:07 PM     LOG [RouterExplorer] Mapped {/v1/patients/:patientId/record, GET} route +1ms
-[WebServer] [Nest] 333130  - 10/11/2026, 4:22:07 PM     LOG [RouterExplorer] Mapped {/v1/patients, GET} route +0ms
-[WebServer] [Nest] 333130  - 10/11/2026, 4:22:07 PM     LOG [RoutesResolver] WorkflowController {/v1/workflow}: +0ms
-[WebServer] [Nest] 333130  - 10/11/2026, 4:22:07 PM     LOG [RouterExplorer] Mapped {/v1/workflow/care/patients/:patientId/symptoms, POST} route +0ms
-[WebServer] [Nest] 333130  - 10/11/2026, 4:22:07 PM     LOG [RouterExplorer] Mapped {/v1/workflow/clinical/patients/:patientId/alerts, GET} route +0ms
-[WebServer] [Nest] 333130  - 10/11/2026, 4:22:07 PM     LOG [RouterExplorer] Mapped {/v1/workflow/clinical/patients/:patientId/interventions, POST} route +1ms
-[WebServer] [Nest] 333130  - 10/11/2026, 4:22:07 PM     LOG [NestApplication] Nest application successfully started +0ms
+[WebServer] [Nest] 352770  - 10/11/2026, 5:47:01 PM     LOG [NestFactory] Starting Nest application...
+[WebServer] [Nest] 352770  - 10/11/2026, 5:47:01 PM     LOG [InstanceLoader] AppModule dependencies initialized +9ms
+[WebServer] [Nest] 352770  - 10/11/2026, 5:47:01 PM     LOG [RoutesResolver] HealthController {/v1/health}: +3ms
+[WebServer] [Nest] 352770  - 10/11/2026, 5:47:01 PM     LOG [RouterExplorer] Mapped {/v1/health, GET} route +1ms
+[WebServer] [Nest] 352770  - 10/11/2026, 5:47:01 PM     LOG [RoutesResolver] ReadyController {/v1/ready}: +0ms
+[WebServer] [Nest] 352770  - 10/11/2026, 5:47:01 PM     LOG [RouterExplorer] Mapped {/v1/ready, GET} route +1ms
+[WebServer] [Nest] 352770  - 10/11/2026, 5:47:01 PM     LOG [RoutesResolver] ClinicalController {/v1}: +0ms
+[WebServer] [Nest] 352770  - 10/11/2026, 5:47:01 PM     LOG [RouterExplorer] Mapped {/v1/me, GET} route +0ms
+[WebServer] [Nest] 352770  - 10/11/2026, 5:47:01 PM     LOG [RouterExplorer] Mapped {/v1/patients/:patientId/record, GET} route +1ms
+[WebServer] [Nest] 352770  - 10/11/2026, 5:47:01 PM     LOG [RouterExplorer] Mapped {/v1/patients, GET} route +0ms
+[WebServer] [Nest] 352770  - 10/11/2026, 5:47:01 PM     LOG [RoutesResolver] WorkflowController {/v1/workflow}: +0ms
+[WebServer] [Nest] 352770  - 10/11/2026, 5:47:01 PM     LOG [RouterExplorer] Mapped {/v1/workflow/care/patients/:patientId/symptoms, POST} route +1ms
+[WebServer] [Nest] 352770  - 10/11/2026, 5:47:01 PM     LOG [RouterExplorer] Mapped {/v1/workflow/clinical/patients/:patientId/alerts, GET} route +0ms
+[WebServer] [Nest] 352770  - 10/11/2026, 5:47:01 PM     LOG [RouterExplorer] Mapped {/v1/workflow/clinical/patients/:patientId/interventions, POST} route +0ms
+[WebServer] [Nest] 352770  - 10/11/2026, 5:47:01 PM     LOG [NestApplication] Nest application successfully started +1ms
 [WebServer]    ▲ Next.js 15.5.27
 [WebServer]    - Local:        http://localhost:3001
 [WebServer]    - Network:      http://172.30.0.2:3001
 [WebServer] 
 [WebServer]  ✓ Starting...
-[WebServer]  ✓ Ready in 1192ms
+[WebServer]  ✓ Ready in 1227ms
 [WebServer]  ○ Compiling / ...
-[WebServer]  ✓ Compiled / in 784ms (564 modules)
-[WebServer]  GET / 307 in 1106ms
-[WebServer]  ✓ Compiled /care in 258ms (635 modules)
-[WebServer]  GET /care 200 in 501ms
+[WebServer]  ✓ Compiled / in 870ms (564 modules)
+[WebServer]  GET / 307 in 1216ms
+[WebServer]  ✓ Compiled /care in 217ms (635 modules)
+[WebServer]  GET /care 200 in 495ms
 [WebServer]    ▲ Next.js 15.5.27
 [WebServer]    - Local:        http://localhost:3002
 [WebServer]    - Network:      http://172.30.0.2:3002
 [WebServer] 
 [WebServer]  ✓ Starting...
-[WebServer]  ✓ Ready in 1230ms
+[WebServer]  ✓ Ready in 1324ms
 [WebServer]  ○ Compiling / ...
-[WebServer]  ✓ Compiled / in 752ms (564 modules)
-[WebServer]  GET / 307 in 1062ms
-[WebServer]  ✓ Compiled /clinical in 361ms (639 modules)
-[WebServer]  GET /clinical 200 in 596ms
+[WebServer]  ✓ Compiled / in 861ms (564 modules)
+[WebServer]  GET / 307 in 1216ms
+[WebServer]  ✓ Compiled /clinical in 405ms (639 modules)
+[WebServer]  GET /clinical 200 in 659ms
 [WebServer]    ▲ Next.js 15.5.27
 [WebServer]    - Local:        http://localhost:3003
 [WebServer]    - Network:      http://172.30.0.2:3003
 [WebServer] 
 [WebServer]  ✓ Starting...
-[WebServer]  ✓ Ready in 425ms
+[WebServer]  ✓ Ready in 468ms
 
 Running 11 tests using 1 worker
 
 [WebServer]  GET / 307 in 55ms
-[WebServer]  GET /care 200 in 48ms
-[WebServer]  ✓ Compiled /icon.svg in 214ms (427 modules)
-[WebServer]  GET / 307 in 57ms
-[WebServer]  GET /clinical 200 in 44ms
-[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 331ms
-[WebServer]  ✓ Compiled /icon.svg in 347ms (665 modules)
-  ✓   1 tests/e2e/m145-flow.spec.mjs:71:3 › M14.5 E2E sintético › 01 healthchecks dos quatro serviços (2.2s)
-[WebServer]  GET /api/clinical/summary 401 in 9ms
-[WebServer]  ✓ Compiled /api/workflow/patients/[id]/symptoms in 283ms (662 modules)
-[WebServer]  POST /api/workflow/patients/22222222-2222-4222-8222-222222222221/symptoms 401 in 746ms
-  ✓   2 tests/e2e/m145-flow.spec.mjs:79:3 › M14.5 E2E sintético › 02 negativos sem autenticação (API e proxies) (839ms)
-[WebServer]  GET /care 200 in 163ms
-[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 11ms
-[WebServer]  GET /clinical 200 in 167ms
-[WebServer]  GET /api/clinical/summary 401 in 11ms
-[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 8ms
-[WebServer]  GET /care 200 in 49ms
-[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 7ms
-[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 7ms
-[WebServer]  GET /clinical 200 in 58ms
-[WebServer]  GET /api/clinical/summary 401 in 11ms
-[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 7ms
-[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 7ms
-  ✓   3 tests/e2e/m145-flow.spec.mjs:88:3 › M14.5 E2E sintético › 03 acessibilidade e teclado sem sessão (Care, Clinical, Admin) (5.4s)
-[WebServer]  GET /care 200 in 51ms
-[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 13ms
-[WebServer]  ✓ Compiled /api/auth/login in 173ms (664 modules)
-[WebServer]  GET /api/auth/login 307 in 236ms
-[WebServer]  ✓ Compiled /api/auth/callback in 171ms (712 modules)
-[WebServer]  GET /api/auth/callback?state=QtRbijtoCTvbBZogPXJ10QP4r2i8GhfGmHS0TP7mZ4E&session_state=NoQ6Bnw8Ao91xr50CphTgIbI&iss=http%3A%2F%2Flocalhost%3A8080%2Frealms%2Foncopharma-test&code=d727f0df-58aa-90a9-3318-1e5672257773.NoQ6Bnw8Ao91xr50CphTgIbI.6eafcac6-3156-49c3-9eed-8d6ce4fe2cbd 307 in 262ms
-[WebServer]  GET /care 200 in 140ms
-[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 8ms
-[WebServer]  POST /api/workflow/patients/22222222-2222-4222-8222-222222222221/symptoms 201 in 68ms
-[WebServer]  POST /api/workflow/patients/22222222-2222-4222-8222-222222222222/symptoms 403 in 32ms
-[WebServer]  POST /api/workflow/patients/22222222-2222-4222-8222-222222222221/symptoms 403 in 8ms
-[WebServer]  POST /api/workflow/patients/22222222-2222-4222-8222-222222222221/symptoms 403 in 8ms
-[WebServer]  POST /api/workflow/patients/22222222-2222-4222-8222-222222222221/symptoms 415 in 8ms
-[WebServer]  POST /api/workflow/patients/22222222-2222-4222-8222-222222222221/symptoms 201 in 17ms
-[WebServer]  POST /api/workflow/patients/22222222-2222-4222-8222-222222222221/symptoms 201 in 13ms
-[WebServer]  ✓ Compiled /api/auth/logout in 204ms (714 modules)
-[WebServer]  POST /api/auth/logout 403 in 240ms
-[WebServer]  POST /api/auth/logout 303 in 7ms
-[WebServer]  GET / 307 in 121ms
-[WebServer]  GET /care 200 in 68ms
-[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 12ms
-[WebServer]  GET /api/auth/login 307 in 12ms
-[WebServer]  GET /care 200 in 51ms
-[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 7ms
-[WebServer]  POST /api/workflow/patients/22222222-2222-4222-8222-222222222221/symptoms 401 in 26ms
-  ✓   4 tests/e2e/m145-flow.spec.mjs:102:3 › M14.5 E2E sintético › 04 Care: login OIDC com PKCE, cookie HttpOnly, relato sintético persistido (6.2s)
-[WebServer]  GET /clinical 200 in 62ms
-[WebServer]  GET /api/clinical/summary 401 in 20ms
-[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 6ms
-[WebServer]  ✓ Compiled /api/auth/login in 207ms (667 modules)
-[WebServer]  GET /api/auth/login 307 in 255ms
-[WebServer]  ✓ Compiled /api/auth/callback in 198ms (715 modules)
-[WebServer]  GET /api/auth/callback?state=ReXe152f-IusKuFsfPR3rSAzZS44En9sqkBoIj9bxeo&session_state=U4s_RYgbf4XmGJapRrsGbhCV&iss=http%3A%2F%2Flocalhost%3A8080%2Frealms%2Foncopharma-test&code=57e2a01f-88ab-8f75-e519-096db2928908.U4s_RYgbf4XmGJapRrsGbhCV.8e19c18b-bb87-4351-ba64-0f12e8964634 307 in 285ms
-[WebServer]  GET /clinical 200 in 146ms
-[WebServer]  GET /api/clinical/summary 200 in 24ms
-[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 13ms
-[WebServer]  GET /clinical 200 in 71ms
-[WebServer]  GET /api/clinical/summary 401 in 11ms
-[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 6ms
-[WebServer]  GET /api/auth/login 307 in 11ms
-[WebServer]  GET /api/auth/callback?state=3tUQBu5wTu-_KFNJYYF8zsrWand6WILvje6_P8pyaRI&session_state=rsUYbq2fHAlqjOom6f8vRi3C&iss=http%3A%2F%2Flocalhost%3A8080%2Frealms%2Foncopharma-test&code=bc86c1fb-7dae-e112-0ae0-0b8cea79506e.rsUYbq2fHAlqjOom6f8vRi3C.8e19c18b-bb87-4351-ba64-0f12e8964634 307 in 25ms
-[WebServer]  GET /clinical 200 in 47ms
-[WebServer]  GET /api/clinical/summary 200 in 20ms
-[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 7ms
-[WebServer]  GET /clinical 200 in 47ms
-[WebServer]  GET /api/clinical/summary 401 in 11ms
-[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 8ms
-[WebServer]  GET /api/auth/login 307 in 7ms
-[WebServer]  GET /api/auth/callback?state=EE2dStWdgQdEKLISGt3SafidkDJDyX-lre4BV_kSAuo&session_state=pLvnEj4kMJxlBDZkCoVWScZV&iss=http%3A%2F%2Flocalhost%3A8080%2Frealms%2Foncopharma-test&code=aeebcb8e-0d5b-2aac-435a-63c406c758b2.pLvnEj4kMJxlBDZkCoVWScZV.8e19c18b-bb87-4351-ba64-0f12e8964634 307 in 34ms
-[WebServer]  GET /clinical 200 in 49ms
-[WebServer]  GET /api/clinical/summary 200 in 19ms
-[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 13ms
-  ✓   5 tests/e2e/m145-flow.spec.mjs:160:3 › M14.5 E2E sintético › 05 cadastro real de TOTP para contas profissionais (required action do IdP) (7.6s)
-[WebServer]  GET /clinical 200 in 48ms
-[WebServer]  GET /api/clinical/summary 401 in 11ms
-[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 7ms
-[WebServer]  GET /api/auth/login 307 in 8ms
-[WebServer]  GET /api/auth/callback?state=b155oC1xn6xzKjnI66aYCW9JgoAZtyZ97XSbfwTZPMo&session_state=_6CSB9T1IkItn1kEGcUl9Nou&iss=http%3A%2F%2Flocalhost%3A8080%2Frealms%2Foncopharma-test&code=0fbbbd7a-7f9b-fc2f-2072-645ea3a327f9._6CSB9T1IkItn1kEGcUl9Nou.8e19c18b-bb87-4351-ba64-0f12e8964634 307 in 23ms
-[WebServer]  GET /clinical 200 in 45ms
-[WebServer]  GET /api/clinical/summary 200 in 31ms
-[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 8ms
-[WebServer]  ✓ Compiled /api/clinical/patients/[id] in 198ms (717 modules)
-[WebServer]  GET /api/clinical/patients/22222222-2222-4222-8222-222222222221 200 in 597ms
-[WebServer]  ✓ Compiled /api/workflow/patients/[id]/alerts in 258ms (720 modules)
-[WebServer]  GET /api/workflow/patients/22222222-2222-4222-8222-222222222221/alerts 200 in 648ms
-[WebServer]  ✓ Compiled /api/workflow/patients/[id]/interventions in 219ms (722 modules)
-[WebServer]  POST /api/workflow/patients/22222222-2222-4222-8222-222222222221/interventions 201 in 627ms
-[WebServer]  GET /api/workflow/patients/22222222-2222-4222-8222-222222222221/alerts 200 in 27ms
-  ✓   6 tests/e2e/m145-flow.spec.mjs:168:3 › M14.5 E2E sintético › 06 Clinical: farmacêutico com senha+TOTP revisa alerta do relato Care; auditoria no PostgreSQL (26.5s)
-[WebServer]  GET /clinical 200 in 117ms
-[WebServer]  GET /api/clinical/summary 401 in 12ms
-[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 6ms
-[WebServer]  GET /api/auth/login 307 in 10ms
-[WebServer]  GET /api/auth/callback?state=nLy25eoviD1aHgqMwYbFigMMytdc9MEo7kgnx0G9ZZg&session_state=y7QWeTDnRyOK0XATpKctBvTs&iss=http%3A%2F%2Flocalhost%3A8080%2Frealms%2Foncopharma-test&code=e76607ad-03ca-8cf1-2458-bb5d19a09f40.y7QWeTDnRyOK0XATpKctBvTs.8e19c18b-bb87-4351-ba64-0f12e8964634 307 in 40ms
-[WebServer]  GET /clinical 200 in 38ms
-[WebServer]  GET /api/clinical/summary 200 in 21ms
-[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 6ms
-[WebServer]  GET /clinical 200 in 42ms
-[WebServer]  GET /api/clinical/summary 401 in 14ms
-[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 10ms
-[WebServer]  GET /api/auth/login 307 in 8ms
-[WebServer]  GET /api/auth/callback?state=JJ08C6bKz9SIgjipsXHibXMAxraAgYhXyMd-KqfgjNg&session_state=41prof5w4Mf_OtuEB7yX-7jg&iss=http%3A%2F%2Flocalhost%3A8080%2Frealms%2Foncopharma-test&code=cae7c14d-e8ab-90d5-1374-3ced654db7f9.41prof5w4Mf_OtuEB7yX-7jg.8e19c18b-bb87-4351-ba64-0f12e8964634 307 in 22ms
-[WebServer]  GET /clinical 200 in 52ms
-[WebServer]  GET /api/clinical/summary 200 in 17ms
-[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 8ms
-[WebServer]  GET /clinical 200 in 56ms
-[WebServer]  GET /api/clinical/summary 401 in 9ms
-[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 8ms
-[WebServer]  GET /api/auth/login 307 in 8ms
-[WebServer]  GET /api/auth/callback?state=RO_Jr8oMY3jMjgQtOPFaf_c1U69FyVgD4HnV509Oxus&session_state=FVVqNjOw9tZ03FKaVONG-XH6&iss=http%3A%2F%2Flocalhost%3A8080%2Frealms%2Foncopharma-test&code=12b84a4b-49a3-81d0-5f55-be2440dc265f.FVVqNjOw9tZ03FKaVONG-XH6.8e19c18b-bb87-4351-ba64-0f12e8964634 307 in 21ms
-[WebServer]  GET /clinical 200 in 49ms
-[WebServer]  GET /api/clinical/summary 200 in 20ms
-[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 6ms
-[WebServer]  GET /care 200 in 60ms
-[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 7ms
-[WebServer]  GET /api/auth/login 307 in 8ms
-[WebServer]  GET /api/auth/callback?state=3IUfoTTbl77Ez2tFg2hjalMO56sfeVXPB9G-tX_saUs&session_state=vclwzi9_ItvIb5WUXmYGEMXr&iss=http%3A%2F%2Flocalhost%3A8080%2Frealms%2Foncopharma-test&code=46d2f80d-661d-9ba4-eb2a-3fb080e65c2e.vclwzi9_ItvIb5WUXmYGEMXr.6eafcac6-3156-49c3-9eed-8d6ce4fe2cbd 307 in 37ms
 [WebServer]  GET /care 200 in 42ms
-[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 6ms
-[WebServer]  GET /care 200 in 48ms
+[WebServer]  ✓ Compiled /icon.svg in 219ms (427 modules)
+[WebServer]  GET / 307 in 62ms
+[WebServer]  GET /clinical 200 in 48ms
+[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 332ms
+[WebServer]  ✓ Compiled /icon.svg in 432ms (665 modules)
+  ✓   1 tests/e2e/m145-flow.spec.mjs:71:3 › M14.5 E2E sintético › 01 healthchecks dos quatro serviços (2.4s)
+[WebServer]  GET /api/clinical/summary 401 in 9ms
+[WebServer]  ✓ Compiled /api/workflow/patients/[id]/symptoms in 221ms (662 modules)
+[WebServer]  POST /api/workflow/patients/22222222-2222-4222-8222-222222222221/symptoms 401 in 693ms
+  ✓   2 tests/e2e/m145-flow.spec.mjs:79:3 › M14.5 E2E sintético › 02 negativos sem autenticação (API e proxies) (752ms)
+[WebServer]  GET /care 200 in 178ms
+[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 10ms
+[WebServer]  GET /clinical 200 in 170ms
+[WebServer]  GET /api/clinical/summary 401 in 10ms
 [WebServer]  GET /icon.svg?17ae2696ee364060 200 in 7ms
-[WebServer]  GET /api/auth/login 307 in 8ms
-[WebServer]  GET /api/auth/callback?state=QMPIg_g_QdDCxQhxCxwGaIf6w5Grad3KLM_ak4nnDBY&session_state=L1wdvk0HYuLJ3tqeE-7f8piz&iss=http%3A%2F%2Flocalhost%3A8080%2Frealms%2Foncopharma-test&code=ead7f1b4-1958-cfa4-4bda-ecd241f9ac9d.L1wdvk0HYuLJ3tqeE-7f8piz.6eafcac6-3156-49c3-9eed-8d6ce4fe2cbd 307 in 25ms
-[WebServer]  GET /care 200 in 41ms
+[WebServer]  GET /care 200 in 49ms
 [WebServer]  GET /icon.svg?17ae2696ee364060 200 in 11ms
-  ✓   7 tests/e2e/m145-flow.spec.mjs:199:3 › M14.5 E2E sintético › 07 negativos de papel/MFA/vínculo com tokens reais na API (10.5s)
-[WebServer]  GET /api/auth/callback?code=synthetic-invalid&state=wrong 307 in 12ms
-[WebServer]  GET /clinical?login=failed 200 in 49ms
-[WebServer]  GET /api/clinical/summary 401 in 11ms
 [WebServer]  GET /icon.svg?17ae2696ee364060 200 in 6ms
-[WebServer]  GET /api/auth/login 307 in 7ms
-[WebServer]  GET /api/auth/callback?state=irw5aNYz0o_k8Ad7PmH_eHurYOpZWfW4qhFRXSkZ9DU&session_state=BnMcMy1fqe47vQVPHG_VW6dF&iss=http%3A%2F%2Flocalhost%3A8080%2Frealms%2Foncopharma-test&code=4c94231d-63c1-b438-40a9-155587eb768a.BnMcMy1fqe47vQVPHG_VW6dF.6eafcac6-3156-49c3-9eed-8d6ce4fe2cbd 307 in 14ms
-[WebServer]  GET /care?login=failed 200 in 55ms
-[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 32ms
-  ✓   8 tests/e2e/m145-flow.spec.mjs:238:3 › M14.5 E2E sintético › 07b (Codex) callback com state inválido e verifier PKCE incorreto não criam sessão (1.9s)
-[WebServer]  GET /care 200 in 60ms
-[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 11ms
-[WebServer]  GET /care 200 in 61ms
+[WebServer]  GET /clinical 200 in 46ms
+[WebServer]  GET /api/clinical/summary 401 in 10ms
+[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 7ms
+[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 8ms
+  ✓   3 tests/e2e/m145-flow.spec.mjs:88:3 › M14.5 E2E sintético › 03 acessibilidade e teclado sem sessão (Care, Clinical, Admin) (5.6s)
+[WebServer]  GET /care 200 in 45ms
+[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 12ms
+[WebServer]  ✓ Compiled /api/auth/login in 163ms (664 modules)
+[WebServer]  GET /api/auth/login 307 in 221ms
+[WebServer]  ✓ Compiled /api/auth/callback in 203ms (712 modules)
+[WebServer]  GET /api/auth/callback?state=efR-GoZ4PCrBdhugP3xCin7c3cqifzqw2dQE0b0-utA&session_state=MyJvRxh797ki4L-BIx3yKuug&iss=http%3A%2F%2Flocalhost%3A8080%2Frealms%2Foncopharma-test&code=8080b54d-4fee-de30-5255-4adad600bdf1.MyJvRxh797ki4L-BIx3yKuug.4fc62687-96f3-4d27-9ea6-64182860232a 307 in 297ms
+[WebServer]  GET /care 200 in 146ms
+[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 8ms
+[WebServer]  POST /api/workflow/patients/22222222-2222-4222-8222-222222222221/symptoms 201 in 79ms
+[WebServer]  POST /api/workflow/patients/22222222-2222-4222-8222-222222222222/symptoms 403 in 29ms
+[WebServer]  POST /api/workflow/patients/22222222-2222-4222-8222-222222222221/symptoms 403 in 11ms
+[WebServer]  POST /api/workflow/patients/22222222-2222-4222-8222-222222222221/symptoms 403 in 9ms
+[WebServer]  POST /api/workflow/patients/22222222-2222-4222-8222-222222222221/symptoms 415 in 7ms
+[WebServer]  POST /api/workflow/patients/22222222-2222-4222-8222-222222222221/symptoms 201 in 18ms
+[WebServer]  POST /api/workflow/patients/22222222-2222-4222-8222-222222222221/symptoms 201 in 14ms
+[WebServer]  ✓ Compiled /api/auth/logout in 240ms (714 modules)
+[WebServer]  POST /api/auth/logout 403 in 287ms
+[WebServer]  POST /api/auth/logout 303 in 9ms
+[WebServer]  GET / 307 in 108ms
+[WebServer]  GET /care 200 in 56ms
+[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 7ms
+[WebServer]  GET /api/auth/login 307 in 10ms
+[WebServer]  GET /care 200 in 52ms
+[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 8ms
+[WebServer]  POST /api/workflow/patients/22222222-2222-4222-8222-222222222221/symptoms 401 in 21ms
+  ✓   4 tests/e2e/m145-flow.spec.mjs:102:3 › M14.5 E2E sintético › 04 Care: login OIDC com PKCE, cookie HttpOnly, relato sintético persistido (6.6s)
+[WebServer]  GET /clinical 200 in 61ms
+[WebServer]  GET /api/clinical/summary 401 in 14ms
 [WebServer]  GET /icon.svg?17ae2696ee364060 200 in 6ms
-[WebServer]  GET /care 200 in 51ms
-[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 6ms
-[WebServer]  GET /clinical 200 in 75ms
-[WebServer]  GET /api/clinical/summary 401 in 12ms
+[WebServer]  ✓ Compiled /api/auth/login in 194ms (667 modules)
+[WebServer]  GET /api/auth/login 307 in 246ms
+[WebServer]  ✓ Compiled /api/auth/callback in 241ms (715 modules)
+[WebServer]  GET /api/auth/callback?state=ZUf2IJaRAHW9LMdYlrdHt3qp-iBJvsCosyACOzMJjsQ&session_state=Ce38Cyl2XRlT010MH_jDIEAJ&iss=http%3A%2F%2Flocalhost%3A8080%2Frealms%2Foncopharma-test&code=49b5b0d0-e84a-dafa-23a5-f0e10b8c730c.Ce38Cyl2XRlT010MH_jDIEAJ.0f0abc21-24a8-4a8c-af4d-8ee1f947df07 307 in 339ms
+[WebServer]  GET /clinical 200 in 168ms
+[WebServer]  GET /api/clinical/summary 200 in 21ms
+[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 10ms
+[WebServer]  GET /clinical 200 in 53ms
+[WebServer]  GET /api/clinical/summary 401 in 10ms
+[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 8ms
+[WebServer]  GET /api/auth/login 307 in 12ms
+[WebServer]  GET /api/auth/callback?state=SGlaYA9cZ85OLUHAw74ET3Mr3Hh0SEoup7NBBuET0zQ&session_state=54-5S24iIx0P22eOujh5zAgo&iss=http%3A%2F%2Flocalhost%3A8080%2Frealms%2Foncopharma-test&code=67789121-f7bf-a405-468f-a99f06f6870e.54-5S24iIx0P22eOujh5zAgo.0f0abc21-24a8-4a8c-af4d-8ee1f947df07 307 in 34ms
+[WebServer]  GET /clinical 200 in 41ms
+[WebServer]  GET /api/clinical/summary 200 in 24ms
 [WebServer]  GET /icon.svg?17ae2696ee364060 200 in 8ms
 [WebServer]  GET /clinical 200 in 48ms
-[WebServer]  GET /api/clinical/summary 401 in 9ms
-[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 7ms
-[WebServer]  GET /clinical 200 in 62ms
-[WebServer]  GET /api/clinical/summary 401 in 13ms
-[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 7ms
-[WebServer]  GET /care 200 in 53ms
+[WebServer]  GET /api/clinical/summary 401 in 11ms
 [WebServer]  GET /icon.svg?17ae2696ee364060 200 in 8ms
-[WebServer]  POST /api/workflow/patients/22222222-2222-4222-8222-222222222221/symptoms 401 in 24ms
-  ✓   9 tests/e2e/m145-flow.spec.mjs:252:3 › M14.5 E2E sintético › 07c (Codex) superfícies em 390/768/1440 px: sem overflow horizontal, sem erros de página; Care sem sessão recusa envio (10.5s)
+[WebServer]  GET /api/auth/login 307 in 9ms
+[WebServer]  GET /api/auth/callback?state=hyGOu3lQ5-ZNBrD9cgBz6sQHOreqLgFO26PgOeY52zU&session_state=SGC5KvmNPH-j87rc190aHpRY&iss=http%3A%2F%2Flocalhost%3A8080%2Frealms%2Foncopharma-test&code=3874fd99-cfb4-849c-c2ef-078e638cb846.SGC5KvmNPH-j87rc190aHpRY.0f0abc21-24a8-4a8c-af4d-8ee1f947df07 307 in 25ms
+[WebServer]  GET /clinical 200 in 53ms
+[WebServer]  GET /api/clinical/summary 200 in 18ms
+[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 7ms
+  ✓   5 tests/e2e/m145-flow.spec.mjs:160:3 › M14.5 E2E sintético › 05 cadastro real de TOTP para contas profissionais (required action do IdP) (10.1s)
+[WebServer]  GET /clinical 200 in 51ms
 [WebServer]  GET /api/clinical/summary 401 in 10ms
-  ✓  10 tests/e2e/m145-flow.spec.mjs:269:3 › M14.5 E2E sintético › 08 token adulterado, sessão forjada vencida e expiração real do token (1.6m)
+[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 7ms
+[WebServer]  GET /api/auth/login 307 in 9ms
+[WebServer]  GET /api/auth/callback?state=eRkanxNmblKNX6Dp0dBZ_yV6TWkldZ635TfvjFWX8Z4&session_state=GTHODMSY3FkJw-rfZFi1UoLM&iss=http%3A%2F%2Flocalhost%3A8080%2Frealms%2Foncopharma-test&code=51cea558-ef98-e380-4c39-da8d43b88dda.GTHODMSY3FkJw-rfZFi1UoLM.0f0abc21-24a8-4a8c-af4d-8ee1f947df07 307 in 38ms
+[WebServer]  GET /clinical 200 in 53ms
+[WebServer]  GET /api/clinical/summary 200 in 35ms
+[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 8ms
+[WebServer]  ✓ Compiled /api/clinical/patients/[id] in 170ms (717 modules)
+[WebServer]  GET /api/clinical/patients/22222222-2222-4222-8222-222222222221 200 in 619ms
+[WebServer]  ✓ Compiled /api/workflow/patients/[id]/alerts in 289ms (720 modules)
+[WebServer]  GET /api/workflow/patients/22222222-2222-4222-8222-222222222221/alerts 200 in 717ms
+[WebServer]  ✓ Compiled /api/workflow/patients/[id]/interventions in 162ms (722 modules)
+[WebServer]  POST /api/workflow/patients/22222222-2222-4222-8222-222222222221/interventions 201 in 568ms
+[WebServer]  GET /api/workflow/patients/22222222-2222-4222-8222-222222222221/alerts 200 in 26ms
+  ✓   6 tests/e2e/m145-flow.spec.mjs:168:3 › M14.5 E2E sintético › 06 Clinical: farmacêutico com senha+TOTP revisa alerta do relato Care; auditoria no PostgreSQL (28.6s)
+[WebServer]  GET /clinical 200 in 157ms
+[WebServer]  GET /api/clinical/summary 401 in 13ms
+[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 11ms
+[WebServer]  GET /api/auth/login 307 in 12ms
+[WebServer]  GET /api/auth/callback?state=n8VC7eF8COm6T89WAYJv1ucReuS-dUIkaHZFmxWGN2Y&session_state=HzcHkc21-aUhi5IWv3srJaFo&iss=http%3A%2F%2Flocalhost%3A8080%2Frealms%2Foncopharma-test&code=0eb24080-d79d-5f1f-315e-bde887bb5c5b.HzcHkc21-aUhi5IWv3srJaFo.0f0abc21-24a8-4a8c-af4d-8ee1f947df07 307 in 37ms
+[WebServer]  GET /clinical 200 in 47ms
+[WebServer]  GET /api/clinical/summary 200 in 22ms
+[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 9ms
+[WebServer]  GET /clinical 200 in 61ms
+[WebServer]  GET /api/clinical/summary 401 in 10ms
+[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 7ms
+[WebServer]  GET /api/auth/login 307 in 9ms
+[WebServer]  GET /api/auth/callback?state=G2ojo-O78qUiGHzCFTqmuL0LJLGpzk04MNpC4-QLZR0&session_state=RD-dDSbtXhGQU2Vvsb-GxEAj&iss=http%3A%2F%2Flocalhost%3A8080%2Frealms%2Foncopharma-test&code=b578c18a-5940-d56d-bef9-70c8a738443f.RD-dDSbtXhGQU2Vvsb-GxEAj.0f0abc21-24a8-4a8c-af4d-8ee1f947df07 307 in 21ms
+[WebServer]  GET /clinical 200 in 54ms
+[WebServer]  GET /api/clinical/summary 200 in 26ms
+[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 10ms
+[WebServer]  GET /clinical 200 in 51ms
+[WebServer]  GET /api/clinical/summary 401 in 8ms
+[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 6ms
+[WebServer]  GET /api/auth/login 307 in 9ms
+[WebServer]  GET /api/auth/callback?state=fToLEJYmqEdSgYPZFAMS2h4cLnHGQZdOinuJRDRn9so&session_state=-xZbsLDdubR1wgpL8W_rW1_f&iss=http%3A%2F%2Flocalhost%3A8080%2Frealms%2Foncopharma-test&code=2df82845-8592-8a85-829d-30529ec39ae8.-xZbsLDdubR1wgpL8W_rW1_f.0f0abc21-24a8-4a8c-af4d-8ee1f947df07 307 in 26ms
+[WebServer]  GET /clinical 200 in 37ms
+[WebServer]  GET /api/clinical/summary 200 in 30ms
+[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 6ms
+[WebServer]  GET /care 200 in 66ms
+[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 8ms
+[WebServer]  GET /api/auth/login 307 in 9ms
+[WebServer]  GET /api/auth/callback?state=UElIZxjmIcLOudBq_NmGwMrV2yq44ITVn2OJlVZAOfc&session_state=I_wO2vyf_kvWdxhlLyZRG8E8&iss=http%3A%2F%2Flocalhost%3A8080%2Frealms%2Foncopharma-test&code=cdb9377f-3b92-ff59-5192-e362ee0721d0.I_wO2vyf_kvWdxhlLyZRG8E8.4fc62687-96f3-4d27-9ea6-64182860232a 307 in 38ms
+[WebServer]  GET /care 200 in 52ms
+[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 8ms
+[WebServer]  GET /care 200 in 48ms
+[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 7ms
+[WebServer]  GET /api/auth/login 307 in 7ms
+[WebServer]  GET /api/auth/callback?state=kQ9TSG2WsiTRlOU2SyBIVBC1xcYFwQnZ67qdTDMIgSw&session_state=5-0tNeuthppqVpQ-Sb4uiylF&iss=http%3A%2F%2Flocalhost%3A8080%2Frealms%2Foncopharma-test&code=9dac874b-25e8-1bfc-fc18-03afb2c2b31e.5-0tNeuthppqVpQ-Sb4uiylF.4fc62687-96f3-4d27-9ea6-64182860232a 307 in 28ms
+[WebServer]  GET /care 200 in 42ms
+[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 8ms
+  ✓   7 tests/e2e/m145-flow.spec.mjs:199:3 › M14.5 E2E sintético › 07 negativos de papel/MFA/vínculo com tokens reais na API (11.0s)
+[WebServer]  GET /api/auth/callback?code=synthetic-invalid&state=wrong 307 in 13ms
+[WebServer]  GET /clinical?login=failed 200 in 55ms
+[WebServer]  GET /api/clinical/summary 401 in 11ms
+[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 7ms
+[WebServer]  GET /api/auth/login 307 in 8ms
+[WebServer]  GET /api/auth/callback?state=KfcYD-rGIINdgZZCF6M1D8nGP9EC63SNR8x507odo5g&session_state=PwkjjKLYtn76nIYDwt2IlwqX&iss=http%3A%2F%2Flocalhost%3A8080%2Frealms%2Foncopharma-test&code=43db230a-aa10-2ab9-0eca-3e1a12061cb5.PwkjjKLYtn76nIYDwt2IlwqX.4fc62687-96f3-4d27-9ea6-64182860232a 307 in 16ms
+[WebServer]  GET /care?login=failed 200 in 43ms
+[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 7ms
+  ✓   8 tests/e2e/m145-flow.spec.mjs:238:3 › M14.5 E2E sintético › 07b (Codex) callback com state inválido e verifier PKCE incorreto não criam sessão (1.9s)
+[WebServer]  GET /care 200 in 55ms
+[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 7ms
+[WebServer]  GET /care 200 in 40ms
+[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 7ms
+[WebServer]  GET /care 200 in 48ms
+[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 6ms
+[WebServer]  GET /clinical 200 in 56ms
+[WebServer]  GET /api/clinical/summary 401 in 11ms
+[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 6ms
+[WebServer]  GET /clinical 200 in 66ms
+[WebServer]  GET /api/clinical/summary 401 in 11ms
+[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 6ms
+[WebServer]  GET /clinical 200 in 49ms
+[WebServer]  GET /api/clinical/summary 401 in 9ms
+[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 13ms
+[WebServer]  GET /care 200 in 42ms
+[WebServer]  GET /icon.svg?17ae2696ee364060 200 in 8ms
+[WebServer]  POST /api/workflow/patients/22222222-2222-4222-8222-222222222221/symptoms 401 in 31ms
+  ✓   9 tests/e2e/m145-flow.spec.mjs:252:3 › M14.5 E2E sintético › 07c (Codex) superfícies em 390/768/1440 px: sem overflow horizontal, sem erros de página; Care sem sessão recusa envio (9.8s)
+[WebServer]  GET /api/clinical/summary 401 in 9ms
+  ✓  10 tests/e2e/m145-flow.spec.mjs:269:3 › M14.5 E2E sintético › 08 token adulterado, sessão forjada vencida e expiração real do token (1.7m)
   ✓  11 tests/e2e/m145-flow.spec.mjs:285:3 › M14.5 E2E sintético › 09 resultado axe (WCAG 2.x A/AA): nenhuma violação séria/crítica em Care, Clinical e Admin (1ms)
 
-  11 passed (3.0m)
+  11 passed (3.1m)
 
-(node:333275) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(node:352918) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
 (Use `node --trace-warnings ...` to show where the warning was created)

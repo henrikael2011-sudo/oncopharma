@@ -6,7 +6,7 @@ TAP version 13
 # Subtest: fluxo HTTP ponta a ponta, persistência e validação sintética
 ok 1 - fluxo HTTP ponta a ponta, persistência e validação sintética
   ---
-  duration_ms: 132.707849
+  duration_ms: 132.210776
   type: 'test'
   ...
 1..1
@@ -17,5 +17,5 @@ ok 1 - fluxo HTTP ponta a ponta, persistência e validação sintética
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 205.951366
+# duration_ms 203.916927
 
