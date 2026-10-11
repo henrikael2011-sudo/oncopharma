@@ -13,3 +13,8 @@ tools/synthetic-lab/.local/
 
 # M14.5 — saídas transitórias do Playwright (vídeo/trace só em falha)
 artifacts/validation/m14_5/playwright-output/
+
+# M14.5 consolidado (adições da proposta Codex)
+*.tsbuildinfo
+playwright-report/
+test-results/

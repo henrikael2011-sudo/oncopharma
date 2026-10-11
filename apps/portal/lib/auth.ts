@@ -14,4 +14,6 @@ export const random = () => randomBytes(32).toString('base64url');
 export const challenge = (verifier:string) => createHash('sha256').update(verifier).digest('base64url');
 export async function session():Promise<Session|null> {const raw=(await cookies()).get(SESSION)?.value;if(!raw)return null;const s=unseal<Session>(raw);return s && typeof s.token==='string' && Number.isFinite(s.expiresAt) && s.expiresAt>Date.now()+5000 ? s : null;}
 export const cookieOptions = (maxAge:number) => ({httpOnly:true,secure:secureCookie(),sameSite:'lax' as const,path:'/',maxAge});
-export function oidcConfig(){return {issuer:required('OIDC_ISSUER'),authorizationEndpoint:required('OIDC_AUTHORIZATION_ENDPOINT'),tokenEndpoint:required('OIDC_TOKEN_ENDPOINT'),clientId:required('OIDC_CLIENT_ID')};}
+export function oidcConfig(){return {issuer:required('OIDC_ISSUER'),authorizationEndpoint:required('OIDC_AUTHORIZATION_ENDPOINT'),tokenEndpoint:required('OIDC_TOKEN_ENDPOINT'),clientId:required('OIDC_CLIENT_ID'),jwksUri:required('OIDC_JWKS_URI'),audience:required('OIDC_AUDIENCE')};}
+
+export function postLoginPath():string { const path=process.env.AUTH_POST_LOGIN_PATH||'/clinical'; if(!/^\/[a-zA-Z0-9/_-]*$/.test(path)||path.startsWith('//'))throw new Error('Destino de login inválido'); return path; }

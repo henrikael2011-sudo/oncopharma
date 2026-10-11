@@ -1,0 +1,1531 @@
+diff --git a/.github/workflows/quality.yml b/.github/workflows/quality.yml
+index 030db4a..ed88dab 100644
+--- a/.github/workflows/quality.yml
++++ b/.github/workflows/quality.yml
+@@ -10,12 +10,14 @@ jobs:
+       - uses: actions/setup-node@v4
+         with:
+           node-version: '22'
+-      - run: npm install --no-audit --no-fund
++      - run: npm ci --no-audit --no-fund
+       - run: npm test
+       - run: npm run test:extended
+       - run: npm run check:design
+       - run: npm run check:governance
+       - run: npm run build
++      - run: npm run test:api:security
++      - run: npm run test:rules
+       - run: npm run test:readiness
+       - run: npm run test:lab:e2e
+       - name: Generate validation evidence (unit runner; integration reported separately)
+@@ -35,7 +37,7 @@ jobs:
+         env:
+           POSTGRES_DB: oncopharma_dev
+           POSTGRES_USER: oncopharma
+-          POSTGRES_PASSWORD: test_only_ci_secret
++          POSTGRES_PASSWORD: ${{ secrets.ONCO_CI_DB_ADMIN_PASSWORD }}
+         ports: ['5432:5432']
+         options: >-
+           --health-cmd "pg_isready -U oncopharma -d oncopharma_dev" --health-interval 10s --health-timeout 5s --health-retries 5
+@@ -44,17 +46,19 @@ jobs:
+       - uses: actions/setup-node@v4
+         with:
+           node-version: '22'
+-      - run: npm install --no-audit --no-fund
++      - run: npm ci --no-audit --no-fund
+       - run: npm run build
+       - name: Install PostgreSQL client
+         run: sudo apt-get update && sudo apt-get install -y postgresql-client
+       - name: Apply migrations and provision least-privilege role
+         run: bash infra/scripts/bootstrap-ci-db.sh
+         env:
+-          DATABASE_URL_ADMIN: postgres://oncopharma:test_only_ci_secret@localhost:5432/oncopharma_dev
+-          APP_DB_PASSWORD: ci_runtime_test_password
++          DATABASE_URL_ADMIN: postgres://oncopharma:${{ secrets.ONCO_CI_DB_ADMIN_PASSWORD }}@localhost:5432/oncopharma_dev
++          APP_DB_PASSWORD: ${{ secrets.ONCO_CI_DB_APP_PASSWORD }}
+           NODE_ENV: test
+       - name: Verify PostgreSQL RLS with runtime role (fail closed)
+         run: npm run test:db:required
+         env:
+-          DATABASE_URL: postgres://oncopharma_app:ci_runtime_test_password@localhost:5432/oncopharma_dev
++          DATABASE_URL: postgres://oncopharma_app:${{ secrets.ONCO_CI_DB_APP_PASSWORD }}@localhost:5432/oncopharma_dev
++          DATABASE_URL_ADMIN: postgres://oncopharma:${{ secrets.ONCO_CI_DB_ADMIN_PASSWORD }}@localhost:5432/oncopharma_dev
++          NODE_ENV: test
+diff --git a/.gitignore b/.gitignore
+index 28e0d40..0bf7d7d 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -4,9 +4,6 @@ dist/
+ .env
+ .env.*
+ !.env.example
+-*.log
+-.DS_Store
+-coverage/
+-
+-# Synthetic local lab data
+-tools/synthetic-lab/.local/
++*.tsbuildinfo
++playwright-report/
++test-results/
+diff --git a/ARQUIVOS_ALTERADOS_M14_5.md b/ARQUIVOS_ALTERADOS_M14_5.md
+new file mode 100644
+index 0000000..ea7b24c
+--- /dev/null
++++ b/ARQUIVOS_ALTERADOS_M14_5.md
+@@ -0,0 +1,146 @@
++# Arquivos alterados - M14.4 para M14.5
++
++Comparação de bytes contra a extração original; exclui dependências, builds, .git e temporários. Código e documentação foram versionados; git-history.log registra a revisão local.
++
++| Arquivo | Estado |
++|---|---|
++| `.github/workflows/quality.yml` | ALTERADO |
++| `.gitignore` | ALTERADO |
++| `ARQUIVOS_ALTERADOS_M14_5.md` | ADICIONADO |
++| `CHANGELOG_M14_5.md` | ADICIONADO |
++| `README_M14_5.md` | ADICIONADO |
++| `apps/admin-web/app/api/auth/callback/route.ts` | ADICIONADO |
++| `apps/admin-web/app/api/auth/login/route.ts` | ADICIONADO |
++| `apps/admin-web/app/api/auth/logout/route.ts` | ADICIONADO |
++| `apps/admin-web/app/api/health/route.ts` | ADICIONADO |
++| `apps/admin-web/lib/auth.ts` | ADICIONADO |
++| `apps/admin-web/next-env.d.ts` | ALTERADO |
++| `apps/admin-web/package.json` | ALTERADO |
++| `apps/care-web/app/api/auth/callback/route.ts` | ALTERADO |
++| `apps/care-web/app/api/health/route.ts` | ADICIONADO |
++| `apps/care-web/app/globals.css` | ALTERADO |
++| `apps/care-web/components/ClinicalAccess.tsx` | ALTERADO |
++| `apps/care-web/components/WorkflowReview.tsx` | ALTERADO |
++| `apps/care-web/lib/auth.ts` | ALTERADO |
++| `apps/care-web/next-env.d.ts` | ALTERADO |
++| `apps/care-web/package.json` | ALTERADO |
++| `apps/clinical-web/app/api/auth/callback/route.ts` | ALTERADO |
++| `apps/clinical-web/app/api/health/route.ts` | ADICIONADO |
++| `apps/clinical-web/app/globals.css` | ALTERADO |
++| `apps/clinical-web/components/ClinicalAccess.tsx` | ALTERADO |
++| `apps/clinical-web/components/WorkflowReview.tsx` | ALTERADO |
++| `apps/clinical-web/lib/auth.ts` | ALTERADO |
++| `apps/clinical-web/next-env.d.ts` | ALTERADO |
++| `apps/clinical-web/package.json` | ALTERADO |
++| `apps/portal/app/api/auth/callback/route.ts` | ALTERADO |
++| `apps/portal/app/globals.css` | ALTERADO |
++| `apps/portal/components/ClinicalAccess.tsx` | ALTERADO |
++| `apps/portal/components/WorkflowReview.tsx` | ALTERADO |
++| `apps/portal/lib/auth.ts` | ALTERADO |
++| `apps/portal/next-env.d.ts` | ALTERADO |
++| `apps/portal/package.json` | ALTERADO |
++| `artifacts/m14.5/ONCOPHARMA_PLANEJAMENTO_ACUMULADO_M14_5.pdf` | ADICIONADO |
++| `artifacts/m14.5/ONCOPHARMA_RELATORIO_M14_5.pdf` | ADICIONADO |
++| `artifacts/m14.5/axe-admin.json` | ADICIONADO |
++| `artifacts/m14.5/axe-care.json` | ADICIONADO |
++| `artifacts/m14.5/axe-clinical.json` | ADICIONADO |
++| `artifacts/m14.5/build-corrected.json` | ADICIONADO |
++| `artifacts/m14.5/build-initial.json` | ADICIONADO |
++| `artifacts/m14.5/diff-M14.4-M14.5.patch` | ADICIONADO |
++| `artifacts/m14.5/git-history.log` | ADICIONADO |
++| `artifacts/m14.5/healthchecks.json` | ADICIONADO |
++| `artifacts/m14.5/idp-configuration.json` | ADICIONADO |
++| `artifacts/m14.5/logs/build-api-role-guard.log` | ADICIONADO |
++| `artifacts/m14.5/logs/build-corrected-care-web.log` | ADICIONADO |
++| `artifacts/m14.5/logs/build-corrected-clinical-web.log` | ADICIONADO |
++| `artifacts/m14.5/logs/build-corrected-portal.log` | ADICIONADO |
++| `artifacts/m14.5/logs/build-initial-admin-web.log` | ADICIONADO |
++| `artifacts/m14.5/logs/build-initial-api.log` | ADICIONADO |
++| `artifacts/m14.5/logs/build-initial-care-web.log` | ADICIONADO |
++| `artifacts/m14.5/logs/build-initial-clinical-rules.log` | ADICIONADO |
++| `artifacts/m14.5/logs/build-initial-clinical-web.log` | ADICIONADO |
++| `artifacts/m14.5/logs/build-initial-portal.log` | ADICIONADO |
++| `artifacts/m14.5/logs/check-design.log` | ADICIONADO |
++| `artifacts/m14.5/logs/check-governance.log` | ADICIONADO |
++| `artifacts/m14.5/logs/e2e-surfaces-initial.log` | ADICIONADO |
++| `artifacts/m14.5/logs/e2e-surfaces-integrated.log` | ADICIONADO |
++| `artifacts/m14.5/logs/e2e-surfaces-safe-browser.log` | ADICIONADO |
++| `artifacts/m14.5/logs/full-build.log` | ADICIONADO |
++| `artifacts/m14.5/logs/identity-corrected.log` | ADICIONADO |
++| `artifacts/m14.5/logs/identity-final-before-evidence.log` | ADICIONADO |
++| `artifacts/m14.5/logs/identity-initial.log` | ADICIONADO |
++| `artifacts/m14.5/logs/identity-otp-replay-failure.log` | ADICIONADO |
++| `artifacts/m14.5/logs/identity-transport-replay-failure.log` | ADICIONADO |
++| `artifacts/m14.5/logs/keycloak-server.log` | ADICIONADO |
++| `artifacts/m14.5/logs/local-tests-m145.log` | ADICIONADO |
++| `artifacts/m14.5/logs/node-version.log` | ADICIONADO |
++| `artifacts/m14.5/logs/npm-ci.log` | ADICIONADO |
++| `artifacts/m14.5/logs/npm-install-e2e.log` | ADICIONADO |
++| `artifacts/m14.5/logs/npm-install-oidc.log` | ADICIONADO |
++| `artifacts/m14.5/logs/npm-install.log` | ADICIONADO |
++| `artifacts/m14.5/logs/npm-version.log` | ADICIONADO |
++| `artifacts/m14.5/logs/playwright-install.log` | ADICIONADO |
++| `artifacts/m14.5/logs/postgres-bootstrap.log` | ADICIONADO |
++| `artifacts/m14.5/logs/postgres-environment.log` | ADICIONADO |
++| `artifacts/m14.5/logs/postgres-initdb.log` | ADICIONADO |
++| `artifacts/m14.5/logs/postgres-required-final.log` | ADICIONADO |
++| `artifacts/m14.5/logs/postgres-required.log` | ADICIONADO |
++| `artifacts/m14.5/logs/quality-gate.log` | ADICIONADO |
++| `artifacts/m14.5/logs/server-admin-web.log` | ADICIONADO |
++| `artifacts/m14.5/logs/server-api.log` | ADICIONADO |
++| `artifacts/m14.5/logs/server-care-web.log` | ADICIONADO |
++| `artifacts/m14.5/logs/server-clinical-web.log` | ADICIONADO |
++| `artifacts/m14.5/logs/validate-evidence-final.log` | ADICIONADO |
++| `artifacts/m14.5/otp-used-periods.json` | ADICIONADO |
++| `artifacts/m14.5/playwright-results.json` | ADICIONADO |
++| `artifacts/m14.5/screenshots/admin-desktop.png` | ADICIONADO |
++| `artifacts/m14.5/screenshots/admin-mobile.png` | ADICIONADO |
++| `artifacts/m14.5/screenshots/admin-tablet.png` | ADICIONADO |
++| `artifacts/m14.5/screenshots/care-desktop.png` | ADICIONADO |
++| `artifacts/m14.5/screenshots/care-error-unauthenticated.png` | ADICIONADO |
++| `artifacts/m14.5/screenshots/care-mobile.png` | ADICIONADO |
++| `artifacts/m14.5/screenshots/care-tablet.png` | ADICIONADO |
++| `artifacts/m14.5/screenshots/clinical-desktop.png` | ADICIONADO |
++| `artifacts/m14.5/screenshots/clinical-mobile.png` | ADICIONADO |
++| `artifacts/m14.5/screenshots/clinical-tablet.png` | ADICIONADO |
++| `artifacts/m14.5/screenshots/identity-caregiver.png` | ADICIONADO |
++| `artifacts/m14.5/screenshots/identity-expired.png` | ADICIONADO |
++| `artifacts/m14.5/screenshots/identity-nurse.png` | ADICIONADO |
++| `artifacts/m14.5/screenshots/identity-patient.png` | ADICIONADO |
++| `artifacts/m14.5/screenshots/identity-pharmacist.png` | ADICIONADO |
++| `artifacts/m14.5/screenshots/identity-physician.png` | ADICIONADO |
++| `artifacts/m14.5/screenshots/identity-technical_admin.png` | ADICIONADO |
++| `artifacts/m14.5/validation-before-otp-replay-fix.json` | ADICIONADO |
++| `artifacts/m14.5/validation-before-transport-fix.json` | ADICIONADO |
++| `artifacts/validation/api-security-unit.log` | ADICIONADO |
++| `artifacts/validation/browser-identity.log` | ADICIONADO |
++| `artifacts/validation/clinical-rules.log` | ADICIONADO |
++| `artifacts/validation/design.log` | ADICIONADO |
++| `artifacts/validation/full-build.log` | ADICIONADO |
++| `artifacts/validation/governance.log` | ADICIONADO |
++| `artifacts/validation/lab-unit-tests.log` | ALTERADO |
++| `artifacts/validation/local-tests.log` | ALTERADO |
++| `artifacts/validation/postgres-required.log` | ALTERADO |
++| `artifacts/validation/release-gate-enforced.log` | ADICIONADO |
++| `artifacts/validation/validation-report.json` | ALTERADO |
++| `docs/product/MATRIZ_RASTREABILIDADE.md` | ALTERADO |
++| `infra/scripts/provision-app-role.sh` | ALTERADO |
++| `package-lock.json` | ADICIONADO |
++| `package.json` | ALTERADO |
++| `packages/clinical-rules/package.json` | ALTERADO |
++| `packages/design-system/app/globals.css` | ALTERADO |
++| `playwright.config.ts` | ADICIONADO |
++| `services/api/src/database.service.ts` | ALTERADO |
++| `services/api/src/workflow.controller.ts` | ALTERADO |
++| `tests/e2e-real/auth-helpers.ts` | ADICIONADO |
++| `tests/e2e-real/identity.spec.ts` | ADICIONADO |
++| `tests/e2e-real/surfaces.spec.ts` | ADICIONADO |
++| `tests/e2e-real/vertical.spec.ts` | ADICIONADO |
++| `tests/m143-integration-readiness.test.mjs` | ALTERADO |
++| `tests/m145-api.security.mjs` | ADICIONADO |
++| `tests/m145-db.integration.mjs` | ADICIONADO |
++| `tests/require-postgres.mjs` | ALTERADO |
++| `tools/run-identity-validation.mjs` | ADICIONADO |
++| `tools/run-test-stack.mjs` | ADICIONADO |
++| `tools/source-digest.mjs` | ADICIONADO |
++| `tools/validate-real.mjs` | ALTERADO |
+diff --git a/CHANGELOG_M14_5.md b/CHANGELOG_M14_5.md
+new file mode 100644
+index 0000000..6b51120
+--- /dev/null
++++ b/CHANGELOG_M14_5.md
+@@ -0,0 +1,22 @@
++# Changelog M14.5 - 11/10/2026
++
++Baseline M14.4 preservada. Plano Diretor v3 e D-001 a D-008 mantidos.
++
++## Correções
++- `ClinicalAccess`: diretiva client na primeira posição.
++- `WorkflowReview`: tipo `Alert` inclui `rule_version`.
++- Clinical: contraste do rótulo corrigido com token navy aprovado, inclusive referência canônica.
++- Vínculo profissional consultado em transação com tenant.
++- API/provisionamento/test runner recusam superusuário e BYPASSRLS.
++- Callback OIDC verifica ID token e access token; valida nonce, issuer, audience, assinatura e expiração.
++
++## Reprodução e evidência
++- Node 22, package-lock e npm ci no CI; secrets em ambiente.
++- Build das aplicações/API e checks dos pacotes JS; portal de compatibilidade preservado.
++- Healthchecks; Playwright + axe; Keycloak efêmero e seis contas TOTP sintéticas.
++- Novos testes DB/API/E2E/identidade e relatório PASS/FAIL/BLOCKED com digest de fonte.
++
++## Bloqueios mantidos
++PostgreSQL não iniciou; RLS e fluxo vertical integrado não executados. RBAC institucional, patientId no fluxo real, operação clínica, provedor institucional e aprovações externas continuam pendentes. Logout global IdP não validado. Produção/assistência permanecem bloqueadas.
++
++Falhas e tentativas anteriores da própria M14.5 estão preservadas nos logs. A rodada após npm ci executado durante testes foi invalidada por falhas de módulos e repetida sequencialmente. O arquivo validation-report.json representa a rodada final, sem apagar essas tentativas.
+diff --git a/README_M14_5.md b/README_M14_5.md
+new file mode 100644
+index 0000000..4de56bb
+--- /dev/null
++++ b/README_M14_5.md
+@@ -0,0 +1,122 @@
++# ONCOPHARMA M14.5 - validação técnica reproduzível
++
++Referência: Plano Diretor v3 (D-001 a D-008) e dossiê M14.4. Produto em desenvolvimento. **Sem homologação clínica; sem dados reais.**
++
++## Resultado e decisão
++
++**NO-GO para piloto integrado ou uso assistencial.** GO apenas para continuar desenvolvimento sintético isolado. PostgreSQL 17 não iniciou neste container; RLS integrado, vínculos e RBAC/ABAC da aplicação e o fluxo persistido Care -> Clinical -> auditoria continuam BLOCKED. O IdP local de teste não é uma escolha aprovada de provedor institucional (D-008).
++
++Validação: 2026-10-11T18:59:32.152Z até 2026-10-11T19:02:57.997Z. Checks: 13 PASS, 0 FAIL, 5 BLOCKED. Os checks têm escopos diferentes e não equivalem a uma contagem de casos independentes.
++
++| Check | Resultado | Exit |
++|---|---|---|
++| node22 | PASS | - |
++| lockfile | PASS | - |
++| local-tests | PASS | 0 |
++| lab-unit-tests | PASS | 0 |
++| clinical-rules | PASS | 0 |
++| full-build | PASS | 0 |
++| api-security-unit | PASS | 0 |
++| design | PASS | 0 |
++| governance | PASS | 0 |
++| release-gate-enforced | PASS | 1 |
++| clinical-release | BLOCKED | - |
++| postgres-required | BLOCKED | - |
++| migration-0003 | BLOCKED | - |
++| browser-surfaces | PASS | - |
++| oidc-core | PASS | - |
++| oidc-mfa | BLOCKED | - |
++| vertical-care-clinical-audit | BLOCKED | - |
++| source-stability | PASS | - |
++
++`readyForClinicalUse=false`, `clinicalApproval=false`, `readyForIntegratedValidation=false`.
++
++## Alterações localizadas
++
++- Node 22; lockfile versionado; CI com `npm ci`; segredos do banco CI fornecidos por variáveis/secrets.
++- Compilação: `use client` antes dos imports e `rule_version` no tipo de alerta; mesmas correções no portal de compatibilidade.
++- Contraste do pequeno rótulo Clinical corrigido usando **navy #0A344A já aprovado**. Tokens, símbolos e navegação preservados; referência canônica atualizada em conjunto.
++- Consulta de atribuições profissionais executada com contexto de tenant. API e pré-requisito DB recusam superusuário, BYPASSRLS e role diferente de `oncopharma_app`. Testes unitários não substituem prova RLS no banco.
++- Callback OIDC valida ID token e access token com JWKS, assinatura, issuer, audience, expiração, nonce e at_hash quando presente. Destino de retorno configurável e restrito a um caminho local. Admin recebe apenas a infraestrutura de sessão; nenhuma operação administrativa foi habilitada.
++- Healthchecks, Playwright/axe, IdP Keycloak efêmero com seis contas sintéticas e TOTP obrigatório, sem sessão ou token simulado.
++- Evidências v2 com digest de fontes e PASS/FAIL/BLOCKED separados. Gate clínico continua fechado.
++
++## Reprodução
++
++Pré-requisitos: Node 22; npm com rede; PostgreSQL 17 efêmero executado por usuário não-root; `psql`; Chromium Playwright; Java 17 compatível com Keycloak 26.0.8 de teste. O ambiente de teste Keycloak usa H2 **em memória**, exclusivamente para identidade; não substitui PostgreSQL da aplicação.
++
++```bash
++npm ci --no-audit --no-fund
++npm run build
++npm run verify:local
++npm run test:rules
++npm run test:api:security
++npm run check:design
++npm run check:governance
++npm run quality:gate  # exit 1 esperado enquanto G01-G09 estiverem bloqueados
++```
++
++Os pacotes JS existentes são validados por `node --check` e testes. O design-system canônico é conferido contra as cópias compiladas nos apps. Os serviços FHIR/IA em JS são cobertos por `test:extended`; não existe build de um serviço executável independente nesses diretórios.
++
++### PostgreSQL
++
++Fornecer `DATABASE_URL_ADMIN`, `APP_DB_PASSWORD` e `DATABASE_URL` da role restrita apenas em ambiente seguro. Nenhum segredo deve ser escrito no projeto.
++
++```bash
++NODE_ENV=test bash infra/scripts/bootstrap-ci-db.sh
++NODE_ENV=test npm run test:db:required
++```
++
++0003_runtime_permissions.sql é chamada por `provision-app-role.sh`, entre 0002 e 0004. A chamada foi confirmada no código; **a execução no banco não foi comprovada aqui**. Bootstrap neste ambiente: exit 2, conexão recusada. PostgreSQL 17.10 está disponível como binário, mas `initdb` recusa root. O container mapeia apenas UID 0; `runuser` e remapeamento por `unshare` são proibidos; Docker está ausente. Cliente psql 16.15 foi obtido e executado, sem servidor disponível.
++
++Testes negativos preparados em `tests/m145-db.integration.mjs`: dados de dois tenants preenchidos, leitura cruzada, INSERT auditoria permitido no tenant e negado fora, elevação de role, recusa da conta administrativa e restauração do contexto transacional. **Não executados**. Superusuário PostgreSQL consegue contornar RLS por definição; a defesa é impedir seu uso pela API e pelos testes runtime, sem alegar que FORCE RLS bloqueia superusuário.
++
++### Navegador e identidade
++
++```bash
++npx playwright install chromium
++# KEYCLOAK_HOME deve apontar para uma distribuição local de teste.
++# Opcional: ONCO_BROWSER_EXECUTABLE para um Chromium já instalado.
++npm run test:identity:real
++npm run validate:evidence
++```
++
++`run-identity-validation.mjs` gera senhas, segredos TOTP e chave de sessão em memória, passa-os por variáveis aos processos de teste e provisiona o realm pela API administrativa. Não salva credenciais em arquivo. MFA usa o fluxo real de senha + OTP REQUIRED e o AMR de execuções concluídas; grant direto dos clientes da aplicação é desabilitado; PKCE S256 obrigatório.
++
++As superfícies são verificadas em 390, 768 e 1440 px, incluindo teclado, contraste via axe, overflow, estado sem sessão e erro de envio. Testes automatizados sem violações não certificam toda a WCAG 2.2 AA; leitores de tela, zoom 200%, orientações clínicas e testes de usabilidade completos continuam pendentes.
++
++OIDC core: seis contas, OTP incorreto recusado, OTP real aceito, assinatura/JWKS/issuer/audience/AMR/papel no token, cookie HttpOnly/SameSite Lax, token indisponível em document.cookie, JWT ausente/adulterado recusado, state inválido, CSRF de logout e intervenção, verifier PKCE incorreto, logout **local da aplicação** e expiração efetiva da sessão. `Secure` é obrigatório em produção; testes locais usam HTTP/localhost em desenvolvimento. Logout global SSO/revogação no IdP não foi implementado nem comprovado.
++
++A API aceita o JWT legítimo e chega ao limite de banco, retornando 503. Isso **não prova autorização institucional por papel**. O Admin permanece uma estrutura sem operações; validar identidade não libera ações administrativas.
++
++O fluxo vertical real e o patientId de outro paciente estão preparados em `tests/e2e-real/vertical.spec.ts`, selecionado somente quando as duas URLs DB são fornecidas e os pré-requisitos passam. Sem PostgreSQL, o runner não inventa dados, não contorna login e marca o fluxo integrado BLOCKED.
++
++No container utilizado, chamadas separadas de execução possuem namespaces de rede distintos. O runner inicia servidores, IdP e testes no mesmo processo de orquestração. O download padrão Chromium do Playwright veio inválido; a rodada final usou Chromium 153.0.8010.0 com flags de execução para root, **sem desativar a segurança web ou a proteção de origem**. Esse navegador alternativo é um recurso do ambiente; não foi incluído no produto.
++
++### CI
++
++Configurar os secrets `ONCO_CI_DB_ADMIN_PASSWORD` e `ONCO_CI_DB_APP_PASSWORD` com valores diferentes e seguros para uso em URL. O serviço efêmero usa Postgres 17. O CI foi atualizado, mas **não foi executado em GitHub Actions nesta entrega**. O pipeline atual não provisiona automaticamente Keycloak e navegador no runner; isso deve ser configurado antes de declarar E2E no CI.
++
++## Evidências e histórico
++
++- `artifacts/validation/validation-report.json`: resultado final e digest de fontes.
++- `artifacts/validation/*.log`: rodada final; `artifacts/m14.5/logs/`: tentativas, erros e correções, incluindo instalação e bootstrap.
++- `artifacts/m14.5/playwright-results.json`, `axe-*.json`, `healthchecks.json` e `screenshots/`: evidências reais.
++- `CHANGELOG_M14_5.md`, `ARQUIVOS_ALTERADOS_M14_5.md`, `docs/product/MATRIZ_RASTREABILIDADE.md` e diff contra M14.4.
++- PDF acumulado preserva as 37 páginas históricas e acrescenta esta revisão, sem reescrever o histórico.
++
++SHA-256 do ZIP de baseline M14.4: `e8c492bbe9f2101a8cf56acc6d801ce790f25642a3dabee09f4f11432a49396d`. Digest final das fontes validadas: `4ad867aebc22a4bfb3de8771ea1cfbb70034fbfb786697ade1559661eab4dc4a`.
++
++## Riscos e limites
++
++1. PostgreSQL/RLS, INSERT audit_events no banco e isolamento do fluxo real não validados neste ambiente; testes preparados aguardam execução.
++2. RBAC/ABAC, vínculo Care e permissões por instituição dependem do banco. Não converter login/TOTP em prova de autorização.
++3. Correções de tenant/role têm evidência unitária e compilação; comportamento SQL ainda exige validação integrada.
++4. Sem logout global/revogação OIDC comprovados, sem login administrativo operacional, sem configuração IdP institucional aprovada.
++5. Migrações de fundação não foram comprovadas como idempotentes, rollback/restauração não realizados, concorrência e desempenho não homologados.
++6. PWA/offline, leitores de tela, zoom, governança institucional, LGPD/SaMD, responsáveis/SLA de alertas e validação clínica continuam pendentes.
++7. Fonte de clínica/IA não recebeu aprovação nova; nenhuma prescrição, mudança de dose, liberação de ciclo ou orientação automática habilitada.
++
++**A entrega é uma evolução técnica parcial com evidências; não é um piloto integrado aprovado.**
++
++Referência do IdP: https://www.keycloak.org/docs/26.0.8/server_admin/index.html (fluxos REQUIRED, OTP e AMR). Essa versão foi usada somente em teste efêmero e não recomenda um IdP ou versão de produção.
+diff --git a/apps/admin-web/app/api/auth/callback/route.ts b/apps/admin-web/app/api/auth/callback/route.ts
+new file mode 100644
+index 0000000..18a50ed
+--- /dev/null
++++ b/apps/admin-web/app/api/auth/callback/route.ts
+@@ -0,0 +1,28 @@
++import { NextRequest, NextResponse } from 'next/server';
++import { createRemoteJWKSet, jwtVerify } from 'jose';
++import { createHash } from 'node:crypto';
++import { cookieOptions, FLOW, oidcConfig, origin, postLoginPath, seal, SESSION, unseal } from '../../../../lib/auth';
++export const runtime='nodejs';
++type Flow = {state:string;verifier:string;nonce:string;issuedAt:number};
++export async function GET(req:NextRequest){
++ try {
++ const code=req.nextUrl.searchParams.get('code'),state=req.nextUrl.searchParams.get('state');
++ const flow=unseal<Flow>(req.cookies.get(FLOW)?.value||'');
++ if(!code || !state || !flow || flow.state!==state || Date.now()-flow.issuedAt>600000 || flow.issuedAt>Date.now()+30000)throw Error('state inválido');
++ const cfg=oidcConfig();const endpoint=new URL(cfg.tokenEndpoint);if(endpoint.protocol!=='https:'&&endpoint.hostname!=='localhost')throw Error('HTTPS obrigatório');
++ const response=await fetch(endpoint,{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'authorization_code',code,client_id:cfg.clientId,code_verifier:flow.verifier,redirect_uri:`${origin()}/api/auth/callback`}),cache:'no-store',signal:AbortSignal.timeout(10000)});
++ if(!response.ok)throw Error('troca de código falhou');
++ const tokens=await response.json() as {access_token?:string;id_token?:string;token_type?:string;expires_in?:number};
++ if(!tokens.access_token||!tokens.id_token||tokens.token_type?.toLowerCase()!=='bearer'||!Number.isFinite(tokens.expires_in)||Number(tokens.expires_in)<30)throw Error('token inválido');
++ const jwksUrl=new URL(cfg.jwksUri);if(jwksUrl.protocol!=='https:'&&jwksUrl.hostname!=='localhost')throw Error('HTTPS obrigatório');
++ const jwks=createRemoteJWKSet(jwksUrl);
++ const {payload:id}=await jwtVerify(tokens.id_token,jwks,{issuer:cfg.issuer,audience:cfg.clientId,algorithms:['RS256','ES256'],requiredClaims:['exp','iat','sub'],clockTolerance:5});
++ const {payload:access}=await jwtVerify(tokens.access_token,jwks,{issuer:cfg.issuer,audience:cfg.audience,algorithms:['RS256','ES256'],requiredClaims:['exp','iat','sub'],clockTolerance:5});
++ if(id.nonce!==flow.nonce||!id.sub||id.sub!==access.sub)throw Error('identidade/nonce inválido');
++ if(id.at_hash!==undefined){const hash=createHash('sha256').update(tokens.access_token).digest();if(id.at_hash!==hash.subarray(0,hash.length/2).toString('base64url'))throw Error('at_hash inválido');}
++ const maxAge=Math.min(1800,Math.floor(Number(tokens.expires_in))-15,Math.floor(Number(access.exp)-Date.now()/1000)-15);
++ if(maxAge<10)throw Error('token expirando');
++ const back=NextResponse.redirect(`${origin()}${postLoginPath()}`);back.cookies.delete(FLOW);
++ back.cookies.set(SESSION,seal({token:tokens.access_token,expiresAt:Date.now()+maxAge*1000}),cookieOptions(maxAge));return back;
++ }catch{const fail=NextResponse.redirect(`${origin()}${postLoginPath()}?login=failed`);fail.cookies.delete(FLOW);fail.cookies.delete(SESSION);return fail;}
++}
+diff --git a/apps/admin-web/app/api/auth/login/route.ts b/apps/admin-web/app/api/auth/login/route.ts
+new file mode 100644
+index 0000000..65fe887
+--- /dev/null
++++ b/apps/admin-web/app/api/auth/login/route.ts
+@@ -0,0 +1,10 @@
++import { NextResponse } from 'next/server';
++import { challenge, cookieOptions, FLOW, oidcConfig, origin, random, seal } from '../../../../lib/auth';
++export const runtime='nodejs';
++export async function GET(){
++ try {const cfg=oidcConfig();const state=random(),verifier=random(),nonce=random();const url=new URL(cfg.authorizationEndpoint);
++ if(url.protocol!=='https:' && url.hostname!=='localhost') throw Error('OIDC requer HTTPS');
++ url.searchParams.set('response_type','code');url.searchParams.set('client_id',cfg.clientId);url.searchParams.set('redirect_uri',`${origin()}/api/auth/callback`);url.searchParams.set('scope','openid profile');url.searchParams.set('state',state);url.searchParams.set('nonce',nonce);url.searchParams.set('code_challenge',challenge(verifier));url.searchParams.set('code_challenge_method','S256');
++ const res=NextResponse.redirect(url);res.cookies.set(FLOW,seal({state,verifier,nonce,issuedAt:Date.now()}),cookieOptions(600));return res;
++ }catch{return NextResponse.json({error:'Autenticação indisponível; configuração pendente.'},{status:503});}
++}
+diff --git a/apps/admin-web/app/api/auth/logout/route.ts b/apps/admin-web/app/api/auth/logout/route.ts
+new file mode 100644
+index 0000000..72bb111
+--- /dev/null
++++ b/apps/admin-web/app/api/auth/logout/route.ts
+@@ -0,0 +1,8 @@
++import { NextRequest,NextResponse } from 'next/server';
++import { FLOW, origin, SESSION } from '../../../../lib/auth';
++export const runtime='nodejs';
++export async function POST(req:NextRequest){
++ try {if(req.headers.get('origin')!==origin())return NextResponse.json({error:'Origem inválida'},{status:403});
++ const res=NextResponse.redirect(`${origin()}/`,303);res.cookies.delete(SESSION);res.cookies.delete(FLOW);return res;
++ }catch{return NextResponse.json({error:'Configuração ausente'},{status:503});}
++}
+diff --git a/apps/admin-web/app/api/health/route.ts b/apps/admin-web/app/api/health/route.ts
+new file mode 100644
+index 0000000..ccc922b
+--- /dev/null
++++ b/apps/admin-web/app/api/health/route.ts
+@@ -0,0 +1 @@
++export async function GET(){return Response.json({service:'oncopharma-admin-web',status:'alive',clinicalOperationsEnabled:false},{headers:{'Cache-Control':'no-store'}});}
+diff --git a/apps/admin-web/lib/auth.ts b/apps/admin-web/lib/auth.ts
+new file mode 100644
+index 0000000..d563797
+--- /dev/null
++++ b/apps/admin-web/lib/auth.ts
+@@ -0,0 +1,19 @@
++import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'node:crypto';
++import { cookies } from 'next/headers';
++
++export const SESSION = 'onco_session';
++export const FLOW = 'onco_login_flow';
++export type Session = { token:string; expiresAt:number };
++const required = (name:string) => { const value=process.env[name]; if (!value) throw new Error(`${name} não configurado`); return value; };
++const key = () => { const raw=Buffer.from(required('SESSION_ENCRYPTION_KEY'),'base64'); if(raw.length!==32) throw new Error('SESSION_ENCRYPTION_KEY deve conter 32 bytes base64'); return raw; };
++export const origin = () => required('PORTAL_ORIGIN').replace(/\/$/,'');
++export const secureCookie = () => process.env.NODE_ENV==='production';
++export function seal(value:unknown):string { const iv=randomBytes(12),cipher=createCipheriv('aes-256-gcm',key(),iv);const encrypted=Buffer.concat([cipher.update(JSON.stringify(value),'utf8'),cipher.final()]);return Buffer.concat([iv,cipher.getAuthTag(),encrypted]).toString('base64url'); }
++export function unseal<T>(text:string):T|null { try { const b=Buffer.from(text,'base64url');if(b.length<29)return null;const decipher=createDecipheriv('aes-256-gcm',key(),b.subarray(0,12));decipher.setAuthTag(b.subarray(12,28));return JSON.parse(Buffer.concat([decipher.update(b.subarray(28)),decipher.final()]).toString('utf8')) as T; }catch{return null;} }
++export const random = () => randomBytes(32).toString('base64url');
++export const challenge = (verifier:string) => createHash('sha256').update(verifier).digest('base64url');
++export async function session():Promise<Session|null> {const raw=(await cookies()).get(SESSION)?.value;if(!raw)return null;const s=unseal<Session>(raw);return s && typeof s.token==='string' && Number.isFinite(s.expiresAt) && s.expiresAt>Date.now()+5000 ? s : null;}
++export const cookieOptions = (maxAge:number) => ({httpOnly:true,secure:secureCookie(),sameSite:'lax' as const,path:'/',maxAge});
++export function oidcConfig(){return {issuer:required('OIDC_ISSUER'),authorizationEndpoint:required('OIDC_AUTHORIZATION_ENDPOINT'),tokenEndpoint:required('OIDC_TOKEN_ENDPOINT'),clientId:required('OIDC_CLIENT_ID'),jwksUri:required('OIDC_JWKS_URI'),audience:required('OIDC_AUDIENCE')};}
++
++export function postLoginPath():string { const path=process.env.AUTH_POST_LOGIN_PATH||'/clinical'; if(!/^\/[a-zA-Z0-9/_-]*$/.test(path)||path.startsWith('//'))throw new Error('Destino de login inválido'); return path; }
+diff --git a/apps/admin-web/next-env.d.ts b/apps/admin-web/next-env.d.ts
+index 92fd505..830fb59 100644
+--- a/apps/admin-web/next-env.d.ts
++++ b/apps/admin-web/next-env.d.ts
+@@ -1,3 +1,6 @@
+ /// <reference types="next" />
+ /// <reference types="next/image-types/global" />
+-// Gerado e mantido pelo Next.js.
++/// <reference path="./.next/types/routes.d.ts" />
++
++// NOTE: This file should not be edited
++// see https://nextjs.org/docs/app/api-reference/config/typescript for more information.
+diff --git a/apps/admin-web/package.json b/apps/admin-web/package.json
+index 4b749a1..1cff427 100644
+--- a/apps/admin-web/package.json
++++ b/apps/admin-web/package.json
+@@ -8,13 +8,14 @@
+     "start": "next start -p 3003"
+   },
+   "dependencies": {
++    "jose": "^6.2.12",
+     "next": "^15.5.0",
+     "react": "^19.1.0",
+     "react-dom": "^19.1.0"
+   },
+   "devDependencies": {
+-    "typescript": "^5.9.0",
++    "@types/node": "^22.0.0",
+     "@types/react": "^19.1.0",
+-    "@types/node": "^22.0.0"
++    "typescript": "^5.9.0"
+   }
+ }
+diff --git a/apps/care-web/app/api/auth/callback/route.ts b/apps/care-web/app/api/auth/callback/route.ts
+index 7ec56fc..18a50ed 100644
+--- a/apps/care-web/app/api/auth/callback/route.ts
++++ b/apps/care-web/app/api/auth/callback/route.ts
+@@ -1,10 +1,10 @@
+ import { NextRequest, NextResponse } from 'next/server';
+-import { cookieOptions, FLOW, oidcConfig, origin, seal, SESSION, unseal } from '../../../../lib/auth';
++import { createRemoteJWKSet, jwtVerify } from 'jose';
++import { createHash } from 'node:crypto';
++import { cookieOptions, FLOW, oidcConfig, origin, postLoginPath, seal, SESSION, unseal } from '../../../../lib/auth';
+ export const runtime='nodejs';
+ type Flow = {state:string;verifier:string;nonce:string;issuedAt:number};
+ export async function GET(req:NextRequest){
+- const back=NextResponse.redirect(`${origin()}/clinical`);
+- back.cookies.delete(FLOW);
+  try {
+  const code=req.nextUrl.searchParams.get('code'),state=req.nextUrl.searchParams.get('state');
+  const flow=unseal<Flow>(req.cookies.get(FLOW)?.value||'');
+@@ -12,9 +12,17 @@ export async function GET(req:NextRequest){
+  const cfg=oidcConfig();const endpoint=new URL(cfg.tokenEndpoint);if(endpoint.protocol!=='https:'&&endpoint.hostname!=='localhost')throw Error('HTTPS obrigatório');
+  const response=await fetch(endpoint,{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'authorization_code',code,client_id:cfg.clientId,code_verifier:flow.verifier,redirect_uri:`${origin()}/api/auth/callback`}),cache:'no-store',signal:AbortSignal.timeout(10000)});
+  if(!response.ok)throw Error('troca de código falhou');
+- const tokens=await response.json() as {access_token?:string;token_type?:string;expires_in?:number};
+- if(!tokens.access_token||tokens.token_type?.toLowerCase()!=='bearer'||!Number.isFinite(tokens.expires_in)||Number(tokens.expires_in)<30)throw Error('token inválido');
+- const maxAge=Math.min(1800,Math.floor(Number(tokens.expires_in))-15);
++ const tokens=await response.json() as {access_token?:string;id_token?:string;token_type?:string;expires_in?:number};
++ if(!tokens.access_token||!tokens.id_token||tokens.token_type?.toLowerCase()!=='bearer'||!Number.isFinite(tokens.expires_in)||Number(tokens.expires_in)<30)throw Error('token inválido');
++ const jwksUrl=new URL(cfg.jwksUri);if(jwksUrl.protocol!=='https:'&&jwksUrl.hostname!=='localhost')throw Error('HTTPS obrigatório');
++ const jwks=createRemoteJWKSet(jwksUrl);
++ const {payload:id}=await jwtVerify(tokens.id_token,jwks,{issuer:cfg.issuer,audience:cfg.clientId,algorithms:['RS256','ES256'],requiredClaims:['exp','iat','sub'],clockTolerance:5});
++ const {payload:access}=await jwtVerify(tokens.access_token,jwks,{issuer:cfg.issuer,audience:cfg.audience,algorithms:['RS256','ES256'],requiredClaims:['exp','iat','sub'],clockTolerance:5});
++ if(id.nonce!==flow.nonce||!id.sub||id.sub!==access.sub)throw Error('identidade/nonce inválido');
++ if(id.at_hash!==undefined){const hash=createHash('sha256').update(tokens.access_token).digest();if(id.at_hash!==hash.subarray(0,hash.length/2).toString('base64url'))throw Error('at_hash inválido');}
++ const maxAge=Math.min(1800,Math.floor(Number(tokens.expires_in))-15,Math.floor(Number(access.exp)-Date.now()/1000)-15);
++ if(maxAge<10)throw Error('token expirando');
++ const back=NextResponse.redirect(`${origin()}${postLoginPath()}`);back.cookies.delete(FLOW);
+  back.cookies.set(SESSION,seal({token:tokens.access_token,expiresAt:Date.now()+maxAge*1000}),cookieOptions(maxAge));return back;
+- }catch{const fail=NextResponse.redirect(`${origin()}/clinical?login=failed`);fail.cookies.delete(FLOW);fail.cookies.delete(SESSION);return fail;}
++ }catch{const fail=NextResponse.redirect(`${origin()}${postLoginPath()}?login=failed`);fail.cookies.delete(FLOW);fail.cookies.delete(SESSION);return fail;}
+ }
+diff --git a/apps/care-web/app/api/health/route.ts b/apps/care-web/app/api/health/route.ts
+new file mode 100644
+index 0000000..1a32f34
+--- /dev/null
++++ b/apps/care-web/app/api/health/route.ts
+@@ -0,0 +1 @@
++export async function GET(){return Response.json({service:'oncopharma-care-web',status:'alive',clinicalOperationsEnabled:false},{headers:{'Cache-Control':'no-store'}});}
+diff --git a/apps/care-web/app/globals.css b/apps/care-web/app/globals.css
+index 4fcecb4..46872ff 100644
+--- a/apps/care-web/app/globals.css
++++ b/apps/care-web/app/globals.css
+@@ -1,3 +1,3 @@
+-:root{--teal:#063f3b;--emerald:#15735d;--navy:#0a344a;--gold:#d7a858;--mint:#b9e1d0;--canvas:#f5f8f7;--ink:#152c32;--danger:#b42318;--radius:22px;font-family:'DM Sans',system-ui,sans-serif}*{box-sizing:border-box}body{margin:0}a{color:inherit}a:focus-visible{outline:3px solid var(--gold);outline-offset:4px} .skip{position:absolute;left:-9999px;top:12px;background:#fff;color:#000;padding:12px;z-index:10}.skip:focus{left:12px}.site-shell{min-height:100vh;color:white;background:radial-gradient(ellipse at 5% 5%,#1a6b60 0,transparent 35%),linear-gradient(130deg,#063f3b 5%,#052e39 58%,#0a344a 100%)}.topbar,.care-header,.clinical-header{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:22px clamp(20px,5vw,80px)}.brand{display:flex;align-items:center;gap:12px;text-decoration:none;min-width:0}.brand img{flex-shrink:0}.brand strong{display:block;font-size:clamp(18px,2.1vw,26px);font-weight:800;letter-spacing:-.04em}.brand strong span{color:var(--gold)}.brand small{display:block;font-size:11px;letter-spacing:.05em;opacity:.85;line-height:1.4}.eyebrow,.overline,.kicker{font-size:12px;letter-spacing:.15em;font-weight:800}.eyebrow{color:var(--mint)}.hero{max-width:1320px;margin:auto;padding:clamp(30px,6vw,90px) 24px 70px}.hero-copy{max-width:800px}.kicker{color:var(--gold)}h1{font-size:clamp(38px,5.6vw,72px);line-height:1.07;letter-spacing:-.055em;margin:18px 0 22px}h1 em{font-style:normal;color:var(--mint)}.lead{font-size:clamp(17px,2vw,21px);line-height:1.65;color:#d4e9e6;max-width:700px}.notice{display:grid;gap:5px;max-width:740px;padding:15px 18px;border-radius:14px;border:1px solid #d7a85866;background:#052e39a8;color:#e8f6f2;font-size:14px;line-height:1.5;margin-top:25px}.notice strong{color:#f5d497}.experience-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:48px}.experience{min-height:340px;border:1px solid #ffffff32;padding:30px;border-radius:28px;display:flex;flex-direction:column;align-items:flex-start;gap:15px;text-decoration:none;box-shadow:0 20px 60px #0002;transition:transform .2s,border-color .2s}.experience:hover{transform:translateY(-4px);border-color:var(--gold)}.experience.care{background:linear-gradient(145deg,#146b5b,#063f3b)}.experience.clinical{background:linear-gradient(145deg,#154f67,#092d40)}.experience-icon{background:#ffffff14;padding:10px;border-radius:20px}.experience-icon img{width:76px;height:76px}.experience .overline{color:#d9d9d0}.experience>strong{font-size:clamp(24px,3vw,36px);letter-spacing:-.04em}.experience i{font-style:normal;color:var(--mint);font-weight:500}.experience>span:not(.experience-icon):not(.overline):not(.enter){font-size:17px;color:#d2e5e1}.enter{margin-top:auto;color:#f5d497;font-weight:700}.footer{padding:25px;text-align:center;color:#bad5d2;font-size:13px;border-top:1px solid #ffffff20}.care-page{min-height:100vh;background:#f2f8f5;color:#173d35}.care-header{background:#063f3b;color:white}.back{text-decoration:none;font-weight:700;padding:10px}.care-main{max-width:1100px;margin:auto;padding:45px 24px 90px}.care-main .kicker{color:#15735d}.care-main h1{font-size:clamp(38px,5vw,64px)}.care-lead{font-size:clamp(19px,2vw,24px);line-height:1.55;max-width:740px}.care-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin:42px 0}.care-card{background:#fff;border:2px solid #cbded5;border-radius:24px;padding:28px;min-height:280px}.care-symbol{font-size:40px;color:#15735d}.care-card h2{font-size:26px;line-height:1.2}.care-card p{font-size:18px;line-height:1.5}.care-card.help{border-color:#d4b4a6}.planned{display:inline-block;margin-top:12px;font-size:12px;letter-spacing:.03em;font-weight:700;background:#e6eee9;color:#335b4d;padding:7px 10px;border-radius:8px}.notice.light{background:#fff7eb;color:#543e1c;border-color:#ddc5a5}.notice.light strong{color:#684516}.clinical-page{min-height:100vh;background:#eef3f6;color:#173344}.clinical-header{background:#092e41;color:white}.clinical-main{max-width:1320px;margin:auto;padding:48px 24px 90px}.clinical-heading{display:flex;justify-content:space-between;align-items:center;gap:20px}.clinical-heading h1{font-size:clamp(36px,4vw,56px)}.clinical-heading p:not(.kicker){font-size:18px}.clinical-heading .kicker{color:#a8792d}.environment{border:1px solid #9fb8c2;color:#315667;border-radius:10px;padding:9px 12px;font-size:12px;font-weight:800;white-space:nowrap}.clinical-notice{border-left:4px solid #bf8c40;background:#fff;padding:18px 20px;border-radius:12px;line-height:1.5;margin:24px 0 30px}.clinical-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.module{border:1px solid #d7e1e7;border-radius:20px;padding:24px;background:#fff;min-height:210px}.module-index{font-weight:800;color:#8b642d;font-size:14px}.module h2{font-size:21px}.module p{line-height:1.5;color:#48606b}.next-step{margin-top:25px;padding:25px;border-radius:20px;background:#dce9ed}.next-step h2{margin-top:0}@media(max-width:850px){.experience-grid,.care-cards,.clinical-grid{grid-template-columns:1fr}.clinical-heading{align-items:flex-start;flex-direction:column}.experience{min-height:290px}}@media(max-width:540px){.topbar,.care-header,.clinical-header{padding:18px 16px}.eyebrow{display:none}.brand img{width:42px;height:42px}.brand small{font-size:9px}.hero,.care-main,.clinical-main{padding-left:18px;padding-right:18px}.experience{padding:24px}.care-card{min-height:auto}.care-main h1{font-size:40px}.care-card h2{font-size:24px}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
++:root{--teal:#063f3b;--emerald:#15735d;--navy:#0a344a;--gold:#d7a858;--mint:#b9e1d0;--canvas:#f5f8f7;--ink:#152c32;--danger:#b42318;--radius:22px;font-family:'DM Sans',system-ui,sans-serif}*{box-sizing:border-box}body{margin:0}a{color:inherit}a:focus-visible{outline:3px solid var(--gold);outline-offset:4px} .skip{position:absolute;left:-9999px;top:12px;background:#fff;color:#000;padding:12px;z-index:10}.skip:focus{left:12px}.site-shell{min-height:100vh;color:white;background:radial-gradient(ellipse at 5% 5%,#1a6b60 0,transparent 35%),linear-gradient(130deg,#063f3b 5%,#052e39 58%,#0a344a 100%)}.topbar,.care-header,.clinical-header{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:22px clamp(20px,5vw,80px)}.brand{display:flex;align-items:center;gap:12px;text-decoration:none;min-width:0}.brand img{flex-shrink:0}.brand strong{display:block;font-size:clamp(18px,2.1vw,26px);font-weight:800;letter-spacing:-.04em}.brand strong span{color:var(--gold)}.brand small{display:block;font-size:11px;letter-spacing:.05em;opacity:.85;line-height:1.4}.eyebrow,.overline,.kicker{font-size:12px;letter-spacing:.15em;font-weight:800}.eyebrow{color:var(--mint)}.hero{max-width:1320px;margin:auto;padding:clamp(30px,6vw,90px) 24px 70px}.hero-copy{max-width:800px}.kicker{color:var(--gold)}h1{font-size:clamp(38px,5.6vw,72px);line-height:1.07;letter-spacing:-.055em;margin:18px 0 22px}h1 em{font-style:normal;color:var(--mint)}.lead{font-size:clamp(17px,2vw,21px);line-height:1.65;color:#d4e9e6;max-width:700px}.notice{display:grid;gap:5px;max-width:740px;padding:15px 18px;border-radius:14px;border:1px solid #d7a85866;background:#052e39a8;color:#e8f6f2;font-size:14px;line-height:1.5;margin-top:25px}.notice strong{color:#f5d497}.experience-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:48px}.experience{min-height:340px;border:1px solid #ffffff32;padding:30px;border-radius:28px;display:flex;flex-direction:column;align-items:flex-start;gap:15px;text-decoration:none;box-shadow:0 20px 60px #0002;transition:transform .2s,border-color .2s}.experience:hover{transform:translateY(-4px);border-color:var(--gold)}.experience.care{background:linear-gradient(145deg,#146b5b,#063f3b)}.experience.clinical{background:linear-gradient(145deg,#154f67,#092d40)}.experience-icon{background:#ffffff14;padding:10px;border-radius:20px}.experience-icon img{width:76px;height:76px}.experience .overline{color:#d9d9d0}.experience>strong{font-size:clamp(24px,3vw,36px);letter-spacing:-.04em}.experience i{font-style:normal;color:var(--mint);font-weight:500}.experience>span:not(.experience-icon):not(.overline):not(.enter){font-size:17px;color:#d2e5e1}.enter{margin-top:auto;color:#f5d497;font-weight:700}.footer{padding:25px;text-align:center;color:#bad5d2;font-size:13px;border-top:1px solid #ffffff20}.care-page{min-height:100vh;background:#f2f8f5;color:#173d35}.care-header{background:#063f3b;color:white}.back{text-decoration:none;font-weight:700;padding:10px}.care-main{max-width:1100px;margin:auto;padding:45px 24px 90px}.care-main .kicker{color:#15735d}.care-main h1{font-size:clamp(38px,5vw,64px)}.care-lead{font-size:clamp(19px,2vw,24px);line-height:1.55;max-width:740px}.care-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin:42px 0}.care-card{background:#fff;border:2px solid #cbded5;border-radius:24px;padding:28px;min-height:280px}.care-symbol{font-size:40px;color:#15735d}.care-card h2{font-size:26px;line-height:1.2}.care-card p{font-size:18px;line-height:1.5}.care-card.help{border-color:#d4b4a6}.planned{display:inline-block;margin-top:12px;font-size:12px;letter-spacing:.03em;font-weight:700;background:#e6eee9;color:#335b4d;padding:7px 10px;border-radius:8px}.notice.light{background:#fff7eb;color:#543e1c;border-color:#ddc5a5}.notice.light strong{color:#684516}.clinical-page{min-height:100vh;background:#eef3f6;color:#173344}.clinical-header{background:#092e41;color:white}.clinical-main{max-width:1320px;margin:auto;padding:48px 24px 90px}.clinical-heading{display:flex;justify-content:space-between;align-items:center;gap:20px}.clinical-heading h1{font-size:clamp(36px,4vw,56px)}.clinical-heading p:not(.kicker){font-size:18px}.clinical-heading .kicker{color:var(--navy)}.environment{border:1px solid #9fb8c2;color:#315667;border-radius:10px;padding:9px 12px;font-size:12px;font-weight:800;white-space:nowrap}.clinical-notice{border-left:4px solid #bf8c40;background:#fff;padding:18px 20px;border-radius:12px;line-height:1.5;margin:24px 0 30px}.clinical-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.module{border:1px solid #d7e1e7;border-radius:20px;padding:24px;background:#fff;min-height:210px}.module-index{font-weight:800;color:#8b642d;font-size:14px}.module h2{font-size:21px}.module p{line-height:1.5;color:#48606b}.next-step{margin-top:25px;padding:25px;border-radius:20px;background:#dce9ed}.next-step h2{margin-top:0}@media(max-width:850px){.experience-grid,.care-cards,.clinical-grid{grid-template-columns:1fr}.clinical-heading{align-items:flex-start;flex-direction:column}.experience{min-height:290px}}@media(max-width:540px){.topbar,.care-header,.clinical-header{padding:18px 16px}.eyebrow{display:none}.brand img{width:42px;height:42px}.brand small{font-size:9px}.hero,.care-main,.clinical-main{padding-left:18px;padding-right:18px}.experience{padding:24px}.care-card{min-height:auto}.care-main h1{font-size:40px}.care-card h2{font-size:24px}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+ 
+ .workflow-form{display:grid;gap:12px;max-width:680px}.workflow-form label,.next-step label{font-weight:700}.workflow-form input,.workflow-form select,.workflow-form textarea,.next-step select,.next-step textarea{width:100%;padding:12px;border:1px solid #a8c1c1;border-radius:10px;background:#fff;color:#152c32;font:inherit}.workflow-form button,.next-step button{padding:12px 16px;background:#063f3b;color:#fff;border:0;border-radius:10px;font:inherit;font-weight:700;cursor:pointer;margin-top:10px}.workflow-form button:disabled,.next-step button:disabled{opacity:.5;cursor:not-allowed}.next-step .module{margin-top:15px;min-height:0}.next-step textarea{display:block;margin-top:8px}
+diff --git a/apps/care-web/components/ClinicalAccess.tsx b/apps/care-web/components/ClinicalAccess.tsx
+index ebc242c..e3cf5fa 100644
+--- a/apps/care-web/components/ClinicalAccess.tsx
++++ b/apps/care-web/components/ClinicalAccess.tsx
+@@ -1,5 +1,5 @@
+-import { WorkflowReview } from './WorkflowReview';
+ 'use client';
++import { WorkflowReview } from './WorkflowReview';
+ import { SyntheticRecord } from './SyntheticRecord';
+ import { useEffect,useState } from 'react';
+ type Data={profile:{subject:string;mfa:boolean;memberships:{organization_id:string;role:string;active:boolean}[]};patients?:{patients:{id:string;external_reference:string}[]} | null};
+diff --git a/apps/care-web/components/WorkflowReview.tsx b/apps/care-web/components/WorkflowReview.tsx
+index b141fc0..76056c3 100644
+--- a/apps/care-web/components/WorkflowReview.tsx
++++ b/apps/care-web/components/WorkflowReview.tsx
+@@ -1,6 +1,6 @@
+  'use client';
+ import { useState } from 'react';
+-type Alert={id:string;code:string;level:string;status:string;explanation:string;created_at:string;description?:string};
++type Alert={id:string;code:string;level:string;status:string;explanation:string;created_at:string;rule_version?:string;description?:string};
+ export function WorkflowReview({patients}:{patients:{id:string;external_reference:string}[]}){
+  const [patientId,setPatientId]=useState(patients[0]?.id||'');const [alerts,setAlerts]=useState<Alert[]>([]);
+  const [busy,setBusy]=useState(false);const [message,setMessage]=useState('');const [notes,setNotes]=useState<Record<string,string>>({});
+diff --git a/apps/care-web/lib/auth.ts b/apps/care-web/lib/auth.ts
+index 0207eb5..d563797 100644
+--- a/apps/care-web/lib/auth.ts
++++ b/apps/care-web/lib/auth.ts
+@@ -14,4 +14,6 @@ export const random = () => randomBytes(32).toString('base64url');
+ export const challenge = (verifier:string) => createHash('sha256').update(verifier).digest('base64url');
+ export async function session():Promise<Session|null> {const raw=(await cookies()).get(SESSION)?.value;if(!raw)return null;const s=unseal<Session>(raw);return s && typeof s.token==='string' && Number.isFinite(s.expiresAt) && s.expiresAt>Date.now()+5000 ? s : null;}
+ export const cookieOptions = (maxAge:number) => ({httpOnly:true,secure:secureCookie(),sameSite:'lax' as const,path:'/',maxAge});
+-export function oidcConfig(){return {issuer:required('OIDC_ISSUER'),authorizationEndpoint:required('OIDC_AUTHORIZATION_ENDPOINT'),tokenEndpoint:required('OIDC_TOKEN_ENDPOINT'),clientId:required('OIDC_CLIENT_ID')};}
++export function oidcConfig(){return {issuer:required('OIDC_ISSUER'),authorizationEndpoint:required('OIDC_AUTHORIZATION_ENDPOINT'),tokenEndpoint:required('OIDC_TOKEN_ENDPOINT'),clientId:required('OIDC_CLIENT_ID'),jwksUri:required('OIDC_JWKS_URI'),audience:required('OIDC_AUDIENCE')};}
++
++export function postLoginPath():string { const path=process.env.AUTH_POST_LOGIN_PATH||'/clinical'; if(!/^\/[a-zA-Z0-9/_-]*$/.test(path)||path.startsWith('//'))throw new Error('Destino de login inválido'); return path; }
+diff --git a/apps/care-web/next-env.d.ts b/apps/care-web/next-env.d.ts
+index 92fd505..830fb59 100644
+--- a/apps/care-web/next-env.d.ts
++++ b/apps/care-web/next-env.d.ts
+@@ -1,3 +1,6 @@
+ /// <reference types="next" />
+ /// <reference types="next/image-types/global" />
+-// Gerado e mantido pelo Next.js.
++/// <reference path="./.next/types/routes.d.ts" />
++
++// NOTE: This file should not be edited
++// see https://nextjs.org/docs/app/api-reference/config/typescript for more information.
+diff --git a/apps/care-web/package.json b/apps/care-web/package.json
+index f568da2..f0744d2 100644
+--- a/apps/care-web/package.json
++++ b/apps/care-web/package.json
+@@ -8,13 +8,14 @@
+     "start": "next start -p 3001"
+   },
+   "dependencies": {
++    "jose": "^6.2.12",
+     "next": "^15.5.0",
+     "react": "^19.1.0",
+     "react-dom": "^19.1.0"
+   },
+   "devDependencies": {
+-    "typescript": "^5.9.0",
++    "@types/node": "^22.0.0",
+     "@types/react": "^19.1.0",
+-    "@types/node": "^22.0.0"
++    "typescript": "^5.9.0"
+   }
+ }
+diff --git a/apps/clinical-web/app/api/auth/callback/route.ts b/apps/clinical-web/app/api/auth/callback/route.ts
+index 7ec56fc..18a50ed 100644
+--- a/apps/clinical-web/app/api/auth/callback/route.ts
++++ b/apps/clinical-web/app/api/auth/callback/route.ts
+@@ -1,10 +1,10 @@
+ import { NextRequest, NextResponse } from 'next/server';
+-import { cookieOptions, FLOW, oidcConfig, origin, seal, SESSION, unseal } from '../../../../lib/auth';
++import { createRemoteJWKSet, jwtVerify } from 'jose';
++import { createHash } from 'node:crypto';
++import { cookieOptions, FLOW, oidcConfig, origin, postLoginPath, seal, SESSION, unseal } from '../../../../lib/auth';
+ export const runtime='nodejs';
+ type Flow = {state:string;verifier:string;nonce:string;issuedAt:number};
+ export async function GET(req:NextRequest){
+- const back=NextResponse.redirect(`${origin()}/clinical`);
+- back.cookies.delete(FLOW);
+  try {
+  const code=req.nextUrl.searchParams.get('code'),state=req.nextUrl.searchParams.get('state');
+  const flow=unseal<Flow>(req.cookies.get(FLOW)?.value||'');
+@@ -12,9 +12,17 @@ export async function GET(req:NextRequest){
+  const cfg=oidcConfig();const endpoint=new URL(cfg.tokenEndpoint);if(endpoint.protocol!=='https:'&&endpoint.hostname!=='localhost')throw Error('HTTPS obrigatório');
+  const response=await fetch(endpoint,{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'authorization_code',code,client_id:cfg.clientId,code_verifier:flow.verifier,redirect_uri:`${origin()}/api/auth/callback`}),cache:'no-store',signal:AbortSignal.timeout(10000)});
+  if(!response.ok)throw Error('troca de código falhou');
+- const tokens=await response.json() as {access_token?:string;token_type?:string;expires_in?:number};
+- if(!tokens.access_token||tokens.token_type?.toLowerCase()!=='bearer'||!Number.isFinite(tokens.expires_in)||Number(tokens.expires_in)<30)throw Error('token inválido');
+- const maxAge=Math.min(1800,Math.floor(Number(tokens.expires_in))-15);
++ const tokens=await response.json() as {access_token?:string;id_token?:string;token_type?:string;expires_in?:number};
++ if(!tokens.access_token||!tokens.id_token||tokens.token_type?.toLowerCase()!=='bearer'||!Number.isFinite(tokens.expires_in)||Number(tokens.expires_in)<30)throw Error('token inválido');
++ const jwksUrl=new URL(cfg.jwksUri);if(jwksUrl.protocol!=='https:'&&jwksUrl.hostname!=='localhost')throw Error('HTTPS obrigatório');
++ const jwks=createRemoteJWKSet(jwksUrl);
++ const {payload:id}=await jwtVerify(tokens.id_token,jwks,{issuer:cfg.issuer,audience:cfg.clientId,algorithms:['RS256','ES256'],requiredClaims:['exp','iat','sub'],clockTolerance:5});
++ const {payload:access}=await jwtVerify(tokens.access_token,jwks,{issuer:cfg.issuer,audience:cfg.audience,algorithms:['RS256','ES256'],requiredClaims:['exp','iat','sub'],clockTolerance:5});
++ if(id.nonce!==flow.nonce||!id.sub||id.sub!==access.sub)throw Error('identidade/nonce inválido');
++ if(id.at_hash!==undefined){const hash=createHash('sha256').update(tokens.access_token).digest();if(id.at_hash!==hash.subarray(0,hash.length/2).toString('base64url'))throw Error('at_hash inválido');}
++ const maxAge=Math.min(1800,Math.floor(Number(tokens.expires_in))-15,Math.floor(Number(access.exp)-Date.now()/1000)-15);
++ if(maxAge<10)throw Error('token expirando');
++ const back=NextResponse.redirect(`${origin()}${postLoginPath()}`);back.cookies.delete(FLOW);
+  back.cookies.set(SESSION,seal({token:tokens.access_token,expiresAt:Date.now()+maxAge*1000}),cookieOptions(maxAge));return back;
+- }catch{const fail=NextResponse.redirect(`${origin()}/clinical?login=failed`);fail.cookies.delete(FLOW);fail.cookies.delete(SESSION);return fail;}
++ }catch{const fail=NextResponse.redirect(`${origin()}${postLoginPath()}?login=failed`);fail.cookies.delete(FLOW);fail.cookies.delete(SESSION);return fail;}
+ }
+diff --git a/apps/clinical-web/app/api/health/route.ts b/apps/clinical-web/app/api/health/route.ts
+new file mode 100644
+index 0000000..0afbf77
+--- /dev/null
++++ b/apps/clinical-web/app/api/health/route.ts
+@@ -0,0 +1 @@
++export async function GET(){return Response.json({service:'oncopharma-clinical-web',status:'alive',clinicalOperationsEnabled:false},{headers:{'Cache-Control':'no-store'}});}
+diff --git a/apps/clinical-web/app/globals.css b/apps/clinical-web/app/globals.css
+index 4fcecb4..46872ff 100644
+--- a/apps/clinical-web/app/globals.css
++++ b/apps/clinical-web/app/globals.css
+@@ -1,3 +1,3 @@
+-:root{--teal:#063f3b;--emerald:#15735d;--navy:#0a344a;--gold:#d7a858;--mint:#b9e1d0;--canvas:#f5f8f7;--ink:#152c32;--danger:#b42318;--radius:22px;font-family:'DM Sans',system-ui,sans-serif}*{box-sizing:border-box}body{margin:0}a{color:inherit}a:focus-visible{outline:3px solid var(--gold);outline-offset:4px} .skip{position:absolute;left:-9999px;top:12px;background:#fff;color:#000;padding:12px;z-index:10}.skip:focus{left:12px}.site-shell{min-height:100vh;color:white;background:radial-gradient(ellipse at 5% 5%,#1a6b60 0,transparent 35%),linear-gradient(130deg,#063f3b 5%,#052e39 58%,#0a344a 100%)}.topbar,.care-header,.clinical-header{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:22px clamp(20px,5vw,80px)}.brand{display:flex;align-items:center;gap:12px;text-decoration:none;min-width:0}.brand img{flex-shrink:0}.brand strong{display:block;font-size:clamp(18px,2.1vw,26px);font-weight:800;letter-spacing:-.04em}.brand strong span{color:var(--gold)}.brand small{display:block;font-size:11px;letter-spacing:.05em;opacity:.85;line-height:1.4}.eyebrow,.overline,.kicker{font-size:12px;letter-spacing:.15em;font-weight:800}.eyebrow{color:var(--mint)}.hero{max-width:1320px;margin:auto;padding:clamp(30px,6vw,90px) 24px 70px}.hero-copy{max-width:800px}.kicker{color:var(--gold)}h1{font-size:clamp(38px,5.6vw,72px);line-height:1.07;letter-spacing:-.055em;margin:18px 0 22px}h1 em{font-style:normal;color:var(--mint)}.lead{font-size:clamp(17px,2vw,21px);line-height:1.65;color:#d4e9e6;max-width:700px}.notice{display:grid;gap:5px;max-width:740px;padding:15px 18px;border-radius:14px;border:1px solid #d7a85866;background:#052e39a8;color:#e8f6f2;font-size:14px;line-height:1.5;margin-top:25px}.notice strong{color:#f5d497}.experience-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:48px}.experience{min-height:340px;border:1px solid #ffffff32;padding:30px;border-radius:28px;display:flex;flex-direction:column;align-items:flex-start;gap:15px;text-decoration:none;box-shadow:0 20px 60px #0002;transition:transform .2s,border-color .2s}.experience:hover{transform:translateY(-4px);border-color:var(--gold)}.experience.care{background:linear-gradient(145deg,#146b5b,#063f3b)}.experience.clinical{background:linear-gradient(145deg,#154f67,#092d40)}.experience-icon{background:#ffffff14;padding:10px;border-radius:20px}.experience-icon img{width:76px;height:76px}.experience .overline{color:#d9d9d0}.experience>strong{font-size:clamp(24px,3vw,36px);letter-spacing:-.04em}.experience i{font-style:normal;color:var(--mint);font-weight:500}.experience>span:not(.experience-icon):not(.overline):not(.enter){font-size:17px;color:#d2e5e1}.enter{margin-top:auto;color:#f5d497;font-weight:700}.footer{padding:25px;text-align:center;color:#bad5d2;font-size:13px;border-top:1px solid #ffffff20}.care-page{min-height:100vh;background:#f2f8f5;color:#173d35}.care-header{background:#063f3b;color:white}.back{text-decoration:none;font-weight:700;padding:10px}.care-main{max-width:1100px;margin:auto;padding:45px 24px 90px}.care-main .kicker{color:#15735d}.care-main h1{font-size:clamp(38px,5vw,64px)}.care-lead{font-size:clamp(19px,2vw,24px);line-height:1.55;max-width:740px}.care-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin:42px 0}.care-card{background:#fff;border:2px solid #cbded5;border-radius:24px;padding:28px;min-height:280px}.care-symbol{font-size:40px;color:#15735d}.care-card h2{font-size:26px;line-height:1.2}.care-card p{font-size:18px;line-height:1.5}.care-card.help{border-color:#d4b4a6}.planned{display:inline-block;margin-top:12px;font-size:12px;letter-spacing:.03em;font-weight:700;background:#e6eee9;color:#335b4d;padding:7px 10px;border-radius:8px}.notice.light{background:#fff7eb;color:#543e1c;border-color:#ddc5a5}.notice.light strong{color:#684516}.clinical-page{min-height:100vh;background:#eef3f6;color:#173344}.clinical-header{background:#092e41;color:white}.clinical-main{max-width:1320px;margin:auto;padding:48px 24px 90px}.clinical-heading{display:flex;justify-content:space-between;align-items:center;gap:20px}.clinical-heading h1{font-size:clamp(36px,4vw,56px)}.clinical-heading p:not(.kicker){font-size:18px}.clinical-heading .kicker{color:#a8792d}.environment{border:1px solid #9fb8c2;color:#315667;border-radius:10px;padding:9px 12px;font-size:12px;font-weight:800;white-space:nowrap}.clinical-notice{border-left:4px solid #bf8c40;background:#fff;padding:18px 20px;border-radius:12px;line-height:1.5;margin:24px 0 30px}.clinical-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.module{border:1px solid #d7e1e7;border-radius:20px;padding:24px;background:#fff;min-height:210px}.module-index{font-weight:800;color:#8b642d;font-size:14px}.module h2{font-size:21px}.module p{line-height:1.5;color:#48606b}.next-step{margin-top:25px;padding:25px;border-radius:20px;background:#dce9ed}.next-step h2{margin-top:0}@media(max-width:850px){.experience-grid,.care-cards,.clinical-grid{grid-template-columns:1fr}.clinical-heading{align-items:flex-start;flex-direction:column}.experience{min-height:290px}}@media(max-width:540px){.topbar,.care-header,.clinical-header{padding:18px 16px}.eyebrow{display:none}.brand img{width:42px;height:42px}.brand small{font-size:9px}.hero,.care-main,.clinical-main{padding-left:18px;padding-right:18px}.experience{padding:24px}.care-card{min-height:auto}.care-main h1{font-size:40px}.care-card h2{font-size:24px}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
++:root{--teal:#063f3b;--emerald:#15735d;--navy:#0a344a;--gold:#d7a858;--mint:#b9e1d0;--canvas:#f5f8f7;--ink:#152c32;--danger:#b42318;--radius:22px;font-family:'DM Sans',system-ui,sans-serif}*{box-sizing:border-box}body{margin:0}a{color:inherit}a:focus-visible{outline:3px solid var(--gold);outline-offset:4px} .skip{position:absolute;left:-9999px;top:12px;background:#fff;color:#000;padding:12px;z-index:10}.skip:focus{left:12px}.site-shell{min-height:100vh;color:white;background:radial-gradient(ellipse at 5% 5%,#1a6b60 0,transparent 35%),linear-gradient(130deg,#063f3b 5%,#052e39 58%,#0a344a 100%)}.topbar,.care-header,.clinical-header{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:22px clamp(20px,5vw,80px)}.brand{display:flex;align-items:center;gap:12px;text-decoration:none;min-width:0}.brand img{flex-shrink:0}.brand strong{display:block;font-size:clamp(18px,2.1vw,26px);font-weight:800;letter-spacing:-.04em}.brand strong span{color:var(--gold)}.brand small{display:block;font-size:11px;letter-spacing:.05em;opacity:.85;line-height:1.4}.eyebrow,.overline,.kicker{font-size:12px;letter-spacing:.15em;font-weight:800}.eyebrow{color:var(--mint)}.hero{max-width:1320px;margin:auto;padding:clamp(30px,6vw,90px) 24px 70px}.hero-copy{max-width:800px}.kicker{color:var(--gold)}h1{font-size:clamp(38px,5.6vw,72px);line-height:1.07;letter-spacing:-.055em;margin:18px 0 22px}h1 em{font-style:normal;color:var(--mint)}.lead{font-size:clamp(17px,2vw,21px);line-height:1.65;color:#d4e9e6;max-width:700px}.notice{display:grid;gap:5px;max-width:740px;padding:15px 18px;border-radius:14px;border:1px solid #d7a85866;background:#052e39a8;color:#e8f6f2;font-size:14px;line-height:1.5;margin-top:25px}.notice strong{color:#f5d497}.experience-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:48px}.experience{min-height:340px;border:1px solid #ffffff32;padding:30px;border-radius:28px;display:flex;flex-direction:column;align-items:flex-start;gap:15px;text-decoration:none;box-shadow:0 20px 60px #0002;transition:transform .2s,border-color .2s}.experience:hover{transform:translateY(-4px);border-color:var(--gold)}.experience.care{background:linear-gradient(145deg,#146b5b,#063f3b)}.experience.clinical{background:linear-gradient(145deg,#154f67,#092d40)}.experience-icon{background:#ffffff14;padding:10px;border-radius:20px}.experience-icon img{width:76px;height:76px}.experience .overline{color:#d9d9d0}.experience>strong{font-size:clamp(24px,3vw,36px);letter-spacing:-.04em}.experience i{font-style:normal;color:var(--mint);font-weight:500}.experience>span:not(.experience-icon):not(.overline):not(.enter){font-size:17px;color:#d2e5e1}.enter{margin-top:auto;color:#f5d497;font-weight:700}.footer{padding:25px;text-align:center;color:#bad5d2;font-size:13px;border-top:1px solid #ffffff20}.care-page{min-height:100vh;background:#f2f8f5;color:#173d35}.care-header{background:#063f3b;color:white}.back{text-decoration:none;font-weight:700;padding:10px}.care-main{max-width:1100px;margin:auto;padding:45px 24px 90px}.care-main .kicker{color:#15735d}.care-main h1{font-size:clamp(38px,5vw,64px)}.care-lead{font-size:clamp(19px,2vw,24px);line-height:1.55;max-width:740px}.care-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin:42px 0}.care-card{background:#fff;border:2px solid #cbded5;border-radius:24px;padding:28px;min-height:280px}.care-symbol{font-size:40px;color:#15735d}.care-card h2{font-size:26px;line-height:1.2}.care-card p{font-size:18px;line-height:1.5}.care-card.help{border-color:#d4b4a6}.planned{display:inline-block;margin-top:12px;font-size:12px;letter-spacing:.03em;font-weight:700;background:#e6eee9;color:#335b4d;padding:7px 10px;border-radius:8px}.notice.light{background:#fff7eb;color:#543e1c;border-color:#ddc5a5}.notice.light strong{color:#684516}.clinical-page{min-height:100vh;background:#eef3f6;color:#173344}.clinical-header{background:#092e41;color:white}.clinical-main{max-width:1320px;margin:auto;padding:48px 24px 90px}.clinical-heading{display:flex;justify-content:space-between;align-items:center;gap:20px}.clinical-heading h1{font-size:clamp(36px,4vw,56px)}.clinical-heading p:not(.kicker){font-size:18px}.clinical-heading .kicker{color:var(--navy)}.environment{border:1px solid #9fb8c2;color:#315667;border-radius:10px;padding:9px 12px;font-size:12px;font-weight:800;white-space:nowrap}.clinical-notice{border-left:4px solid #bf8c40;background:#fff;padding:18px 20px;border-radius:12px;line-height:1.5;margin:24px 0 30px}.clinical-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.module{border:1px solid #d7e1e7;border-radius:20px;padding:24px;background:#fff;min-height:210px}.module-index{font-weight:800;color:#8b642d;font-size:14px}.module h2{font-size:21px}.module p{line-height:1.5;color:#48606b}.next-step{margin-top:25px;padding:25px;border-radius:20px;background:#dce9ed}.next-step h2{margin-top:0}@media(max-width:850px){.experience-grid,.care-cards,.clinical-grid{grid-template-columns:1fr}.clinical-heading{align-items:flex-start;flex-direction:column}.experience{min-height:290px}}@media(max-width:540px){.topbar,.care-header,.clinical-header{padding:18px 16px}.eyebrow{display:none}.brand img{width:42px;height:42px}.brand small{font-size:9px}.hero,.care-main,.clinical-main{padding-left:18px;padding-right:18px}.experience{padding:24px}.care-card{min-height:auto}.care-main h1{font-size:40px}.care-card h2{font-size:24px}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+ 
+ .workflow-form{display:grid;gap:12px;max-width:680px}.workflow-form label,.next-step label{font-weight:700}.workflow-form input,.workflow-form select,.workflow-form textarea,.next-step select,.next-step textarea{width:100%;padding:12px;border:1px solid #a8c1c1;border-radius:10px;background:#fff;color:#152c32;font:inherit}.workflow-form button,.next-step button{padding:12px 16px;background:#063f3b;color:#fff;border:0;border-radius:10px;font:inherit;font-weight:700;cursor:pointer;margin-top:10px}.workflow-form button:disabled,.next-step button:disabled{opacity:.5;cursor:not-allowed}.next-step .module{margin-top:15px;min-height:0}.next-step textarea{display:block;margin-top:8px}
+diff --git a/apps/clinical-web/components/ClinicalAccess.tsx b/apps/clinical-web/components/ClinicalAccess.tsx
+index ebc242c..e3cf5fa 100644
+--- a/apps/clinical-web/components/ClinicalAccess.tsx
++++ b/apps/clinical-web/components/ClinicalAccess.tsx
+@@ -1,5 +1,5 @@
+-import { WorkflowReview } from './WorkflowReview';
+ 'use client';
++import { WorkflowReview } from './WorkflowReview';
+ import { SyntheticRecord } from './SyntheticRecord';
+ import { useEffect,useState } from 'react';
+ type Data={profile:{subject:string;mfa:boolean;memberships:{organization_id:string;role:string;active:boolean}[]};patients?:{patients:{id:string;external_reference:string}[]} | null};
+diff --git a/apps/clinical-web/components/WorkflowReview.tsx b/apps/clinical-web/components/WorkflowReview.tsx
+index b141fc0..76056c3 100644
+--- a/apps/clinical-web/components/WorkflowReview.tsx
++++ b/apps/clinical-web/components/WorkflowReview.tsx
+@@ -1,6 +1,6 @@
+  'use client';
+ import { useState } from 'react';
+-type Alert={id:string;code:string;level:string;status:string;explanation:string;created_at:string;description?:string};
++type Alert={id:string;code:string;level:string;status:string;explanation:string;created_at:string;rule_version?:string;description?:string};
+ export function WorkflowReview({patients}:{patients:{id:string;external_reference:string}[]}){
+  const [patientId,setPatientId]=useState(patients[0]?.id||'');const [alerts,setAlerts]=useState<Alert[]>([]);
+  const [busy,setBusy]=useState(false);const [message,setMessage]=useState('');const [notes,setNotes]=useState<Record<string,string>>({});
+diff --git a/apps/clinical-web/lib/auth.ts b/apps/clinical-web/lib/auth.ts
+index 0207eb5..d563797 100644
+--- a/apps/clinical-web/lib/auth.ts
++++ b/apps/clinical-web/lib/auth.ts
+@@ -14,4 +14,6 @@ export const random = () => randomBytes(32).toString('base64url');
+ export const challenge = (verifier:string) => createHash('sha256').update(verifier).digest('base64url');
+ export async function session():Promise<Session|null> {const raw=(await cookies()).get(SESSION)?.value;if(!raw)return null;const s=unseal<Session>(raw);return s && typeof s.token==='string' && Number.isFinite(s.expiresAt) && s.expiresAt>Date.now()+5000 ? s : null;}
+ export const cookieOptions = (maxAge:number) => ({httpOnly:true,secure:secureCookie(),sameSite:'lax' as const,path:'/',maxAge});
+-export function oidcConfig(){return {issuer:required('OIDC_ISSUER'),authorizationEndpoint:required('OIDC_AUTHORIZATION_ENDPOINT'),tokenEndpoint:required('OIDC_TOKEN_ENDPOINT'),clientId:required('OIDC_CLIENT_ID')};}
++export function oidcConfig(){return {issuer:required('OIDC_ISSUER'),authorizationEndpoint:required('OIDC_AUTHORIZATION_ENDPOINT'),tokenEndpoint:required('OIDC_TOKEN_ENDPOINT'),clientId:required('OIDC_CLIENT_ID'),jwksUri:required('OIDC_JWKS_URI'),audience:required('OIDC_AUDIENCE')};}
++
++export function postLoginPath():string { const path=process.env.AUTH_POST_LOGIN_PATH||'/clinical'; if(!/^\/[a-zA-Z0-9/_-]*$/.test(path)||path.startsWith('//'))throw new Error('Destino de login inválido'); return path; }
+diff --git a/apps/clinical-web/next-env.d.ts b/apps/clinical-web/next-env.d.ts
+index 92fd505..830fb59 100644
+--- a/apps/clinical-web/next-env.d.ts
++++ b/apps/clinical-web/next-env.d.ts
+@@ -1,3 +1,6 @@
+ /// <reference types="next" />
+ /// <reference types="next/image-types/global" />
+-// Gerado e mantido pelo Next.js.
++/// <reference path="./.next/types/routes.d.ts" />
++
++// NOTE: This file should not be edited
++// see https://nextjs.org/docs/app/api-reference/config/typescript for more information.
+diff --git a/apps/clinical-web/package.json b/apps/clinical-web/package.json
+index 4185285..041feaa 100644
+--- a/apps/clinical-web/package.json
++++ b/apps/clinical-web/package.json
+@@ -8,13 +8,14 @@
+     "start": "next start -p 3002"
+   },
+   "dependencies": {
++    "jose": "^6.2.12",
+     "next": "^15.5.0",
+     "react": "^19.1.0",
+     "react-dom": "^19.1.0"
+   },
+   "devDependencies": {
+-    "typescript": "^5.9.0",
++    "@types/node": "^22.0.0",
+     "@types/react": "^19.1.0",
+-    "@types/node": "^22.0.0"
++    "typescript": "^5.9.0"
+   }
+ }
+diff --git a/apps/portal/app/api/auth/callback/route.ts b/apps/portal/app/api/auth/callback/route.ts
+index 7ec56fc..18a50ed 100644
+--- a/apps/portal/app/api/auth/callback/route.ts
++++ b/apps/portal/app/api/auth/callback/route.ts
+@@ -1,10 +1,10 @@
+ import { NextRequest, NextResponse } from 'next/server';
+-import { cookieOptions, FLOW, oidcConfig, origin, seal, SESSION, unseal } from '../../../../lib/auth';
++import { createRemoteJWKSet, jwtVerify } from 'jose';
++import { createHash } from 'node:crypto';
++import { cookieOptions, FLOW, oidcConfig, origin, postLoginPath, seal, SESSION, unseal } from '../../../../lib/auth';
+ export const runtime='nodejs';
+ type Flow = {state:string;verifier:string;nonce:string;issuedAt:number};
+ export async function GET(req:NextRequest){
+- const back=NextResponse.redirect(`${origin()}/clinical`);
+- back.cookies.delete(FLOW);
+  try {
+  const code=req.nextUrl.searchParams.get('code'),state=req.nextUrl.searchParams.get('state');
+  const flow=unseal<Flow>(req.cookies.get(FLOW)?.value||'');
+@@ -12,9 +12,17 @@ export async function GET(req:NextRequest){
+  const cfg=oidcConfig();const endpoint=new URL(cfg.tokenEndpoint);if(endpoint.protocol!=='https:'&&endpoint.hostname!=='localhost')throw Error('HTTPS obrigatório');
+  const response=await fetch(endpoint,{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'authorization_code',code,client_id:cfg.clientId,code_verifier:flow.verifier,redirect_uri:`${origin()}/api/auth/callback`}),cache:'no-store',signal:AbortSignal.timeout(10000)});
+  if(!response.ok)throw Error('troca de código falhou');
+- const tokens=await response.json() as {access_token?:string;token_type?:string;expires_in?:number};
+- if(!tokens.access_token||tokens.token_type?.toLowerCase()!=='bearer'||!Number.isFinite(tokens.expires_in)||Number(tokens.expires_in)<30)throw Error('token inválido');
+- const maxAge=Math.min(1800,Math.floor(Number(tokens.expires_in))-15);
++ const tokens=await response.json() as {access_token?:string;id_token?:string;token_type?:string;expires_in?:number};
++ if(!tokens.access_token||!tokens.id_token||tokens.token_type?.toLowerCase()!=='bearer'||!Number.isFinite(tokens.expires_in)||Number(tokens.expires_in)<30)throw Error('token inválido');
++ const jwksUrl=new URL(cfg.jwksUri);if(jwksUrl.protocol!=='https:'&&jwksUrl.hostname!=='localhost')throw Error('HTTPS obrigatório');
++ const jwks=createRemoteJWKSet(jwksUrl);
++ const {payload:id}=await jwtVerify(tokens.id_token,jwks,{issuer:cfg.issuer,audience:cfg.clientId,algorithms:['RS256','ES256'],requiredClaims:['exp','iat','sub'],clockTolerance:5});
++ const {payload:access}=await jwtVerify(tokens.access_token,jwks,{issuer:cfg.issuer,audience:cfg.audience,algorithms:['RS256','ES256'],requiredClaims:['exp','iat','sub'],clockTolerance:5});
++ if(id.nonce!==flow.nonce||!id.sub||id.sub!==access.sub)throw Error('identidade/nonce inválido');
++ if(id.at_hash!==undefined){const hash=createHash('sha256').update(tokens.access_token).digest();if(id.at_hash!==hash.subarray(0,hash.length/2).toString('base64url'))throw Error('at_hash inválido');}
++ const maxAge=Math.min(1800,Math.floor(Number(tokens.expires_in))-15,Math.floor(Number(access.exp)-Date.now()/1000)-15);
++ if(maxAge<10)throw Error('token expirando');
++ const back=NextResponse.redirect(`${origin()}${postLoginPath()}`);back.cookies.delete(FLOW);
+  back.cookies.set(SESSION,seal({token:tokens.access_token,expiresAt:Date.now()+maxAge*1000}),cookieOptions(maxAge));return back;
+- }catch{const fail=NextResponse.redirect(`${origin()}/clinical?login=failed`);fail.cookies.delete(FLOW);fail.cookies.delete(SESSION);return fail;}
++ }catch{const fail=NextResponse.redirect(`${origin()}${postLoginPath()}?login=failed`);fail.cookies.delete(FLOW);fail.cookies.delete(SESSION);return fail;}
+ }
+diff --git a/apps/portal/app/globals.css b/apps/portal/app/globals.css
+index 4fcecb4..46872ff 100644
+--- a/apps/portal/app/globals.css
++++ b/apps/portal/app/globals.css
+@@ -1,3 +1,3 @@
+-:root{--teal:#063f3b;--emerald:#15735d;--navy:#0a344a;--gold:#d7a858;--mint:#b9e1d0;--canvas:#f5f8f7;--ink:#152c32;--danger:#b42318;--radius:22px;font-family:'DM Sans',system-ui,sans-serif}*{box-sizing:border-box}body{margin:0}a{color:inherit}a:focus-visible{outline:3px solid var(--gold);outline-offset:4px} .skip{position:absolute;left:-9999px;top:12px;background:#fff;color:#000;padding:12px;z-index:10}.skip:focus{left:12px}.site-shell{min-height:100vh;color:white;background:radial-gradient(ellipse at 5% 5%,#1a6b60 0,transparent 35%),linear-gradient(130deg,#063f3b 5%,#052e39 58%,#0a344a 100%)}.topbar,.care-header,.clinical-header{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:22px clamp(20px,5vw,80px)}.brand{display:flex;align-items:center;gap:12px;text-decoration:none;min-width:0}.brand img{flex-shrink:0}.brand strong{display:block;font-size:clamp(18px,2.1vw,26px);font-weight:800;letter-spacing:-.04em}.brand strong span{color:var(--gold)}.brand small{display:block;font-size:11px;letter-spacing:.05em;opacity:.85;line-height:1.4}.eyebrow,.overline,.kicker{font-size:12px;letter-spacing:.15em;font-weight:800}.eyebrow{color:var(--mint)}.hero{max-width:1320px;margin:auto;padding:clamp(30px,6vw,90px) 24px 70px}.hero-copy{max-width:800px}.kicker{color:var(--gold)}h1{font-size:clamp(38px,5.6vw,72px);line-height:1.07;letter-spacing:-.055em;margin:18px 0 22px}h1 em{font-style:normal;color:var(--mint)}.lead{font-size:clamp(17px,2vw,21px);line-height:1.65;color:#d4e9e6;max-width:700px}.notice{display:grid;gap:5px;max-width:740px;padding:15px 18px;border-radius:14px;border:1px solid #d7a85866;background:#052e39a8;color:#e8f6f2;font-size:14px;line-height:1.5;margin-top:25px}.notice strong{color:#f5d497}.experience-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:48px}.experience{min-height:340px;border:1px solid #ffffff32;padding:30px;border-radius:28px;display:flex;flex-direction:column;align-items:flex-start;gap:15px;text-decoration:none;box-shadow:0 20px 60px #0002;transition:transform .2s,border-color .2s}.experience:hover{transform:translateY(-4px);border-color:var(--gold)}.experience.care{background:linear-gradient(145deg,#146b5b,#063f3b)}.experience.clinical{background:linear-gradient(145deg,#154f67,#092d40)}.experience-icon{background:#ffffff14;padding:10px;border-radius:20px}.experience-icon img{width:76px;height:76px}.experience .overline{color:#d9d9d0}.experience>strong{font-size:clamp(24px,3vw,36px);letter-spacing:-.04em}.experience i{font-style:normal;color:var(--mint);font-weight:500}.experience>span:not(.experience-icon):not(.overline):not(.enter){font-size:17px;color:#d2e5e1}.enter{margin-top:auto;color:#f5d497;font-weight:700}.footer{padding:25px;text-align:center;color:#bad5d2;font-size:13px;border-top:1px solid #ffffff20}.care-page{min-height:100vh;background:#f2f8f5;color:#173d35}.care-header{background:#063f3b;color:white}.back{text-decoration:none;font-weight:700;padding:10px}.care-main{max-width:1100px;margin:auto;padding:45px 24px 90px}.care-main .kicker{color:#15735d}.care-main h1{font-size:clamp(38px,5vw,64px)}.care-lead{font-size:clamp(19px,2vw,24px);line-height:1.55;max-width:740px}.care-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin:42px 0}.care-card{background:#fff;border:2px solid #cbded5;border-radius:24px;padding:28px;min-height:280px}.care-symbol{font-size:40px;color:#15735d}.care-card h2{font-size:26px;line-height:1.2}.care-card p{font-size:18px;line-height:1.5}.care-card.help{border-color:#d4b4a6}.planned{display:inline-block;margin-top:12px;font-size:12px;letter-spacing:.03em;font-weight:700;background:#e6eee9;color:#335b4d;padding:7px 10px;border-radius:8px}.notice.light{background:#fff7eb;color:#543e1c;border-color:#ddc5a5}.notice.light strong{color:#684516}.clinical-page{min-height:100vh;background:#eef3f6;color:#173344}.clinical-header{background:#092e41;color:white}.clinical-main{max-width:1320px;margin:auto;padding:48px 24px 90px}.clinical-heading{display:flex;justify-content:space-between;align-items:center;gap:20px}.clinical-heading h1{font-size:clamp(36px,4vw,56px)}.clinical-heading p:not(.kicker){font-size:18px}.clinical-heading .kicker{color:#a8792d}.environment{border:1px solid #9fb8c2;color:#315667;border-radius:10px;padding:9px 12px;font-size:12px;font-weight:800;white-space:nowrap}.clinical-notice{border-left:4px solid #bf8c40;background:#fff;padding:18px 20px;border-radius:12px;line-height:1.5;margin:24px 0 30px}.clinical-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.module{border:1px solid #d7e1e7;border-radius:20px;padding:24px;background:#fff;min-height:210px}.module-index{font-weight:800;color:#8b642d;font-size:14px}.module h2{font-size:21px}.module p{line-height:1.5;color:#48606b}.next-step{margin-top:25px;padding:25px;border-radius:20px;background:#dce9ed}.next-step h2{margin-top:0}@media(max-width:850px){.experience-grid,.care-cards,.clinical-grid{grid-template-columns:1fr}.clinical-heading{align-items:flex-start;flex-direction:column}.experience{min-height:290px}}@media(max-width:540px){.topbar,.care-header,.clinical-header{padding:18px 16px}.eyebrow{display:none}.brand img{width:42px;height:42px}.brand small{font-size:9px}.hero,.care-main,.clinical-main{padding-left:18px;padding-right:18px}.experience{padding:24px}.care-card{min-height:auto}.care-main h1{font-size:40px}.care-card h2{font-size:24px}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
++:root{--teal:#063f3b;--emerald:#15735d;--navy:#0a344a;--gold:#d7a858;--mint:#b9e1d0;--canvas:#f5f8f7;--ink:#152c32;--danger:#b42318;--radius:22px;font-family:'DM Sans',system-ui,sans-serif}*{box-sizing:border-box}body{margin:0}a{color:inherit}a:focus-visible{outline:3px solid var(--gold);outline-offset:4px} .skip{position:absolute;left:-9999px;top:12px;background:#fff;color:#000;padding:12px;z-index:10}.skip:focus{left:12px}.site-shell{min-height:100vh;color:white;background:radial-gradient(ellipse at 5% 5%,#1a6b60 0,transparent 35%),linear-gradient(130deg,#063f3b 5%,#052e39 58%,#0a344a 100%)}.topbar,.care-header,.clinical-header{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:22px clamp(20px,5vw,80px)}.brand{display:flex;align-items:center;gap:12px;text-decoration:none;min-width:0}.brand img{flex-shrink:0}.brand strong{display:block;font-size:clamp(18px,2.1vw,26px);font-weight:800;letter-spacing:-.04em}.brand strong span{color:var(--gold)}.brand small{display:block;font-size:11px;letter-spacing:.05em;opacity:.85;line-height:1.4}.eyebrow,.overline,.kicker{font-size:12px;letter-spacing:.15em;font-weight:800}.eyebrow{color:var(--mint)}.hero{max-width:1320px;margin:auto;padding:clamp(30px,6vw,90px) 24px 70px}.hero-copy{max-width:800px}.kicker{color:var(--gold)}h1{font-size:clamp(38px,5.6vw,72px);line-height:1.07;letter-spacing:-.055em;margin:18px 0 22px}h1 em{font-style:normal;color:var(--mint)}.lead{font-size:clamp(17px,2vw,21px);line-height:1.65;color:#d4e9e6;max-width:700px}.notice{display:grid;gap:5px;max-width:740px;padding:15px 18px;border-radius:14px;border:1px solid #d7a85866;background:#052e39a8;color:#e8f6f2;font-size:14px;line-height:1.5;margin-top:25px}.notice strong{color:#f5d497}.experience-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:48px}.experience{min-height:340px;border:1px solid #ffffff32;padding:30px;border-radius:28px;display:flex;flex-direction:column;align-items:flex-start;gap:15px;text-decoration:none;box-shadow:0 20px 60px #0002;transition:transform .2s,border-color .2s}.experience:hover{transform:translateY(-4px);border-color:var(--gold)}.experience.care{background:linear-gradient(145deg,#146b5b,#063f3b)}.experience.clinical{background:linear-gradient(145deg,#154f67,#092d40)}.experience-icon{background:#ffffff14;padding:10px;border-radius:20px}.experience-icon img{width:76px;height:76px}.experience .overline{color:#d9d9d0}.experience>strong{font-size:clamp(24px,3vw,36px);letter-spacing:-.04em}.experience i{font-style:normal;color:var(--mint);font-weight:500}.experience>span:not(.experience-icon):not(.overline):not(.enter){font-size:17px;color:#d2e5e1}.enter{margin-top:auto;color:#f5d497;font-weight:700}.footer{padding:25px;text-align:center;color:#bad5d2;font-size:13px;border-top:1px solid #ffffff20}.care-page{min-height:100vh;background:#f2f8f5;color:#173d35}.care-header{background:#063f3b;color:white}.back{text-decoration:none;font-weight:700;padding:10px}.care-main{max-width:1100px;margin:auto;padding:45px 24px 90px}.care-main .kicker{color:#15735d}.care-main h1{font-size:clamp(38px,5vw,64px)}.care-lead{font-size:clamp(19px,2vw,24px);line-height:1.55;max-width:740px}.care-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin:42px 0}.care-card{background:#fff;border:2px solid #cbded5;border-radius:24px;padding:28px;min-height:280px}.care-symbol{font-size:40px;color:#15735d}.care-card h2{font-size:26px;line-height:1.2}.care-card p{font-size:18px;line-height:1.5}.care-card.help{border-color:#d4b4a6}.planned{display:inline-block;margin-top:12px;font-size:12px;letter-spacing:.03em;font-weight:700;background:#e6eee9;color:#335b4d;padding:7px 10px;border-radius:8px}.notice.light{background:#fff7eb;color:#543e1c;border-color:#ddc5a5}.notice.light strong{color:#684516}.clinical-page{min-height:100vh;background:#eef3f6;color:#173344}.clinical-header{background:#092e41;color:white}.clinical-main{max-width:1320px;margin:auto;padding:48px 24px 90px}.clinical-heading{display:flex;justify-content:space-between;align-items:center;gap:20px}.clinical-heading h1{font-size:clamp(36px,4vw,56px)}.clinical-heading p:not(.kicker){font-size:18px}.clinical-heading .kicker{color:var(--navy)}.environment{border:1px solid #9fb8c2;color:#315667;border-radius:10px;padding:9px 12px;font-size:12px;font-weight:800;white-space:nowrap}.clinical-notice{border-left:4px solid #bf8c40;background:#fff;padding:18px 20px;border-radius:12px;line-height:1.5;margin:24px 0 30px}.clinical-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.module{border:1px solid #d7e1e7;border-radius:20px;padding:24px;background:#fff;min-height:210px}.module-index{font-weight:800;color:#8b642d;font-size:14px}.module h2{font-size:21px}.module p{line-height:1.5;color:#48606b}.next-step{margin-top:25px;padding:25px;border-radius:20px;background:#dce9ed}.next-step h2{margin-top:0}@media(max-width:850px){.experience-grid,.care-cards,.clinical-grid{grid-template-columns:1fr}.clinical-heading{align-items:flex-start;flex-direction:column}.experience{min-height:290px}}@media(max-width:540px){.topbar,.care-header,.clinical-header{padding:18px 16px}.eyebrow{display:none}.brand img{width:42px;height:42px}.brand small{font-size:9px}.hero,.care-main,.clinical-main{padding-left:18px;padding-right:18px}.experience{padding:24px}.care-card{min-height:auto}.care-main h1{font-size:40px}.care-card h2{font-size:24px}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+ 
+ .workflow-form{display:grid;gap:12px;max-width:680px}.workflow-form label,.next-step label{font-weight:700}.workflow-form input,.workflow-form select,.workflow-form textarea,.next-step select,.next-step textarea{width:100%;padding:12px;border:1px solid #a8c1c1;border-radius:10px;background:#fff;color:#152c32;font:inherit}.workflow-form button,.next-step button{padding:12px 16px;background:#063f3b;color:#fff;border:0;border-radius:10px;font:inherit;font-weight:700;cursor:pointer;margin-top:10px}.workflow-form button:disabled,.next-step button:disabled{opacity:.5;cursor:not-allowed}.next-step .module{margin-top:15px;min-height:0}.next-step textarea{display:block;margin-top:8px}
+diff --git a/apps/portal/components/ClinicalAccess.tsx b/apps/portal/components/ClinicalAccess.tsx
+index ebc242c..e3cf5fa 100644
+--- a/apps/portal/components/ClinicalAccess.tsx
++++ b/apps/portal/components/ClinicalAccess.tsx
+@@ -1,5 +1,5 @@
+-import { WorkflowReview } from './WorkflowReview';
+ 'use client';
++import { WorkflowReview } from './WorkflowReview';
+ import { SyntheticRecord } from './SyntheticRecord';
+ import { useEffect,useState } from 'react';
+ type Data={profile:{subject:string;mfa:boolean;memberships:{organization_id:string;role:string;active:boolean}[]};patients?:{patients:{id:string;external_reference:string}[]} | null};
+diff --git a/apps/portal/components/WorkflowReview.tsx b/apps/portal/components/WorkflowReview.tsx
+index b141fc0..76056c3 100644
+--- a/apps/portal/components/WorkflowReview.tsx
++++ b/apps/portal/components/WorkflowReview.tsx
+@@ -1,6 +1,6 @@
+  'use client';
+ import { useState } from 'react';
+-type Alert={id:string;code:string;level:string;status:string;explanation:string;created_at:string;description?:string};
++type Alert={id:string;code:string;level:string;status:string;explanation:string;created_at:string;rule_version?:string;description?:string};
+ export function WorkflowReview({patients}:{patients:{id:string;external_reference:string}[]}){
+  const [patientId,setPatientId]=useState(patients[0]?.id||'');const [alerts,setAlerts]=useState<Alert[]>([]);
+  const [busy,setBusy]=useState(false);const [message,setMessage]=useState('');const [notes,setNotes]=useState<Record<string,string>>({});
+diff --git a/apps/portal/lib/auth.ts b/apps/portal/lib/auth.ts
+index 0207eb5..d563797 100644
+--- a/apps/portal/lib/auth.ts
++++ b/apps/portal/lib/auth.ts
+@@ -14,4 +14,6 @@ export const random = () => randomBytes(32).toString('base64url');
+ export const challenge = (verifier:string) => createHash('sha256').update(verifier).digest('base64url');
+ export async function session():Promise<Session|null> {const raw=(await cookies()).get(SESSION)?.value;if(!raw)return null;const s=unseal<Session>(raw);return s && typeof s.token==='string' && Number.isFinite(s.expiresAt) && s.expiresAt>Date.now()+5000 ? s : null;}
+ export const cookieOptions = (maxAge:number) => ({httpOnly:true,secure:secureCookie(),sameSite:'lax' as const,path:'/',maxAge});
+-export function oidcConfig(){return {issuer:required('OIDC_ISSUER'),authorizationEndpoint:required('OIDC_AUTHORIZATION_ENDPOINT'),tokenEndpoint:required('OIDC_TOKEN_ENDPOINT'),clientId:required('OIDC_CLIENT_ID')};}
++export function oidcConfig(){return {issuer:required('OIDC_ISSUER'),authorizationEndpoint:required('OIDC_AUTHORIZATION_ENDPOINT'),tokenEndpoint:required('OIDC_TOKEN_ENDPOINT'),clientId:required('OIDC_CLIENT_ID'),jwksUri:required('OIDC_JWKS_URI'),audience:required('OIDC_AUDIENCE')};}
++
++export function postLoginPath():string { const path=process.env.AUTH_POST_LOGIN_PATH||'/clinical'; if(!/^\/[a-zA-Z0-9/_-]*$/.test(path)||path.startsWith('//'))throw new Error('Destino de login inválido'); return path; }
+diff --git a/apps/portal/next-env.d.ts b/apps/portal/next-env.d.ts
+index 92fd505..830fb59 100644
+--- a/apps/portal/next-env.d.ts
++++ b/apps/portal/next-env.d.ts
+@@ -1,3 +1,6 @@
+ /// <reference types="next" />
+ /// <reference types="next/image-types/global" />
+-// Gerado e mantido pelo Next.js.
++/// <reference path="./.next/types/routes.d.ts" />
++
++// NOTE: This file should not be edited
++// see https://nextjs.org/docs/app/api-reference/config/typescript for more information.
+diff --git a/apps/portal/package.json b/apps/portal/package.json
+index 947a4dc..5ce0ef9 100644
+--- a/apps/portal/package.json
++++ b/apps/portal/package.json
+@@ -8,13 +8,14 @@
+     "start": "next start -p 3000"
+   },
+   "dependencies": {
++    "jose": "^6.2.12",
+     "next": "^15.5.0",
+     "react": "^19.1.0",
+     "react-dom": "^19.1.0"
+   },
+   "devDependencies": {
+-    "typescript": "^5.9.0",
++    "@types/node": "^22.0.0",
+     "@types/react": "^19.1.0",
+-    "@types/node": "^22.0.0"
++    "typescript": "^5.9.0"
+   }
+ }
+diff --git a/docs/product/MATRIZ_RASTREABILIDADE.md b/docs/product/MATRIZ_RASTREABILIDADE.md
+index d0f0722..ec7d3bc 100644
+--- a/docs/product/MATRIZ_RASTREABILIDADE.md
++++ b/docs/product/MATRIZ_RASTREABILIDADE.md
+@@ -1,12 +1,27 @@
+-# Matriz de rastreabilidade — referência Plano Diretor v3.0
+-| Requisito | Implementação | Verificação | Situação |
++# Matriz de rastreabilidade - Plano Diretor v3 / M14.5
++
++Decisões aprovadas preservadas. Nenhum PASS abaixo autoriza uso clínico.
++
++| Requisito | Implementação / alteração | Evidência | Situação do requisito completo |
+ |---|---|---|---|
+-| D-001 PWA e infraestrutura real | Next.js/NestJS/PostgreSQL previsto | Build, deploy, PWA offline | PARCIAL |
+-| D-002 Care/Clinical separados | apps/care-web e apps/clinical-web | check-governance; E2E pendente | PARCIAL |
+-| D-003/004 Marca e cores aprovadas | packages/design-system; SVG provisório | check-design; revisão visual pendente | PARCIAL |
+-| D-005 IA com revisão humana | evidence-gate.mjs | testes de bloqueio de autonomia | PARCIAL |
+-| D-006 Pacientes sintéticos | seeds DEV/HML; produção vazia | testes de seed/RLS pendentes | PARCIAL |
+-| D-007 FHIR/Tasy/MV autorizados | gateway sintético FHIR R4 | testes unitários, contrato hospitalar pendente | PARCIAL |
+-| D-008 decisões externas | docs/quality/PILOTO_GATES.md | instituição, IdP, SLA pendentes | ABERTO |
+-| Seção 5: alerta → intervenção | API M10.1 | teste com PostgreSQL/IdP pendente | PARCIAL |
+-| Seção 12: Definition of Done | quality gates | nenhum módulo clínico homologado | NÃO CONCLUÍDO |
++| D-001 PWA e arquitetura real | Next/Nest; Node 22; lockfile; npm ci | full-build; npm-ci.log | PARCIAL: DB/deploy/offline pendentes |
++| D-002 Care e Clinical separados | Apps separados; rotas e healthchecks | browser-surfaces; capturas 390/768/1440 | PARCIAL: fluxo integrado bloqueado |
++| D-003 Marca/submarcas | Brand/SVG preservados | check:design e capturas | PARCIAL: arte final ainda depende de aprovação |
++| D-004 Tokens aprovados | Apenas kicker Clinical usa navy, melhora contraste | axe-clinical.json; design system sincronizado | PARCIAL: verificação automática não substitui aceite visual final |
++| D-005 IA com revisão humana | Regras e evidence-gate preservados | clinical-rules; testes estendidos; gate clínico | PARCIAL: revisão clínica externa ausente |
++| D-006 Sintéticos DEV/HML | Prod bloqueada; IdP e fixtures sintéticos | guard unitário; cenários DB/E2E preparados | PARCIAL: isolamento RLS no banco BLOCKED |
++| D-007 Integração autorizada | Gateway FHIR sintético preservado | unitários FHIR; nenhuma escrita hospitalar | PARCIAL: autorização/integração real ausentes |
++| D-008 Hospedagem/IdP/piloto/SLA | Keycloak local apenas teste; nenhuma decisão institucional tomada | idp-configuration.json; G01-G09 bloqueados | ABERTO |
++| Build reprodutível | care/clinical/admin/api/portal/regras | full-build.log; package-lock.json | PASS no ambiente local; CI externo não executado |
++| 0003 runtime permissions | Chamada no provisionamento; flags restritivas | scripts; logs de bootstrap | BLOCKED para execução DB |
++| RLS entre instituições | Teste com dois tenants preenchidos | m145-db.integration.mjs | BLOCKED; sem execução PostgreSQL |
++| Audit INSERT isolado | Política 0003; teste positivo/negativo | SQL e teste preparado | BLOCKED; sem execução PostgreSQL |
++| Superuser/BYPASSRLS | Role provisionada restrita; API e prerequisite recusam | api-security-unit; DB negativo preparado | PARCIAL: unitário PASS; DB BLOCKED |
++| patientId arbitrário | Link por subject/issuer/tenant; outro paciente deve ser negado | vertical.spec.ts | BLOCKED; sem fluxo integrado |
++| OIDC/PKCE/TOTP/sessão | Keycloak real; callback com JWT/nonce; HttpOnly | oidc-core; Playwright | PASS para núcleo local; autorização institucional BLOCKED |
++| Logout | POST e origem; apaga cookie local | identidade/CSRF navegador | PARCIAL: logout global/revogação IdP não validado |
++| Care -> Clinical -> auditoria | API/Postgres e revisão humana | vertical.spec.ts | BLOCKED; nenhum resultado inventado |
++| Acessibilidade | Teclado, overflow e contraste axe | axe-*.json e surfaces.spec.ts | PARCIAL: leitores de tela/zoom/usabilidade pendentes |
++| DoD e aprovação clínica | Gate permanece fechado | clinical-release; quality:gate | NÃO CONCLUÍDO |
++
++`readyForIntegratedValidation=false`; `readyForClinicalUse=false`; `clinicalApproval=false`.
+diff --git a/infra/scripts/bootstrap-ci-db.sh b/infra/scripts/bootstrap-ci-db.sh
+old mode 100755
+new mode 100644
+diff --git a/infra/scripts/migrate-dev.sh b/infra/scripts/migrate-dev.sh
+old mode 100755
+new mode 100644
+diff --git a/infra/scripts/migrate-m2-1-dev.sh b/infra/scripts/migrate-m2-1-dev.sh
+old mode 100755
+new mode 100644
+diff --git a/infra/scripts/migrate-m2-dev.sh b/infra/scripts/migrate-m2-dev.sh
+old mode 100755
+new mode 100644
+diff --git a/infra/scripts/provision-app-role.sh b/infra/scripts/provision-app-role.sh
+old mode 100755
+new mode 100644
+index 7dcc9d8..5a7a553
+--- a/infra/scripts/provision-app-role.sh
++++ b/infra/scripts/provision-app-role.sh
+@@ -9,8 +9,8 @@ DB_NAME=$(psql "$DATABASE_URL_ADMIN" -Atqc 'SELECT current_database()')
+ # Password via variável psql, sem concatenar SQL.
+ psql "$DATABASE_URL_ADMIN" -v ON_ERROR_STOP=1 -v app_password="$APP_DB_PASSWORD" <<'SQL'
+ SELECT CASE WHEN NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='oncopharma_app')
+-  THEN 'CREATE ROLE oncopharma_app LOGIN NOINHERIT NOBYPASSRLS'
+-  ELSE 'ALTER ROLE oncopharma_app LOGIN NOINHERIT NOBYPASSRLS' END \gexec
++  THEN 'CREATE ROLE oncopharma_app LOGIN NOINHERIT NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS'
++  ELSE 'ALTER ROLE oncopharma_app LOGIN NOINHERIT NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS' END \gexec
+ ALTER ROLE oncopharma_app PASSWORD :'app_password';
+ SQL
+ psql "$DATABASE_URL_ADMIN" -v ON_ERROR_STOP=1 -f infra/migrations/0003_runtime_permissions.sql
+diff --git a/infra/scripts/reset-synthetic-dev.sh b/infra/scripts/reset-synthetic-dev.sh
+old mode 100755
+new mode 100644
+diff --git a/infra/scripts/seed-dev.sh b/infra/scripts/seed-dev.sh
+old mode 100755
+new mode 100644
+diff --git a/package.json b/package.json
+index 283689e..2a1be0e 100644
+--- a/package.json
++++ b/package.json
+@@ -1,15 +1,16 @@
+ {
+   "name": "oncopharma",
+   "private": true,
+-  "version": "0.14.4-dev",
++  "version": "0.14.5-dev",
+   "workspaces": [
+     "apps/*",
+-    "services/*"
++    "services/*",
++    "packages/*"
+   ],
+   "scripts": {
+     "dev:portal": "npm run dev -w @oncopharma/portal",
+     "dev:api": "npm run start:dev -w @oncopharma/api",
+-    "build": "npm run build:apps && npm run build -w @oncopharma/api",
++    "build": "npm run build:apps && npm run build -w @oncopharma/api && npm run build:packages && npm run build -w @oncopharma/portal",
+     "test": "node --test tests/*.test.mjs",
+     "db:up": "docker compose --env-file .env -f infra/compose.dev.yml up -d",
+     "db:migrate": "bash infra/scripts/migrate-dev.sh",
+@@ -38,11 +39,20 @@
+     "quality:report": "node tools/release-gate.mjs --json",
+     "test:readiness": "node --test tests/m141-release-gate.test.mjs",
+     "test:lab:e2e": "node --test tests/m142-lab-e2e.test.mjs",
+-    "test:db:required": "node tests/require-postgres.mjs && node --test tests/m12-db.integration.mjs",
++    "test:db:required": "node tests/require-postgres.mjs && node --test tests/m12-db.integration.mjs tests/m145-db.integration.mjs",
+     "verify:local": "npm test && npm run test:extended && npm run test:lab:e2e && npm run check:design && npm run check:governance && npm run test:readiness",
+-    "validate:evidence": "node tools/validate-real.mjs"
++    "validate:evidence": "node tools/validate-real.mjs",
++    "build:packages": "npm run build -w @oncopharma/clinical-rules",
++    "test:e2e:real": "playwright test",
++    "test:api:security": "node --test tests/m145-api.security.mjs",
++    "test:identity:real": "node tools/run-identity-validation.mjs",
++    "test:e2e:stack": "node tools/run-test-stack.mjs --test"
+   },
+   "engines": {
+-    "node": ">=20"
++    "node": ">=22 <23"
++  },
++  "devDependencies": {
++    "@axe-core/playwright": "^4.13.0",
++    "@playwright/test": "^1.64.0"
+   }
+ }
+diff --git a/packages/clinical-rules/package.json b/packages/clinical-rules/package.json
+index f18777e..cde0ed9 100644
+--- a/packages/clinical-rules/package.json
++++ b/packages/clinical-rules/package.json
+@@ -1 +1,11 @@
+-{"name":"@oncopharma/clinical-rules","version":"0.1.0","private":true,"type":"module","exports":"./src/index.mjs"}
+\ No newline at end of file
++{
++  "name": "@oncopharma/clinical-rules",
++  "version": "0.1.0",
++  "private": true,
++  "type": "module",
++  "exports": "./src/index.mjs",
++  "scripts": {
++    "build": "node --check src/index.mjs",
++    "test": "node --test tests/*.test.mjs"
++  }
++}
+diff --git a/packages/design-system/app/globals.css b/packages/design-system/app/globals.css
+index 4fcecb4..46872ff 100644
+--- a/packages/design-system/app/globals.css
++++ b/packages/design-system/app/globals.css
+@@ -1,3 +1,3 @@
+-:root{--teal:#063f3b;--emerald:#15735d;--navy:#0a344a;--gold:#d7a858;--mint:#b9e1d0;--canvas:#f5f8f7;--ink:#152c32;--danger:#b42318;--radius:22px;font-family:'DM Sans',system-ui,sans-serif}*{box-sizing:border-box}body{margin:0}a{color:inherit}a:focus-visible{outline:3px solid var(--gold);outline-offset:4px} .skip{position:absolute;left:-9999px;top:12px;background:#fff;color:#000;padding:12px;z-index:10}.skip:focus{left:12px}.site-shell{min-height:100vh;color:white;background:radial-gradient(ellipse at 5% 5%,#1a6b60 0,transparent 35%),linear-gradient(130deg,#063f3b 5%,#052e39 58%,#0a344a 100%)}.topbar,.care-header,.clinical-header{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:22px clamp(20px,5vw,80px)}.brand{display:flex;align-items:center;gap:12px;text-decoration:none;min-width:0}.brand img{flex-shrink:0}.brand strong{display:block;font-size:clamp(18px,2.1vw,26px);font-weight:800;letter-spacing:-.04em}.brand strong span{color:var(--gold)}.brand small{display:block;font-size:11px;letter-spacing:.05em;opacity:.85;line-height:1.4}.eyebrow,.overline,.kicker{font-size:12px;letter-spacing:.15em;font-weight:800}.eyebrow{color:var(--mint)}.hero{max-width:1320px;margin:auto;padding:clamp(30px,6vw,90px) 24px 70px}.hero-copy{max-width:800px}.kicker{color:var(--gold)}h1{font-size:clamp(38px,5.6vw,72px);line-height:1.07;letter-spacing:-.055em;margin:18px 0 22px}h1 em{font-style:normal;color:var(--mint)}.lead{font-size:clamp(17px,2vw,21px);line-height:1.65;color:#d4e9e6;max-width:700px}.notice{display:grid;gap:5px;max-width:740px;padding:15px 18px;border-radius:14px;border:1px solid #d7a85866;background:#052e39a8;color:#e8f6f2;font-size:14px;line-height:1.5;margin-top:25px}.notice strong{color:#f5d497}.experience-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:48px}.experience{min-height:340px;border:1px solid #ffffff32;padding:30px;border-radius:28px;display:flex;flex-direction:column;align-items:flex-start;gap:15px;text-decoration:none;box-shadow:0 20px 60px #0002;transition:transform .2s,border-color .2s}.experience:hover{transform:translateY(-4px);border-color:var(--gold)}.experience.care{background:linear-gradient(145deg,#146b5b,#063f3b)}.experience.clinical{background:linear-gradient(145deg,#154f67,#092d40)}.experience-icon{background:#ffffff14;padding:10px;border-radius:20px}.experience-icon img{width:76px;height:76px}.experience .overline{color:#d9d9d0}.experience>strong{font-size:clamp(24px,3vw,36px);letter-spacing:-.04em}.experience i{font-style:normal;color:var(--mint);font-weight:500}.experience>span:not(.experience-icon):not(.overline):not(.enter){font-size:17px;color:#d2e5e1}.enter{margin-top:auto;color:#f5d497;font-weight:700}.footer{padding:25px;text-align:center;color:#bad5d2;font-size:13px;border-top:1px solid #ffffff20}.care-page{min-height:100vh;background:#f2f8f5;color:#173d35}.care-header{background:#063f3b;color:white}.back{text-decoration:none;font-weight:700;padding:10px}.care-main{max-width:1100px;margin:auto;padding:45px 24px 90px}.care-main .kicker{color:#15735d}.care-main h1{font-size:clamp(38px,5vw,64px)}.care-lead{font-size:clamp(19px,2vw,24px);line-height:1.55;max-width:740px}.care-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin:42px 0}.care-card{background:#fff;border:2px solid #cbded5;border-radius:24px;padding:28px;min-height:280px}.care-symbol{font-size:40px;color:#15735d}.care-card h2{font-size:26px;line-height:1.2}.care-card p{font-size:18px;line-height:1.5}.care-card.help{border-color:#d4b4a6}.planned{display:inline-block;margin-top:12px;font-size:12px;letter-spacing:.03em;font-weight:700;background:#e6eee9;color:#335b4d;padding:7px 10px;border-radius:8px}.notice.light{background:#fff7eb;color:#543e1c;border-color:#ddc5a5}.notice.light strong{color:#684516}.clinical-page{min-height:100vh;background:#eef3f6;color:#173344}.clinical-header{background:#092e41;color:white}.clinical-main{max-width:1320px;margin:auto;padding:48px 24px 90px}.clinical-heading{display:flex;justify-content:space-between;align-items:center;gap:20px}.clinical-heading h1{font-size:clamp(36px,4vw,56px)}.clinical-heading p:not(.kicker){font-size:18px}.clinical-heading .kicker{color:#a8792d}.environment{border:1px solid #9fb8c2;color:#315667;border-radius:10px;padding:9px 12px;font-size:12px;font-weight:800;white-space:nowrap}.clinical-notice{border-left:4px solid #bf8c40;background:#fff;padding:18px 20px;border-radius:12px;line-height:1.5;margin:24px 0 30px}.clinical-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.module{border:1px solid #d7e1e7;border-radius:20px;padding:24px;background:#fff;min-height:210px}.module-index{font-weight:800;color:#8b642d;font-size:14px}.module h2{font-size:21px}.module p{line-height:1.5;color:#48606b}.next-step{margin-top:25px;padding:25px;border-radius:20px;background:#dce9ed}.next-step h2{margin-top:0}@media(max-width:850px){.experience-grid,.care-cards,.clinical-grid{grid-template-columns:1fr}.clinical-heading{align-items:flex-start;flex-direction:column}.experience{min-height:290px}}@media(max-width:540px){.topbar,.care-header,.clinical-header{padding:18px 16px}.eyebrow{display:none}.brand img{width:42px;height:42px}.brand small{font-size:9px}.hero,.care-main,.clinical-main{padding-left:18px;padding-right:18px}.experience{padding:24px}.care-card{min-height:auto}.care-main h1{font-size:40px}.care-card h2{font-size:24px}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
++:root{--teal:#063f3b;--emerald:#15735d;--navy:#0a344a;--gold:#d7a858;--mint:#b9e1d0;--canvas:#f5f8f7;--ink:#152c32;--danger:#b42318;--radius:22px;font-family:'DM Sans',system-ui,sans-serif}*{box-sizing:border-box}body{margin:0}a{color:inherit}a:focus-visible{outline:3px solid var(--gold);outline-offset:4px} .skip{position:absolute;left:-9999px;top:12px;background:#fff;color:#000;padding:12px;z-index:10}.skip:focus{left:12px}.site-shell{min-height:100vh;color:white;background:radial-gradient(ellipse at 5% 5%,#1a6b60 0,transparent 35%),linear-gradient(130deg,#063f3b 5%,#052e39 58%,#0a344a 100%)}.topbar,.care-header,.clinical-header{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:22px clamp(20px,5vw,80px)}.brand{display:flex;align-items:center;gap:12px;text-decoration:none;min-width:0}.brand img{flex-shrink:0}.brand strong{display:block;font-size:clamp(18px,2.1vw,26px);font-weight:800;letter-spacing:-.04em}.brand strong span{color:var(--gold)}.brand small{display:block;font-size:11px;letter-spacing:.05em;opacity:.85;line-height:1.4}.eyebrow,.overline,.kicker{font-size:12px;letter-spacing:.15em;font-weight:800}.eyebrow{color:var(--mint)}.hero{max-width:1320px;margin:auto;padding:clamp(30px,6vw,90px) 24px 70px}.hero-copy{max-width:800px}.kicker{color:var(--gold)}h1{font-size:clamp(38px,5.6vw,72px);line-height:1.07;letter-spacing:-.055em;margin:18px 0 22px}h1 em{font-style:normal;color:var(--mint)}.lead{font-size:clamp(17px,2vw,21px);line-height:1.65;color:#d4e9e6;max-width:700px}.notice{display:grid;gap:5px;max-width:740px;padding:15px 18px;border-radius:14px;border:1px solid #d7a85866;background:#052e39a8;color:#e8f6f2;font-size:14px;line-height:1.5;margin-top:25px}.notice strong{color:#f5d497}.experience-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:48px}.experience{min-height:340px;border:1px solid #ffffff32;padding:30px;border-radius:28px;display:flex;flex-direction:column;align-items:flex-start;gap:15px;text-decoration:none;box-shadow:0 20px 60px #0002;transition:transform .2s,border-color .2s}.experience:hover{transform:translateY(-4px);border-color:var(--gold)}.experience.care{background:linear-gradient(145deg,#146b5b,#063f3b)}.experience.clinical{background:linear-gradient(145deg,#154f67,#092d40)}.experience-icon{background:#ffffff14;padding:10px;border-radius:20px}.experience-icon img{width:76px;height:76px}.experience .overline{color:#d9d9d0}.experience>strong{font-size:clamp(24px,3vw,36px);letter-spacing:-.04em}.experience i{font-style:normal;color:var(--mint);font-weight:500}.experience>span:not(.experience-icon):not(.overline):not(.enter){font-size:17px;color:#d2e5e1}.enter{margin-top:auto;color:#f5d497;font-weight:700}.footer{padding:25px;text-align:center;color:#bad5d2;font-size:13px;border-top:1px solid #ffffff20}.care-page{min-height:100vh;background:#f2f8f5;color:#173d35}.care-header{background:#063f3b;color:white}.back{text-decoration:none;font-weight:700;padding:10px}.care-main{max-width:1100px;margin:auto;padding:45px 24px 90px}.care-main .kicker{color:#15735d}.care-main h1{font-size:clamp(38px,5vw,64px)}.care-lead{font-size:clamp(19px,2vw,24px);line-height:1.55;max-width:740px}.care-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin:42px 0}.care-card{background:#fff;border:2px solid #cbded5;border-radius:24px;padding:28px;min-height:280px}.care-symbol{font-size:40px;color:#15735d}.care-card h2{font-size:26px;line-height:1.2}.care-card p{font-size:18px;line-height:1.5}.care-card.help{border-color:#d4b4a6}.planned{display:inline-block;margin-top:12px;font-size:12px;letter-spacing:.03em;font-weight:700;background:#e6eee9;color:#335b4d;padding:7px 10px;border-radius:8px}.notice.light{background:#fff7eb;color:#543e1c;border-color:#ddc5a5}.notice.light strong{color:#684516}.clinical-page{min-height:100vh;background:#eef3f6;color:#173344}.clinical-header{background:#092e41;color:white}.clinical-main{max-width:1320px;margin:auto;padding:48px 24px 90px}.clinical-heading{display:flex;justify-content:space-between;align-items:center;gap:20px}.clinical-heading h1{font-size:clamp(36px,4vw,56px)}.clinical-heading p:not(.kicker){font-size:18px}.clinical-heading .kicker{color:var(--navy)}.environment{border:1px solid #9fb8c2;color:#315667;border-radius:10px;padding:9px 12px;font-size:12px;font-weight:800;white-space:nowrap}.clinical-notice{border-left:4px solid #bf8c40;background:#fff;padding:18px 20px;border-radius:12px;line-height:1.5;margin:24px 0 30px}.clinical-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.module{border:1px solid #d7e1e7;border-radius:20px;padding:24px;background:#fff;min-height:210px}.module-index{font-weight:800;color:#8b642d;font-size:14px}.module h2{font-size:21px}.module p{line-height:1.5;color:#48606b}.next-step{margin-top:25px;padding:25px;border-radius:20px;background:#dce9ed}.next-step h2{margin-top:0}@media(max-width:850px){.experience-grid,.care-cards,.clinical-grid{grid-template-columns:1fr}.clinical-heading{align-items:flex-start;flex-direction:column}.experience{min-height:290px}}@media(max-width:540px){.topbar,.care-header,.clinical-header{padding:18px 16px}.eyebrow{display:none}.brand img{width:42px;height:42px}.brand small{font-size:9px}.hero,.care-main,.clinical-main{padding-left:18px;padding-right:18px}.experience{padding:24px}.care-card{min-height:auto}.care-main h1{font-size:40px}.care-card h2{font-size:24px}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+ 
+ .workflow-form{display:grid;gap:12px;max-width:680px}.workflow-form label,.next-step label{font-weight:700}.workflow-form input,.workflow-form select,.workflow-form textarea,.next-step select,.next-step textarea{width:100%;padding:12px;border:1px solid #a8c1c1;border-radius:10px;background:#fff;color:#152c32;font:inherit}.workflow-form button,.next-step button{padding:12px 16px;background:#063f3b;color:#fff;border:0;border-radius:10px;font:inherit;font-weight:700;cursor:pointer;margin-top:10px}.workflow-form button:disabled,.next-step button:disabled{opacity:.5;cursor:not-allowed}.next-step .module{margin-top:15px;min-height:0}.next-step textarea{display:block;margin-top:8px}
+diff --git a/playwright.config.ts b/playwright.config.ts
+new file mode 100644
+index 0000000..57de184
+--- /dev/null
++++ b/playwright.config.ts
+@@ -0,0 +1,8 @@
++import { defineConfig } from '@playwright/test';
++export default defineConfig({
++  testDir:'tests/e2e-real',timeout:45000,workers:1,
++  reporter:[['line'],['json',{outputFile:'artifacts/m14.5/playwright-results.json'}]],
++  outputDir:'test-results',
++  use:{headless:true,trace:'off',video:'off',screenshot:'only-on-failure',
++    launchOptions:{executablePath:process.env.ONCO_BROWSER_EXECUTABLE||undefined,args:process.env.ONCO_BROWSER_ARGS?JSON.parse(process.env.ONCO_BROWSER_ARGS):['--no-sandbox','--disable-dev-shm-usage']}}
++});
+diff --git a/services/api/src/database.service.ts b/services/api/src/database.service.ts
+index 2b80eea..78e0977 100644
+--- a/services/api/src/database.service.ts
++++ b/services/api/src/database.service.ts
+@@ -1,6 +1,7 @@
+ import { Injectable, OnModuleDestroy, ServiceUnavailableException } from '@nestjs/common';
+ import { Pool, PoolClient } from 'pg';
+ 
++
+ @Injectable()
+ export class DatabaseService implements OnModuleDestroy {
+   private readonly pool?: Pool;
+@@ -11,12 +12,21 @@ export class DatabaseService implements OnModuleDestroy {
+     if (!this.pool) throw new ServiceUnavailableException('Banco não configurado');
+     return this.pool;
+   }
++  private async assertRuntimeRole(client: Pick<PoolClient, 'query'>): Promise<void> {
++    const result = await client.query('SELECT current_user AS name, rolsuper, rolbypassrls FROM pg_roles WHERE rolname=current_user');
++    const role = result.rows[0];
++    if (role?.name !== 'oncopharma_app' || role.rolsuper !== false || role.rolbypassrls !== false)
++      throw new ServiceUnavailableException('Role de banco não permitida: exige oncopharma_app sem superusuário ou BYPASSRLS');
++  }
+   async query<T extends Record<string, unknown> = Record<string, unknown>>(sql: string, values: unknown[] = []): Promise<T[]> {
+-    return (await this.getPool().query(sql, values)).rows as T[];
++    const pool = this.getPool();
++    await this.assertRuntimeRole(pool);
++    return (await pool.query(sql, values)).rows as T[];
+   }
+   async withTenant<T>(organizationId: string, work: (client: PoolClient) => Promise<T>): Promise<T> {
+     const client = await this.getPool().connect();
+     try {
++      await this.assertRuntimeRole(client);
+       await client.query('BEGIN');
+       // Contexto local à transação, jamais global à conexão reutilizada.
+       await client.query('SELECT set_config($1, $2, true)', ['app.organization_id', organizationId]);
+diff --git a/services/api/src/workflow.controller.ts b/services/api/src/workflow.controller.ts
+index dd95499..94198a7 100644
+--- a/services/api/src/workflow.controller.ts
++++ b/services/api/src/workflow.controller.ts
+@@ -21,10 +21,12 @@ export class WorkflowController {
+   constructor(private readonly db: DatabaseService) {}
+   private async checkStaff(req: AuthenticatedRequest, org: string, patientId: string) {
+     if (!req.principal.mfa) throw new ForbiddenException('MFA obrigatório');
+-    const rows = await this.db.query<{role:string}>(`SELECT role FROM memberships WHERE organization_id=$1 AND oidc_issuer=$2 AND oidc_sub=$3 AND active=true`,[org,req.principal.issuer,req.principal.sub]);
++    return this.db.withTenant(org, async client => {
++    const rows = (await client.query<{role:string}>(`SELECT role FROM memberships WHERE organization_id=$1 AND oidc_issuer=$2 AND oidc_sub=$3 AND active=true`,[org,req.principal.issuer,req.principal.sub])).rows;
+     if (!rows.some(x=>STAFF.includes(x.role))) throw new ForbiddenException('Profissional sem vínculo');
+-    const assignments = await this.db.query<{patient_id:string}>(`SELECT patient_id FROM care_assignments WHERE organization_id=$1 AND patient_id=$2 AND oidc_issuer=$3 AND oidc_sub=$4 AND active=true`,[org,patientId,req.principal.issuer,req.principal.sub]);
++    const assignments = (await client.query<{patient_id:string}>(`SELECT patient_id FROM care_assignments WHERE organization_id=$1 AND patient_id=$2 AND oidc_issuer=$3 AND oidc_sub=$4 AND active=true`,[org,patientId,req.principal.issuer,req.principal.sub])).rows;
+     if (!assignments.length) throw new ForbiddenException('Paciente não atribuído');
++    });
+   }
+   @Post('care/patients/:patientId/symptoms')
+   async symptom(@Req() req: AuthenticatedRequest,@Param('patientId') patientId:string,@Headers('x-organization-id') orgHeader:string,@Body() body:Record<string,unknown>) {
+diff --git a/tests/e2e-real/auth-helpers.ts b/tests/e2e-real/auth-helpers.ts
+new file mode 100644
+index 0000000..10aa261
+--- /dev/null
++++ b/tests/e2e-real/auth-helpers.ts
+@@ -0,0 +1,25 @@
++import {expect} from '@playwright/test';
++import {createHmac,createDecipheriv} from 'node:crypto';
++import {createRemoteJWKSet,jwtVerify} from 'jose';
++import {existsSync,readFileSync,writeFileSync} from 'node:fs';
++export function otp(role:string){const secret=JSON.parse(process.env.ONCO_TEST_OTP_SECRETS||'{}')[role];const counter=Buffer.alloc(8);counter.writeBigUInt64BE(BigInt(Math.floor(Date.now()/30000)));const mac=createHmac('sha1',Buffer.from(secret,'utf8')).update(counter).digest();const at=mac[mac.length-1]&15;return String((mac.readUInt32BE(at)&0x7fffffff)%1000000).padStart(6,'0');}
++export async function freshOtp(role:string){
++ const path='artifacts/m14.5/otp-used-periods.json';const used=existsSync(path)?JSON.parse(readFileSync(path,'utf8')):{};
++ let period=Math.floor(Date.now()/30000);if(used[role]>=period){await new Promise(resolve=>setTimeout(resolve,30000-(Date.now()%30000)+500));period=Math.floor(Date.now()/30000);}
++ used[role]=period;writeFileSync(path,JSON.stringify(used));return otp(role);
++}
++export function tokenFromCookie(value:string){const b=Buffer.from(value,'base64url');const d=createDecipheriv('aes-256-gcm',Buffer.from(process.env.SESSION_ENCRYPTION_KEY!,'base64'),b.subarray(0,12));d.setAuthTag(b.subarray(12,28));return JSON.parse(Buffer.concat([d.update(b.subarray(28)),d.final()]).toString());}
++export async function login(page:any,role:string,app='clinical'){
++ const port=app==='care'?3001:app==='admin'?3003:3002;
++ let pkce=false;page.on('request',(r:any)=>{if(r.url().includes('/protocol/openid-connect/auth?')){const u=new URL(r.url());pkce=u.searchParams.get('code_challenge_method')==='S256'&&!!u.searchParams.get('code_challenge')&&!!u.searchParams.get('nonce')&&!!u.searchParams.get('state');}});
++ await page.goto(`http://localhost:${port}/api/auth/login`);
++ await page.locator('#username').fill(`synthetic-${role}`);await page.locator('#password').fill(process.env.ONCO_TEST_PASSWORD!);await page.locator('#kc-login').click();
++ await page.locator('#otp').fill('000000');await page.locator('#kc-login').click();await expect(page.locator('#otp')).toBeVisible();
++ await page.locator('#otp').fill(await freshOtp(role));await page.locator('#kc-login').click();
++ await expect(page).toHaveURL(new RegExp(`localhost:${port}/`));await expect(page).not.toHaveURL(/login=failed/);expect(pkce).toBeTruthy();
++ const cookie=(await page.context().cookies()).find((c:any)=>c.name==='onco_session');expect(cookie).toBeDefined();expect(cookie!.httpOnly).toBeTruthy();expect(cookie!.sameSite).toBe('Lax');
++ expect(await page.evaluate(()=>document.cookie.includes('onco_session'))).toBeFalsy();
++ const session=tokenFromCookie(cookie!.value);const jwt=await jwtVerify(session.token,createRemoteJWKSet(new URL(process.env.OIDC_JWKS_URI!)),{issuer:process.env.OIDC_ISSUER,audience:'oncopharma-api',algorithms:['RS256']});
++ expect(jwt.payload.amr).toContain('otp');expect((jwt.payload.realm_access as any).roles).toContain(role);
++ return {token:session.token,expiresAt:session.expiresAt,port};
++}
+diff --git a/tests/e2e-real/identity.spec.ts b/tests/e2e-real/identity.spec.ts
+new file mode 100644
+index 0000000..9468aca
+--- /dev/null
++++ b/tests/e2e-real/identity.spec.ts
+@@ -0,0 +1,46 @@
++import {test,expect} from '@playwright/test';
++import {login,freshOtp,tokenFromCookie} from './auth-helpers';
++import {createCipheriv,randomBytes} from 'node:crypto';
++import fs from 'node:fs';
++for(const role of ['patient','caregiver','pharmacist','nurse','physician','technical_admin']){
++ test(`OIDC ${role}: real TOTP, PKCE, signed JWT and HttpOnly session`,async({page,request})=>{
++  const app=role==='patient'||role==='caregiver'?'care':role==='technical_admin'?'admin':'clinical';
++  test.setTimeout(90000);const s=await login(page,role,app);
++  const response=await request.get('http://localhost:4000/v1/me',{headers:{Authorization:`Bearer ${s.token}`}});
++  expect(response.status()).toBe(process.env.DATABASE_URL?200:503); // valid JWT reaches the DB boundary; NOT an RBAC success.
++  await page.screenshot({path:`artifacts/m14.5/screenshots/identity-${role}.png`,fullPage:true});
++  const responsePromise=page.waitForResponse(r=>r.url().endsWith('/api/auth/logout')&&r.request().method()==='POST');
++  await page.evaluate(()=>fetch('/api/auth/logout',{method:'POST'}));expect((await responsePromise).status()).toBe(303);
++  expect((await page.context().cookies()).some(c=>c.name==='onco_session')).toBeFalsy();
++ });
++}
++test('OIDC negative: missing/forged JWT, bad state, foreign-origin CSRF and session expiration',async({page,request})=>{
++ test.setTimeout(180000);
++ const s=await login(page,'pharmacist');
++ for(const token of ['',s.token.slice(0,-8)+'tampered']){const r=await request.get('http://localhost:4000/v1/me',{headers:token?{Authorization:`Bearer ${token}`}:{}});expect(r.status()).toBe(401);}
++ const csrf=await page.context().request.post('http://localhost:3002/api/auth/logout',{headers:{Origin:'https://untrusted.example.invalid'},maxRedirects:0});expect(csrf.status()).toBe(403);
++ const workflow=await page.context().request.post('http://localhost:3002/api/workflow/patients/11111111-1111-4111-8111-111111111111/interventions',{headers:{Origin:'https://untrusted.example.invalid'},data:{note:'synthetic'}});expect(workflow.status()).toBe(403);
++ await page.goto('http://localhost:3002/api/auth/callback?code=synthetic-invalid&state=wrong');await expect(page).toHaveURL(/login=failed/);expect((await page.context().cookies()).some(c=>c.name==='onco_session')).toBeFalsy();
++ await login(page,'pharmacist');
++ const sessionCookie=(await page.context().cookies()).find(c=>c.name==='onco_session')!;const sess=tokenFromCookie(sessionCookie.value);
++ const wait=Math.max(0,sess.expiresAt-Date.now()+1500);console.log('Waiting for actual server-side session expiration: '+Math.ceil(wait/1000)+'s');await new Promise(resolve=>setTimeout(resolve,wait));
++ const expired=await page.context().request.get('http://localhost:3002/api/clinical/summary');expect(expired.status()).toBe(401);
++ await page.goto('http://localhost:3002/clinical');await expect(page.getByText('Faça login para acessar os dados profissionais.')).toBeVisible();
++ await page.screenshot({path:'artifacts/m14.5/screenshots/identity-expired.png',fullPage:true});
++});
++
++test('IdP rejects a wrong PKCE verifier for a real authorization code',async({page})=>{
++ test.setTimeout(90000);
++ await page.goto('http://localhost:3001/api/auth/login');
++ const cookie=(await page.context().cookies()).find(c=>c.name==='onco_login_flow')!;expect(cookie).toBeDefined();
++ const flow=tokenFromCookie(cookie.value);flow.verifier='invalid-verifier-'.repeat(4);
++ const iv=randomBytes(12),cipher=createCipheriv('aes-256-gcm',Buffer.from(process.env.SESSION_ENCRYPTION_KEY!,'base64'),iv);const encrypted=Buffer.concat([cipher.update(JSON.stringify(flow)),cipher.final()]);
++ // Negative fault injection: keep actual state/nonce, but make the BFF send an
++ // incorrect verifier for the challenge already registered with the real IdP.
++ // This never constructs an authenticated session or bypasses an authenticator.
++ await page.context().addCookies([{...cookie,value:Buffer.concat([iv,cipher.getAuthTag(),encrypted]).toString('base64url')}]);
++ await page.locator('#username').fill('synthetic-patient');await page.locator('#password').fill(process.env.ONCO_TEST_PASSWORD!);await page.locator('#kc-login').click();await page.locator('#otp').fill(await freshOtp('patient'));await page.locator('#kc-login').click();
++ await expect(page).toHaveURL(/localhost:3001\/care\?login=failed/);
++ expect((await page.context().cookies()).some(c=>c.name==='onco_session')).toBeFalsy();
++ await expect.poll(()=>fs.readFileSync('artifacts/m14.5/logs/keycloak-server.log','utf8').includes('pkce_verification_failed')).toBeTruthy();
++});
+diff --git a/tests/e2e-real/surfaces.spec.ts b/tests/e2e-real/surfaces.spec.ts
+new file mode 100644
+index 0000000..31fc2c6
+--- /dev/null
++++ b/tests/e2e-real/surfaces.spec.ts
+@@ -0,0 +1,33 @@
++import {test,expect} from '@playwright/test';
++import AxeBuilder from '@axe-core/playwright';
++import fs from 'node:fs';
++const out='artifacts/m14.5/screenshots';fs.mkdirSync(out,{recursive:true});
++for(const [app,url,title] of [
++ ['care','http://localhost:3001/care','Seu cuidado, no seu ritmo.'],
++ ['clinical','http://localhost:3002/clinical','Visão clínica integrada.'],
++ ['admin','http://localhost:3003/','Governança institucional']
++]) {
++ test(`${app}: mobile/desktop, keyboard, contrast and unauthenticated state`,async({page})=>{
++  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
++  for(const [size,width,height] of [['mobile',390,844],['tablet',768,1024],['desktop',1440,1000]] as const){
++   await page.setViewportSize({width,height});await page.goto(url);
++   await expect(page.getByRole('heading',{level:1})).toBeVisible();
++   if(app==='clinical')await expect(page.getByText('Faça login para acessar os dados profissionais.')).toBeVisible();
++   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();
++   await page.screenshot({path:`${out}/${app}-${size}.png`,fullPage:true});
++  }
++  if(app!=='admin'){await page.goto(url);await page.keyboard.press('Tab');await expect(page.getByRole('link',{name:'Pular para o conteúdo'})).toBeFocused();await page.keyboard.press('Enter');}
++  const axe=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']).analyze();
++  fs.writeFileSync(`artifacts/m14.5/axe-${app}.json`,JSON.stringify(axe.violations.map(v=>({id:v.id,impact:v.impact,description:v.description,nodes:v.nodes.map(n=>({target:n.target,failureSummary:n.failureSummary}))})),null,2));
++  expect(axe.violations).toEqual([]);expect(errors).toEqual([]);
++ });
++}
++test('Care unauthenticated submission remains blocked; API DB readiness remains closed',async({page,request})=>{
++ await page.goto('http://localhost:3001/care');
++ await page.getByLabel('ID do paciente fictício (UUID)').fill('11111111-1111-4111-8111-111111111111');
++ await page.getByLabel('Descrição fictícia').fill('Relato exclusivamente sintético M14.5');
++ await page.getByRole('button',{name:'Registrar relato de teste'}).click();
++ await expect(page.getByRole('status')).toContainText('Autenticação necessária');
++ await page.screenshot({path:`${out}/care-error-unauthenticated.png`,fullPage:true});
++ const ready=await request.get('http://localhost:4000/v1/ready');expect([200,503]).toContain(ready.status());
++});
+diff --git a/tests/e2e-real/vertical.spec.ts b/tests/e2e-real/vertical.spec.ts
+new file mode 100644
+index 0000000..14b18d9
+--- /dev/null
++++ b/tests/e2e-real/vertical.spec.ts
+@@ -0,0 +1,28 @@
++import {test,expect} from '@playwright/test';import pg from 'pg';import {randomUUID} from 'node:crypto';
++import {login} from './auth-helpers';
++test('Care -> API/PostgreSQL -> Clinical review -> persisted audit; foreign patientId denied',async({browser,request})=>{
++ test.setTimeout(120000);
++ expect(process.env.NODE_ENV).not.toBe('production');expect(process.env.DATABASE_URL_ADMIN).toBeTruthy();expect(process.env.DATABASE_URL).toBeTruthy();
++ const admin=new pg.Client({connectionString:process.env.DATABASE_URL_ADMIN});await admin.connect();
++ const org=process.env.DEV_ORGANIZATION_ID!, patient=randomUUID(),other=randomUUID();
++ const care=await browser.newContext(),clinical=await browser.newContext();const cp=await care.newPage(),sp=await clinical.newPage();
++ try {
++  expect((await admin.query('SELECT current_database() AS db')).rows[0].db).toBe('oncopharma_dev');
++  await admin.query('INSERT INTO organizations(id,name) VALUES($1,$2) ON CONFLICT DO NOTHING',[org,'Synthetic E2E institution']);
++  await admin.query('INSERT INTO patients(id,organization_id,external_reference,synthetic) VALUES($1,$2,$3,true),($4,$2,$5,true)',[patient,org,'E2E-A-'+patient,other,'E2E-B-'+other]);
++  const patientAuth=await login(cp,'patient','care'),staffAuth=await login(sp,'pharmacist');
++  // These are real signed IdP tokens obtained by browser login, not mocked sessions.
++  const patientSub=JSON.parse(Buffer.from(patientAuth.token.split('.')[1],'base64url').toString()).sub;
++  const staffSub=JSON.parse(Buffer.from(staffAuth.token.split('.')[1],'base64url').toString()).sub;
++  for(const [sub,role] of [[patientSub,'patient'],[staffSub,'pharmacist']])await admin.query('INSERT INTO memberships(organization_id,oidc_issuer,oidc_sub,role) VALUES($1,$2,$3,$4) ON CONFLICT DO NOTHING',[org,process.env.OIDC_ISSUER,sub,role]);
++  await admin.query('INSERT INTO patient_portal_links(organization_id,patient_id,oidc_issuer,oidc_sub) VALUES($1,$2,$3,$4)',[org,patient,process.env.OIDC_ISSUER,patientSub]);
++  await admin.query('INSERT INTO care_assignments(organization_id,patient_id,oidc_issuer,oidc_sub) VALUES($1,$2,$3,$4)',[org,patient,process.env.OIDC_ISSUER,staffSub]);
++  const denied=await request.post(`http://localhost:4000/v1/workflow/care/patients/${other}/symptoms`,{headers:{Authorization:`Bearer ${patientAuth.token}`,'x-organization-id':org},data:{symptomCode:'nausea',description:'Synthetic forbidden patient',requestId:randomUUID()}});expect(denied.status()).toBe(403);
++  await cp.goto('http://localhost:3001/care');await cp.getByLabel('ID do paciente fictício (UUID)').fill(patient);await cp.getByLabel('Descrição fictícia').fill('Synthetic vertical workflow M14.5');await cp.getByRole('button',{name:'Registrar relato de teste'}).click();await expect(cp.getByRole('status')).toContainText('Relato sintético registrado');
++  const report=(await admin.query('SELECT id FROM patient_symptom_reports WHERE patient_id=$1',[patient])).rows;expect(report).toHaveLength(1);
++  await sp.goto('http://localhost:3002/clinical');await sp.getByRole('button',{name:'Consultar alertas'}).click();await sp.getByLabel('Justificativa da revisão').fill('Synthetic professional review, no clinical guidance.');await sp.getByRole('button',{name:'Registrar revisão pendente'}).click();await expect(sp.getByText(/acknowledged/)).toBeVisible();
++  expect((await admin.query('SELECT id FROM clinical_interventions WHERE patient_id=$1',[patient])).rowCount).toBe(1);
++  const actions=(await admin.query("SELECT action FROM audit_events WHERE organization_id=$1 AND actor_sub IN ($2,$3)",[org,patientSub,staffSub])).rows.map(x=>x.action);expect(actions).toContain('symptom.created');expect(actions).toContain('intervention.created');
++  await cp.screenshot({path:'artifacts/m14.5/screenshots/vertical-care.png',fullPage:true});await sp.screenshot({path:'artifacts/m14.5/screenshots/vertical-clinical.png',fullPage:true});
++ }finally{await care.close();await clinical.close();await admin.end();}
++});
+diff --git a/tests/m143-integration-readiness.test.mjs b/tests/m143-integration-readiness.test.mjs
+index d0c4277..5cfa271 100644
+--- a/tests/m143-integration-readiness.test.mjs
++++ b/tests/m143-integration-readiness.test.mjs
+@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
+ import {readFileSync} from 'node:fs';
+ const read = p => readFileSync(new URL('../'+p, import.meta.url),'utf8');
+ test('CI usa banco DEV permitido pelas migrações',()=>{ const y=read('.github/workflows/quality.yml'); assert.match(y,/POSTGRES_DB: oncopharma_dev/); assert.doesNotMatch(y,/oncopharma_ci/); });
+-test('CI provisiona role antes do teste real de RLS',()=>{const y=read('.github/workflows/quality.yml'); assert.ok(y.indexOf('bootstrap-ci-db.sh')<y.indexOf('npm run test:db:required'));assert.match(y,/oncopharma_app:ci_runtime_test_password/);});
++test('CI provisiona role antes do teste real de RLS',()=>{const y=read('.github/workflows/quality.yml'); assert.ok(y.indexOf('bootstrap-ci-db.sh')<y.indexOf('npm run test:db:required'));assert.ok(y.includes('DATABASE_URL: postgres://oncopharma_app:'));assert.match(y,/secrets.ONCO_CI_DB_APP_PASSWORD/);});
+ test('migração inclui política INSERT de auditoria com tenant',()=>{const s=read('infra/migrations/0003_runtime_permissions.sql');assert.match(s,/CREATE POLICY audit_events_insert_tenant/);assert.match(s,/FOR INSERT/);assert.match(s,/organization_id = nullif/);});
+ test('testes obrigatórios recusam conexão administrativa',()=>{assert.match(read('tests/require-postgres.mjs'),/role.stdout.trim\(\)!=='oncopharma_app'/);});
+ test('bootstrap exige ambiente test e não usa seeds',()=>{const s=read('infra/scripts/bootstrap-ci-db.sh');assert.match(s,/NODE_ENV:-/);assert.match(s,/oncopharma_dev/);assert.doesNotMatch(s,/seed-dev\.sh/);});
+diff --git a/tests/m145-api.security.mjs b/tests/m145-api.security.mjs
+new file mode 100644
+index 0000000..5730100
+--- /dev/null
++++ b/tests/m145-api.security.mjs
+@@ -0,0 +1,19 @@
++import test from 'node:test';import assert from 'node:assert/strict';
++import {createRequire} from 'node:module';const require=createRequire(import.meta.url);
++const {DatabaseService}=require('../services/api/dist/database.service.js');
++const {WorkflowController}=require('../services/api/dist/workflow.controller.js');
++test('DatabaseService refuses superuser, BYPASSRLS and unexpected role before transaction',async()=>{
++ for(const role of [{name:'oncopharma_app',rolsuper:true,rolbypassrls:false},{name:'oncopharma_app',rolsuper:false,rolbypassrls:true},{name:'postgres',rolsuper:false,rolbypassrls:false}]){
++  const events=[];const client={query:async sql=>{events.push(sql);return {rows:[role]}},release:()=>{}};
++  const db=new DatabaseService();db.pool={connect:async()=>client,end:async()=>{}};
++  await assert.rejects(db.withTenant('test',async()=>{throw Error('must not run')}),/Role de banco não permitida/);
++  assert.equal(events.includes('BEGIN'),false);
++ }
++});
++test('staff assignments are checked inside tenant context, with MFA and active membership',async()=>{
++ const req={principal:{sub:'synthetic-pharmacist',issuer:'synthetic-idp',mfa:true}};let tenantCalls=0;
++ const db={withTenant:async(org,fn)=>{assert.equal(org,'synthetic-tenant');tenantCalls++;return fn({query:async(sql,args)=>({rows:sql.includes('memberships')?[{role:'pharmacist'}]:[{patient_id:'synthetic-patient'}]})})}};
++ const controller=new WorkflowController(db);await controller.checkStaff(req,'synthetic-tenant','synthetic-patient');assert.equal(tenantCalls,1);
++ await assert.rejects(controller.checkStaff({principal:{...req.principal,mfa:false}},'synthetic-tenant','synthetic-patient'),/MFA obrigatório/);
++ await assert.rejects(new WorkflowController({withTenant:async(org,fn)=>fn({query:async()=>({rows:[]})})}).checkStaff(req,'synthetic-tenant','synthetic-patient'),/Profissional sem vínculo/);
++});
+diff --git a/tests/m145-db.integration.mjs b/tests/m145-db.integration.mjs
+new file mode 100644
+index 0000000..dfb4f0b
+--- /dev/null
++++ b/tests/m145-db.integration.mjs
+@@ -0,0 +1,44 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import { randomUUID } from 'node:crypto';
++import pg from 'pg';
++import { spawnSync } from 'node:child_process';
++// Run only against an ephemeral test DB, after bootstrap. Missing prerequisites FAIL;
++// the evidence runner must mark the group BLOCKED before invoking it.
++const setup = async () => {
++  assert.equal(process.env.NODE_ENV, 'test');
++  assert.ok(process.env.DATABASE_URL_ADMIN && process.env.DATABASE_URL);
++  const admin = new pg.Client({ connectionString: process.env.DATABASE_URL_ADMIN });
++  const app = new pg.Client({ connectionString: process.env.DATABASE_URL });
++  await admin.connect(); await app.connect();
++  assert.equal((await admin.query('SELECT current_database() AS db')).rows[0].db, 'oncopharma_dev');
++  const a = randomUUID(), b = randomUUID(), pa = randomUUID(), pb = randomUUID();
++  await admin.query('INSERT INTO organizations(id,name) VALUES($1,$2),($3,$4)',[a,'Synthetic TEST A',b,'Synthetic TEST B']);
++  await admin.query('INSERT INTO patients(id,organization_id,external_reference,synthetic) VALUES($1,$2,$3,true),($4,$5,$6,true)',[pa,a,'M14.5-A',pb,b,'M14.5-B']);
++  return {admin,app,a,b,pa,pb};
++};
++test('M14.5 PostgreSQL: populated cross-tenant RLS, audit INSERT, escalation and transaction reset', async () => {
++  const {admin,app,a,b,pa,pb} = await setup();
++  try {
++    const role=(await app.query('SELECT current_user AS name, rolsuper,rolbypassrls FROM pg_roles WHERE rolname=current_user')).rows[0];
++    assert.equal(role.name,'oncopharma_app'); assert.equal(role.rolsuper,false); assert.equal(role.rolbypassrls,false);
++    assert.equal((await app.query('SELECT id FROM patients')).rowCount,0);
++    await app.query('BEGIN'); await app.query("SELECT set_config('app.organization_id',$1,true)",[a]);
++    assert.deepEqual((await app.query('SELECT id FROM patients WHERE id IN ($1,$2) ORDER BY id',[pa,pb])).rows.map(x=>x.id),[pa]);
++    await app.query("INSERT INTO audit_events(organization_id,actor_issuer,actor_sub,action,resource_type) VALUES($1,'synthetic-idp','synthetic-patient','m145.test','test')",[a]);
++    await app.query('SAVEPOINT negative_audit');
++    await assert.rejects(app.query("INSERT INTO audit_events(organization_id,actor_issuer,actor_sub,action,resource_type) VALUES($1,'synthetic-idp','synthetic-patient','m145.test','test')",[b]), e=>e.code==='42501');
++    await app.query('ROLLBACK TO SAVEPOINT negative_audit');
++    await app.query('SAVEPOINT escalation');
++    const adminRole=(await admin.query('SELECT quote_ident(current_user) AS name')).rows[0].name;
++    await assert.rejects(app.query('SET ROLE '+adminRole),e=>e.code==='42501');
++    await app.query('ROLLBACK TO SAVEPOINT escalation'); await app.query('ROLLBACK');
++    assert.equal((await app.query('SELECT id FROM patients WHERE id=$1',[pa])).rowCount,0);
++    // The privileged account DOES bypass RLS in PostgreSQL; prove the runner refuses it.
++    const privileged=(await admin.query('SELECT rolsuper OR rolbypassrls AS bypass FROM pg_roles WHERE rolname=current_user')).rows[0].bypass;
++    assert.equal(privileged,true);
++    const rejected=spawnSync(process.execPath,['tests/require-postgres.mjs'],{env:{...process.env,DATABASE_URL:process.env.DATABASE_URL_ADMIN},encoding:'utf8'});
++    assert.equal(rejected.status,2);
++    console.log('Synthetic tenants isolated; same-tenant audit INSERT allowed; cross-tenant INSERT and runtime escalation rejected; admin prerequisite rejected.');
++  } finally {await app.end();await admin.end();}
++});
+diff --git a/tests/require-postgres.mjs b/tests/require-postgres.mjs
+index 41eff6e..9ca30db 100644
+--- a/tests/require-postgres.mjs
++++ b/tests/require-postgres.mjs
+@@ -5,4 +5,7 @@ const probe = spawnSync('psql', [process.env.DATABASE_URL, '-v', 'ON_ERROR_STOP=
+ if (probe.status!==0 || probe.stdout.trim()!=='1') { console.error('BLOQUEADO: PostgreSQL indisponível ou autenticação inválida. '+(probe.stderr||probe.error?.message||'')); process.exit(2); }
+ const role = spawnSync('psql', [process.env.DATABASE_URL, '-v', 'ON_ERROR_STOP=1', '-Atqc', 'SELECT current_user'], {encoding:'utf8',timeout:15000});
+ if (role.status!==0 || role.stdout.trim()!=='oncopharma_app') { console.error('BLOQUEADO: testes devem usar a role restrita oncopharma_app.'); process.exit(2); }
++
++const privileges = spawnSync('psql', [process.env.DATABASE_URL, '-v', 'ON_ERROR_STOP=1', '-Atqc', 'SELECT rolsuper OR rolbypassrls FROM pg_roles WHERE rolname=current_user'], {encoding:'utf8',timeout:15000});
++if (privileges.status!==0 || privileges.stdout.trim()!=='f') { console.error('BLOQUEADO: superusuário ou BYPASSRLS proibido na role runtime.'); process.exit(2); }
+ console.log('PostgreSQL conectado com role restrita; executando testes integrados obrigatórios.');
+diff --git a/tools/run-identity-validation.mjs b/tools/run-identity-validation.mjs
+new file mode 100644
+index 0000000..6b5976c
+--- /dev/null
++++ b/tools/run-identity-validation.mjs
+@@ -0,0 +1,36 @@
++import {spawn} from 'node:child_process';
++import {randomBytes} from 'node:crypto';
++import {createWriteStream,mkdirSync,writeFileSync} from 'node:fs';
++import {join} from 'node:path';
++const output='artifacts/m14.5';mkdirSync(`${output}/logs`,{recursive:true});
++if(!process.env.KEYCLOAK_HOME)throw Error('KEYCLOAK_HOME obrigatório: distribuição local de teste, nunca produção.');
++const home=process.env.KEYCLOAK_HOME;
++const base='http://localhost:8080';const issuer=base+'/realms/oncopharma-test';
++const password=randomBytes(32).toString('base64url');const adminPassword=randomBytes(32).toString('base64url');
++function base32(bytes){const alphabet='ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';let bits=0,val=0,out='';for(const byte of bytes){val=(val<<8)|byte;bits+=8;while(bits>=5){out+=alphabet[(val>>>(bits-5))&31];bits-=5;}}if(bits)out+=alphabet[(val<<(5-bits))&31];return out;}
++const roles=['patient','caregiver','pharmacist','nurse','physician','technical_admin'];
++const secrets=Object.fromEntries(roles.map(r=>[r,base32(randomBytes(20))]));
++const env={...process.env,KC_BOOTSTRAP_ADMIN_USERNAME:'onco-test-admin',KC_BOOTSTRAP_ADMIN_PASSWORD:adminPassword,KC_HTTP_ENABLED:'true',KC_HOSTNAME:base,KC_HEALTH_ENABLED:'true',JAVA_OPTS_APPEND:'-Xms128m -Xmx768m -XX:ActiveProcessorCount=2'};
++const log=createWriteStream(`${output}/logs/keycloak-server.log`);
++const idp=spawn(join(home,'bin/kc.sh'),['start-dev','--db=dev-mem','--http-host=127.0.0.1','--http-port=8080'],{env,stdio:['ignore','pipe','pipe']});idp.stdout.pipe(log);idp.stderr.pipe(log);
++let stack;
++try{
++ let ready=false;for(let i=0;i<180;i++){if(idp.exitCode!==null)throw Error(`Keycloak exited ${idp.exitCode}`);try{if((await fetch(base+'/realms/master/.well-known/openid-configuration')).ok){ready=true;break;}}catch{}await new Promise(r=>setTimeout(r,1000));}if(!ready)throw Error('Keycloak healthcheck timed out after 180 seconds');
++ const login=await fetch(base+'/realms/master/protocol/openid-connect/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'password',client_id:'admin-cli',username:'onco-test-admin',password:adminPassword})});
++ if(!login.ok)throw Error(`Admin bootstrap authentication failed HTTP ${login.status}`);const adminToken=(await login.json()).access_token;
++ const realm={realm:'oncopharma-test',enabled:true,sslRequired:'none',registrationAllowed:false,resetPasswordAllowed:false,accessTokenLifespan:90,ssoSessionIdleTimeout:180,ssoSessionMaxLifespan:300,
++  browserFlow:'onco-browser-mfa',roles:{realm:roles.map(name=>({name}))},
++  authenticatorConfig:[{alias:'pwd-reference',config:{'default.reference.value':'pwd','default.reference.maxAge':'300'}},{alias:'otp-reference',config:{'default.reference.value':'otp','default.reference.maxAge':'300'}}],
++  authenticationFlows:[{alias:'onco-browser-mfa',providerId:'basic-flow',topLevel:true,builtIn:false,authenticationExecutions:[{authenticator:'auth-username-password-form',authenticatorConfig:'pwd-reference',requirement:'REQUIRED',priority:10,authenticatorFlow:false,userSetupAllowed:false},{authenticator:'auth-otp-form',authenticatorConfig:'otp-reference',requirement:'REQUIRED',priority:20,authenticatorFlow:false,userSetupAllowed:false}]}],
++  clients:['care','clinical','admin'].map((name,index)=>({clientId:`oncopharma-${name}`,enabled:true,protocol:'openid-connect',publicClient:true,standardFlowEnabled:true,directAccessGrantsEnabled:false,serviceAccountsEnabled:false,redirectUris:[`http://localhost:${3001+index}/api/auth/callback`],webOrigins:[`http://localhost:${3001+index}`],attributes:{'pkce.code.challenge.method':'S256'},protocolMappers:[{name:'api-audience',protocol:'openid-connect',protocolMapper:'oidc-audience-mapper',config:{'included.custom.audience':'oncopharma-api','access.token.claim':'true','id.token.claim':'false'}},{name:'mfa-method',protocol:'openid-connect',protocolMapper:'oidc-amr-mapper',config:{'access.token.claim':'true','id.token.claim':'true'}}]})),
++  users:roles.map(role=>({username:`synthetic-${role}`,enabled:true,emailVerified:true,firstName:'Synthetic',lastName:role,email:`${role}@example.invalid`,realmRoles:[role],requiredActions:[],credentials:[{type:'password',value:password,temporary:false},{type:'otp',userLabel:'Synthetic TOTP',secretData:JSON.stringify({value:secrets[role]}),credentialData:JSON.stringify({subType:'totp',digits:6,counter:0,period:30,algorithm:'HmacSHA1'})}]}))};
++ const create=await fetch(base+'/admin/realms',{method:'POST',headers:{Authorization:`Bearer ${adminToken}`,'Content-Type':'application/json'},body:JSON.stringify(realm)});
++ if(!create.ok)throw Error(`Synthetic realm creation failed HTTP ${create.status}: ${(await create.text()).slice(0,500)}`);
++ const report={issuer,product:'ONCOPHARMA',keycloak:'26.0.8',users:roles.map(r=>({username:`synthetic-${r}`,role:r})),mfa:'REQUIRED password + TOTP; real AMR execution references',pkce:'S256 required',directGrants:false,syntheticOnly:true,clinicalApproval:false};
++ writeFileSync(`${output}/idp-configuration.json`,JSON.stringify(report,null,2));
++ console.log('Keycloak ready: 6 synthetic accounts; mandatory password + TOTP; PKCE S256; direct grants disabled.');
++ const testEnv={...process.env,OIDC_ISSUER:issuer,OIDC_AUTHORIZATION_ENDPOINT:issuer+'/protocol/openid-connect/auth',OIDC_TOKEN_ENDPOINT:issuer+'/protocol/openid-connect/token',OIDC_JWKS_URI:issuer+'/protocol/openid-connect/certs',OIDC_AUDIENCE:'oncopharma-api',OIDC_CLIENT_ID:'oncopharma-clinical',OIDC_CLIENT_ID_CARE:'oncopharma-care',OIDC_CLIENT_ID_CLINICAL:'oncopharma-clinical',OIDC_CLIENT_ID_ADMIN:'oncopharma-admin',SESSION_ENCRYPTION_KEY:randomBytes(32).toString('base64'),ONCO_TEST_PASSWORD:password,ONCO_TEST_OTP_SECRETS:JSON.stringify(secrets),ONCO_E2E_FILES:'tests/e2e-real/surfaces.spec.ts,tests/e2e-real/identity.spec.ts'+(process.env.DATABASE_URL&&process.env.DATABASE_URL_ADMIN?',tests/e2e-real/vertical.spec.ts':''),DEV_ORGANIZATION_ID:'11111111-1111-4111-8111-111111111111'};
++ stack=spawn(process.execPath,['tools/run-test-stack.mjs','--test'],{env:testEnv,stdio:'inherit'});
++ const code=await new Promise(resolve=>stack.on('exit',resolve));process.exitCode=Number(code)||0;
++}catch(e){console.error(String(e));writeFileSync(`${output}/idp-blocker.json`,JSON.stringify({status:'BLOCKED',reason:String(e)},null,2));process.exitCode=2;}
++finally{stack?.kill();idp.kill();setTimeout(()=>process.exit(process.exitCode||0),1500);}
+diff --git a/tools/run-test-stack.mjs b/tools/run-test-stack.mjs
+new file mode 100644
+index 0000000..11d0a68
+--- /dev/null
++++ b/tools/run-test-stack.mjs
+@@ -0,0 +1,29 @@
++import { spawn } from 'node:child_process';
++import { mkdirSync, createWriteStream, writeFileSync } from 'node:fs';
++const logdir='artifacts/m14.5/logs'; mkdirSync(logdir,{recursive:true});
++const children=[];
++const env={...process.env,NODE_ENV:'development',NEXT_TELEMETRY_DISABLED:'1',ALLOW_SYNTHETIC_API:'true',NEXT_PUBLIC_ALLOW_SYNTHETIC_UI:'true'};
++const apps=[['care-web',3001,'/care'],['clinical-web',3002,'/clinical'],['admin-web',3003,'/']];
++function start(name,args,extra={}) {
++  const stream=createWriteStream(`${logdir}/server-${name}.log`);
++  const child=spawn(process.execPath,args,{env:{...env,...extra},stdio:['ignore','pipe','pipe']});
++  child.stdout.pipe(stream);child.stderr.pipe(stream);children.push(child);
++}
++start('api',['services/api/dist/main.js'],{PORT:'4000'});
++for(const [app,port,path] of apps)start(app,['node_modules/next/dist/bin/next','dev',`apps/${app}`,'-p',String(port),'-H','localhost'],{PORTAL_ORIGIN:`http://localhost:${port}`,AUTH_POST_LOGIN_PATH:path,OIDC_CLIENT_ID:process.env['OIDC_CLIENT_ID_'+app.split('-')[0].toUpperCase()]||env.OIDC_CLIENT_ID});
++async function poll(url){for(let i=0;i<120;i++){try{const r=await fetch(url);if(r.ok)return {url,status:r.status,body:await r.json()}}catch{}await new Promise(r=>setTimeout(r,500));}throw Error(`Healthcheck timeout: ${url}`);}
++try {
++  const surfaces=[];
++  for(const [app,port] of apps)surfaces.push(await poll(`http://localhost:${port}/api/health`));
++  surfaces.push(await poll('http://localhost:4000/v1/health'));
++  const ready=await fetch('http://localhost:4000/v1/ready');surfaces.push({url:'http://localhost:4000/v1/ready',status:ready.status});
++  writeFileSync('artifacts/m14.5/healthchecks.json',JSON.stringify(surfaces,null,2));
++  console.log('Stack running: three apps and API alive; PostgreSQL readiness HTTP '+ready.status);
++} catch(e){console.error(String(e));for(const c of children)c.kill();process.exit(1);}
++if(process.argv.includes('--test')) {
++  const child=spawn('npm',['run','test:e2e:real','--',...(process.env.ONCO_E2E_FILES||'tests/e2e-real/surfaces.spec.ts').split(',')],{env:process.env,stdio:'inherit'});
++  const code=await new Promise(resolve=>child.on('exit',resolve));for(const c of children)c.kill();setTimeout(()=>process.exit(Number(code)||0),1000);
++}
++function stop(){for(const c of children)c.kill();setTimeout(()=>process.exit(),500);}
++process.on('SIGTERM',stop);process.on('SIGINT',stop);
++await new Promise(()=>{});
+diff --git a/tools/source-digest.mjs b/tools/source-digest.mjs
+new file mode 100644
+index 0000000..35c0103
+--- /dev/null
++++ b/tools/source-digest.mjs
+@@ -0,0 +1,2 @@
++import {readdirSync,readFileSync} from 'node:fs';import {createHash} from 'node:crypto';import {join} from 'node:path';
++export function sourceDigest(){const hash=createHash('sha256');function walk(dir){for(const e of readdirSync(dir,{withFileTypes:true}).sort((a,b)=>a.name.localeCompare(b.name))){if(['node_modules','.next','dist','.git','artifacts','test-results','docs'].includes(e.name))continue;const p=join(dir,e.name);if(e.isDirectory())walk(p);else if(/\.(tsx?|mjs|json|sql|sh|css|ya?ml)$/.test(p)&&!p.endsWith('next-env.d.ts')){hash.update(p);hash.update(readFileSync(p));}}}walk('.');return hash.digest('hex');}
+diff --git a/tools/validate-real.mjs b/tools/validate-real.mjs
+index 8a9cd3e..03b494b 100644
+--- a/tools/validate-real.mjs
++++ b/tools/validate-real.mjs
+@@ -1,41 +1,55 @@
+-import { spawnSync, spawn } from 'node:child_process';
+-import { mkdirSync, writeFileSync, existsSync, mkdtempSync, rmSync } from 'node:fs';
+-import { tmpdir } from 'node:os';
+-import { join } from 'node:path';
+-import { once } from 'node:events';
+-const out='artifacts/validation'; mkdirSync(out,{recursive:true});
+-const report={schema:'oncopharma-validation-v1',date:new Date().toISOString(),baseline:'Plano Diretor v3.0',release:'M14.4',clinicalApproval:false,checks:[]};
+-function check(name,cmd,args,opts={}){
+- const p=spawnSync(cmd,args,{encoding:'utf8',timeout:opts.timeout||120000,env:process.env,maxBuffer:8*1024*1024});
+- const status=p.error?.code==='ENOENT'?'BLOCKED':p.status===0?'PASS':'FAIL';
+- report.checks.push({name,status,exitCode:p.status,reason:p.error?.message||((p.stderr||'').slice(-1000)),command:[cmd,...args].join(' ')});
+- writeFileSync(`${out}/${name.replace(/[^a-z0-9-]/gi,'_')}.log`,(p.stdout||'')+'\n'+(p.stderr||''));
+- return status;
++import {spawnSync,spawn} from 'node:child_process';
++import {mkdirSync,writeFileSync,existsSync,readFileSync} from 'node:fs';
++import {sourceDigest} from './source-digest.mjs';
++const out='artifacts/validation';mkdirSync(out,{recursive:true});
++const report={schema:'oncopharma-validation-v2',date:new Date().toISOString(),baseline:'Plano Diretor v3.0',release:'M14.5',sourceDigest:sourceDigest(),clinicalApproval:false,checks:[]};
++function record(name,status,reason='',extra={}){const c={name,status,reason,...extra};report.checks.push(c);console.log(name+' '+status+(reason?' — '+reason:''));return c;}
++function sanitize(s){for(const k of ['DATABASE_URL','DATABASE_URL_ADMIN','APP_DB_PASSWORD','SESSION_ENCRYPTION_KEY','ONCO_TEST_PASSWORD'])if(process.env[k])s=s.replaceAll(process.env[k],'[REDACTED]');return s.replace(/Bearer\s+[A-Za-z0-9._-]+/g,'Bearer [REDACTED]');}
++function run(name,args,{timeout=120000,blockedExit,expectedExit=0,env=process.env}={}){
++ const p=spawnSync('npm',args,{encoding:'utf8',env,timeout,maxBuffer:16*1024*1024});
++ writeFileSync(`${out}/${name}.log`,sanitize((p.stdout||'')+'\n'+(p.stderr||'')));
++ const status=p.error?.code==='ENOENT'||p.status===blockedExit?'BLOCKED':p.status===expectedExit?'PASS':'FAIL';
++ return record(name,status,p.error?.message||'',{exitCode:p.status,command:'npm '+args.join(' '),log:`${out}/${name}.log`,expectedExit});
+ }
+-check('local-tests','npm',['run','verify:local']);
+-check('lab-unit-tests','npm',['run','test:lab']);
+-if(!process.env.DATABASE_URL)report.checks.push({name:'postgres-required',status:'BLOCKED',reason:'DATABASE_URL ausente; nenhum teste PostgreSQL executado.'});
+-else check('postgres-required','npm',['run','test:db:required'],{timeout:12000});
+-if(existsSync('node_modules/next')&&existsSync('node_modules/@nestjs'))check('full-build','npm',['run','build'],{timeout:180000});
+-else report.checks.push({name:'full-build',status:'BLOCKED',reason:'Dependências Next.js/NestJS não instaladas; build não executado.'});
+-if(!process.env.OIDC_ISSUER||!process.env.OIDC_CLIENT_ID)report.checks.push({name:'oidc-mfa',status:'BLOCKED',reason:'Provedor e identidades de homologação não configurados; não simular autenticação.'});
+-else report.checks.push({name:'oidc-mfa',status:'BLOCKED',reason:'Credenciais presentes não constituem teste E2E de OIDC/MFA; executar suite institucional.'});
+-if(existsSync('/usr/bin/chromium')){
+- const temp=mkdtempSync(join(tmpdir(),'onco-browser-'));const port=41779;
+- const server=spawn(process.execPath,['tools/synthetic-lab/server.mjs'],{env:{...process.env,PORT:String(port),ONCO_LAB_DATA:join(temp,'synthetic.json')},stdio:'ignore'});
+- try {
+-   let ready=false;
+-   for(let i=0;i<60;i++){try{const r=await fetch(`http://127.0.0.1:${port}/`);if(r.ok){ready=true;break;}}catch{}await new Promise(r=>setTimeout(r,100));}
+-   if(!ready)throw Error('Servidor sintético não iniciou');
+-   const r=spawnSync('/usr/bin/chromium',['--headless','--no-sandbox','--disable-gpu','--disable-dev-shm-usage','--hide-scrollbars','--window-size=1280,900',`--screenshot=${join(process.cwd(),out,'lab-browser.png')}`,`http://127.0.0.1:${port}/`],{encoding:'utf8',timeout:12000});
+-   const ok=r.status===0&&existsSync(`${out}/lab-browser.png`);
+-   report.checks.push({name:'browser-lab-render',status:ok?'PASS':'BLOCKED',reason:ok?'Chromium renderizou laboratório sintético; não é teste E2E do Next.js.':'Chromium indisponível operacionalmente no container (erro ou timeout); sem captura validada.'});
+- }catch(e){report.checks.push({name:'browser-lab-render',status:'FAIL',reason:String(e)});}
+- finally{server.kill();rmSync(temp,{recursive:true,force:true});}
+-}else report.checks.push({name:'browser-lab-render',status:'BLOCKED',reason:'Chromium indisponível.'});
+-const required=['full-build','postgres-required','oidc-mfa'];
+-report.readyForIntegratedValidation=required.every(n=>report.checks.find(c=>c.name===n)?.status==='PASS');
+-report.readyForClinicalUse=false;
++record('node22',process.versions.node.split('.')[0]==='22'?'PASS':'FAIL',process.version);
++record('lockfile',existsSync('package-lock.json')?'PASS':'FAIL','npm ci requires the committed lockfile.');
++run('local-tests',['run','verify:local']);run('lab-unit-tests',['run','test:lab']);run('clinical-rules',['run','test:rules']);
++run('full-build',['run','build'],{timeout:300000});
++run('api-security-unit',['run','test:api:security']);
++run('design',['run','check:design']);run('governance',['run','check:governance']);
++const gate=run('release-gate-enforced',['run','quality:gate'],{expectedExit:1});
++if(gate.status==='PASS'&&!readFileSync(`${out}/release-gate-enforced.log`,'utf8').includes('BLOQUEADO: piloto e produção não autorizados.')){gate.status='FAIL';gate.reason='Expected approval block was not observed.';}
++record('clinical-release','BLOCKED','G01-G09 require external approvals; readyForClinicalUse remains false.');
++let db;
++if(process.env.DATABASE_URL && process.env.DATABASE_URL_ADMIN)db=run('postgres-required',['run','test:db:required'],{timeout:120000,blockedExit:2,env:{...process.env,NODE_ENV:'test'}});
++else {const reason=process.env.ONCO_DB_BLOCK_REASON||'DATABASE_URL and DATABASE_URL_ADMIN absent; PostgreSQL migration and negative integration tests not executed.';db=record('postgres-required','BLOCKED',reason);}
++record('migration-0003',db.status==='PASS'?'PASS':'BLOCKED',db.status==='PASS'?'bootstrap-ci-db.sh calls provision-app-role.sh, which executes 0003; permissions tested in PostgreSQL.':'Static call confirmed in provision-app-role.sh. Database execution not proven.');
++let browserStatus='BLOCKED',identityStatus='BLOCKED',verticalStatus='BLOCKED';
++function suiteResult(file,started){
++ try {const j=JSON.parse(readFileSync('artifacts/m14.5/playwright-results.json','utf8'));if(Date.parse(j.stats.startTime)<started-5000)return {status:'BLOCKED',reason:'No current Playwright report.'};const specs=j.suites.filter(s=>s.file.endsWith(file)).flatMap(s=>s.specs);if(!specs.length)return {status:'BLOCKED',reason:'Suite was not executed.'};const pass=specs.filter(s=>s.ok&&s.tests.every(t=>t.results.length&&t.results.every(r=>r.status==='passed'))).length;return {status:pass===specs.length?'PASS':'FAIL',passed:pass,total:specs.length,reason:'Actual Playwright results: '+pass+'/'+specs.length+' passed.'};}catch(e){return {status:'BLOCKED',reason:String(e)};}
++}
++if(process.env.KEYCLOAK_HOME && existsSync(process.env.KEYCLOAK_HOME+'/bin/kc.sh')){
++ const env={...process.env};if(db.status!=='PASS'){delete env.DATABASE_URL;delete env.DATABASE_URL_ADMIN;}
++ const started=Date.now();
++ const p=spawn('npm',['run','test:identity:real'],{env,stdio:['ignore','pipe','pipe']});let output='';p.stdout.on('data',x=>{output+=x;process.stdout.write(x)});p.stderr.on('data',x=>{output+=x;process.stderr.write(x)});
++ const exit=await new Promise(resolve=>p.on('exit',resolve));writeFileSync(`${out}/browser-identity.log`,sanitize(output));
++ const surfaces=exit===2?{status:'BLOCKED',reason:'IdP setup blocked; inspect log.'}:suiteResult('surfaces.spec.ts',started);
++ const identity=exit===2?{status:'BLOCKED',reason:'IdP setup blocked; inspect log.'}:suiteResult('identity.spec.ts',started);
++ const vertical=suiteResult('vertical.spec.ts',started);browserStatus=surfaces.status;identityStatus=identity.status;verticalStatus=vertical.status;
++ record('browser-surfaces',browserStatus,surfaces.reason,{suiteExitCode:exit,passed:surfaces.passed,total:surfaces.total,command:'npm run test:identity:real',log:`${out}/browser-identity.log`});
++ record('oidc-core',identityStatus,identity.reason+' Local identity is separate from institutional RBAC.',{suiteExitCode:exit,passed:identity.passed,total:identity.total});
++ if(db.status==='PASS')record('vertical-browser-suite',verticalStatus,vertical.reason,{passed:vertical.passed,total:vertical.total});
++}else if(process.env.ONCO_BROWSER_EXECUTABLE && existsSync(process.env.ONCO_BROWSER_EXECUTABLE)){
++ const c=run('browser-surfaces',['run','test:e2e:stack'],{timeout:240000});browserStatus=c.status;record('oidc-core','BLOCKED','KEYCLOAK_HOME absent; no real IdP run.');
++}else{record('browser-surfaces','BLOCKED','Playwright Chromium missing; install a browser or provide ONCO_BROWSER_EXECUTABLE.');record('oidc-core','BLOCKED','KEYCLOAK_HOME absent; no real IdP run.');}
++const integrated=db.status==='PASS'&&browserStatus==='PASS'&&identityStatus==='PASS'&&verticalStatus==='PASS';
++record('oidc-mfa',integrated?'PASS':'BLOCKED',integrated?'Real identity plus application role/tenant validation completed.':'Core identity may pass independently; institutional RBAC/ABAC and patient links need real PostgreSQL integration.');
++record('vertical-care-clinical-audit',integrated?'PASS':'BLOCKED',integrated?'Real browser workflow tested with PostgreSQL persistence and audit.':'No simulated persistence or authentication. PostgreSQL prerequisite blocked.');
++report.readyForIntegratedValidation=integrated&&report.checks.find(c=>c.name==='full-build')?.status==='PASS';
++report.readyForClinicalUse=false;report.goNoGoTechnical=report.readyForIntegratedValidation?'GO for further synthetic institutional validation only':'NO-GO for integrated pilot; isolated development checks may pass';
++report.completedAt=new Date().toISOString();report.sourceDigestAfter=sourceDigest();
++if(report.sourceDigest!==report.sourceDigestAfter)record('source-stability','FAIL','Source changed while validation was running.');
++else record('source-stability','PASS','Source digest unchanged throughout the validation.');
+ writeFileSync(`${out}/validation-report.json`,JSON.stringify(report,null,2));
+ console.log(JSON.stringify(report,null,2));
+ if(report.checks.some(c=>c.status==='FAIL'))process.exitCode=1;

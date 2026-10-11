@@ -1,9 +1,9 @@
 
-> oncopharma@0.14.4-dev build
-> npm run build:apps && npm run build -w @oncopharma/api
+> oncopharma@0.14.5-dev build
+> npm run build:apps && npm run build -w @oncopharma/api && npm run build:packages && npm run build -w @oncopharma/portal
 
 
-> oncopharma@0.14.4-dev build:apps
+> oncopharma@0.14.5-dev build:apps
 > npm run build -w @oncopharma/care-web && npm run build -w @oncopharma/clinical-web && npm run build -w @oncopharma/admin-web
 
 
@@ -13,24 +13,25 @@
    ▲ Next.js 15.5.27
 
    Creating an optimized production build ...
- ✓ Compiled successfully in 2.1s
+ ✓ Compiled successfully in 1308ms
    Linting and checking validity of types ...
    Collecting page data ...
-   Generating static pages (0/9) ...
-   Generating static pages (2/9) 
-   Generating static pages (4/9) 
-   Generating static pages (6/9) 
- ✓ Generating static pages (9/9)
+   Generating static pages (0/10) ...
+   Generating static pages (2/10) 
+   Generating static pages (4/10) 
+   Generating static pages (7/10) 
+ ✓ Generating static pages (10/10)
    Finalizing page optimization ...
    Collecting build traces ...
 
 Route (app)                                  Size  First Load JS
-┌ ○ /                                       136 B         103 kB
+┌ ○ /                                       138 B         103 kB
 ├ ○ /_not-found                             988 B         104 kB
-├ ƒ /api/auth/callback                      136 B         103 kB
-├ ƒ /api/auth/login                         136 B         103 kB
-├ ƒ /api/auth/logout                        136 B         103 kB
-├ ƒ /api/workflow/patients/[id]/symptoms    136 B         103 kB
+├ ƒ /api/auth/callback                      138 B         103 kB
+├ ƒ /api/auth/login                         138 B         103 kB
+├ ƒ /api/auth/logout                        138 B         103 kB
+├ ƒ /api/health                             138 B         103 kB
+├ ƒ /api/workflow/patients/[id]/symptoms    138 B         103 kB
 ├ ○ /care                                 4.43 kB         107 kB
 └ ○ /icon.svg                                 0 B            0 B
 + First Load JS shared by all              103 kB
@@ -49,27 +50,28 @@ Route (app)                                  Size  First Load JS
    ▲ Next.js 15.5.27
 
    Creating an optimized production build ...
- ✓ Compiled successfully in 1866ms
+ ✓ Compiled successfully in 1252ms
    Linting and checking validity of types ...
    Collecting page data ...
-   Generating static pages (0/10) ...
-   Generating static pages (2/10) 
-   Generating static pages (4/10) 
-   Generating static pages (7/10) 
- ✓ Generating static pages (10/10)
+   Generating static pages (0/11) ...
+   Generating static pages (2/11) 
+   Generating static pages (5/11) 
+   Generating static pages (8/11) 
+ ✓ Generating static pages (11/11)
    Finalizing page optimization ...
    Collecting build traces ...
 
 Route (app)                                       Size  First Load JS
-┌ ○ /                                            143 B         103 kB
+┌ ○ /                                            145 B         103 kB
 ├ ○ /_not-found                                  988 B         104 kB
-├ ƒ /api/auth/callback                           143 B         103 kB
-├ ƒ /api/auth/login                              143 B         103 kB
-├ ƒ /api/auth/logout                             143 B         103 kB
-├ ƒ /api/clinical/patients/[id]                  143 B         103 kB
-├ ƒ /api/clinical/summary                        143 B         103 kB
-├ ƒ /api/workflow/patients/[id]/alerts           143 B         103 kB
-├ ƒ /api/workflow/patients/[id]/interventions    143 B         103 kB
+├ ƒ /api/auth/callback                           145 B         103 kB
+├ ƒ /api/auth/login                              145 B         103 kB
+├ ƒ /api/auth/logout                             145 B         103 kB
+├ ƒ /api/clinical/patients/[id]                  145 B         103 kB
+├ ƒ /api/clinical/summary                        145 B         103 kB
+├ ƒ /api/health                                  145 B         103 kB
+├ ƒ /api/workflow/patients/[id]/alerts           145 B         103 kB
+├ ƒ /api/workflow/patients/[id]/interventions    145 B         103 kB
 ├ ○ /clinical                                  6.21 kB         109 kB
 └ ○ /icon.svg                                      0 B            0 B
 + First Load JS shared by all                   103 kB
@@ -88,30 +90,81 @@ Route (app)                                       Size  First Load JS
    ▲ Next.js 15.5.27
 
    Creating an optimized production build ...
- ✓ Compiled successfully in 1159ms
+ ✓ Compiled successfully in 877ms
    Linting and checking validity of types ...
    Collecting page data ...
-   Generating static pages (0/4) ...
-   Generating static pages (1/4) 
-   Generating static pages (2/4) 
-   Generating static pages (3/4) 
- ✓ Generating static pages (4/4)
+   Generating static pages (0/5) ...
+   Generating static pages (1/5) 
+   Generating static pages (2/5) 
+   Generating static pages (3/5) 
+ ✓ Generating static pages (5/5)
    Finalizing page optimization ...
    Collecting build traces ...
 
 Route (app)                                 Size  First Load JS
-┌ ○ /                                      122 B         103 kB
-└ ○ /_not-found                            988 B         104 kB
+┌ ○ /                                      126 B         103 kB
+├ ○ /_not-found                            988 B         104 kB
+└ ƒ /api/health                            126 B         103 kB
 + First Load JS shared by all             103 kB
   ├ chunks/18-25b11e3a132b87ef.js        46.5 kB
   ├ chunks/87c73c54-24122e7b92478d00.js  54.2 kB
   └ other shared chunks (total)           1.9 kB
 
 
-○  (Static)  prerendered as static content
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
 
 
 > @oncopharma/api@0.2.0 build
 > nest build
+
+
+> oncopharma@0.14.5-dev build:packages
+> npm run build -w @oncopharma/clinical-rules
+
+
+> @oncopharma/clinical-rules@0.1.0 build
+> node --check src/index.mjs
+
+
+> @oncopharma/portal@0.1.0 build
+> next build
+
+   ▲ Next.js 15.5.27
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 1253ms
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/11) ...
+   Generating static pages (2/11) 
+   Generating static pages (5/11) 
+   Generating static pages (8/11) 
+ ✓ Generating static pages (11/11)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                       Size  First Load JS
+┌ ○ /                                            160 B         106 kB
+├ ○ /_not-found                                  988 B         104 kB
+├ ƒ /api/auth/callback                           142 B         103 kB
+├ ƒ /api/auth/login                              142 B         103 kB
+├ ƒ /api/auth/logout                             142 B         103 kB
+├ ƒ /api/clinical/patients/[id]                  142 B         103 kB
+├ ƒ /api/clinical/summary                        142 B         103 kB
+├ ƒ /api/workflow/patients/[id]/alerts           142 B         103 kB
+├ ƒ /api/workflow/patients/[id]/interventions    142 B         103 kB
+├ ƒ /api/workflow/patients/[id]/symptoms         142 B         103 kB
+├ ○ /care                                      1.16 kB         107 kB
+├ ○ /clinical                                  2.84 kB         109 kB
+└ ○ /icon.svg                                      0 B            0 B
++ First Load JS shared by all                   103 kB
+  ├ chunks/18-25b11e3a132b87ef.js              46.5 kB
+  ├ chunks/87c73c54-24122e7b92478d00.js        54.2 kB
+  └ other shared chunks (total)                 1.9 kB
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
 
 

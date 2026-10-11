@@ -21,12 +21,14 @@ export class WorkflowController {
   constructor(private readonly db: DatabaseService) {}
   private async checkStaff(req: AuthenticatedRequest, org: string, patientId: string) {
     if (!req.principal.mfa) throw new ForbiddenException('MFA obrigatório');
-    const rows = await this.db.query<{role:string}>(`SELECT role FROM memberships WHERE organization_id=$1 AND oidc_issuer=$2 AND oidc_sub=$3 AND active=true`,[org,req.principal.issuer,req.principal.sub]);
-    if (!rows.some(x=>STAFF.includes(x.role))) throw new ForbiddenException('Profissional sem vínculo');
-    // M14.5: care_assignments tem FORCE RLS por organização; a consulta precisa do contexto de tenant da transação,
-    // caso contrário retorna zero linhas e todo profissional atribuído é negado.
-    const assigned = await this.db.withTenant(org, async client => (await client.query(`SELECT patient_id FROM care_assignments WHERE organization_id=$1 AND patient_id=$2 AND oidc_issuer=$3 AND oidc_sub=$4 AND active=true`,[org,patientId,req.principal.issuer,req.principal.sub])).rowCount);
-    if (!assigned) throw new ForbiddenException('Paciente não atribuído');
+    // M14.5 (consolidado; forma adotada da proposta Codex): vínculo e atribuição na MESMA transação com contexto de tenant.
+    // care_assignments tem FORCE RLS; fora do contexto retornava zero linhas e todo profissional atribuído era negado.
+    return this.db.withTenant(org, async client => {
+      const rows = (await client.query<{role:string}>(`SELECT role FROM memberships WHERE organization_id=$1 AND oidc_issuer=$2 AND oidc_sub=$3 AND active=true`,[org,req.principal.issuer,req.principal.sub])).rows;
+      if (!rows.some(x=>STAFF.includes(x.role))) throw new ForbiddenException('Profissional sem vínculo');
+      const assignments = (await client.query<{patient_id:string}>(`SELECT patient_id FROM care_assignments WHERE organization_id=$1 AND patient_id=$2 AND oidc_issuer=$3 AND oidc_sub=$4 AND active=true`,[org,patientId,req.principal.issuer,req.principal.sub])).rows;
+      if (!assignments.length) throw new ForbiddenException('Paciente não atribuído');
+    });
   }
   @Post('care/patients/:patientId/symptoms')
   async symptom(@Req() req: AuthenticatedRequest,@Param('patientId') patientId:string,@Headers('x-organization-id') orgHeader:string,@Body() body:Record<string,unknown>) {

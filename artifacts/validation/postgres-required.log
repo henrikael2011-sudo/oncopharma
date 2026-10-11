@@ -1,70 +1,89 @@
 
-> oncopharma@0.14.4-dev test:db:required
-> node tests/require-postgres.mjs && node --test tests/m12-db.integration.mjs tests/m145-db-rls.integration.mjs
+> oncopharma@0.14.5-dev test:db:required
+> node tests/require-postgres.mjs && NODE_ENV=test node --test tests/m12-db.integration.mjs tests/m145-db-rls.integration.mjs tests/m145-db.integration.mjs tests/m145-db-0008.integration.mjs
 
 PostgreSQL conectado com role restrita; executando testes integrados obrigatórios.
 TAP version 13
 # Subtest: M1.2: role sem privilégios de escrita clínica
 ok 1 - M1.2: role sem privilégios de escrita clínica
   ---
-  duration_ms: 218.960921
+  duration_ms: 215.406514
   type: 'test'
   ...
 # Subtest: M1.2: isolamento RLS sem contexto e com organização incorreta
 ok 2 - M1.2: isolamento RLS sem contexto e com organização incorreta
   ---
-  duration_ms: 68.806965
+  duration_ms: 71.578166
+  type: 'test'
+  ...
+# Subtest: 0008: todas as políticas de tenant usam nullif (nenhum cast direto de current_setting)
+ok 3 - 0008: todas as políticas de tenant usam nullif (nenhum cast direto de current_setting)
+  ---
+  duration_ms: 19.45456
+  type: 'test'
+  ...
+# Subtest: 0008: conexão reutilizada (contexto vazio) retorna zero linhas em vez de erro, com a role restrita
+ok 4 - 0008: conexão reutilizada (contexto vazio) retorna zero linhas em vez de erro, com a role restrita
+  ---
+  duration_ms: 14.99781
   type: 'test'
   ...
 # Subtest: M14.5 pré-condições: URLs configuradas, banco DEV, role restrita
-ok 3 - M14.5 pré-condições: URLs configuradas, banco DEV, role restrita
+ok 5 - M14.5 pré-condições: URLs configuradas, banco DEV, role restrita
   ---
-  duration_ms: 123.537215
+  duration_ms: 100.465998
   type: 'test'
   ...
 # Subtest: RLS cross-tenant: contexto da org A não enxerga paciente/vínculo da org B
-ok 4 - RLS cross-tenant: contexto da org A não enxerga paciente/vínculo da org B
+ok 6 - RLS cross-tenant: contexto da org A não enxerga paciente/vínculo da org B
   ---
-  duration_ms: 193.9509
+  duration_ms: 180.696151
   type: 'test'
   ...
 # Subtest: patientId fornecido pelo cliente: vínculo de identidade da conta A não autoriza paciente B (nem na mesma org)
-ok 5 - patientId fornecido pelo cliente: vínculo de identidade da conta A não autoriza paciente B (nem na mesma org)
+ok 7 - patientId fornecido pelo cliente: vínculo de identidade da conta A não autoriza paciente B (nem na mesma org)
   ---
-  duration_ms: 144.596812
+  duration_ms: 141.612717
   type: 'test'
   ...
 # Subtest: INSERT cross-tenant de relato/alerta/intervenção é negado pela política WITH CHECK
-ok 6 - INSERT cross-tenant de relato/alerta/intervenção é negado pela política WITH CHECK
+ok 8 - INSERT cross-tenant de relato/alerta/intervenção é negado pela política WITH CHECK
   ---
-  duration_ms: 151.493587
+  duration_ms: 138.924239
   type: 'test'
   ...
 # Subtest: UPDATE cross-tenant de alerta não afeta linhas da outra organização
-ok 7 - UPDATE cross-tenant de alerta não afeta linhas da outra organização
+ok 9 - UPDATE cross-tenant de alerta não afeta linhas da outra organização
   ---
-  duration_ms: 111.359914
+  duration_ms: 101.162421
   type: 'test'
   ...
 # Subtest: audit_events: INSERT só no tenant do contexto; sem leitura, UPDATE ou DELETE pela role da API
-ok 8 - audit_events: INSERT só no tenant do contexto; sem leitura, UPDATE ou DELETE pela role da API
+ok 10 - audit_events: INSERT só no tenant do contexto; sem leitura, UPDATE ou DELETE pela role da API
   ---
-  duration_ms: 289.63781
+  duration_ms: 264.221907
   type: 'test'
   ...
 # Subtest: Bypass de superusuário/RLS: role da API não é superuser, não tem BYPASSRLS e não assume a role administrativa
-ok 9 - Bypass de superusuário/RLS: role da API não é superuser, não tem BYPASSRLS e não assume a role administrativa
+ok 11 - Bypass de superusuário/RLS: role da API não é superuser, não tem BYPASSRLS e não assume a role administrativa
   ---
-  duration_ms: 326.397964
+  duration_ms: 329.238505
   type: 'test'
   ...
-1..9
-# tests 9
+# Synthetic tenants isolated; same-tenant audit INSERT allowed; cross-tenant INSERT and runtime escalation rejected; admin prerequisite rejected.
+# Subtest: M14.5 PostgreSQL: populated cross-tenant RLS, audit INSERT, escalation and transaction reset
+ok 12 - M14.5 PostgreSQL: populated cross-tenant RLS, audit INSERT, escalation and transaction reset
+  ---
+  duration_ms: 131.803644
+  type: 'test'
+  ...
+1..12
+# tests 12
 # suites 0
-# pass 9
+# pass 12
 # fail 0
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 1397.38224
+# duration_ms 1312.267721
 

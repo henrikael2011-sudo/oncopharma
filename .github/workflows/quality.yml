@@ -10,12 +10,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: npm install --no-audit --no-fund
+      - run: npm ci --no-audit --no-fund
       - run: npm test
       - run: npm run test:extended
       - run: npm run check:design
       - run: npm run check:governance
       - run: npm run build
+      - run: npm run test:api:security
+      - run: npm run test:rules
       - run: npm run test:readiness
       - run: npm run test:lab:e2e
       - name: Generate validation evidence (unit runner; integration reported separately)
@@ -35,7 +37,7 @@ jobs:
         env:
           POSTGRES_DB: oncopharma_dev
           POSTGRES_USER: oncopharma
-          POSTGRES_PASSWORD: test_only_ci_secret
+          POSTGRES_PASSWORD: ${{ secrets.ONCO_CI_DB_ADMIN_PASSWORD }}
         ports: ['5432:5432']
         options: >-
           --health-cmd "pg_isready -U oncopharma -d oncopharma_dev" --health-interval 10s --health-timeout 5s --health-retries 5
@@ -44,19 +46,20 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: npm install --no-audit --no-fund
+      - run: npm ci --no-audit --no-fund
       - run: npm run build
       - name: Install PostgreSQL client
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
       - name: Apply migrations and provision least-privilege role
         run: bash infra/scripts/bootstrap-ci-db.sh
         env:
-          DATABASE_URL_ADMIN: postgres://oncopharma:test_only_ci_secret@localhost:5432/oncopharma_dev
-          APP_DB_PASSWORD: ci_runtime_test_password
+          DATABASE_URL_ADMIN: postgres://oncopharma:${{ secrets.ONCO_CI_DB_ADMIN_PASSWORD }}@localhost:5432/oncopharma_dev
+          APP_DB_PASSWORD: ${{ secrets.ONCO_CI_DB_APP_PASSWORD }}
           NODE_ENV: test
       - name: Verify PostgreSQL RLS with runtime role (fail closed)
         run: npm run test:db:required
         env:
-          DATABASE_URL: postgres://oncopharma_app:ci_runtime_test_password@localhost:5432/oncopharma_dev
+          DATABASE_URL: postgres://oncopharma_app:${{ secrets.ONCO_CI_DB_APP_PASSWORD }}@localhost:5432/oncopharma_dev
           # M14.5: somente para criar fixtures sintéticas dos testes negativos (banco efêmero do runner).
-          DATABASE_URL_ADMIN: postgres://oncopharma:test_only_ci_secret@localhost:5432/oncopharma_dev
+          DATABASE_URL_ADMIN: postgres://oncopharma:${{ secrets.ONCO_CI_DB_ADMIN_PASSWORD }}@localhost:5432/oncopharma_dev
+          NODE_ENV: test

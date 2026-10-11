@@ -1,1 +1,11 @@
-{"name":"@oncopharma/clinical-rules","version":"0.1.0","private":true,"type":"module","exports":"./src/index.mjs"}
+{
+  "name": "@oncopharma/clinical-rules",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.mjs",
+  "scripts": {
+    "build": "node --check src/index.mjs",
+    "test": "node --test tests/*.test.mjs"
+  }
+}

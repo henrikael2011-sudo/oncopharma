@@ -33,3 +33,24 @@ Referência imutável: Plano Diretor v3.0, decisões D-001 a D-008. **Sem redese
 
 ## O que NÃO mudou
 Decisões D-001..D-008, tokens (deepTeal #063F3B, emerald #15735D, navy #0A344A, gold #D7A858, mint #B9E1D0, canvas #F5F8F7, ink #152C32, danger #B42318), símbolos Care/Clinical, textos de segurança, migrações SQL 0001–0007, guards de MFA/RBAC/RLS (nenhum foi afrouxado). `apps/portal` mantido (decisão de descontinuação pendente).
+
+
+---
+## M14.5 CONSOLIDADO (branch `fix/m14-5-merge`, 11/10/2026)
+Base: `fix/m14-5`. Contribuições da proposta independente **Codex (ChatGPT)** portadas seletivamente; decisão item a item em `docs/quality/CONSOLIDACAO_CODEX_M14_5.md`. Histórico Codex preservado em `docs/history/codex-m14_5/`.
+
+### Segurança (Codex)
+- Callback OIDC valida id_token + access token (JWKS, iss, aud, exp, nonce, at_hash, sub); sessão limitada pelo `exp` real; destino pós-login restrito a caminho local (padrão `/care` no Care).
+- API recusa role superusuário/BYPASSRLS/≠`oncopharma_app`; role runtime com NOSUPERUSER/NOCREATEDB/NOCREATEROLE; `require-postgres` recusa role privilegiada.
+- `checkStaff` em uma única transação com tenant (forma Codex, equivalente à correção #5).
+### Banco (novo)
+- Migração **0008_tenant_setting_nullif.sql** (R1) + `tests/m145-db-0008.integration.mjs`; aplicada no bootstrap.
+- `tests/m145-db.integration.mjs` (Codex) executado pela primeira vez: PASS.
+### Testes/CI/ferramentas
+- `test:api:security` (Codex); E2E +2 testes e asserções (OTP incorreto, cookie inacessível, nonce, state inválido, PKCE incorreto, 3 viewports, envio sem sessão).
+- Healthchecks `/api/health` nos apps (Codex). CI com `npm ci`, `test:api:security`, `test:rules`, senhas via secrets (Codex).
+- Workspaces `packages/*`, `build` inclui clinical-rules e portal; engines Node 22 (Codex). `validate:evidence` v2 (Codex: logs sanitizados, digest, checks granulares) + `migration-0008-nullif`.
+### Mantido da versão Grok (conflitos)
+- Contraste `#8b642d` (não navy), harness E2E com PostgreSQL real, Keycloak 26.8, rotas Admin sem sessão, `.gitignore` sem remoções.
+### Resultado
+- 18 PASS, 0 FAIL, 2 BLOCKED (oidc-mfa institucional; clinical-release). Uso clínico: NÃO.

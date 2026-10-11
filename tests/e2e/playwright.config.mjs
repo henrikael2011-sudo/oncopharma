@@ -10,7 +10,7 @@ const ISSUER = `${KC}/realms/${REALM}`;
 const ORG = '11111111-1111-4111-8111-111111111111';
 const common = { NODE_ENV: 'development', NEXT_TELEMETRY_DISABLED: '1', ALLOW_SYNTHETIC_API: 'true', NEXT_PUBLIC_ALLOW_SYNTHETIC_UI: 'true', DEV_ORGANIZATION_ID: ORG,
   API_INTERNAL_URL: 'http://127.0.0.1:4000', SESSION_ENCRYPTION_KEY: process.env.E2E_SESSION_KEY, OIDC_ISSUER: ISSUER,
-  OIDC_AUTHORIZATION_ENDPOINT: `${ISSUER}/protocol/openid-connect/auth`, OIDC_TOKEN_ENDPOINT: `${ISSUER}/protocol/openid-connect/token`, OIDC_END_SESSION_ENDPOINT: `${ISSUER}/protocol/openid-connect/logout`, PATH: process.env.PATH };
+  OIDC_AUTHORIZATION_ENDPOINT: `${ISSUER}/protocol/openid-connect/auth`, OIDC_TOKEN_ENDPOINT: `${ISSUER}/protocol/openid-connect/token`, OIDC_END_SESSION_ENDPOINT: `${ISSUER}/protocol/openid-connect/logout`, OIDC_JWKS_URI: `${ISSUER}/protocol/openid-connect/certs`, OIDC_AUDIENCE: process.env.OIDC_AUDIENCE || 'oncopharma-api', PATH: process.env.PATH };
 const app = (name, port, extra = {}, cmd = 'dev') => ({
   command: `node ../../node_modules/next/dist/bin/next ${cmd} -p ${port}`, cwd: `apps/${name}`, url: `http://localhost:${port}/`, timeout: 180_000, reuseExistingServer: false,
   stdout: 'pipe', stderr: 'pipe', env: { ...common, PORTAL_ORIGIN: `http://localhost:${port}`, ...extra } });

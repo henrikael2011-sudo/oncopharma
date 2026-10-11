@@ -32,3 +32,14 @@ Necessidade → tela → regra → API → teste → aprovação. Tabela acima p
 | §8 Sessão, CSRF, logout, expiração | auth routes | cookie HttpOnly/Lax; Origin; RP logout; exp | e2e 04, 08 | VERIFICADO COM IdP DE TESTE |
 | §11 Teclado, leitor de tela, contraste | layouts | skip link; axe WCAG A/AA | e2e 03, 04, 06, 09 | PARCIAL (zoom 200%, leitores reais e dispositivos pequenos pendentes) |
 | §12 DoD | — | quality gates | release-gate BLOCKED | NÃO CONCLUÍDO (sem aprovação de produto/clínica) |
+
+
+## M14.5 CONSOLIDADO (Grok + Codex, `fix/m14-5-merge`, 11/10/2026)
+| Requisito (Plano v3) | Implementação | Evidência | Estado |
+|---|---|---|---|
+| §8 Segregação por instituição (RLS) — robustez de sessão | migração 0008 (`nullif` em 11 políticas) | m145-db-0008 (vermelho antes, verde depois) | VERIFICADO EM DEV |
+| §8 Menor privilégio no banco | API recusa superusuário/BYPASSRLS; role NOSUPERUSER… (Codex) | api-security-unit; m145-db (Codex) | VERIFICADO EM DEV |
+| §8 Autenticação OIDC (integridade do login) | id_token/nonce/at_hash/JWKS no callback (Codex) | e2e 04, 06, 07b | VERIFICADO COM IdP DE TESTE |
+| §11 Responsividade | — | e2e 07c (390/768/1440, sem overflow) | PARCIAL (zoom 200% e leitores reais pendentes) |
+| §12 Reprodutibilidade / CI | `npm ci`, secrets, testes extras no CI (Codex) | npm-ci.log; CI não executado (sem repositório) | PARCIAL |
+| D-008 decisões externas | — | oidc-mfa institucional e clinical-release BLOCKED | ABERTO |

@@ -9,8 +9,8 @@ DB_NAME=$(psql "$DATABASE_URL_ADMIN" -Atqc 'SELECT current_database()')
 # Password via variável psql, sem concatenar SQL.
 psql "$DATABASE_URL_ADMIN" -v ON_ERROR_STOP=1 -v app_password="$APP_DB_PASSWORD" <<'SQL'
 SELECT CASE WHEN NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='oncopharma_app')
-  THEN 'CREATE ROLE oncopharma_app LOGIN NOINHERIT NOBYPASSRLS'
-  ELSE 'ALTER ROLE oncopharma_app LOGIN NOINHERIT NOBYPASSRLS' END \gexec
+  THEN 'CREATE ROLE oncopharma_app LOGIN NOINHERIT NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS'
+  ELSE 'ALTER ROLE oncopharma_app LOGIN NOINHERIT NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS' END \gexec
 ALTER ROLE oncopharma_app PASSWORD :'app_password';
 SQL
 psql "$DATABASE_URL_ADMIN" -v ON_ERROR_STOP=1 -f infra/migrations/0003_runtime_permissions.sql

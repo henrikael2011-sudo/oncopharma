@@ -39,7 +39,7 @@ const claims = (jwt) => JSON.parse(Buffer.from(jwt.split('.')[1], 'base64url').t
 async function sessionToken(context, origin) { const c = (await context.cookies(origin)).find((x) => x.name === 'onco_session'); return c ? { cookie: c, ...unseal(c.value) } : null; }
 function sql(q) { const r = spawnSync('psql', ['-X', process.env.DATABASE_URL_ADMIN, '-v', 'ON_ERROR_STOP=1', '-Atq', '-c', q], { encoding: 'utf8' }); if (r.status !== 0) throw new Error(r.stderr); return r.stdout.trim(); }
 
-async function kcLogin(page, user, { enroll = false } = {}) {
+async function kcLogin(page, user, { enroll = false, wrongOtpFirst = false } = {}) {
   await page.waitForURL(/localhost:8080\/realms\//);
   await page.fill('#username', user); await page.fill('#password', PW); await page.click('#kc-login');
   if (enroll) { // Cadastro real de TOTP exigido pelo IdP (required action CONFIGURE_TOTP)
@@ -51,13 +51,17 @@ async function kcLogin(page, user, { enroll = false } = {}) {
     await page.click('#saveTOTPBtn, input[type=submit]');
   } else if (secrets[user]) {
     await page.waitForSelector('#otp'); await shot(page, `idp-otp-prompt-${user}`);
+    if (wrongOtpFirst) { // (Codex) OTP incorreto é recusado pelo IdP
+      await page.fill('#otp', '000000'); await page.click('#kc-login'); await expect(page.locator('#otp')).toBeVisible();
+      await expect(page).toHaveURL(/localhost:8080\/realms\//); await shot(page, `idp-otp-rejected-${user}`);
+    }
     await page.fill('#otp', await freshCode(user)); await page.click('#kc-login');
   }
 }
-async function staffLogin(browser, user, { enroll = false } = {}) {
+async function staffLogin(browser, user, { enroll = false, wrongOtpFirst = false } = {}) {
   const context = await browser.newContext(); const page = await context.newPage();
   await page.goto(`${CLIN}/clinical`); await page.getByRole('link', { name: 'Entrar com identidade institucional' }).click();
-  await kcLogin(page, user, { enroll }); await page.waitForURL(`${CLIN}/clinical`); return { context, page };
+  await kcLogin(page, user, { enroll, wrongOtpFirst }); await page.waitForURL(`${CLIN}/clinical`); return { context, page };
 }
 const apiGet = (request, path, token, org = ORG) => request.get(`${API}/v1/${path}`, { headers: { authorization: `Bearer ${token}`, 'x-organization-id': org } });
 
@@ -103,9 +107,11 @@ test.describe.serial('M14.5 E2E sintético', () => {
     const u = new URL((await authReq).url());
     expect(u.searchParams.get('code_challenge_method')).toBe('S256'); expect(u.searchParams.get('code_challenge')).toMatch(/^[A-Za-z0-9_-]{43}$/);
     expect(u.searchParams.get('state')).toBeTruthy(); expect(u.searchParams.get('client_id')).toBe('oncopharma-care-web');
+    expect(u.searchParams.get('nonce')).toBeTruthy();
     await shot(page, 'idp-login-care'); await kcLogin(page, 'paciente.a'); await page.waitForURL(`${CARE}/care`);
     const s = await sessionToken(context, CARE); expect(s).toBeTruthy();
     expect(s.cookie.httpOnly).toBe(true); expect(s.cookie.sameSite).toBe('Lax');
+    expect(await page.evaluate(() => document.cookie.includes('onco_session'))).toBe(false); // (Codex) token inacessível ao JS
     expect((await context.cookies(CARE)).some((c) => c.name === 'onco_login_flow')).toBe(false);
     const c = claims(s.token); evidence.tokens.patientA = { iss: c.iss, aud: c.aud, amr: c.amr, exp_minus_iat: c.exp - c.iat, sub_matches: c.sub === sub('paciente.a') };
     expect(c.iss).toBe(STATE.issuer); expect([].concat(c.aud)).toContain('oncopharma-api'); expect(c.sub).toBe(sub('paciente.a'));
@@ -160,8 +166,9 @@ test.describe.serial('M14.5 E2E sintético', () => {
   });
 
   test('06 Clinical: farmacêutico com senha+TOTP revisa alerta do relato Care; auditoria no PostgreSQL', async ({ browser, request }) => {
-    const { context, page } = await staffLogin(browser, 'farmaceutico');
+    const { context, page } = await staffLogin(browser, 'farmaceutico', { wrongOtpFirst: true });
     const s = await sessionToken(context, CLIN); const c = claims(s.token); pharmacistToken = s.token;
+    expect(await page.evaluate(() => document.cookie.includes('onco_session'))).toBe(false);
     evidence.tokens.pharmacist = { iss: c.iss, aud: c.aud, amr: c.amr, exp_minus_iat: c.exp - c.iat, cookieMaxAgeSeconds: Math.round(s.cookie.expires - Date.now() / 1000) };
     expect(c.amr).toContain('otp'); // MFA comprovado pelo formulário OTP do IdP
     await expect(page.getByText('MFA: confirmado pelo token')).toBeVisible();
@@ -226,6 +233,37 @@ test.describe.serial('M14.5 E2E sintético', () => {
       expect(sym.status()).toBe(403);
       await ctx.close();
     }
+  });
+
+  test('07b (Codex) callback com state inválido e verifier PKCE incorreto não criam sessão', async ({ browser }) => {
+    const ctx = await browser.newContext(); const page = await ctx.newPage();
+    await page.goto(`${CLIN}/api/auth/callback?code=synthetic-invalid&state=wrong`);
+    await expect(page).toHaveURL(/\/clinical\?login=failed/); expect(await sessionToken(ctx, CLIN)).toBeNull();
+    // Injeção de falha: mantém state/nonce reais, troca só o verifier enviado pelo BFF; o IdP deve recusar a troca do código.
+    await page.goto(`${CARE}/api/auth/login`); await page.waitForURL(/localhost:8080\/realms\//);
+    const flowCookie = (await ctx.cookies(CARE)).find((c) => c.name === 'onco_login_flow'); expect(flowCookie).toBeTruthy();
+    const flow = unseal(flowCookie.value); flow.verifier = 'verifier-incorreto-'.repeat(4);
+    await ctx.addCookies([{ name: 'onco_login_flow', value: seal(flow), url: CARE, httpOnly: true, sameSite: 'Lax' }]);
+    await kcLogin(page, 'paciente.b'); await expect(page).toHaveURL(/localhost:3001\/care\?login=failed/);
+    expect(await sessionToken(ctx, CARE)).toBeNull(); await shot(page, 'care-login-failed-wrong-pkce');
+    await ctx.close();
+  });
+
+  test('07c (Codex) superfícies em 390/768/1440 px: sem overflow horizontal, sem erros de página; Care sem sessão recusa envio', async ({ browser }) => {
+    const ctx = await browser.newContext(); const page = await ctx.newPage(); const errors = []; page.on('pageerror', (e) => errors.push(e.message));
+    for (const [app, url] of [['care', `${CARE}/care`], ['clinical', `${CLIN}/clinical`], ['admin', ADMIN]]) {
+      for (const [size, width, height] of [['mobile', 390, 844], ['tablet', 768, 1024], ['desktop', 1440, 1000]]) {
+        await page.setViewportSize({ width, height }); await page.goto(url); await page.waitForLoadState('networkidle');
+        await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${app}-${size} overflow`).toBe(true);
+        await shot(page, `surface-${app}-${size}`);
+      }
+    }
+    await page.setViewportSize({ width: 390, height: 844 }); await page.goto(`${CARE}/care`);
+    await page.fill('#care-patient', PAT_A); await page.fill('#care-description', 'Relato sintético sem sessão');
+    await page.click('button[type=submit]:has-text("Registrar relato de teste")');
+    await expect(page.getByRole('status')).toContainText('Autenticação necessária'); await shot(page, 'care-error-unauthenticated');
+    expect(errors).toEqual([]); await ctx.close();
   });
 
   test('08 token adulterado, sessão forjada vencida e expiração real do token', async ({ browser, request }) => {

@@ -1,10 +1,21 @@
 {
-  "schema": "oncopharma-validation-v1",
-  "date": "2026-10-11T18:53:01.517Z",
+  "schema": "oncopharma-validation-v2",
+  "date": "2026-10-11T19:21:15.481Z",
   "baseline": "Plano Diretor v3.0",
-  "release": "M14.5",
+  "release": "M14.5-consolidado",
+  "sourceDigest": "452ef050c27aac8fd76bafd33eb1378c0c06b0b23792a1e869b2e0558d372d3d",
   "clinicalApproval": false,
   "checks": [
+    {
+      "name": "node22",
+      "status": "PASS",
+      "reason": "v22.23.3"
+    },
+    {
+      "name": "lockfile",
+      "status": "PASS",
+      "reason": "package-lock.json versionado (CI usa npm ci)."
+    },
     {
       "name": "local-tests",
       "status": "PASS",
@@ -20,11 +31,28 @@
       "command": "npm run test:lab"
     },
     {
+      "name": "clinical-rules",
+      "status": "PASS",
+      "exitCode": 0,
+      "reason": "",
+      "command": "npm run test:rules"
+    },
+    {
       "name": "postgres-required",
       "status": "PASS",
       "exitCode": 0,
       "reason": "",
       "command": "npm run test:db:required"
+    },
+    {
+      "name": "migration-0003",
+      "status": "PASS",
+      "reason": "Aplicada por provision-app-role.sh (bootstrap); GRANTs e política INSERT de audit_events exercitados no PostgreSQL."
+    },
+    {
+      "name": "migration-0008-nullif",
+      "status": "PASS",
+      "reason": "Políticas com nullif; sessão reutilizada retorna 0 linhas sem erro 22P02 (tests/m145-db-0008.integration.mjs)."
     },
     {
       "name": "full-build",
@@ -34,10 +62,31 @@
       "command": "npm run build"
     },
     {
+      "name": "api-security-unit",
+      "status": "PASS",
+      "exitCode": 0,
+      "reason": "",
+      "command": "npm run test:api:security"
+    },
+    {
+      "name": "design",
+      "status": "PASS",
+      "exitCode": 0,
+      "reason": "",
+      "command": "npm run check:design"
+    },
+    {
+      "name": "governance",
+      "status": "PASS",
+      "exitCode": 0,
+      "reason": "",
+      "command": "npm run check:governance"
+    },
+    {
       "name": "e2e-care-clinical",
       "status": "PASS",
       "exitCode": 0,
-      "reason": "(node:312541) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+      "reason": "(node:333275) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
       "command": "npm run test:e2e"
     },
     {
@@ -46,23 +95,40 @@
       "reason": "OIDC code+PKCE, TOTP real, claim amr, audience, sessão HttpOnly, CSRF, logout RP-initiated, expiração e negativos de papel validados no navegador e na API contra IdP de TESTE local (Keycloak dev) com contas sintéticas."
     },
     {
+      "name": "vertical-care-clinical-audit",
+      "status": "PASS",
+      "reason": "Care -> API/PostgreSQL -> Clinical -> intervenção -> auditoria com pacientes sintéticos, isolamento por organização e role restrita."
+    },
+    {
       "name": "oidc-mfa",
       "status": "BLOCKED",
       "reason": "IdP de homologação institucional não definido (D-008). A validação M14.5 usou somente IdP de teste local; repetir a suíte no IdP escolhido antes de qualquer piloto."
     },
     {
-      "name": "release-gate",
-      "status": "BLOCKED",
+      "name": "release-gate-enforced",
+      "status": "PASS",
+      "reason": "quality:gate sai com 1 e bloqueia G01–G09 (comportamento esperado).",
       "exitCode": 1,
-      "reason": "Gate de piloto/produção: bloqueado até aprovações formais (esperado).",
       "command": "npm run quality:gate"
+    },
+    {
+      "name": "clinical-release",
+      "status": "BLOCKED",
+      "reason": "G01–G09 exigem aprovações externas (clínica, LGPD/RIPD, SaMD/Anvisa, instituição, operação de alertas)."
     },
     {
       "name": "browser-lab-render",
       "status": "PASS",
       "reason": "/usr/bin/google-chrome renderizou laboratório sintético (o E2E dos apps é o check e2e-care-clinical)."
+    },
+    {
+      "name": "source-stability",
+      "status": "PASS",
+      "reason": "Fontes inalteradas durante a validação."
     }
   ],
   "readyForIntegratedValidation": false,
-  "readyForClinicalUse": false
+  "readyForClinicalUse": false,
+  "completedAt": "2026-10-11T19:25:08.304Z",
+  "sourceDigestAfter": "452ef050c27aac8fd76bafd33eb1378c0c06b0b23792a1e869b2e0558d372d3d"
 }

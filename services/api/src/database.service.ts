@@ -1,6 +1,7 @@
 import { Injectable, OnModuleDestroy, ServiceUnavailableException } from '@nestjs/common';
 import { Pool, PoolClient } from 'pg';
 
+
 @Injectable()
 export class DatabaseService implements OnModuleDestroy {
   private readonly pool?: Pool;
@@ -11,12 +12,21 @@ export class DatabaseService implements OnModuleDestroy {
     if (!this.pool) throw new ServiceUnavailableException('Banco não configurado');
     return this.pool;
   }
+  private async assertRuntimeRole(client: Pick<PoolClient, 'query'>): Promise<void> {
+    const result = await client.query('SELECT current_user AS name, rolsuper, rolbypassrls FROM pg_roles WHERE rolname=current_user');
+    const role = result.rows[0];
+    if (role?.name !== 'oncopharma_app' || role.rolsuper !== false || role.rolbypassrls !== false)
+      throw new ServiceUnavailableException('Role de banco não permitida: exige oncopharma_app sem superusuário ou BYPASSRLS');
+  }
   async query<T extends Record<string, unknown> = Record<string, unknown>>(sql: string, values: unknown[] = []): Promise<T[]> {
-    return (await this.getPool().query(sql, values)).rows as T[];
+    const pool = this.getPool();
+    await this.assertRuntimeRole(pool);
+    return (await pool.query(sql, values)).rows as T[];
   }
   async withTenant<T>(organizationId: string, work: (client: PoolClient) => Promise<T>): Promise<T> {
     const client = await this.getPool().connect();
     try {
+      await this.assertRuntimeRole(client);
       await client.query('BEGIN');
       // Contexto local à transação, jamais global à conexão reutilizada.
       await client.query('SELECT set_config($1, $2, true)', ['app.organization_id', organizationId]);
