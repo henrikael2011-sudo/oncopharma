@@ -99,6 +99,25 @@ test.describe.serial('M14.5 E2E sintético', () => {
     }
   });
 
+  test('03b (M15.1) identidade: títulos/manifest por app, assinatura Care, foco AA, alvos ≥48px, sem link autorredirecionado', async ({ page, request }) => {
+    for (const [origin, title, start] of [[CARE, 'ONCOPHARMA Care', '/care'], [CLIN, 'ONCOPHARMA Clinical', '/clinical'], [ADMIN, 'ONCOPHARMA Admin', '/']]) {
+      await page.goto(origin + start); await expect(page).toHaveTitle(title);
+      const m = await (await request.get(origin + '/manifest.webmanifest')).json(); expect(m.name).toBe(title); expect(m.icons.length).toBeGreaterThan(0);
+      for (const href of await page.locator('a[href]').evaluateAll((as) => as.map((a) => a.getAttribute('href'))))
+        if (start !== '/') expect(href, `link em ${title} não deve apontar para "/" (apenas redireciona)`).not.toBe('/');
+    }
+    await page.goto(CARE + '/care');
+    await expect(page.getByText('Um passo de cada vez. Juntos no cuidado.')).toBeVisible();
+    expect(parseFloat(await page.locator('.care-page').evaluate((e) => getComputedStyle(e).fontSize))).toBeGreaterThanOrEqual(18);
+    for (const h of await page.locator('.care-page button, .care-page input, .care-page select').evaluateAll((es) => es.map((e) => e.getBoundingClientRect().height)))
+      expect(h).toBeGreaterThanOrEqual(48);
+    // foco em fundo claro = azul-petróleo (navy), não dourado
+    const field = page.locator('.care-main input, .care-main button').first();
+    if (await field.count()) { await field.focus(); await page.keyboard.press('Shift+Tab'); await page.keyboard.press('Tab');
+      expect(await page.evaluate(() => getComputedStyle(document.activeElement).outlineColor)).toBe('rgb(10, 52, 74)'); }
+    await page.goto(CLIN + '/clinical'); await expect(page.getByText(/M14\.1|M10\.1/)).toHaveCount(0);
+  });
+
   test('04 Care: login OIDC com PKCE, cookie HttpOnly, relato sintético persistido', async ({ browser }) => {
     const context = await browser.newContext(); const page = await context.newPage();
     await page.goto(`${CARE}/care`);

@@ -1,3 +1,8 @@
-import type {Metadata} from 'next'; import './globals.css';
-export const metadata:Metadata={title:'ONCOPHARMA Admin — Governança'};
-export default function Layout({children}:{children:React.ReactNode}){return <html lang="pt-BR"><body>{children}</body></html>;}
+import type { Metadata, Viewport } from 'next';
+import './globals.css';
+export const metadata: Metadata = { title: 'ONCOPHARMA Admin', description: 'Governança institucional do ONCOPHARMA.', applicationName: 'ONCOPHARMA Admin' };
+// themeColor: token aprovado (Plano v3 §2.2).
+export const viewport: Viewport = { width: 'device-width', initialScale: 1, themeColor: '#0a344a' };
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  return <html lang="pt-BR"><body><a className="skip" href="#conteudo">Pular para o conteúdo</a>{children}</body></html>;
+}

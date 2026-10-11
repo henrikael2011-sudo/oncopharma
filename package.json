@@ -40,12 +40,13 @@
     "test:readiness": "node --test tests/m141-release-gate.test.mjs",
     "test:lab:e2e": "node --test tests/m142-lab-e2e.test.mjs",
     "test:db:required": "node tests/require-postgres.mjs && NODE_ENV=test node --test tests/m12-db.integration.mjs tests/m145-db-rls.integration.mjs tests/m145-db.integration.mjs tests/m145-db-0008.integration.mjs",
-    "verify:local": "npm test && npm run test:extended && npm run test:lab:e2e && npm run check:design && npm run check:governance && npm run test:readiness",
+    "verify:local": "npm test && npm run test:extended && npm run test:lab:e2e && npm run check:design && npm run check:brand && npm run check:governance && npm run test:readiness",
     "validate:evidence": "node tools/validate-real.mjs",
     "test:e2e": "bash tests/e2e/run-e2e.sh",
     "idp:test:setup": "node infra/idp-test/setup-keycloak-test.mjs",
     "build:packages": "npm run build -w @oncopharma/clinical-rules",
-    "test:api:security": "node --test tests/m145-api.security.mjs tests/m15-oidc-providers.mjs tests/m151-synthetic-mode.mjs"
+    "test:api:security": "node --test tests/m145-api.security.mjs tests/m15-oidc-providers.mjs tests/m151-synthetic-mode.mjs",
+    "check:brand": "node tools/check-brand.mjs"
   },
   "engines": {
     "node": ">=22 <23"

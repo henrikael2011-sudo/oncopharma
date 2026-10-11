@@ -1,5 +1,5 @@
 {
-  "_doc": "Paleta M15.1. 'tokens' = Plano Diretor v3 §2.2 (únicos permitidos em código novo). 'baseline_derivatives' = tons derivados já existentes no CSS do M14.4 (gradientes/superfícies), congelados até a arte final (D-004); nenhum novo valor pode ser adicionado sem revisão explícita de identidade.",
+  "_doc": "Paleta M15.1. 'tokens' = Plano Diretor v3 §2.2. 'derived' = lista fechada de tints/shades dos tokens, declarada como variáveis CSS em :root (packages/design-system/app/globals.css). Código e CSS fora de :root usam somente var(--…). Novos tons exigem revisão explícita de identidade.",
   "tokens": {
     "#063f3b": "brand.deepTeal",
     "#15735d": "brand.emerald",
@@ -16,40 +16,118 @@
     "#fff",
     "#ffffff"
   ],
-  "baseline_derivatives": [
-    "#052e39",
-    "#052e39a8",
-    "#092d40",
-    "#092e41",
-    "#146b5b",
-    "#154f67",
-    "#173344",
-    "#173d35",
-    "#1a6b60",
-    "#315667",
-    "#335b4d",
-    "#48606b",
-    "#50747c",
-    "#543e1c",
-    "#684516",
-    "#8b642d",
-    "#9fb8c2",
-    "#a8c1c1",
-    "#bad5d2",
-    "#bf8c40",
-    "#cbded5",
-    "#d2e5e1",
-    "#d4b4a6",
-    "#d4e9e6",
-    "#d7e1e7",
-    "#d9d9d0",
-    "#dce9ed",
-    "#ddc5a5",
-    "#e6eee9",
-    "#e8f6f2",
-    "#eef3f6",
-    "#f2f8f5",
-    "#f5d497",
-    "#fff7eb"
-  ]
+  "derived": {
+    "--teal-500": {
+      "hex": "#1a6b60",
+      "from": "tint deepTeal (brilho do gradiente)"
+    },
+    "--teal-600": {
+      "hex": "#146b5b",
+      "from": "deepTeal→emerald (cartão Care)"
+    },
+    "--teal-800": {
+      "hex": "#052e39",
+      "from": "deepTeal→navy (gradiente/painel)"
+    },
+    "--navy-500": {
+      "hex": "#154f67",
+      "from": "tint navy (cartão Clinical)"
+    },
+    "--navy-800": {
+      "hex": "#092e41",
+      "from": "shade navy (cabeçalho Clinical)"
+    },
+    "--navy-50": {
+      "hex": "#eef3f6",
+      "from": "tint navy (fundo Clinical)"
+    },
+    "--navy-100": {
+      "hex": "#dce9ed",
+      "from": "tint navy (painel)"
+    },
+    "--navy-150": {
+      "hex": "#d7e1e7",
+      "from": "tint navy (borda de cartão)"
+    },
+    "--navy-300": {
+      "hex": "#9fb8c2",
+      "from": "tint navy (borda decorativa)"
+    },
+    "--navy-text": {
+      "hex": "#315667",
+      "from": "navy→ink (texto secundário)"
+    },
+    "--border-strong": {
+      "hex": "#5f7c84",
+      "from": "navy/ink tint (bordas de controle, ≥3:1)"
+    },
+    "--ink-teal": {
+      "hex": "#173d35",
+      "from": "ink→deepTeal (texto Care)"
+    },
+    "--ink-navy": {
+      "hex": "#173344",
+      "from": "ink→navy (texto Clinical)"
+    },
+    "--ink-muted": {
+      "hex": "#48606b",
+      "from": "tint ink (texto auxiliar)"
+    },
+    "--emerald-ink": {
+      "hex": "#335b4d",
+      "from": "emerald→ink (rótulo)"
+    },
+    "--mint-50": {
+      "hex": "#f2f8f5",
+      "from": "tint mint (fundo Care)"
+    },
+    "--mint-100": {
+      "hex": "#e6eee9",
+      "from": "tint mint (rótulo)"
+    },
+    "--mint-200": {
+      "hex": "#cbded5",
+      "from": "mint (borda de cartão Care)"
+    },
+    "--mint-on-dark": {
+      "hex": "#d4e9e6",
+      "from": "mint claro sobre escuro"
+    },
+    "--mint-on-dark-strong": {
+      "hex": "#e8f6f2",
+      "from": "mint claro sobre escuro (forte)"
+    },
+    "--mint-on-dark-muted": {
+      "hex": "#bad5d2",
+      "from": "mint sobre escuro (rodapé)"
+    },
+    "--gold-50": {
+      "hex": "#fff7eb",
+      "from": "tint gold (aviso claro)"
+    },
+    "--gold-200": {
+      "hex": "#f5d497",
+      "from": "tint gold sobre escuro"
+    },
+    "--gold-300": {
+      "hex": "#ddc5a5",
+      "from": "tint gold (borda de aviso)"
+    },
+    "--gold-600": {
+      "hex": "#bf8c40",
+      "from": "shade gold (barra de aviso)"
+    },
+    "--gold-700": {
+      "hex": "#8b642d",
+      "from": "shade gold (rótulo em fundo claro, AA)"
+    },
+    "--gold-ink": {
+      "hex": "#543e1c",
+      "from": "gold→ink (texto de aviso)"
+    },
+    "--gold-ink-strong": {
+      "hex": "#684516",
+      "from": "gold→ink (destaque de aviso)"
+    }
+  }
 }

@@ -14,6 +14,7 @@ jobs:
       - run: npm test
       - run: npm run test:extended
       - run: npm run check:design
+      - run: npm run check:brand
       - run: npm run check:governance
       - run: npm run build
       - run: npm run test:api:security
@@ -63,3 +64,33 @@ jobs:
           # M14.5: somente para criar fixtures sintéticas dos testes negativos (banco efêmero do runner).
           DATABASE_URL_ADMIN: postgres://oncopharma:${{ secrets.ONCO_CI_DB_ADMIN_PASSWORD }}@localhost:5432/oncopharma_dev
           NODE_ENV: test
+      # M15.1: E2E completo (Playwright + Chrome + axe) com IdP de TESTE Keycloak efêmero; senhas geradas por execução.
+      - name: Generate ephemeral E2E credentials
+        run: |
+          KC_PW=$(openssl rand -hex 24); E2E_PW="E2e-$(openssl rand -hex 12)"
+          echo "::add-mask::$KC_PW"; echo "::add-mask::$E2E_PW"
+          echo "KC_BOOTSTRAP_ADMIN_PASSWORD=$KC_PW" >> "$GITHUB_ENV"; echo "E2E_USER_PASSWORD=$E2E_PW" >> "$GITHUB_ENV"
+      - name: Start Keycloak (test IdP)
+        run: |
+          docker run -d --name kc -p 8080:8080 -e KC_BOOTSTRAP_ADMIN_USERNAME=ci-admin -e KC_BOOTSTRAP_ADMIN_PASSWORD="$KC_BOOTSTRAP_ADMIN_PASSWORD" quay.io/keycloak/keycloak:26.8.0 start-dev --http-port=8080
+          for i in $(seq 1 90); do curl -fsS http://localhost:8080/realms/master/.well-known/openid-configuration >/dev/null && exit 0; sleep 2; done; docker logs kc; exit 1
+      - run: npx playwright install ffmpeg
+      - name: E2E Care -> Clinical -> auditoria (OIDC+PKCE+TOTP, axe)
+        run: bash tests/e2e/run-e2e.sh
+        env:
+          DATABASE_URL: postgres://oncopharma_app:${{ secrets.ONCO_CI_DB_APP_PASSWORD }}@localhost:5432/oncopharma_dev
+          DATABASE_URL_ADMIN: postgres://oncopharma:${{ secrets.ONCO_CI_DB_ADMIN_PASSWORD }}@localhost:5432/oncopharma_dev
+          KC_URL: http://localhost:8080
+          KC_BOOTSTRAP_ADMIN_USERNAME: ci-admin
+          E2E_STATE_FILE: ${{ runner.temp }}/e2e-state.json
+          CHROME_PATH: /usr/bin/google-chrome
+      - name: Upload E2E evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: oncopharma-e2e-evidence
+          path: |
+            artifacts/validation/screens/
+            artifacts/validation/m14_5/e2e-results.json
+            artifacts/validation/m14_5/e2e-evidence.json
+          if-no-files-found: ignore
