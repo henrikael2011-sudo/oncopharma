@@ -1,6 +1,6 @@
  'use client';
 import { useState } from 'react';
-type Alert={id:string;code:string;level:string;status:string;explanation:string;created_at:string;description?:string};
+type Alert={id:string;code:string;level:string;status:string;rule_version?:string;explanation:string;created_at:string;description?:string};
 export function WorkflowReview({patients}:{patients:{id:string;external_reference:string}[]}){
  const [patientId,setPatientId]=useState(patients[0]?.id||'');const [alerts,setAlerts]=useState<Alert[]>([]);
  const [busy,setBusy]=useState(false);const [message,setMessage]=useState('');const [notes,setNotes]=useState<Record<string,string>>({});

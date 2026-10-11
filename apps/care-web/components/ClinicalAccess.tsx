@@ -1,5 +1,5 @@
-import { WorkflowReview } from './WorkflowReview';
 'use client';
+import { WorkflowReview } from './WorkflowReview';
 import { SyntheticRecord } from './SyntheticRecord';
 import { useEffect,useState } from 'react';
 type Data={profile:{subject:string;mfa:boolean;memberships:{organization_id:string;role:string;active:boolean}[]};patients?:{patients:{id:string;external_reference:string}[]} | null};
