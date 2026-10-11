@@ -22,7 +22,7 @@ Nada aqui altera D-001..D-008 nem os tokens de marca. "FEITO" nunca significa ho
 | WCAG 2.2 AA, foco, alvos amplos | PARCIAL | axe A/AA sem violações sérias (e2e 03/09); skip link | Zoom 200%, leitor de tela real, alvos ≥ 24 px verificados: FALTA (M15.6) |
 | Estados loading/vazio/erro em todos os componentes | PARCIAL | erros de envio no Care; "Faça login" no Clinical | Padronizar e testar estados em cada tela nova (DoD) |
 | Care: um objetivo por tela, próximo passo, sem dose ao paciente | PARCIAL | formulário único; nenhuma orientação automática (e2e 06) | Telas Care do §4.1 → M15.2/M15.3 |
-| Clinical: incerteza, dados faltantes, origem | PARCIAL | `source_reference` nos registros; regra `MISSING_CONTEXT` | Mostrar origem/horário e "Não é possível concluir" na UI → M15.4 |
+| Clinical: incerteza, dados faltantes, origem | FEITO (M15.4a) | `source_reference` nos registros; regra `MISSING_CONTEXT` | Mostrar origem/horário e "Não é possível concluir" na UI → M15.4 |
 
 ## 3. Papéis e permissões (§3)
 | Req. | Situação | Evidência | Lacuna |
@@ -30,7 +30,7 @@ Nada aqui altera D-001..D-008 nem os tokens de marca. "FEITO" nunca significa ho
 | Paciente registra o próprio sintoma | FEITO (M15.2) | `GET /v1/care/me` + `POST /v1/care/me/symptoms` resolvem o paciente por `patient_portal_links` (org+issuer+sujeito); rota com `patientId` removida (404); e2e 04/07, `tests/m152-*.mjs` | — |
 | Cuidador: escopo autorizado, revogável | FEITO (M15.3) | migração 0010, `care.controller.ts` (`need()`), e2e 07d, `tests/m153-*.mjs` | **R4: modelo convite + consentimento por escopo + prazo + revogação + auditoria** (M15.3) |
 | Farmacêutico revisa alerta / propõe intervenção | FEITO (DEV) | `GET alerts`, `POST interventions`; MFA + vínculo + atribuição (e2e 06/07) | — |
-| Enfermagem "conforme atribuição"; Médico | PARCIAL | papéis `nurse`/`physician` em `STAFF`; atribuição por paciente testada (e2e 07) | Matriz fina por recurso (enfermagem não propõe intervenção farmacêutica) → M15.4 |
+| Enfermagem "conforme atribuição"; Médico | FEITO (M15.4a, P-CLIN-1) | papéis `nurse`/`physician` em `STAFF`; atribuição por paciente testada (e2e 07) | Matriz fina por recurso (enfermagem não propõe intervenção farmacêutica) → M15.4 |
 | Gestor clínico (filas, indicadores, auditoria) | FALTA | papel inexistente | Papel `clinical_manager` + telas → M15.4/M15.7 |
 | Admin técnico sem acesso clínico | FEITO (negativo) | admin com MFA → sem acesso clínico (e2e 07) | Admin sem login e sem funções → M15.7 |
 | RBAC + ABAC (organização, equipe, consentimento, finalidade, emergência auditada) | PARCIAL | RLS por organização; `care_assignments`; MFA | Unidade/equipe, finalidade e "quebra de vidro" auditada: FALTA (quebra de vidro = BLOQUEADO-DECISÃO de política) |
@@ -51,12 +51,12 @@ Nada aqui altera D-001..D-008 nem os tokens de marca. "FEITO" nunca significa ho
 ## 4.2 Clinical
 | # | Tela | Situação | Evidência | Plano |
 |---|---|---|---|---|
-| 1 | Painel (vinculados, fila de alertas, tarefas, pré-ciclos, pendências) | PARCIAL | `/v1/me`, `/v1/patients`, alertas por paciente | Fila consolidada por gravidade/estado → M15.4 |
-| 2 | Pacientes: busca e filtros | PARCIAL | seletor de paciente | Filtros protocolo/ciclo/gravidade/pendência → M15.4 |
-| 3 | Prontuário longitudinal | PARCIAL | `GET /v1/patients/:id/record` (ciclos, observações, alergias, medidas, exames, ordens, administrações, avaliações) | Linha do tempo com origem/horário na UI; diagnóstico/estadiamento/biomarcadores: tabelas FALTA → M15.4 |
-| 4 | Avaliação pré-ciclo (checklist disponíveis/ausentes, parecer) | PARCIAL | `evaluateSyntheticPreCycle` (testado) + `clinical_reviews` | Expor checklist + parecer persistido → M15.4 |
+| 1 | Painel (vinculados, fila de alertas, tarefas, pré-ciclos, pendências) | FEITO (M15.4a) | `/v1/me`, `/v1/patients`, alertas por paciente | Fila consolidada por gravidade/estado → M15.4 |
+| 2 | Pacientes: busca e filtros | FEITO (M15.4a) | seletor de paciente | Filtros protocolo/ciclo/gravidade/pendência → M15.4 |
+| 3 | Prontuário longitudinal | PARCIAL (linha do tempo com origem: FEITO M15.4a; diagnóstico/estadiamento/biomarcadores: FALTA) | `GET /v1/patients/:id/record` (ciclos, observações, alergias, medidas, exames, ordens, administrações, avaliações) | Linha do tempo com origem/horário na UI; diagnóstico/estadiamento/biomarcadores: tabelas FALTA → M15.4 |
+| 4 | Avaliação pré-ciclo (checklist disponíveis/ausentes, parecer) | FEITO (M15.4a) | `evaluateSyntheticPreCycle` (testado) + `clinical_reviews` | Expor checklist + parecer persistido → M15.4 |
 | 5 | Inteligência clínica | BLOQUEADO-DECISÃO | evidence-gate | Apenas regras determinísticas; nada de LLM |
-| 6 | Intervenções (aceitar/ajustar/rejeitar, encaminhamento, responsável, prazo, desfecho) | PARCIAL | `clinical_interventions` (decision pending/accepted/declined/referred) | Tarefa/encaminhamento com responsável/prazo/desfecho → M15.4 |
+| 6 | Intervenções (aceitar/ajustar/rejeitar, encaminhamento, responsável, prazo, desfecho) | FEITO (M15.4a) | `clinical_interventions` (decision pending/accepted/declined/referred) | Tarefa/encaminhamento com responsável/prazo/desfecho → M15.4 |
 | 6a | **RF-M15-SAM-01 Solicitação de alteração ao médico** (D-012; plantão/médico vinculado, justificativa, evidências, prioridade, estados, IA-rascunho determinístico) | FALTA | — | **M15.5** (`docs/product/RF_SOLICITACAO_ALTERACAO_MEDICO.md`) |
 | 7 | Protocolos versionados | PARCIAL | `clinical_protocol_versions` (aprovação obrigatória) | Visualização somente leitura → M15.4; aprovação = papel designado (BLOQUEADO-DECISÃO) |
 | 8 | Indicadores | FALTA | — | Indicadores operacionais sintéticos (tempo até revisão, nº intervenções) → M15.7 |
@@ -68,8 +68,8 @@ Nada aqui altera D-001..D-008 nem os tokens de marca. "FEITO" nunca significa ho
 | Sintoma: validar, salvar, sinais críticos por regra, confirmação | FEITO (básico) | e2e 04; idempotência por requestId | Questionário M15.2 |
 | Dado hospitalar chega (autentica, reconcilia, deduplica, provenance) | PARCIAL | `reconcileSynthetic` (unit) | Simulador conectado + provenance persistida → M15.4 |
 | **Estados de alerta §5.1** (Detectado → Aguardando revisão → Em avaliação → Encaminhado → Em acompanhamento → Resolvido; Descartado com justificativa; Duplicado vinculado; sem fechamento por tempo) | PARCIAL | hoje `open/acknowledged/resolved` | **Migração 0009 com a máquina de estados completa + transições auditadas** → M15.4 |
-| Encaminhamento/tarefa com confirmação de recebimento | FALTA | — | M15.4 |
-| Dados insuficientes → "Não é possível concluir" | PARCIAL | regra `MISSING_CONTEXT` | UI + teste → M15.4 |
+| Encaminhamento/tarefa com confirmação de recebimento | FEITO (M15.4a) | — | M15.4 |
+| Dados insuficientes → "Não é possível concluir" | FEITO (M15.4a) | regra `MISSING_CONTEXT` | UI + teste → M15.4 |
 | Alerta crítico (febre) → orientação imediata + escalonamento configurado | PARCIAL | `urgent_review` | Mensagem imediata ao paciente com texto **provisório** para revisão + escalonamento "não configurado" explícito (sem prometer monitoramento) → M15.2 |
 
 ## 6–7. Inteligência, dados e integração
@@ -106,9 +106,9 @@ Nada aqui altera D-001..D-008 nem os tokens de marca. "FEITO" nunca significa ho
 |---|---|---|---|
 | D-013 Rascunho de prescrição assistido por IA | BLOQUEADO-DECISÃO — **depende de decisão regulatória** | `RF_PRESCRICAO_ASSISTIDA_IA.md` | Aprovada (registro); implementação bloqueada até enquadramento Anvisa, validação clínica e integração com prontuário oficial. Regras determinísticas de dose antes de qualquer LLM |
 | UI-01 Care simples (letra grande, alto contraste, um passo por tela, botões grandes) | FALTA | `docs/diretrizes-design.md` §1 | → M15.2 / M15.6 (axe, zoom 200%) |
-| UI-02 Clinical sem poluição (essencial visível, detalhe sob demanda) | FALTA | `docs/diretrizes-design.md` §2 | → M15.4 |
-| UI-03 Dados do paciente só ao clicar; lista mínima (identificação segura, gravidade, pendência) | FALTA | `docs/diretrizes-design.md` §3 | → M15.4 (contrato da API de lista + E2E + auditoria do detalhe) |
-| UI-04 Busca de pacientes respeitando vínculo/ABAC | FALTA | `docs/diretrizes-design.md` §4 | → M15.4 (testes RLS/ABAC da busca) |
+| UI-02 Clinical sem poluição (essencial visível, detalhe sob demanda) | FEITO (M15.4a) | `docs/diretrizes-design.md` §2 | → M15.4 |
+| UI-03 Dados do paciente só ao clicar; lista mínima (identificação segura, gravidade, pendência) | FEITO (M15.4a) | `docs/diretrizes-design.md` §3 | → M15.4 (contrato da API de lista + E2E + auditoria do detalhe) |
+| UI-04 Busca de pacientes respeitando vínculo/ABAC | FEITO (M15.4a) | `docs/diretrizes-design.md` §4 | → M15.4 (testes RLS/ABAC da busca) |
 | UI-05 Alocação hospitalar (unidade/andar/quarto/leito) via "Sincronizar" — FHIR Location/Encounter.location ou HL7 ADT A01/A02/A03 | FALTA | `docs/diretrizes-design.md` §5 | → M15.4 com simulador; integração real depende de D-007 |
 | UI-06 Alocação manual marcada "manual", auditada; sincronizado prevalece com aviso de conflito | FALTA | `docs/diretrizes-design.md` §6 | → M15.4 |
 | UI-07 Importação de PDF de pacientes do dia (layout por fornecedor, pré-visualização obrigatória, confirmação humana, origem/hash, divergência, auditoria, storage criptografado) | FALTA (requisito aprovado); dados reais BLOQUEADO-DECISÃO | `RF_IMPORTACAO_PDF_PACIENTES.md`; `docs/diretrizes-design.md` §7 | Só PDFs sintéticos até autorização formal do hospital (farmácia/direção + DPO/LGPD, tutela da saúde), ambiente sa-east-1 restrito e repositório privado. Marco a definir (sugestão: após M15.4) |
@@ -119,7 +119,7 @@ Nada aqui altera D-001..D-008 nem os tokens de marca. "FEITO" nunca significa ho
 | M15.1 | `m15.1-fundacao` | Remover duplicações (Clinical dentro do care-web), OpenAPI da API, Dockerfiles, modo sintético explícito (substitui dependência de `NODE_ENV`) |
 | M15.2 | `m15.2-care-paciente` | **R3** paciente derivado da identidade (`GET /v1/care/me`); Início, Registrar sintoma estruturado, Minha jornada, Meus medicamentos (leitura + adesão relatada), Preciso de ajuda, orientações só `approved`, febre → mensagem imediata provisória |
 | M15.3 | `m15.3-cuidador` | **R4** convite + consentimento por escopo + prazo + revogação + histórico de acessos auditado |
-| M15.4 | `m15.4-clinical` | Estados de alerta §5.1 (migração), fila/painel, linha do tempo com origem, pré-ciclo, tarefas/encaminhamento, simulador hospitalar FHIR conectado |
+| M15.4 | `m15.4-clinical` (4a núcleo) → `m15.4b-alocacao` (Sincronizar/manual) → `m15.4c-pdf` (importação PDF sintética) | Estados de alerta §5.1 (migração), fila/painel, linha do tempo com origem, pré-ciclo, tarefas/encaminhamento, simulador hospitalar FHIR conectado | FEITO (M15.4a) 
 | M15.5 | `m15.5-solicitacao-medico` | **RF-M15-SAM-01 (D-012)**: unidades + escala de plantão sintética, critérios de prioridade, solicitação com evidências e Provenance, estados rascunho→enviada/em revisão→aceita/ajustada/recusada→concluída, resposta do médico, `TemplateJustificationDrafter` (determinístico, rotulado), RLS/auditoria; E2E farmacêutico → plantonista → auditoria |
 | M15.6 | `m15.6-pwa-a11y` | Manifest/SW seguro, preferências de acessibilidade, zoom 200%, rede lenta/offline |
 | M15.7 | `m15.7-admin` | Login no Admin, profissionais/equipes/vínculos (sem dados clínicos), trilha de auditoria, indicadores operacionais |

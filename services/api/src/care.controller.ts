@@ -165,7 +165,7 @@ export class CareController {
       const reportId = randomUUID(), alertId = randomUUID();
       await c.query(`INSERT INTO patient_symptom_reports(id,organization_id,patient_id,symptom_code,description,source,source_reference,triage_status,details,actor_issuer,actor_sub) VALUES($1,$2,$3,$4,$5,'care-portal',$6,$7,$8::jsonb,$9,$10)`,
         [reportId, org, s.patientId, answers.symptomCode, answers.description || SYMPTOMS[answers.symptomCode], answers.requestId, a.urgent ? 'urgent_review' : 'pending', JSON.stringify({ ...a.details, reported_by: s.actor }), req.principal.issuer, req.principal.sub]);
-      await c.query(`INSERT INTO clinical_alerts(id,organization_id,patient_id,source_report_id,code,level,status,rule_version,explanation) VALUES($1,$2,$3,$4,$5,$6,'open',$7,$8)`,
+      await c.query(`INSERT INTO clinical_alerts(id,organization_id,patient_id,source_report_id,code,level,status,rule_version,explanation) VALUES($1,$2,$3,$4,$5,$6,'awaiting_review',$7,$8)`,
         [alertId, org, s.patientId, reportId, `symptom.${answers.symptomCode}`, a.urgent ? 'urgent_review' : 'needs_review', a.ruleVersion, a.explanation]);
       await this.audit(c, org, req, 'symptom.created', s, { report_id: reportId, urgent: String(a.urgent) });
       return { reportId, urgent: a.urgent, message: a.patientMessage, clinicalAdvice: false };

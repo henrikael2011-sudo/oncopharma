@@ -77,6 +77,6 @@ Atribuir os grupos aos app roles em Enterprise applications → ONCOPHARMA API �
 Vínculos (`memberships`, `care_assignments`, `patient_portal_links`) usam `oidc_issuer` = issuer acima e `oidc_sub` = **oid**.
 
 ## 7. Revalidação do R5 (claim de MFA) no Entra
-1. Com conta de teste, decodificar o access token **só em ambiente de teste** e conferir: `ver=2.0`, `iss`, `aud=<API_CLIENT_ID>`, `oid`, `amr` contém `mfa`, `acrs` contém `c1`, `roles`.
+1. Com conta de teste, decodificar o access token **só em ambiente de teste** e conferir: `ver=2.0`, `iss`, `aud=<API_CLIENT_ID>`, `oid`, `amr` contém `mfa`, `acrs` contém `c1`, `roles`. Repetir com alguns segundos entre o MFA e o retorno ao app: o `amr` deve continuar presente (no IdP de teste Keycloak isso falhava com `maxAge=0`; no Entra o `amr` não depende desse ajuste, mas a conferência é a mesma).
 2. Negativos: conta só com SMS → login bloqueado pelo CA; token sem `acrs=c1` → API responde 403 "MFA obrigatório" (coberto por `tests/m15-oidc-providers.mjs`); conta fora dos grupos → bloqueada pela atribuição obrigatória.
 3. Rodar a suíte `tests/e2e/m145-flow.spec.mjs` adaptada ao IdP real (o cadastro TOTP do teste 05 é substituído pelo Authenticator) e registrar a evidência em `validate:evidence` (check `oidc-mfa`).

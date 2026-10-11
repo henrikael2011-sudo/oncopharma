@@ -44,6 +44,8 @@ const PAIRS = [
   ['aviso claro', 'gold-ink', 'gold-50', 4.5], ['rótulo planejado', 'emerald-ink', 'mint-100', 4.5], ['alerta crítico', 'danger', 'white', 4.5], ['texto claro', 'ink', 'canvas', 4.5],
   ['foco claro (Care)', 'navy', 'mint-50', 3], ['foco claro (Clinical)', 'navy', 'navy-50', 3], ['foco escuro (Care)', 'gold', 'teal', 3], ['foco escuro (Clinical)', 'gold', 'navy-800', 3],
   ['borda de controle', 'border-strong', 'white', 3], ['borda de controle (Care)', 'border-strong', 'mint-50', 3], ['borda de controle (painel)', 'border-strong', 'navy-100', 3],
+  // M15.4 — Clinical: gravidade, abas, linha do tempo, mensagens.
+  ['gravidade urgente', 'white', 'danger', 4.5], ['gravidade revisão', 'gold-ink', 'gold-50', 4.5], ['sem alerta', 'navy-text', 'navy-50', 4.5], ['texto secundário em cartão', 'navy-text', 'white', 4.5], ['aba ativa', 'navy', 'navy-50', 4.5], ['mensagem de sucesso', 'ink-teal', 'mint-50', 4.5], ['erro em cartão', 'danger', 'white', 4.5], ['borda de gravidade (revisão)', 'gold-700', 'gold-50', 3], ['borda pendente no checklist', 'gold-700', 'white', 3],
 ];
 const table = PAIRS.map(([n, fg, bg, min]) => { const r = ratio(fg, bg); if (r < min) errors.push(`contraste ${n}: ${r.toFixed(2)} < ${min}`); return `${n.padEnd(28)} ${fg}/${bg} ${r.toFixed(2)}:1 (mín ${min})`; });
 console.log(table.join('\n'));

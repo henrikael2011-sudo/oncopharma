@@ -24,6 +24,7 @@ async function api(method, path, body, okStatuses = [200, 201, 204]) {
   const t = await r.text(); return t ? JSON.parse(t) : null;
 }
 
+export const AMR_MAX_AGE = 900;
 // Realm novo a cada execução (efêmero). Tokens curtos para permitir teste real de expiração.
 await api('DELETE', `/realms/${REALM}`, null, [204, 404]);
 await api('POST', '/realms', { realm: REALM, enabled: true, displayName: 'ONCOPHARMA TESTE (sintético)', accessTokenLifespan: Number(process.env.KC_ACCESS_TOKEN_LIFESPAN || 120),
@@ -31,10 +32,12 @@ await api('POST', '/realms', { realm: REALM, enabled: true, displayName: 'ONCOPH
   otpPolicyType: 'totp', otpPolicyAlgorithm: 'HmacSHA1', otpPolicyDigits: 6, otpPolicyPeriod: 30, otpPolicyLookAheadWindow: 1, internationalizationEnabled: true, supportedLocales: ['pt-BR'], defaultLocale: 'pt-BR' });
 
 // AMR: referências por autenticador no fluxo browser (pwd / otp) para o claim amr do token de acesso.
+// maxAge (segundos) = validade da referência após auth_time (Keycloak AmrUtils.isAmrValid: auth_time + maxAge >= agora).
+// '0' fazia o amr sair vazio quando a troca do código acontecia ≥1 s após o OTP (MFA intermitente). 900 = ssoSessionIdleTimeout.
 const execs = await api('GET', `/realms/${REALM}/authentication/flows/browser/executions`);
 for (const [provider, ref] of [['auth-username-password-form', 'pwd'], ['auth-otp-form', 'otp']]) {
   const e = execs.find((x) => x.providerId === provider); if (!e) throw new Error(`execução ${provider} ausente`);
-  await api('POST', `/realms/${REALM}/authentication/executions/${e.id}/config`, { alias: `amr-${ref}`, config: { 'default.reference.value': ref, 'default.reference.maxAge': '0' } });
+  await api('POST', `/realms/${REALM}/authentication/executions/${e.id}/config`, { alias: `amr-${ref}`, config: { 'default.reference.value': ref, 'default.reference.maxAge': String(AMR_MAX_AGE) } });
 }
 
 const mappers = [
