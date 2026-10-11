@@ -44,8 +44,19 @@ Necessidade → tela → regra → API → teste → aprovação. Tabela acima p
 | §12 Reprodutibilidade / CI | `npm ci`, secrets, testes extras no CI (Codex) | npm-ci.log; CI não executado (sem repositório) | PARCIAL |
 | D-008 decisões externas | — | oidc-mfa institucional e clinical-release BLOCKED | ABERTO |
 
-
 ## M15 — novos requisitos aprovados
 | Requisito | Tela | Regra | API | Teste | Aprovação |
 |---|---|---|---|---|---|
 | RF-M15-SAM-01 Solicitação de alteração ao médico (D-012) | Clinical: "Solicitar alteração ao médico" (autor) e "Solicitações recebidas" (médico) | vínculo assistencial + MFA; estados rascunho→enviada/em revisão→aceita/ajustada/recusada→concluída; app nunca altera prescrição; IA só rascunho rotulado | `/v1/workflow/clinical/patients/:id/change-requests` (planejado M15.5) | unit (estados, plantão, drafter); DB/RLS negativos (sem vínculo, outra org, admin); E2E farmacêutico→plantonista→auditoria | Requisito aprovado pelo responsável; implementação pendente (M15.5) |
+
+## Emenda UI / D-013 (11/10/2026)
+| Requisito | Implementação | Verificação | Estado |
+|---|---|---|---|
+| D-013 Rascunho de prescrição assistido por IA (`RF_PRESCRICAO_ASSISTIDA_IA.md`) | — (não implementar) | — | **BLOQUEADO — depende de decisão regulatória** (Anvisa SaMD RDC 657/2022 e 751/2022, validação clínica, CFM/ICP-Brasil, integração com prontuário oficial) |
+| UI-01 Care simples (letra grande, alto contraste, um passo por tela, botões grandes) | `docs/diretrizes-design.md` §1 | axe + zoom 200% + E2E Care | ABERTO |
+| UI-02 Clinical sem poluição (essencial visível, detalhe sob demanda) | `docs/diretrizes-design.md` §2 | revisão de UX + E2E Clinical | ABERTO |
+| UI-03 Dados do paciente só ao clicar; lista mínima | `docs/diretrizes-design.md` §3 | teste de contrato da API de lista + E2E + auditoria | ABERTO |
+| UI-04 Busca de pacientes respeitando vínculo/ABAC | `docs/diretrizes-design.md` §4 | testes RLS/ABAC da busca | ABERTO |
+| UI-05 Alocação hospitalar por "Sincronizar" (FHIR Location/Encounter.location ou HL7 ADT A01/A02/A03) | `docs/diretrizes-design.md` §5; simulador até D-007 | E2E com simulador; auditoria de sincronização | ABERTO (integração real depende de D-007) |
+| UI-06 Alocação manual marcada, auditada; sincronizado prevalece com aviso de conflito | `docs/diretrizes-design.md` §6 | teste de conflito manual × sincronizado | ABERTO |
+| UI-07 Importação de PDF de pacientes do dia (layout por fornecedor, pré-visualização, confirmação, origem/hash, divergência, auditoria, storage criptografado) | `docs/product/RF_IMPORTACAO_PDF_PACIENTES.md`; `docs/diretrizes-design.md` §7 | E2E com PDFs sintéticos | ABERTO (aprovado); **dados reais BLOQUEADO** até autorização do hospital + DPO/LGPD, ambiente sa-east-1 restrito e repositório privado |
