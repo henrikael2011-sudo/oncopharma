@@ -1,0 +1,70 @@
+
+> oncopharma@0.14.4-dev test:db:required
+> node tests/require-postgres.mjs && node --test tests/m12-db.integration.mjs tests/m145-db-rls.integration.mjs
+
+PostgreSQL conectado com role restrita; executando testes integrados obrigatórios.
+TAP version 13
+# Subtest: M1.2: role sem privilégios de escrita clínica
+ok 1 - M1.2: role sem privilégios de escrita clínica
+  ---
+  duration_ms: 218.960921
+  type: 'test'
+  ...
+# Subtest: M1.2: isolamento RLS sem contexto e com organização incorreta
+ok 2 - M1.2: isolamento RLS sem contexto e com organização incorreta
+  ---
+  duration_ms: 68.806965
+  type: 'test'
+  ...
+# Subtest: M14.5 pré-condições: URLs configuradas, banco DEV, role restrita
+ok 3 - M14.5 pré-condições: URLs configuradas, banco DEV, role restrita
+  ---
+  duration_ms: 123.537215
+  type: 'test'
+  ...
+# Subtest: RLS cross-tenant: contexto da org A não enxerga paciente/vínculo da org B
+ok 4 - RLS cross-tenant: contexto da org A não enxerga paciente/vínculo da org B
+  ---
+  duration_ms: 193.9509
+  type: 'test'
+  ...
+# Subtest: patientId fornecido pelo cliente: vínculo de identidade da conta A não autoriza paciente B (nem na mesma org)
+ok 5 - patientId fornecido pelo cliente: vínculo de identidade da conta A não autoriza paciente B (nem na mesma org)
+  ---
+  duration_ms: 144.596812
+  type: 'test'
+  ...
+# Subtest: INSERT cross-tenant de relato/alerta/intervenção é negado pela política WITH CHECK
+ok 6 - INSERT cross-tenant de relato/alerta/intervenção é negado pela política WITH CHECK
+  ---
+  duration_ms: 151.493587
+  type: 'test'
+  ...
+# Subtest: UPDATE cross-tenant de alerta não afeta linhas da outra organização
+ok 7 - UPDATE cross-tenant de alerta não afeta linhas da outra organização
+  ---
+  duration_ms: 111.359914
+  type: 'test'
+  ...
+# Subtest: audit_events: INSERT só no tenant do contexto; sem leitura, UPDATE ou DELETE pela role da API
+ok 8 - audit_events: INSERT só no tenant do contexto; sem leitura, UPDATE ou DELETE pela role da API
+  ---
+  duration_ms: 289.63781
+  type: 'test'
+  ...
+# Subtest: Bypass de superusuário/RLS: role da API não é superuser, não tem BYPASSRLS e não assume a role administrativa
+ok 9 - Bypass de superusuário/RLS: role da API não é superuser, não tem BYPASSRLS e não assume a role administrativa
+  ---
+  duration_ms: 326.397964
+  type: 'test'
+  ...
+1..9
+# tests 9
+# suites 0
+# pass 9
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1397.38224
+

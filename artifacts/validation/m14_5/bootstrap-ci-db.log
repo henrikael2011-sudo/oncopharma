@@ -1,0 +1,92 @@
+CREATE EXTENSION
+CREATE TABLE
+CREATE TABLE
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE FUNCTION
+psql:infra/migrations/0002_identity_and_audit.sql:39: NOTICE:  trigger "audit_immutable" for relation "audit_events" does not exist, skipping
+DROP TRIGGER
+CREATE TRIGGER
+ALTER TABLE
+ALTER TABLE
+psql:infra/migrations/0002_identity_and_audit.sql:44: NOTICE:  policy "patients_tenant" for relation "patients" does not exist, skipping
+DROP POLICY
+CREATE POLICY
+ALTER TABLE
+ALTER TABLE
+psql:infra/migrations/0002_identity_and_audit.sql:50: NOTICE:  policy "assignments_tenant" for relation "care_assignments" does not exist, skipping
+DROP POLICY
+CREATE POLICY
+CREATE ROLE
+ALTER ROLE
+DO
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+ALTER TABLE
+ALTER TABLE
+psql:infra/migrations/0003_runtime_permissions.sql:20: NOTICE:  policy "audit_events_insert_tenant" for relation "audit_events" does not exist, skipping
+DROP POLICY
+CREATE POLICY
+Role de execução configurada. Use DATABASE_URL com usuário oncopharma_app na API.
+DO
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE INDEX
+ALTER TABLE
+ALTER TABLE
+CREATE POLICY
+ALTER TABLE
+ALTER TABLE
+CREATE POLICY
+ALTER TABLE
+ALTER TABLE
+CREATE POLICY
+GRANT
+DO
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+DO
+DO
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+DO
+DO
+CREATE TABLE
+ALTER TABLE
+ALTER TABLE
+psql:infra/migrations/0007_m10_patient_links.sql:14: NOTICE:  policy "patient_portal_links_tenant_read" for relation "patient_portal_links" does not exist, skipping
+DROP POLICY
+CREATE POLICY
+GRANT
+GRANT
+GRANT
+psql:infra/migrations/0007_m10_patient_links.sql:20: NOTICE:  policy "symptom_insert_tenant" for relation "patient_symptom_reports" does not exist, skipping
+DROP POLICY
+CREATE POLICY
+psql:infra/migrations/0007_m10_patient_links.sql:22: NOTICE:  policy "alert_insert_tenant" for relation "clinical_alerts" does not exist, skipping
+DROP POLICY
+CREATE POLICY
+psql:infra/migrations/0007_m10_patient_links.sql:24: NOTICE:  policy "alert_update_tenant" for relation "clinical_alerts" does not exist, skipping
+DROP POLICY
+CREATE POLICY
+psql:infra/migrations/0007_m10_patient_links.sql:26: NOTICE:  policy "intervention_insert_tenant" for relation "clinical_interventions" does not exist, skipping
+DROP POLICY
+CREATE POLICY
+Migrações e role de execução preparadas em banco efêmero de CI.

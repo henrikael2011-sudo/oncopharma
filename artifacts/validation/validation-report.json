@@ -1,8 +1,8 @@
 {
   "schema": "oncopharma-validation-v1",
-  "date": "2026-10-11T17:58:46.625Z",
+  "date": "2026-10-11T18:53:01.517Z",
   "baseline": "Plano Diretor v3.0",
-  "release": "M14.4",
+  "release": "M14.5",
   "clinicalApproval": false,
   "checks": [
     {
@@ -21,23 +21,46 @@
     },
     {
       "name": "postgres-required",
-      "status": "BLOCKED",
-      "reason": "DATABASE_URL ausente; nenhum teste PostgreSQL executado."
+      "status": "PASS",
+      "exitCode": 0,
+      "reason": "",
+      "command": "npm run test:db:required"
     },
     {
       "name": "full-build",
-      "status": "BLOCKED",
-      "reason": "Dependências Next.js/NestJS não instaladas; build não executado."
+      "status": "PASS",
+      "exitCode": 0,
+      "reason": "",
+      "command": "npm run build"
+    },
+    {
+      "name": "e2e-care-clinical",
+      "status": "PASS",
+      "exitCode": 0,
+      "reason": "(node:312541) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+      "command": "npm run test:e2e"
+    },
+    {
+      "name": "oidc-mfa-test-idp",
+      "status": "PASS",
+      "reason": "OIDC code+PKCE, TOTP real, claim amr, audience, sessão HttpOnly, CSRF, logout RP-initiated, expiração e negativos de papel validados no navegador e na API contra IdP de TESTE local (Keycloak dev) com contas sintéticas."
     },
     {
       "name": "oidc-mfa",
       "status": "BLOCKED",
-      "reason": "Provedor e identidades de homologação não configurados; não simular autenticação."
+      "reason": "IdP de homologação institucional não definido (D-008). A validação M14.5 usou somente IdP de teste local; repetir a suíte no IdP escolhido antes de qualquer piloto."
+    },
+    {
+      "name": "release-gate",
+      "status": "BLOCKED",
+      "exitCode": 1,
+      "reason": "Gate de piloto/produção: bloqueado até aprovações formais (esperado).",
+      "command": "npm run quality:gate"
     },
     {
       "name": "browser-lab-render",
-      "status": "BLOCKED",
-      "reason": "Chromium indisponível operacionalmente no container (erro ou timeout); sem captura validada."
+      "status": "PASS",
+      "reason": "/usr/bin/google-chrome renderizou laboratório sintético (o E2E dos apps é o check e2e-care-clinical)."
     }
   ],
   "readyForIntegratedValidation": false,

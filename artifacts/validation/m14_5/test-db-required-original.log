@@ -1,0 +1,27 @@
+
+> oncopharma@0.14.4-dev test:db:required
+> node tests/require-postgres.mjs && node --test tests/m12-db.integration.mjs
+
+PostgreSQL conectado com role restrita; executando testes integrados obrigatórios.
+TAP version 13
+# Subtest: M1.2: role sem privilégios de escrita clínica
+ok 1 - M1.2: role sem privilégios de escrita clínica
+  ---
+  duration_ms: 230.339762
+  type: 'test'
+  ...
+# Subtest: M1.2: isolamento RLS sem contexto e com organização incorreta
+ok 2 - M1.2: isolamento RLS sem contexto e com organização incorreta
+  ---
+  duration_ms: 84.016287
+  type: 'test'
+  ...
+1..2
+# tests 2
+# suites 0
+# pass 2
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 404.644996

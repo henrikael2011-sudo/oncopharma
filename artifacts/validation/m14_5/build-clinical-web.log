@@ -1,0 +1,39 @@
+
+> @oncopharma/clinical-web@0.1.0 build
+> next build
+
+   ▲ Next.js 15.5.27
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 2.9s
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/10) ...
+   Generating static pages (2/10) 
+   Generating static pages (4/10) 
+   Generating static pages (7/10) 
+ ✓ Generating static pages (10/10)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                       Size  First Load JS
+┌ ○ /                                            143 B         103 kB
+├ ○ /_not-found                                  988 B         104 kB
+├ ƒ /api/auth/callback                           143 B         103 kB
+├ ƒ /api/auth/login                              143 B         103 kB
+├ ƒ /api/auth/logout                             143 B         103 kB
+├ ƒ /api/clinical/patients/[id]                  143 B         103 kB
+├ ƒ /api/clinical/summary                        143 B         103 kB
+├ ƒ /api/workflow/patients/[id]/alerts           143 B         103 kB
+├ ƒ /api/workflow/patients/[id]/interventions    143 B         103 kB
+├ ○ /clinical                                  6.21 kB         109 kB
+└ ○ /icon.svg                                      0 B            0 B
++ First Load JS shared by all                   103 kB
+  ├ chunks/18-25b11e3a132b87ef.js              46.5 kB
+  ├ chunks/87c73c54-24122e7b92478d00.js        54.2 kB
+  └ other shared chunks (total)                 1.9 kB
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

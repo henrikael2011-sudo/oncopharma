@@ -1,0 +1,15 @@
+
+> oncopharma@0.14.4-dev quality:gate
+> node tools/release-gate.mjs
+
+ONCOPHARMA — GATE DE EVIDÊNCIAS (não é homologação)
+G01 BLOCKED — Aprovação e evidências completas ausentes
+G02 BLOCKED — Aprovação e evidências completas ausentes
+G03 BLOCKED — Aprovação e evidências completas ausentes
+G04 BLOCKED — Aprovação e evidências completas ausentes
+G05 BLOCKED — Aprovação e evidências completas ausentes
+G06 BLOCKED — Aprovação e evidências completas ausentes
+G07 BLOCKED — Aprovação e evidências completas ausentes
+G08 BLOCKED — Aprovação e evidências completas ausentes
+G09 BLOCKED — Aprovação e evidências completas ausentes
+BLOQUEADO: piloto e produção não autorizados.

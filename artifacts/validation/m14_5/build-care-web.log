@@ -1,0 +1,36 @@
+
+> @oncopharma/care-web@0.1.0 build
+> next build
+
+   ▲ Next.js 15.5.27
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 1451ms
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/9) ...
+   Generating static pages (2/9) 
+   Generating static pages (4/9) 
+   Generating static pages (6/9) 
+ ✓ Generating static pages (9/9)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                  Size  First Load JS
+┌ ○ /                                       136 B         103 kB
+├ ○ /_not-found                             988 B         104 kB
+├ ƒ /api/auth/callback                      136 B         103 kB
+├ ƒ /api/auth/login                         136 B         103 kB
+├ ƒ /api/auth/logout                        136 B         103 kB
+├ ƒ /api/workflow/patients/[id]/symptoms    136 B         103 kB
+├ ○ /care                                 4.36 kB         107 kB
+└ ○ /icon.svg                                 0 B            0 B
++ First Load JS shared by all              103 kB
+  ├ chunks/18-25b11e3a132b87ef.js         46.5 kB
+  ├ chunks/87c73c54-24122e7b92478d00.js   54.2 kB
+  └ other shared chunks (total)            1.9 kB
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

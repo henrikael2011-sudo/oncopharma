@@ -10,3 +10,6 @@ coverage/
 
 # Synthetic local lab data
 tools/synthetic-lab/.local/
+
+# M14.5 — saídas transitórias do Playwright (vídeo/trace só em falha)
+artifacts/validation/m14_5/playwright-output/

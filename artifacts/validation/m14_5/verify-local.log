@@ -1,0 +1,544 @@
+
+> oncopharma@0.14.5-dev verify:local
+> npm test && npm run test:extended && npm run test:lab:e2e && npm run check:design && npm run check:governance && npm run test:readiness
+
+
+> oncopharma@0.14.5-dev test
+> node --test tests/*.test.mjs
+
+TAP version 13
+# Subtest: migration gates to dev
+ok 1 - migration gates to dev
+  ---
+  duration_ms: 1.020304
+  type: 'test'
+  ...
+# Subtest: no write grants to app role
+ok 2 - no write grants to app role
+  ---
+  duration_ms: 0.330016
+  type: 'test'
+  ...
+# Subtest: human approval required for guidance
+ok 3 - human approval required for guidance
+  ---
+  duration_ms: 0.166027
+  type: 'test'
+  ...
+# Subtest: pilot marked no-go
+ok 4 - pilot marked no-go
+  ---
+  duration_ms: 4.796415
+  type: 'test'
+  ...
+# Subtest: rules engine included
+ok 5 - rules engine included
+  ---
+  duration_ms: 0.306055
+  type: 'test'
+  ...
+# Subtest: ambientes Care e Clinical existem
+ok 6 - ambientes Care e Clinical existem
+  ---
+  duration_ms: 0.842622
+  type: 'test'
+  ...
+# Subtest: marca sem símbolo de registro não confirmado
+ok 7 - marca sem símbolo de registro não confirmado
+  ---
+  duration_ms: 0.370861
+  type: 'test'
+  ...
+# Subtest: API não expõe prontuários sem controle de acesso
+ok 8 - API não expõe prontuários sem controle de acesso
+  ---
+  duration_ms: 0.167512
+  type: 'test'
+  ...
+# Subtest: produção não possui seed de pacientes
+ok 9 - produção não possui seed de pacientes
+  ---
+  duration_ms: 1.395542
+  type: 'test'
+  ...
+# Subtest: endpoints clínicos falham fechados sem habilitação e em produção
+ok 10 - endpoints clínicos falham fechados sem habilitação e em produção
+  ---
+  duration_ms: 1.032957
+  type: 'test'
+  ...
+# Subtest: JWT usa JWKS remoto, valida issuer, audience e assinatura
+ok 11 - JWT usa JWKS remoto, valida issuer, audience e assinatura
+  ---
+  duration_ms: 0.290897
+  type: 'test'
+  ...
+# Subtest: RLS FORCE e isolamento de transação
+ok 12 - RLS FORCE e isolamento de transação
+  ---
+  duration_ms: 0.217985
+  type: 'test'
+  ...
+# Subtest: seed não contém paciente real e usa sub do provedor
+ok 13 - seed não contém paciente real e usa sub do provedor
+  ---
+  duration_ms: 1.391509
+  type: 'test'
+  ...
+# Subtest: segredos e bancos não estão embutidos no app
+ok 14 - segredos e bancos não estão embutidos no app
+  ---
+  duration_ms: 0.438538
+  type: 'test'
+  ...
+# Subtest: M10 bloqueado em produção
+ok 15 - M10 bloqueado em produção
+  ---
+  duration_ms: 0.66849
+  type: 'test'
+  ...
+# Subtest: M10 usa autenticação
+ok 16 - M10 usa autenticação
+  ---
+  duration_ms: 0.182311
+  type: 'test'
+  ...
+# Subtest: M10 verifica vínculo paciente e atribuição profissional
+ok 17 - M10 verifica vínculo paciente e atribuição profissional
+  ---
+  duration_ms: 0.11104
+  type: 'test'
+  ...
+# Subtest: M10 registra auditoria e idempotência
+ok 18 - M10 registra auditoria e idempotência
+  ---
+  duration_ms: 1.486486
+  type: 'test'
+  ...
+# Subtest: M10 usa transações por tenant
+ok 19 - M10 usa transações por tenant
+  ---
+  duration_ms: 0.14074
+  type: 'test'
+  ...
+# Subtest: M10 ativa RLS
+ok 20 - M10 ativa RLS
+  ---
+  duration_ms: 0.098836
+  type: 'test'
+  ...
+# Subtest: BFF requires session and dev flags
+ok 21 - BFF requires session and dev flags
+  ---
+  duration_ms: 0.759902
+  type: 'test'
+  ...
+# Subtest: POST requires same origin and JSON with size limit
+ok 22 - POST requires same origin and JSON with size limit
+  ---
+  duration_ms: 0.218029
+  type: 'test'
+  ...
+# Subtest: clinical review does not send guidance
+ok 23 - clinical review does not send guidance
+  ---
+  duration_ms: 0.145239
+  type: 'test'
+  ...
+# Subtest: care report uses requestId and no advice
+ok 24 - care report uses requestId and no advice
+  ---
+  duration_ms: 1.064822
+  type: 'test'
+  ...
+# Subtest: all proxy routes present
+ok 25 - all proxy routes present
+  ---
+  duration_ms: 0.519001
+  type: 'test'
+  ...
+# Subtest: M10.2: homepage no longer claims M1
+ok 26 - M10.2: homepage no longer claims M1
+  ---
+  duration_ms: 0.984446
+  type: 'test'
+  ...
+# Subtest: M10.2: Care never claims that reporting is impossible
+ok 27 - M10.2: Care never claims that reporting is impossible
+  ---
+  duration_ms: 0.261908
+  type: 'test'
+  ...
+# Subtest: M10.2: Clinical states technical validation limits
+ok 28 - M10.2: Clinical states technical validation limits
+  ---
+  duration_ms: 0.194638
+  type: 'test'
+  ...
+# Subtest: M10.2: brand care includes family and heart
+ok 29 - M10.2: brand care includes family and heart
+  ---
+  duration_ms: 1.202897
+  type: 'test'
+  ...
+# Subtest: M10.2: brand clinical includes professional and infusion
+ok 30 - M10.2: brand clinical includes professional and infusion
+  ---
+  duration_ms: 0.23625
+  type: 'test'
+  ...
+# Subtest: M10.2: plan baseline is preserved
+ok 31 - M10.2: plan baseline is preserved
+  ---
+  duration_ms: 0.282376
+  type: 'test'
+  ...
+# Subtest: Care não publica endpoint de revisão clínica
+ok 32 - Care não publica endpoint de revisão clínica
+  ---
+  duration_ms: 2.232709
+  type: 'test'
+  ...
+# Subtest: Clinical não publica endpoint de sintomas do paciente
+ok 33 - Clinical não publica endpoint de sintomas do paciente
+  ---
+  duration_ms: 0.237136
+  type: 'test'
+  ...
+# Subtest: Admin não possui rotas de prontuário
+ok 34 - Admin não possui rotas de prontuário
+  ---
+  duration_ms: 0.099076
+  type: 'test'
+  ...
+# Subtest: portal legado preservado
+ok 35 - portal legado preservado
+  ---
+  duration_ms: 0.139035
+  type: 'test'
+  ...
+# Subtest: planejamento v3 mantido
+ok 36 - planejamento v3 mantido
+  ---
+  duration_ms: 0.474311
+  type: 'test'
+  ...
+# Subtest: sem marca registrada na assinatura
+ok 37 - sem marca registrada na assinatura
+  ---
+  duration_ms: 0.16158
+  type: 'test'
+  ...
+# Subtest: PKCE S256 e state presentes
+ok 38 - PKCE S256 e state presentes
+  ---
+  duration_ms: 0.930618
+  type: 'test'
+  ...
+# Subtest: sessão HttpOnly e criptografada
+ok 39 - sessão HttpOnly e criptografada
+  ---
+  duration_ms: 0.214996
+  type: 'test'
+  ...
+# Subtest: callback valida state e expiração
+ok 40 - callback valida state e expiração
+  ---
+  duration_ms: 0.245397
+  type: 'test'
+  ...
+# Subtest: sem token no navegador
+ok 41 - sem token no navegador
+  ---
+  duration_ms: 1.64189
+  type: 'test'
+  ...
+# Subtest: logout POST e checagem de origem
+ok 42 - logout POST e checagem de origem
+  ---
+  duration_ms: 0.383909
+  type: 'test'
+  ...
+# Subtest: pacientes de teste bloqueados por padrão
+ok 43 - pacientes de teste bloqueados por padrão
+  ---
+  duration_ms: 0.17903
+  type: 'test'
+  ...
+# Subtest: runtime sem permissões de alteração clínica
+ok 44 - runtime sem permissões de alteração clínica
+  ---
+  duration_ms: 0.784332
+  type: 'test'
+  ...
+# Subtest: reset limitado a dev e sem apagar auditoria
+ok 45 - reset limitado a dev e sem apagar auditoria
+  ---
+  duration_ms: 0.232142
+  type: 'test'
+  ...
+# Subtest: login mantém PKCE e cookie HttpOnly
+ok 46 - login mantém PKCE e cookie HttpOnly
+  ---
+  duration_ms: 0.236839
+  type: 'test'
+  ...
+# Subtest: gate falha fechado com aprovações pendentes
+ok 47 - gate falha fechado com aprovações pendentes
+  ---
+  duration_ms: 32.384939
+  type: 'test'
+  ...
+# Subtest: gate falha fechado sem arquivo
+ok 48 - gate falha fechado sem arquivo
+  ---
+  duration_ms: 33.457131
+  type: 'test'
+  ...
+# Subtest: gate rejeita alegação approved sem artefatos e aprovador
+ok 49 - gate rejeita alegação approved sem artefatos e aprovador
+  ---
+  duration_ms: 33.568807
+  type: 'test'
+  ...
+# Subtest: gate nunca autoriza uso clínico mesmo com declarações completas
+ok 50 - gate nunca autoriza uso clínico mesmo com declarações completas
+  ---
+  duration_ms: 34.337507
+  type: 'test'
+  ...
+# Subtest: M14.2: laboratório sintético HTTP ponta a ponta e isolamento local
+ok 51 - M14.2: laboratório sintético HTTP ponta a ponta e isolamento local
+  ---
+  duration_ms: 127.999963
+  type: 'test'
+  ...
+# Subtest: CI usa banco DEV permitido pelas migrações
+ok 52 - CI usa banco DEV permitido pelas migrações
+  ---
+  duration_ms: 0.969136
+  type: 'test'
+  ...
+# Subtest: CI provisiona role antes do teste real de RLS
+ok 53 - CI provisiona role antes do teste real de RLS
+  ---
+  duration_ms: 0.314355
+  type: 'test'
+  ...
+# Subtest: migração inclui política INSERT de auditoria com tenant
+ok 54 - migração inclui política INSERT de auditoria com tenant
+  ---
+  duration_ms: 0.166099
+  type: 'test'
+  ...
+# Subtest: testes obrigatórios recusam conexão administrativa
+ok 55 - testes obrigatórios recusam conexão administrativa
+  ---
+  duration_ms: 1.190805
+  type: 'test'
+  ...
+# Subtest: bootstrap exige ambiente test e não usa seeds
+ok 56 - bootstrap exige ambiente test e não usa seeds
+  ---
+  duration_ms: 0.327344
+  type: 'test'
+  ...
+# Subtest: M2: prontuário somente sintético, autenticado e auditado
+ok 57 - M2: prontuário somente sintético, autenticado e auditado
+  ---
+  duration_ms: 0.839906
+  type: 'test'
+  ...
+# Subtest: M2: RLS em todas as tabelas clínicas
+ok 58 - M2: RLS em todas as tabelas clínicas
+  ---
+  duration_ms: 0.280305
+  type: 'test'
+  ...
+# Subtest: M2: proxy autenticado e bloqueado em produção
+ok 59 - M2: proxy autenticado e bloqueado em produção
+  ---
+  duration_ms: 0.156387
+  type: 'test'
+  ...
+1..59
+# tests 59
+# suites 0
+# pass 59
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 289.688925
+
+> oncopharma@0.14.5-dev test:extended
+> node --test services/integration-gateway/tests/*.test.mjs services/ai-orchestrator/tests/*.test.mjs tests/m103-m14.test.mjs
+
+TAP version 13
+# Subtest: rascunho sempre pendente de revisão
+ok 1 - rascunho sempre pendente de revisão
+  ---
+  duration_ms: 0.707251
+  type: 'test'
+  ...
+# Subtest: bloqueia referência não aprovada
+ok 2 - bloqueia referência não aprovada
+  ---
+  duration_ms: 0.283463
+  type: 'test'
+  ...
+# Subtest: bloqueia ação terapêutica
+ok 3 - bloqueia ação terapêutica
+  ---
+  duration_ms: 0.117288
+  type: 'test'
+  ...
+# Subtest: bloqueia evidência sem origem
+ok 4 - bloqueia evidência sem origem
+  ---
+  duration_ms: 0.11667
+  type: 'test'
+  ...
+# Subtest: bundle sintético normalizado
+ok 5 - bundle sintético normalizado
+  ---
+  duration_ms: 0.772309
+  type: 'test'
+  ...
+# Subtest: deduplicação idempotente
+ok 6 - deduplicação idempotente
+  ---
+  duration_ms: 0.216195
+  type: 'test'
+  ...
+# Subtest: bloqueia ID não sintético
+ok 7 - bloqueia ID não sintético
+  ---
+  duration_ms: 1.176832
+  type: 'test'
+  ...
+# Subtest: bloqueia tipo não autorizado
+ok 8 - bloqueia tipo não autorizado
+  ---
+  duration_ms: 0.163866
+  type: 'test'
+  ...
+# Subtest: bloqueia duplicatas
+ok 9 - bloqueia duplicatas
+  ---
+  duration_ms: 0.126224
+  type: 'test'
+  ...
+# Subtest: Care não publica endpoint de revisão clínica
+ok 10 - Care não publica endpoint de revisão clínica
+  ---
+  duration_ms: 0.745343
+  type: 'test'
+  ...
+# Subtest: Clinical não publica endpoint de sintomas do paciente
+ok 11 - Clinical não publica endpoint de sintomas do paciente
+  ---
+  duration_ms: 0.183137
+  type: 'test'
+  ...
+# Subtest: Admin não possui rotas de prontuário
+ok 12 - Admin não possui rotas de prontuário
+  ---
+  duration_ms: 0.095087
+  type: 'test'
+  ...
+# Subtest: portal legado preservado
+ok 13 - portal legado preservado
+  ---
+  duration_ms: 0.15536
+  type: 'test'
+  ...
+# Subtest: planejamento v3 mantido
+ok 14 - planejamento v3 mantido
+  ---
+  duration_ms: 0.384119
+  type: 'test'
+  ...
+# Subtest: sem marca registrada na assinatura
+ok 15 - sem marca registrada na assinatura
+  ---
+  duration_ms: 0.132558
+  type: 'test'
+  ...
+1..15
+# tests 15
+# suites 0
+# pass 15
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 60.095576
+
+> oncopharma@0.14.5-dev test:lab:e2e
+> node --test tests/m142-lab-e2e.test.mjs
+
+TAP version 13
+# Subtest: M14.2: laboratório sintético HTTP ponta a ponta e isolamento local
+ok 1 - M14.2: laboratório sintético HTTP ponta a ponta e isolamento local
+  ---
+  duration_ms: 129.4996
+  type: 'test'
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 1
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 216.843416
+
+> oncopharma@0.14.5-dev check:design
+> node tools/check-design.mjs
+
+Design system: 15 arquivos alinhados à referência canônica
+
+> oncopharma@0.14.5-dev check:governance
+> node tools/check-governance.mjs
+
+Governança: documentos e limites de release presentes
+
+> oncopharma@0.14.5-dev test:readiness
+> node --test tests/m141-release-gate.test.mjs
+
+TAP version 13
+# Subtest: gate falha fechado com aprovações pendentes
+ok 1 - gate falha fechado com aprovações pendentes
+  ---
+  duration_ms: 36.045081
+  type: 'test'
+  ...
+# Subtest: gate falha fechado sem arquivo
+ok 2 - gate falha fechado sem arquivo
+  ---
+  duration_ms: 32.086395
+  type: 'test'
+  ...
+# Subtest: gate rejeita alegação approved sem artefatos e aprovador
+ok 3 - gate rejeita alegação approved sem artefatos e aprovador
+  ---
+  duration_ms: 30.863158
+  type: 'test'
+  ...
+# Subtest: gate nunca autoriza uso clínico mesmo com declarações completas
+ok 4 - gate nunca autoriza uso clínico mesmo com declarações completas
+  ---
+  duration_ms: 33.81454
+  type: 'test'
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 4
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 185.996557

@@ -1,0 +1,5 @@
+
+> oncopharma@0.14.4-dev check:governance
+> node tools/check-governance.mjs
+
+Governança: documentos e limites de release presentes

@@ -1,0 +1,5 @@
+
+> oncopharma@0.14.4-dev check:design
+> node tools/check-design.mjs
+
+Design system: 15 arquivos alinhados à referência canônica

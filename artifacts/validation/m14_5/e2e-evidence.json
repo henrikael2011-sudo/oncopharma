@@ -1,0 +1,49 @@
+{
+  "startedAt": "2026-10-11T18:53:54.729Z",
+  "issuer": "http://localhost:8080/realms/oncopharma-test",
+  "a11y": {
+    "care": [],
+    "clinical": [],
+    "admin": [],
+    "careLoggedIn": [],
+    "clinicalLoggedIn": []
+  },
+  "tokens": {
+    "patientA": {
+      "iss": "http://localhost:8080/realms/oncopharma-test",
+      "aud": [
+        "oncopharma-api",
+        "account"
+      ],
+      "amr": [
+        "pwd"
+      ],
+      "exp_minus_iat": 120,
+      "sub_matches": true
+    },
+    "pharmacist": {
+      "iss": "http://localhost:8080/realms/oncopharma-test",
+      "aud": [
+        "oncopharma-api",
+        "account"
+      ],
+      "amr": [
+        "otp"
+      ],
+      "exp_minus_iat": 120,
+      "cookieMaxAgeSeconds": 104
+    },
+    "waitedForExpiryMs": 110696
+  },
+  "db": {
+    "reportId": "b7fcdb9d-c08a-4ea4-9567-3c9915a0a831",
+    "alertId": "ed088ddf-e286-4b7e-a292-197eedf27b31",
+    "alertStatus": "acknowledged",
+    "interventionActorIsPharmacist": true,
+    "auditTrail": [
+      "symptom.created",
+      "intervention.created"
+    ],
+    "pharmacistAuditActions": "alert.list,intervention.created,patient.list,patient.record.read"
+  }
+}

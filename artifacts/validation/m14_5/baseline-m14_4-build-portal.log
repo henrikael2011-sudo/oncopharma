@@ -1,0 +1,53 @@
+   ▲ Next.js 15.5.27
+
+   Creating an optimized production build ...
+Failed to compile.
+
+./components/ClinicalAccess.tsx
+Error:   [31mx[0m The "use client" directive must be placed before other expressions. Move it to the top of the file to resolve this issue.
+   ,-[[36;1;4m/tmp/m144-baseline/apps/portal/components/ClinicalAccess.tsx[0m:2:1]
+ [2m1[0m | import { WorkflowReview } from './WorkflowReview';
+ [2m2[0m | 'use client';
+   : [35;1m^^^^^^^^^^^^^[0m
+ [2m3[0m | import { SyntheticRecord } from './SyntheticRecord';
+ [2m4[0m | import { useEffect,useState } from 'react';
+ [2m5[0m | type Data={profile:{subject:string;mfa:boolean;memberships:{organization_id:string;role:string;active:boolean}[]};patients?:{patients:{id:string;external_reference:string}[]} | null};
+   `----
+  [31mx[0m You're importing a component that needs `useEffect`. This React Hook only works in a Client Component. To fix, mark the file (or its parent) with the `"use client"` directive.
+  [31m|[0m
+  [31m|[0m  Learn more: https://nextjs.org/docs/app/api-reference/directives/use-client
+  [31m|[0m
+
+   ,-[[36;1;4m/tmp/m144-baseline/apps/portal/components/ClinicalAccess.tsx[0m:4:1]
+ [2m1[0m | import { WorkflowReview } from './WorkflowReview';
+ [2m2[0m | 'use client';
+ [2m3[0m | import { SyntheticRecord } from './SyntheticRecord';
+ [2m4[0m | import { useEffect,useState } from 'react';
+   : [35;1m         ^^^^^^^^^[0m
+ [2m5[0m | type Data={profile:{subject:string;mfa:boolean;memberships:{organization_id:string;role:string;active:boolean}[]};patients?:{patients:{id:string;external_reference:string}[]} | null};
+ [2m6[0m | export function ClinicalAccess(){const [data,setData]=useState<Data|null>(null);const [error,setError]=useState('Verificando sessão profissional...');
+ [2m7[0m | useEffect(()=>{let live=true;fetch('/api/clinical/summary',{cache:'no-store'}).then(async r=>{const body=await r.json();if(!live)return;if(!r.ok){setError(r.status===401?'Faça login para acessar os dados profissionais.':body.error||'Acesso indisponível.');return;}setData(body);setError('');}).catch(()=>live&&setError('Não foi possível conectar ao servidor.'));return()=>{live=false;};},[]);
+   `----
+  [31mx[0m You're importing a component that needs `useState`. This React Hook only works in a Client Component. To fix, mark the file (or its parent) with the `"use client"` directive.
+  [31m|[0m
+  [31m|[0m  Learn more: https://nextjs.org/docs/app/api-reference/directives/use-client
+  [31m|[0m
+
+   ,-[[36;1;4m/tmp/m144-baseline/apps/portal/components/ClinicalAccess.tsx[0m:4:1]
+ [2m1[0m | import { WorkflowReview } from './WorkflowReview';
+ [2m2[0m | 'use client';
+ [2m3[0m | import { SyntheticRecord } from './SyntheticRecord';
+ [2m4[0m | import { useEffect,useState } from 'react';
+   : [35;1m                   ^^^^^^^^[0m
+ [2m5[0m | type Data={profile:{subject:string;mfa:boolean;memberships:{organization_id:string;role:string;active:boolean}[]};patients?:{patients:{id:string;external_reference:string}[]} | null};
+ [2m6[0m | export function ClinicalAccess(){const [data,setData]=useState<Data|null>(null);const [error,setError]=useState('Verificando sessão profissional...');
+ [2m7[0m | useEffect(()=>{let live=true;fetch('/api/clinical/summary',{cache:'no-store'}).then(async r=>{const body=await r.json();if(!live)return;if(!r.ok){setError(r.status===401?'Faça login para acessar os dados profissionais.':body.error||'Acesso indisponível.');return;}setData(body);setError('');}).catch(()=>live&&setError('Não foi possível conectar ao servidor.'));return()=>{live=false;};},[]);
+   `----
+
+Import trace for requested module:
+./components/ClinicalAccess.tsx
+./app/clinical/page.tsx
+
+
+> Build failed because of webpack errors
+baseline portal EXIT 1

@@ -1,0 +1,602 @@
+{
+  "config": {
+    "argv": [
+      "/opt/node22/bin/node",
+      "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/node_modules/.bin/playwright",
+      "test",
+      "-c",
+      "tests/e2e/playwright.config.mjs"
+    ],
+    "configFile": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/playwright.config.mjs",
+    "rootDir": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/artifacts/validation/m14_5/playwright-output",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "/.*\\.spec\\.mjs/"
+        ],
+        "timeout": 240000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/artifacts/validation/m14_5/playwright-output",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "",
+        "testDir": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e",
+        "snapshotDir": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 240000,
+        "use": {
+          "launchOptions": {
+            "executablePath": "/usr/bin/google-chrome",
+            "args": [
+              "--no-sandbox",
+              "--disable-dev-shm-usage"
+            ]
+          },
+          "headless": true,
+          "locale": "pt-BR",
+          "timezoneId": "America/Sao_Paulo",
+          "video": "retain-on-failure",
+          "trace": "retain-on-failure",
+          "screenshot": "only-on-failure",
+          "actionTimeout": 30000,
+          "navigationTimeout": 90000
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": ""
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "../../artifacts/validation/m14_5/e2e-results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.64.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "m145-flow.spec.mjs",
+      "file": "m145-flow.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "M14.5 E2E sintético",
+          "file": "m145-flow.spec.mjs",
+          "line": 64,
+          "column": 15,
+          "specs": [
+            {
+              "title": "01 healthchecks dos quatro serviços",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 240000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
+                        "line": 64,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2398,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-11T18:53:54.753Z",
+                      "annotations": [
+                        {
+                          "type": "serial",
+                          "location": {
+                            "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
+                            "line": 64,
+                            "column": 15
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "3597eb8adab86113f57d-dbb1efcae48fe50e2da4",
+              "file": "m145-flow.spec.mjs",
+              "line": 67,
+              "column": 3
+            },
+            {
+              "title": "02 negativos sem autenticação (API e proxies)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 240000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
+                        "line": 64,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 862,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-11T18:53:57.545Z",
+                      "annotations": [
+                        {
+                          "type": "serial",
+                          "location": {
+                            "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
+                            "line": 64,
+                            "column": 15
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "3597eb8adab86113f57d-0b5c411b6b3e59d1f0cd",
+              "file": "m145-flow.spec.mjs",
+              "line": 75,
+              "column": 3
+            },
+            {
+              "title": "03 acessibilidade e teclado sem sessão (Care, Clinical, Admin)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 240000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
+                        "line": 64,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5347,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-11T18:53:58.415Z",
+                      "annotations": [
+                        {
+                          "type": "serial",
+                          "location": {
+                            "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
+                            "line": 64,
+                            "column": 15
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "3597eb8adab86113f57d-f32beca86fecae18b4fb",
+              "file": "m145-flow.spec.mjs",
+              "line": 84,
+              "column": 3
+            },
+            {
+              "title": "04 Care: login OIDC com PKCE, cookie HttpOnly, relato sintético persistido",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 240000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
+                        "line": 64,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 6435,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-11T18:54:03.771Z",
+                      "annotations": [
+                        {
+                          "type": "serial",
+                          "location": {
+                            "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
+                            "line": 64,
+                            "column": 15
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "3597eb8adab86113f57d-f92b83c470cbe48f011e",
+              "file": "m145-flow.spec.mjs",
+              "line": 98,
+              "column": 3
+            },
+            {
+              "title": "05 cadastro real de TOTP para contas profissionais (required action do IdP)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 240000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
+                        "line": 64,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 7815,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-11T18:54:10.216Z",
+                      "annotations": [
+                        {
+                          "type": "serial",
+                          "location": {
+                            "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
+                            "line": 64,
+                            "column": 15
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "3597eb8adab86113f57d-086d36b09c5f489133e6",
+              "file": "m145-flow.spec.mjs",
+              "line": 154,
+              "column": 3
+            },
+            {
+              "title": "06 Clinical: farmacêutico com senha+TOTP revisa alerta do relato Care; auditoria no PostgreSQL",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 240000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
+                        "line": 64,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 17299,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-11T18:54:18.041Z",
+                      "annotations": [
+                        {
+                          "type": "serial",
+                          "location": {
+                            "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
+                            "line": 64,
+                            "column": 15
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "3597eb8adab86113f57d-6aa1471d3e0629a06873",
+              "file": "m145-flow.spec.mjs",
+              "line": 162,
+              "column": 3
+            },
+            {
+              "title": "07 negativos de papel/MFA/vínculo com tokens reais na API",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 240000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
+                        "line": 64,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 10894,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-11T18:54:35.358Z",
+                      "annotations": [
+                        {
+                          "type": "serial",
+                          "location": {
+                            "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
+                            "line": 64,
+                            "column": 15
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "3597eb8adab86113f57d-3514ee9dd6d418a5b72f",
+              "file": "m145-flow.spec.mjs",
+              "line": 192,
+              "column": 3
+            },
+            {
+              "title": "08 token adulterado, sessão forjada vencida e expiração real do token",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 240000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
+                        "line": 64,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 110774,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-11T18:54:46.262Z",
+                      "annotations": [
+                        {
+                          "type": "serial",
+                          "location": {
+                            "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
+                            "line": 64,
+                            "column": 15
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "3597eb8adab86113f57d-6961a2f6a31bf56512a2",
+              "file": "m145-flow.spec.mjs",
+              "line": 231,
+              "column": 3
+            },
+            {
+              "title": "09 resultado axe (WCAG 2.x A/AA): nenhuma violação séria/crítica em Care, Clinical e Admin",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 240000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
+                        "line": 64,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-11T18:56:37.047Z",
+                      "annotations": [
+                        {
+                          "type": "serial",
+                          "location": {
+                            "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
+                            "line": 64,
+                            "column": 15
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "3597eb8adab86113f57d-5036b81c09b2cfda3528",
+              "file": "m145-flow.spec.mjs",
+              "line": 247,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-11T18:53:44.793Z",
+    "duration": 172439.047,
+    "expected": 9,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

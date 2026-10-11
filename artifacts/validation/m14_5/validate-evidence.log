@@ -1,0 +1,72 @@
+
+> oncopharma@0.14.4-dev validate:evidence
+> node tools/validate-real.mjs
+
+{
+  "schema": "oncopharma-validation-v1",
+  "date": "2026-10-11T18:53:01.517Z",
+  "baseline": "Plano Diretor v3.0",
+  "release": "M14.5",
+  "clinicalApproval": false,
+  "checks": [
+    {
+      "name": "local-tests",
+      "status": "PASS",
+      "exitCode": 0,
+      "reason": "",
+      "command": "npm run verify:local"
+    },
+    {
+      "name": "lab-unit-tests",
+      "status": "PASS",
+      "exitCode": 0,
+      "reason": "",
+      "command": "npm run test:lab"
+    },
+    {
+      "name": "postgres-required",
+      "status": "PASS",
+      "exitCode": 0,
+      "reason": "",
+      "command": "npm run test:db:required"
+    },
+    {
+      "name": "full-build",
+      "status": "PASS",
+      "exitCode": 0,
+      "reason": "",
+      "command": "npm run build"
+    },
+    {
+      "name": "e2e-care-clinical",
+      "status": "PASS",
+      "exitCode": 0,
+      "reason": "(node:312541) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+      "command": "npm run test:e2e"
+    },
+    {
+      "name": "oidc-mfa-test-idp",
+      "status": "PASS",
+      "reason": "OIDC code+PKCE, TOTP real, claim amr, audience, sessão HttpOnly, CSRF, logout RP-initiated, expiração e negativos de papel validados no navegador e na API contra IdP de TESTE local (Keycloak dev) com contas sintéticas."
+    },
+    {
+      "name": "oidc-mfa",
+      "status": "BLOCKED",
+      "reason": "IdP de homologação institucional não definido (D-008). A validação M14.5 usou somente IdP de teste local; repetir a suíte no IdP escolhido antes de qualquer piloto."
+    },
+    {
+      "name": "release-gate",
+      "status": "BLOCKED",
+      "exitCode": 1,
+      "reason": "Gate de piloto/produção: bloqueado até aprovações formais (esperado).",
+      "command": "npm run quality:gate"
+    },
+    {
+      "name": "browser-lab-render",
+      "status": "PASS",
+      "reason": "/usr/bin/google-chrome renderizou laboratório sintético (o E2E dos apps é o check e2e-care-clinical)."
+    }
+  ],
+  "readyForIntegratedValidation": false,
+  "readyForClinicalUse": false
+}
