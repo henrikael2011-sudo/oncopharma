@@ -6,9 +6,9 @@ Nada aqui altera D-001..D-008 nem os tokens de marca. "FEITO" nunca significa ho
 ## 1. Decisões e limites (§1)
 | Req. | Situação | Evidência | Lacuna / próximo passo |
 |---|---|---|---|
-| D-001 PWA responsiva + infra real | PARCIAL | 3 apps Next.js + API NestJS + PG17; build PASS; 390/768/1440 px sem overflow (e2e 07c); Terraform rascunho `infra/aws` (PR #1) | **Falta manifest/ícones PWA e service worker seguro (sem cache de dados clínicos)** → M15.5 |
+| D-001 PWA responsiva + infra real | PARCIAL | 3 apps Next.js + API NestJS + PG17; build PASS; 390/768/1440 px sem overflow (e2e 07c); Terraform rascunho `infra/aws` (PR #1) | **Falta manifest/ícones PWA e service worker seguro (sem cache de dados clínicos)** → M15.6 |
 | D-002 Care e Clinical separados | FEITO | `apps/care-web` :3001, `apps/clinical-web` :3002, clientes OIDC distintos; e2e 01/04/06 | Componentes do Clinical duplicados dentro do care-web e `apps/portal` legado → limpeza M15.1 |
-| D-003/D-004 marca e cores | PARCIAL | tokens em `packages/design-system/app/globals.css`; `check:design` PASS | Arte final vetorial e manual de marca = **BLOQUEADO-DECISÃO** (designer/aprovação); modo claro/escuro testado: FALTA (M15.5) |
+| D-003/D-004 marca e cores | PARCIAL | tokens em `packages/design-system/app/globals.css`; `check:design` PASS | Arte final vetorial e manual de marca = **BLOQUEADO-DECISÃO** (designer/aprovação); modo claro/escuro testado: FALTA (M15.6) |
 | D-005 IA com decisão humana | PARCIAL | `services/ai-orchestrator/src/evidence-gate.mjs` (só valida rascunho com referências aprovadas); intervenção exige ação humana | Sem IA ativa (correto). RAG/LLM = BLOQUEADO-DECISÃO (biblioteca clínica aprovada) |
 | D-006 sintéticos; produção vazia | FEITO (DEV) | `synthetic=true` obrigatório (CHECK + RLS); seeds versionados; Terraform `data_classification` | Reset idempotente com confirmação/registro: PARCIAL (`reset-synthetic-dev.sh` sem trilha) → M15.4 |
 | D-007 integração só autorizada | PARCIAL | `services/integration-gateway` (FHIR R4 sintético, `clinicalWrites:false`) | Simulador de hospital conectado ao Clinical: FALTA → M15.4 |
@@ -18,7 +18,7 @@ Nada aqui altera D-001..D-008 nem os tokens de marca. "FEITO" nunca significa ho
 | Req. | Situação | Evidência | Lacuna |
 |---|---|---|---|
 | Sub-marcas Care (casa+acolhimento) / Clinical (bolsa de infusão) | PARCIAL | `public/brand/care.svg`, `clinical.svg` provisórios | Vetores finais: BLOQUEADO-DECISÃO |
-| WCAG 2.2 AA, foco, alvos amplos | PARCIAL | axe A/AA sem violações sérias (e2e 03/09); skip link | Zoom 200%, leitor de tela real, alvos ≥ 24 px verificados: FALTA (M15.5) |
+| WCAG 2.2 AA, foco, alvos amplos | PARCIAL | axe A/AA sem violações sérias (e2e 03/09); skip link | Zoom 200%, leitor de tela real, alvos ≥ 24 px verificados: FALTA (M15.6) |
 | Estados loading/vazio/erro em todos os componentes | PARCIAL | erros de envio no Care; "Faça login" no Clinical | Padronizar e testar estados em cada tela nova (DoD) |
 | Care: um objetivo por tela, próximo passo, sem dose ao paciente | PARCIAL | formulário único; nenhuma orientação automática (e2e 06) | Telas Care do §4.1 → M15.2/M15.3 |
 | Clinical: incerteza, dados faltantes, origem | PARCIAL | `source_reference` nos registros; regra `MISSING_CONTEXT` | Mostrar origem/horário e "Não é possível concluir" na UI → M15.4 |
@@ -30,15 +30,15 @@ Nada aqui altera D-001..D-008 nem os tokens de marca. "FEITO" nunca significa ho
 | Cuidador: escopo autorizado, revogável | FALTA | cuidador hoje sempre 403 (e2e 07) | **R4: modelo convite + consentimento por escopo + prazo + revogação + auditoria** (M15.3) |
 | Farmacêutico revisa alerta / propõe intervenção | FEITO (DEV) | `GET alerts`, `POST interventions`; MFA + vínculo + atribuição (e2e 06/07) | — |
 | Enfermagem "conforme atribuição"; Médico | PARCIAL | papéis `nurse`/`physician` em `STAFF`; atribuição por paciente testada (e2e 07) | Matriz fina por recurso (enfermagem não propõe intervenção farmacêutica) → M15.4 |
-| Gestor clínico (filas, indicadores, auditoria) | FALTA | papel inexistente | Papel `clinical_manager` + telas → M15.4/M15.6 |
-| Admin técnico sem acesso clínico | FEITO (negativo) | admin com MFA → sem acesso clínico (e2e 07) | Admin sem login e sem funções → M15.6 |
+| Gestor clínico (filas, indicadores, auditoria) | FALTA | papel inexistente | Papel `clinical_manager` + telas → M15.4/M15.7 |
+| Admin técnico sem acesso clínico | FEITO (negativo) | admin com MFA → sem acesso clínico (e2e 07) | Admin sem login e sem funções → M15.7 |
 | RBAC + ABAC (organização, equipe, consentimento, finalidade, emergência auditada) | PARCIAL | RLS por organização; `care_assignments`; MFA | Unidade/equipe, finalidade e "quebra de vidro" auditada: FALTA (quebra de vidro = BLOQUEADO-DECISÃO de política) |
 | MFA, sessões expiráveis, segregação | FEITO (IdP de teste) | e2e 04/06/08; RLS negativos (m145-db-*) | Repetir no IdP institucional (D-009) |
 
 ## 4.1 Care
 | # | Tela | Situação | Evidência | Plano |
 |---|---|---|---|---|
-| 1 | Boas-vindas/acesso, consentimentos, acessibilidade, cuidador | PARCIAL | login OIDC, logout RP | Consentimento de uso (termo) = texto BLOQUEADO-DECISÃO (jurídico); preferência de acessibilidade (fonte grande/contraste) → M15.5 |
+| 1 | Boas-vindas/acesso, consentimentos, acessibilidade, cuidador | PARCIAL | login OIDC, logout RP | Consentimento de uso (termo) = texto BLOQUEADO-DECISÃO (jurídico); preferência de acessibilidade (fonte grande/contraste) → M15.6 |
 | 2 | Início "Como você está hoje?", próximo ciclo, lembretes, ajuda | FALTA | — | M15.2 (próximo ciclo a partir de `treatment_cycles`; lembretes sem push nesta fase) |
 | 3 | Registrar sintoma: questionário adaptativo (duração, intensidade, início, sinais de alerta), confirmação | PARCIAL | código + descrição livre; febre → `urgent_review` | Questionário estruturado sintético (perguntas = conteúdo **demonstrativo**, não aprovado clinicamente) → M15.2 |
 | 4 | Minha jornada (ciclos, histórico em linguagem simples) | FALTA | — | M15.2 (recorte permitido; somente dados autorizados) |
@@ -56,9 +56,10 @@ Nada aqui altera D-001..D-008 nem os tokens de marca. "FEITO" nunca significa ho
 | 4 | Avaliação pré-ciclo (checklist disponíveis/ausentes, parecer) | PARCIAL | `evaluateSyntheticPreCycle` (testado) + `clinical_reviews` | Expor checklist + parecer persistido → M15.4 |
 | 5 | Inteligência clínica | BLOQUEADO-DECISÃO | evidence-gate | Apenas regras determinísticas; nada de LLM |
 | 6 | Intervenções (aceitar/ajustar/rejeitar, encaminhamento, responsável, prazo, desfecho) | PARCIAL | `clinical_interventions` (decision pending/accepted/declined/referred) | Tarefa/encaminhamento com responsável/prazo/desfecho → M15.4 |
+| 6a | **RF-M15-SAM-01 Solicitação de alteração ao médico** (D-012; plantão/médico vinculado, justificativa, evidências, prioridade, estados, IA-rascunho determinístico) | FALTA | — | **M15.5** (`docs/product/RF_SOLICITACAO_ALTERACAO_MEDICO.md`) |
 | 7 | Protocolos versionados | PARCIAL | `clinical_protocol_versions` (aprovação obrigatória) | Visualização somente leitura → M15.4; aprovação = papel designado (BLOQUEADO-DECISÃO) |
-| 8 | Indicadores | FALTA | — | Indicadores operacionais sintéticos (tempo até revisão, nº intervenções) → M15.6 |
-| 9 | Admin (profissionais, equipes, permissões, conectores, trilhas) | FALTA | admin-web estático | M15.6 |
+| 8 | Indicadores | FALTA | — | Indicadores operacionais sintéticos (tempo até revisão, nº intervenções) → M15.7 |
+| 9 | Admin (profissionais, equipes, permissões, conectores, trilhas) | FALTA | admin-web estático | M15.7 |
 
 ## 5. Comportamentos
 | Req. | Situação | Evidência | Plano |
@@ -75,7 +76,7 @@ Nada aqui altera D-001..D-008 nem os tokens de marca. "FEITO" nunca significa ho
 |---|---|---|---|
 | Regras determinísticas primeiro; LLM não suprime alerta | PARCIAL | `packages/clinical-rules` (`test:rules`) | Versionamento por regra já existe (`rule_version`) |
 | RAG, avaliação de desempenho | BLOQUEADO-DECISÃO | — | — |
-| Entidades nucleares (§7) | PARCIAL | 21 tabelas; faltam Facility, CareTeam, Consent, CaregiverAccess, Diagnosis/CancerStage/Biomarker, Task, Notification, IntegrationJob | Consent/CaregiverAccess (M15.3), Task (M15.4), IntegrationJob/Provenance (M15.4), CareTeam/Facility (M15.6) |
+| Entidades nucleares (§7) | PARCIAL | 21 tabelas; faltam Facility, CareTeam, Consent, CaregiverAccess, Diagnosis/CancerStage/Biomarker, Task, Notification, IntegrationJob | Consent/CaregiverAccess (M15.3), Task (M15.4), IntegrationJob/Provenance (M15.4), CareTeam/Facility (M15.4/M15.5) |
 | FHIR R4/HL7/Tasy/MV | PARCIAL (sintético) | gateway FHIR | Integração real BLOQUEADO-DECISÃO (D-007) |
 
 ## 8–9. Segurança e arquitetura
@@ -95,8 +96,8 @@ Nada aqui altera D-001..D-008 nem os tokens de marca. "FEITO" nunca significa ho
 |---|---|
 | Paciente A FOLFOX/neuropatia; Paciente B AC-T/náusea/febre | PARCIAL — seeds com os dois pacientes; cenários B "febre" e A "parestesia" sem E2E dedicado → M15.2/M15.4 |
 | Acessos indevidos, duplicatas | FEITO (RLS, idempotência, 403s) |
-| Perda de rede, latência | FALTA → M15.5 |
-| Leitores de tela, zoom 200%, aparelhos pequenos | PARCIAL (390 px ok) → M15.5 |
+| Perda de rede, latência | FALTA → M15.6 |
+| Leitores de tela, zoom 200%, aparelhos pequenos | PARCIAL (390 px ok) → M15.6 |
 | DoD item 12 (aprovação do responsável) | Toda entrega fica "aguardando aprovação de produto" |
 
 ## Plano de marcos (um branch e um PR por marco; cada um com unit + DB PG17 + Playwright E2E + axe)
@@ -106,8 +107,9 @@ Nada aqui altera D-001..D-008 nem os tokens de marca. "FEITO" nunca significa ho
 | M15.2 | `m15.2-care-paciente` | **R3** paciente derivado da identidade (`GET /v1/care/me`); Início, Registrar sintoma estruturado, Minha jornada, Meus medicamentos (leitura + adesão relatada), Preciso de ajuda, orientações só `approved`, febre → mensagem imediata provisória |
 | M15.3 | `m15.3-cuidador` | **R4** convite + consentimento por escopo + prazo + revogação + histórico de acessos auditado |
 | M15.4 | `m15.4-clinical` | Estados de alerta §5.1 (migração), fila/painel, linha do tempo com origem, pré-ciclo, tarefas/encaminhamento, simulador hospitalar FHIR conectado |
-| M15.5 | `m15.5-pwa-a11y` | Manifest/SW seguro, preferências de acessibilidade, zoom 200%, rede lenta/offline |
-| M15.6 | `m15.6-admin` | Login no Admin, profissionais/equipes/vínculos (sem dados clínicos), trilha de auditoria, indicadores operacionais |
+| M15.5 | `m15.5-solicitacao-medico` | **RF-M15-SAM-01 (D-012)**: unidades + escala de plantão sintética, critérios de prioridade, solicitação com evidências e Provenance, estados rascunho→enviada/em revisão→aceita/ajustada/recusada→concluída, resposta do médico, `TemplateJustificationDrafter` (determinístico, rotulado), RLS/auditoria; E2E farmacêutico → plantonista → auditoria |
+| M15.6 | `m15.6-pwa-a11y` | Manifest/SW seguro, preferências de acessibilidade, zoom 200%, rede lenta/offline |
+| M15.7 | `m15.7-admin` | Login no Admin, profissionais/equipes/vínculos (sem dados clínicos), trilha de auditoria, indicadores operacionais |
 
 ## Propostas conservadoras para aprovação (o Plano deixa a escolha em aberto)
 **P-R3 — paciente derivado da identidade.** O Care nunca recebe/mostra UUID. A API resolve o paciente por `patient_portal_links` (issuer + sujeito) dentro do tenant. Um link ativo ⇒ paciente automático; mais de um (ex.: cuidador de dois pacientes) ⇒ lista com nome sintético/rótulo, sem identificador interno. Nenhum link ⇒ "Conta ainda não vinculada; procure a equipe" (sem autocadastro).
