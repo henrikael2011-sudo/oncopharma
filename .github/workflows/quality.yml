@@ -58,3 +58,5 @@ jobs:
         run: npm run test:db:required
         env:
           DATABASE_URL: postgres://oncopharma_app:ci_runtime_test_password@localhost:5432/oncopharma_dev
+          # M14.5: somente para criar fixtures sintéticas dos testes negativos (banco efêmero do runner).
+          DATABASE_URL_ADMIN: postgres://oncopharma:test_only_ci_secret@localhost:5432/oncopharma_dev
