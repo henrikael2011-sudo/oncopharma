@@ -13,6 +13,7 @@ Nada aqui altera D-001..D-008 nem os tokens de marca. "FEITO" nunca significa ho
 | D-006 sintéticos; produção vazia | FEITO (DEV) | `synthetic=true` obrigatório (CHECK + RLS); seeds versionados; Terraform `data_classification` | Reset idempotente com confirmação/registro: PARCIAL (`reset-synthetic-dev.sh` sem trilha) → M15.4 |
 | D-007 integração só autorizada | PARCIAL | `services/integration-gateway` (FHIR R4 sintético, `clinicalWrites:false`) | Simulador de hospital conectado ao Clinical: FALTA → M15.4 |
 | D-008 externas | PARCIAL | IdP/hospedagem/repositório decididos (D-009..D-011) | Instituição-piloto, operação de alertas/SLA: BLOQUEADO-DECISÃO |
+| D-013 rascunho de prescrição assistido por IA (*Emenda D-013*) | BLOQUEADO-DECISÃO | `RF_PRESCRICAO_ASSISTIDA_IA.md`; `docs/decisions/D-013-prescricao-assistida-ia.md` | **Depende de decisão regulatória** (Anvisa SaMD RDC 657/2022 e 751/2022, validação clínica, CFM/ICP-Brasil, integração com prontuário oficial). Fase posterior; não implementar agora |
 
 ## 2. Identidade visual (§2)
 | Req. | Situação | Evidência | Lacuna |
@@ -99,6 +100,18 @@ Nada aqui altera D-001..D-008 nem os tokens de marca. "FEITO" nunca significa ho
 | Perda de rede, latência | FALTA → M15.6 |
 | Leitores de tela, zoom 200%, aparelhos pequenos | PARCIAL (390 px ok) → M15.6 |
 | DoD item 12 (aprovação do responsável) | Toda entrega fica "aguardando aprovação de produto" |
+
+## Emendas de 11/10/2026 (D-013 e Emenda UI)
+| Req. | Situação | Documento | Lacuna / próximo passo |
+|---|---|---|---|
+| D-013 Rascunho de prescrição assistido por IA | BLOQUEADO-DECISÃO — **depende de decisão regulatória** | `RF_PRESCRICAO_ASSISTIDA_IA.md` | Aprovada (registro); implementação bloqueada até enquadramento Anvisa, validação clínica e integração com prontuário oficial. Regras determinísticas de dose antes de qualquer LLM |
+| UI-01 Care simples (letra grande, alto contraste, um passo por tela, botões grandes) | FALTA | `docs/diretrizes-design.md` §1 | → M15.2 / M15.6 (axe, zoom 200%) |
+| UI-02 Clinical sem poluição (essencial visível, detalhe sob demanda) | FALTA | `docs/diretrizes-design.md` §2 | → M15.4 |
+| UI-03 Dados do paciente só ao clicar; lista mínima (identificação segura, gravidade, pendência) | FALTA | `docs/diretrizes-design.md` §3 | → M15.4 (contrato da API de lista + E2E + auditoria do detalhe) |
+| UI-04 Busca de pacientes respeitando vínculo/ABAC | FALTA | `docs/diretrizes-design.md` §4 | → M15.4 (testes RLS/ABAC da busca) |
+| UI-05 Alocação hospitalar (unidade/andar/quarto/leito) via "Sincronizar" — FHIR Location/Encounter.location ou HL7 ADT A01/A02/A03 | FALTA | `docs/diretrizes-design.md` §5 | → M15.4 com simulador; integração real depende de D-007 |
+| UI-06 Alocação manual marcada "manual", auditada; sincronizado prevalece com aviso de conflito | FALTA | `docs/diretrizes-design.md` §6 | → M15.4 |
+| UI-07 Importação de PDF de pacientes do dia (layout por fornecedor, pré-visualização obrigatória, confirmação humana, origem/hash, divergência, auditoria, storage criptografado) | FALTA (requisito aprovado); dados reais BLOQUEADO-DECISÃO | `RF_IMPORTACAO_PDF_PACIENTES.md`; `docs/diretrizes-design.md` §7 | Só PDFs sintéticos até autorização formal do hospital (farmácia/direção + DPO/LGPD, tutela da saúde), ambiente sa-east-1 restrito e repositório privado. Marco a definir (sugestão: após M15.4) |
 
 ## Plano de marcos (um branch e um PR por marco; cada um com unit + DB PG17 + Playwright E2E + axe)
 | Marco | Branch | Escopo (sem decisões clínicas/LGPD/hospital) |
