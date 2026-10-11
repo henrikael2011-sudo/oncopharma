@@ -1,0 +1,12 @@
+**/node_modules
+**/.next
+**/dist
+.git
+.env
+.env.*
+!.env.example
+artifacts
+docs/history
+infra/aws/.terraform
+**/*.tfstate*
+**/*.log

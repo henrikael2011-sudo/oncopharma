@@ -11,7 +11,7 @@ locals {
   }
   service_env = {
     for k, v in var.services : k => merge(
-      { NODE_ENV = "production", PORT = tostring(v.port) },
+      { NODE_ENV = "production", PORT = tostring(v.port), ONCO_ENVIRONMENT = var.environment },
       v.public ? { PORTAL_ORIGIN = "https://${local.fqdn[k]}", API_INTERNAL_URL = "https://${local.api_fqdn}" } : {},
       { for n, val in lookup(var.oidc_settings, k, {}) : n => val if contains(local.oidc_env_names, n) && val != "" }
     )

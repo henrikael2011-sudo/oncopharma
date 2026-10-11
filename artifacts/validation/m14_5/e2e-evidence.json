@@ -1,5 +1,5 @@
 {
-  "startedAt": "2026-10-11T20:47:10.697Z",
+  "startedAt": "2026-10-11T21:09:00.628Z",
   "issuer": "http://localhost:8080/realms/oncopharma-test",
   "a11y": {
     "care": [],
@@ -28,16 +28,17 @@
         "account"
       ],
       "amr": [
+        "pwd",
         "otp"
       ],
       "exp_minus_iat": 120,
       "cookieMaxAgeSeconds": 103
     },
-    "waitedForExpiryMs": 98935
+    "waitedForExpiryMs": 82441
   },
   "db": {
-    "reportId": "d2cd2e55-d9d4-4283-89b2-7d8ac4ee4be6",
-    "alertId": "efcc8fee-255b-476f-a4ac-a8b829cf49fc",
+    "reportId": "40f45ef0-4c6e-4d74-ad76-6f8e927debb7",
+    "alertId": "e20a692d-ecae-4bb2-ab44-1d1b0d5defec",
     "alertStatus": "acknowledged",
     "interventionActorIsPharmacist": true,
     "auditTrail": [

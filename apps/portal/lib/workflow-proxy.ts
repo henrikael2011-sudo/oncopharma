@@ -1,10 +1,11 @@
+import { syntheticUiEnabled } from './synthetic';
 import { NextResponse } from 'next/server';
 import { session } from './auth';
 
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const json=(error:string,status:number)=>NextResponse.json({error},{status,headers:{'Cache-Control':'no-store'}});
 export async function workflowProxy(request:Request,patientId:string,action:'symptoms'|'alerts'|'interventions'){
-  if(process.env.NODE_ENV==='production'||process.env.NEXT_PUBLIC_ALLOW_SYNTHETIC_UI!=='true'||process.env.ALLOW_SYNTHETIC_API!=='true')return json('Somente ambiente DEV sintético',503);
+  if(!syntheticUiEnabled())return json('Somente ambiente DEV sintético',503);
   const org=process.env.DEV_ORGANIZATION_ID;
   if(!org||!UUID.test(org)||!UUID.test(patientId))return json('Identificador inválido',400);
   const s=await session();if(!s)return json('Autenticação necessária',401);

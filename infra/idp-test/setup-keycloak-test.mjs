@@ -42,7 +42,7 @@ const mappers = [
   { name: 'amr', protocol: 'openid-connect', protocolMapper: 'oidc-amr-mapper', config: { 'access.token.claim': 'true', 'id.token.claim': 'true', 'introspection.token.claim': 'true' } },
 ];
 for (const [app, origin] of Object.entries(APPS)) {
-  await api('POST', `/realms/${REALM}/clients`, { clientId: `oncopharma-${app}-web`, name: `ONCOPHARMA ${app} (teste)`, enabled: true, publicClient: true, standardFlowEnabled: true,
+  await api('POST', `/realms/${REALM}/clients`, { clientId: `oncopharma-${app}-web`, name: ({ care: 'ONCOPHARMA Care', clinical: 'ONCOPHARMA Clinical', admin: 'ONCOPHARMA Admin' })[app] || 'ONCOPHARMA', enabled: true, publicClient: true, standardFlowEnabled: true,
     implicitFlowEnabled: false, directAccessGrantsEnabled: false, serviceAccountsEnabled: false, redirectUris: [`${origin}/api/auth/callback`], webOrigins: [origin], rootUrl: origin,
     attributes: { 'pkce.code.challenge.method': 'S256', 'post.logout.redirect.uris': `${origin}/` }, protocolMappers: mappers });
 }

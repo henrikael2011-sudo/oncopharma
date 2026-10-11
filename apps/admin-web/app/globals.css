@@ -1,1 +1,4 @@
-body{margin:0;background:#0A344A;color:#F5F8F7;font:16px system-ui,sans-serif}main{max-width:850px;margin:8vh auto;padding:32px}h1{color:#D7A858}section{border:1px solid #50747c;border-radius:16px;padding:24px}a{color:#B9E1D0}
+:root{--teal:#063f3b;--emerald:#15735d;--navy:#0a344a;--gold:#d7a858;--mint:#b9e1d0;--canvas:#f5f8f7;--ink:#152c32;--danger:#b42318;--border-strong:#5f7c84}
+body{margin:0;background:var(--navy);color:var(--canvas);font:16px system-ui,sans-serif}main{max-width:850px;margin:8vh auto;padding:32px}h1{color:var(--gold)}section{border:1px solid var(--border-strong);border-radius:16px;padding:24px}a{color:var(--mint)}
+:where(a,button,input,select,textarea):focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.skip{position:absolute;left:-9999px;top:12px;background:#fff;color:#000;padding:12px;z-index:10}.skip:focus{left:12px}

@@ -1,0 +1,31 @@
+{
+  "openapi": "3.1.0",
+  "info": { "title": "ONCOPHARMA API", "version": "0.15.1-dev", "description": "API versionada (/v1). Somente dados sintéticos fora de produção; uso clínico não aprovado. Autorização: JWT OIDC (Bearer) + vínculo no banco + RLS por organização." },
+  "servers": [{ "url": "/v1" }],
+  "components": {
+    "securitySchemes": { "oidc": { "type": "http", "scheme": "bearer", "bearerFormat": "JWT" } },
+    "parameters": {
+      "Org": { "name": "x-organization-id", "in": "header", "required": true, "schema": { "type": "string", "format": "uuid" } },
+      "PatientId": { "name": "patientId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+    },
+    "responses": {
+      "Unauthorized": { "description": "Token ausente/inválido" },
+      "Forbidden": { "description": "Sem MFA, vínculo, atribuição ou organização" },
+      "Unavailable": { "description": "Modo sintético desabilitado ou banco indisponível" }
+    }
+  },
+  "paths": {
+    "/health": { "get": { "summary": "Liveness", "security": [], "responses": { "200": { "description": "Vivo" } } } },
+    "/ready": { "get": { "summary": "Readiness (banco)", "security": [], "responses": { "200": { "description": "Pronto" }, "503": { "$ref": "#/components/responses/Unavailable" } } } },
+    "/me": { "get": { "summary": "Identidade e vínculos do usuário autenticado", "security": [{ "oidc": [] }], "responses": { "200": { "description": "Principal e memberships" }, "401": { "$ref": "#/components/responses/Unauthorized" } } } },
+    "/patients": { "get": { "summary": "Pacientes do profissional (MFA + vínculo)", "security": [{ "oidc": [] }], "parameters": [{ "$ref": "#/components/parameters/Org" }], "responses": { "200": { "description": "Lista mínima" }, "401": { "$ref": "#/components/responses/Unauthorized" }, "403": { "$ref": "#/components/responses/Forbidden" } } } },
+    "/patients/{patientId}/record": { "get": { "summary": "Prontuário longitudinal sintético (auditado)", "security": [{ "oidc": [] }], "parameters": [{ "$ref": "#/components/parameters/PatientId" }, { "$ref": "#/components/parameters/Org" }], "responses": { "200": { "description": "Registro" }, "403": { "$ref": "#/components/responses/Forbidden" } } } },
+    "/workflow/care/patients/{patientId}/symptoms": { "post": { "summary": "Paciente registra sintoma (vínculo patient_portal_links, idempotente)", "security": [{ "oidc": [] }], "parameters": [{ "$ref": "#/components/parameters/PatientId" }, { "$ref": "#/components/parameters/Org" }],
+      "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["symptomCode", "description", "requestId"], "properties": { "symptomCode": { "enum": ["nausea", "neuropathy", "fever", "other"] }, "description": { "type": "string", "maxLength": 1000 }, "requestId": { "type": "string", "format": "uuid" } } } } } },
+      "responses": { "201": { "description": "Relato e alerta criados" }, "200": { "description": "Repetição idempotente" }, "403": { "$ref": "#/components/responses/Forbidden" } } } },
+    "/workflow/clinical/patients/{patientId}/alerts": { "get": { "summary": "Alertas do paciente (MFA + vínculo + atribuição)", "security": [{ "oidc": [] }], "parameters": [{ "$ref": "#/components/parameters/PatientId" }, { "$ref": "#/components/parameters/Org" }], "responses": { "200": { "description": "Alertas" }, "403": { "$ref": "#/components/responses/Forbidden" } } } },
+    "/workflow/clinical/patients/{patientId}/interventions": { "post": { "summary": "Intervenção profissional sobre alerta (auditada)", "security": [{ "oidc": [] }], "parameters": [{ "$ref": "#/components/parameters/PatientId" }, { "$ref": "#/components/parameters/Org" }],
+      "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["alertId", "note", "decision"], "properties": { "alertId": { "type": "string", "format": "uuid" }, "note": { "type": "string", "maxLength": 2000 }, "decision": { "enum": ["pending", "accepted", "declined", "referred"] } } } } } },
+      "responses": { "201": { "description": "Intervenção registrada" }, "403": { "$ref": "#/components/responses/Forbidden" } } } }
+  }
+}

@@ -1,3 +1,4 @@
+import { syntheticUiEnabled } from '../../../../lib/synthetic';
 import { NextResponse } from 'next/server';
 import { session } from '../../../../lib/auth';
 export const runtime='nodejs';
@@ -9,7 +10,7 @@ export async function GET(){
  const profile=await me.json();
  // A lista de pacientes continua indisponível até habilitação explícita do ambiente sintético.
  const org=process.env.DEV_ORGANIZATION_ID;let patients=null;
- if(process.env.NODE_ENV!=='production' && process.env.NEXT_PUBLIC_ALLOW_SYNTHETIC_UI==='true' && org){
+ if(syntheticUiEnabled() && org){
  const result=await fetch(`${api}/v1/patients`,{headers:{authorization:`Bearer ${s.token}`,'x-organization-id':org},cache:'no-store',signal:AbortSignal.timeout(8000)});
  if(result.ok)patients=await result.json();
  }
