@@ -1,12 +1,13 @@
 // M15.4 — API do ONCOPHARMA Clinical (lista, busca, paciente sob demanda, estados de alerta, tarefas, pré-ciclo, linha do tempo).
 // Regras: MFA + vínculo profissional ativo + vínculo assistencial (care_assignments) por paciente; RLS por organização;
 // lista NUNCA traz dado clínico detalhado (diretrizes de design §3); toda leitura de paciente e toda escrita é auditada.
-import { BadRequestException, Body, Controller, ForbiddenException, Get, Headers, Param, Post, Query, Req, ServiceUnavailableException, UseGuards } from '@nestjs/common';
+import { BadGatewayException, BadRequestException, Body, ConflictException, Controller, ForbiddenException, Get, Headers, Param, Post, Query, Req, ServiceUnavailableException, UseGuards } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import type { PoolClient } from 'pg';
 import { AuthGuard, AuthenticatedRequest } from './auth.guard';
 import { DatabaseService } from './database.service';
 import { syntheticApiEnabled } from './synthetic-mode';
+import { type Allocation, allocationLabel, FORMAT_LABEL, normalizeAllocation, syncOutcome, validateFeed } from './allocation-rules';
 import { ALERT_LABEL, ALERT_STATES, type AlertState, allowedTransitions, canTransition, FINAL_STATES, normalizeSearch, preCycleChecklist, primaryRole, ROLE_LABEL, SQL_FOLD, STAFF_ROLES, type StaffRole } from './clinical-work-rules';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -65,14 +66,20 @@ export class ClinicalWorkController {
       const rows = (await c.query(`SELECT p.id,p.display_name,p.hospital_record,
           (SELECT max(CASE a.level WHEN 'urgent_review' THEN 2 ELSE 1 END) FROM clinical_alerts a WHERE a.organization_id=p.organization_id AND a.patient_id=p.id AND a.${OPEN}) AS sev,
           (SELECT count(*) FROM clinical_alerts a WHERE a.organization_id=p.organization_id AND a.patient_id=p.id AND a.${OPEN})::int AS open_alerts,
-          (SELECT count(*) FROM clinical_tasks t WHERE t.organization_id=p.organization_id AND t.patient_id=p.id AND t.status IN ('open','received'))::int AS open_tasks
+          (SELECT count(*) FROM clinical_tasks t WHERE t.organization_id=p.organization_id AND t.patient_id=p.id AND t.status IN ('open','received'))::int AS open_tasks,
+          pa.unit, pa.floor, pa.room, pa.bed, pa.source AS alloc_source,
+          EXISTS (SELECT 1 FROM allocation_sync_items i WHERE i.organization_id=p.organization_id AND i.patient_id=p.id AND i.outcome='conflict' AND i.resolved_at IS NULL) AS alloc_conflict
         FROM patients p JOIN care_assignments ca ON ca.patient_id=p.id AND ca.organization_id=p.organization_id
+        LEFT JOIN patient_allocations pa ON pa.organization_id=p.organization_id AND pa.patient_id=p.id AND pa.superseded_at IS NULL
         WHERE p.organization_id=$1 AND p.synthetic=true AND ca.oidc_issuer=$2 AND ca.oidc_sub=$3 AND ca.active=true ${filter}
         ORDER BY sev DESC NULLS LAST, p.display_name NULLS LAST LIMIT 100`, params)).rows;
       await this.audit(c, org, req, term ? 'patient.search' : 'patient.worklist', s, 'patient', { result_count: rows.length, query_length: term ? term.length : 0 });
+      const last = (await c.query(`SELECT source_system,source_format,at FROM allocation_sync_runs WHERE organization_id=$1 ORDER BY at DESC LIMIT 1`, [org])).rows[0];
       return {
-        patients: rows.map((r) => ({ id: r.id, name: r.display_name ?? 'Sem nome registrado', record: r.hospital_record, severity: r.sev === 2 ? 'urgent' : r.sev === 1 ? 'review' : null, pending: r.open_alerts + r.open_tasks })),
+        patients: rows.map((r) => ({ id: r.id, name: r.display_name ?? 'Sem nome registrado', record: r.hospital_record, severity: r.sev === 2 ? 'urgent' : r.sev === 1 ? 'review' : null, pending: r.open_alerts + r.open_tasks,
+          allocation: r.unit ? { unit: r.unit, floor: r.floor, room: r.room, bed: r.bed, source: r.alloc_source, conflict: r.alloc_conflict } : null })),
         searched: !!term,
+        lastSync: last ? { at: iso(last.at), source: `${last.source_system} · ${FORMAT_LABEL[last.source_format]}` } : null,
       };
     });
   }
@@ -91,6 +98,7 @@ export class ClinicalWorkController {
       await this.audit(c, org, req, 'patient.overview.read', s, 'patient', { patient_id: patientId });
       return {
         patient: { id: p.id, name: p.display_name ?? 'Sem nome registrado', record: p.hospital_record },
+        allocation: await this.allocationView(c, org, patientId),
         role: s.role,
         alerts: alerts.map((a) => ({ id: a.id, code: a.code, level: a.level, status: a.status, statusLabel: ALERT_LABEL[a.status as AlertState], ruleVersion: a.rule_version, explanation: a.explanation,
           description: a.description, reportedBy: a.reported_by, createdAt: iso(a.created_at), changedAt: iso(a.status_changed_at), duplicateOf: a.duplicate_of,
@@ -126,6 +134,110 @@ export class ClinicalWorkController {
     await c.query(`UPDATE clinical_alerts SET status=$3, duplicate_of=$4 WHERE id=$1 AND organization_id=$2`, [alertId, org, to, duplicateOf]);
     await this.audit(c, org, req, 'alert.transition', s, 'clinical_alert', { alert_id: alertId, patient_id: a.patient_id, from: a.status, to });
     return { alertId, from: a.status, to, label: ALERT_LABEL[to] };
+  }
+
+  // ---------- M15.4b — alocação hospitalar ----------
+  private async current(c: PoolClient, org: string, patientId: string) {
+    return (await c.query(`SELECT id,unit,floor,room,bed,source,recorded_at,recorded_by_role,sync_run_id FROM patient_allocations WHERE organization_id=$1 AND patient_id=$2 AND superseded_at IS NULL FOR UPDATE`, [org, patientId])).rows[0] as
+      (Allocation & { id: string; source: 'hospital' | 'manual'; recorded_at: Date; recorded_by_role: StaffRole; sync_run_id: string | null }) | undefined;
+  }
+  private async allocationView(c: PoolClient, org: string, patientId: string) {
+    const a = (await c.query(`SELECT pa.unit,pa.floor,pa.room,pa.bed,pa.source,pa.recorded_at,pa.recorded_by_role,r.source_system,r.source_format
+      FROM patient_allocations pa LEFT JOIN allocation_sync_runs r ON r.id=pa.sync_run_id WHERE pa.organization_id=$1 AND pa.patient_id=$2 AND pa.superseded_at IS NULL`, [org, patientId])).rows[0];
+    const conflict = (await c.query(`SELECT i.unit,i.floor,i.room,i.bed,r.at,r.source_system,r.source_format FROM allocation_sync_items i JOIN allocation_sync_runs r ON r.id=i.run_id
+      WHERE i.organization_id=$1 AND i.patient_id=$2 AND i.outcome='conflict' AND i.resolved_at IS NULL ORDER BY r.at DESC LIMIT 1`, [org, patientId])).rows[0];
+    return {
+      current: a ? { unit: a.unit, floor: a.floor, room: a.room, bed: a.bed, label: allocationLabel(a), source: a.source, at: iso(a.recorded_at),
+        origin: a.source === 'hospital' ? `${a.source_system} · ${FORMAT_LABEL[a.source_format]}` : ROLE_LABEL[a.recorded_by_role as StaffRole] } : null,
+      conflict: conflict ? { label: allocationLabel(conflict), at: iso(conflict.at), origin: `${conflict.source_system} · ${FORMAT_LABEL[conflict.source_format]}` } : null,
+      manualAllowed: !a || a.source === 'manual',
+    };
+  }
+  private async supersede(c: PoolClient, org: string, cur: { id: string } | undefined) {
+    if (cur) await c.query(`UPDATE patient_allocations SET superseded_at=now() WHERE id=$1 AND organization_id=$2 AND superseded_at IS NULL`, [cur.id, org]);
+  }
+
+  /** "Sincronizar": integration-gateway (hospital simulado) → normaliza → aplica. Manual divergente nunca é sobrescrita (vira divergência). */
+  @Post('allocations/sync')
+  async sync(@Req() req: AuthenticatedRequest, @Headers('x-organization-id') org: string) {
+    await this.run(req, org, async () => null); // autoriza (MFA + vínculo profissional) antes de chamar o gateway
+    const base = process.env.INTEGRATION_GATEWAY_URL, token = process.env.INTEGRATION_GATEWAY_TOKEN;
+    if (!base || !token) throw new ServiceUnavailableException('Integração hospitalar não configurada');
+    let feed: ReturnType<typeof validateFeed>;
+    try {
+      const r = await fetch(`${base.replace(/\/$/, '')}/v1/locations`, { headers: { authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(10_000) });
+      if (!r.ok) throw new Error(`gateway ${r.status}`);
+      feed = validateFeed(await r.json());
+    } catch { throw new BadGatewayException('Não foi possível sincronizar com o hospital agora. Tente novamente.'); }
+    return this.run(req, org, async (c, s) => {
+      const run = (await c.query(`INSERT INTO allocation_sync_runs(organization_id,source_system,source_format,adapter_version,fetched_at,actor_issuer,actor_sub,actor_role,received)
+        VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id,at`, [org, feed.source, feed.format, feed.adapterVersion, feed.fetchedAt, req.principal.issuer, req.principal.sub, s.role, feed.items.length])).rows[0];
+      const n = { updated: 0, unchanged: 0, conflicts: 0, not_found: 0 };
+      for (const it of feed.items) {
+        const p = (await c.query(`SELECT id FROM patients WHERE organization_id=$1 AND hospital_record=$2 AND synthetic=true`, [org, it.record])).rows[0];
+        let outcome: string;
+        if (!p) { outcome = 'not_found'; n.not_found++; }
+        else {
+          const cur = await this.current(c, org, p.id);
+          outcome = syncOutcome(cur ?? null, it);
+          if (outcome === 'updated' || outcome === 'confirmed') {
+            await this.supersede(c, org, cur);
+            await c.query(`INSERT INTO patient_allocations(organization_id,patient_id,unit,floor,room,bed,source,sync_run_id,source_ref,recorded_by_issuer,recorded_by_sub,recorded_by_role)
+              VALUES($1,$2,$3,$4,$5,$6,'hospital',$7,$8,$9,$10,$11)`, [org, p.id, it.unit, it.floor, it.room, it.bed, run.id, it.ref, req.principal.issuer, req.principal.sub, s.role]);
+            // Hospital passou a informar (igual ou atualizado): divergências pendentes deixam de valer.
+            await c.query(`UPDATE allocation_sync_items SET resolved_at=now(),resolved_by_sub=$3,resolution='accepted_hospital' WHERE organization_id=$1 AND patient_id=$2 AND outcome='conflict' AND resolved_at IS NULL`, [org, p.id, req.principal.sub]);
+            n.updated += outcome === 'updated' ? 1 : 0; n.unchanged += outcome === 'confirmed' ? 1 : 0;
+          } else if (outcome === 'unchanged') n.unchanged++;
+          else n.conflicts++;
+        }
+        await c.query(`INSERT INTO allocation_sync_items(organization_id,run_id,patient_id,hospital_record,unit,floor,room,bed,source_ref,outcome) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
+          [org, run.id, p?.id ?? null, it.record, it.unit, it.floor, it.room, it.bed, it.ref, outcome]);
+      }
+      await c.query(`UPDATE allocation_sync_runs SET updated=$2,unchanged=$3,conflicts=$4,not_found=$5 WHERE id=$1`, [run.id, n.updated, n.unchanged, n.conflicts, n.not_found]);
+      await this.audit(c, org, req, 'allocation.sync', s, 'allocation_sync_run', { run_id: run.id, format: feed.format, received: feed.items.length, ...n });
+      // Somente contagens: nomes/prontuários de pacientes fora do vínculo nunca são devolvidos.
+      return { runId: run.id, at: iso(run.at), source: `${feed.source} · ${FORMAT_LABEL[feed.format]}`, received: feed.items.length, ...n };
+    });
+  }
+
+  /** Preenchimento manual: só quando o hospital não informa a alocação (ou ela já é manual). Autor/papel/horário registrados. */
+  @Post('patients/:patientId/allocation')
+  manualAllocation(@Req() req: AuthenticatedRequest, @Headers('x-organization-id') org: string, @Param('patientId') patientId: string, @Body() body: Record<string, unknown>) {
+    id(patientId, 'Paciente');
+    let a: Allocation; try { a = normalizeAllocation(body); } catch (e) { throw new BadRequestException((e as Error).message); }
+    return this.run(req, org, async (c, s) => {
+      await this.linked(c, org, req, patientId);
+      const cur = await this.current(c, org, patientId);
+      if (cur?.source === 'hospital') throw new ConflictException('Alocação informada pelo hospital. Use "Sincronizar" para atualizar.');
+      await this.supersede(c, org, cur);
+      await c.query(`INSERT INTO patient_allocations(organization_id,patient_id,unit,floor,room,bed,source,recorded_by_issuer,recorded_by_sub,recorded_by_role) VALUES($1,$2,$3,$4,$5,$6,'manual',$7,$8,$9)`,
+        [org, patientId, a.unit, a.floor, a.room, a.bed, req.principal.issuer, req.principal.sub, s.role]);
+      await c.query(`UPDATE allocation_sync_items SET resolved_at=now(),resolved_by_sub=$3,resolution='kept_manual' WHERE organization_id=$1 AND patient_id=$2 AND outcome='conflict' AND resolved_at IS NULL`, [org, patientId, req.principal.sub]);
+      await this.audit(c, org, req, 'allocation.manual', s, 'patient_allocation', { patient_id: patientId, replaced_manual: !!cur });
+      return this.allocationView(c, org, patientId);
+    });
+  }
+
+  /** Divergência hospital × manual: decisão humana explícita (usar dado do hospital ou manter o manual). */
+  @Post('patients/:patientId/allocation/conflict')
+  resolveConflict(@Req() req: AuthenticatedRequest, @Headers('x-organization-id') org: string, @Param('patientId') patientId: string, @Body() body: Record<string, unknown>) {
+    id(patientId, 'Paciente');
+    const resolution = body?.resolution === 'accepted_hospital' ? 'accepted_hospital' : body?.resolution === 'kept_manual' ? 'kept_manual' : null;
+    if (!resolution) throw new BadRequestException('Resolução inválida');
+    return this.run(req, org, async (c, s) => {
+      await this.linked(c, org, req, patientId);
+      const item = (await c.query(`SELECT i.id,i.unit,i.floor,i.room,i.bed,i.run_id,i.source_ref FROM allocation_sync_items i JOIN allocation_sync_runs r ON r.id=i.run_id
+        WHERE i.organization_id=$1 AND i.patient_id=$2 AND i.outcome='conflict' AND i.resolved_at IS NULL ORDER BY r.at DESC LIMIT 1 FOR UPDATE OF i`, [org, patientId])).rows[0];
+      if (!item) throw new ConflictException('Não há divergência pendente para este paciente');
+      if (resolution === 'accepted_hospital') {
+        await this.supersede(c, org, await this.current(c, org, patientId));
+        await c.query(`INSERT INTO patient_allocations(organization_id,patient_id,unit,floor,room,bed,source,sync_run_id,source_ref,recorded_by_issuer,recorded_by_sub,recorded_by_role)
+          VALUES($1,$2,$3,$4,$5,$6,'hospital',$7,$8,$9,$10,$11)`, [org, patientId, item.unit, item.floor, item.room, item.bed, item.run_id, item.source_ref, req.principal.issuer, req.principal.sub, s.role]);
+      }
+      await c.query(`UPDATE allocation_sync_items SET resolved_at=now(),resolved_by_sub=$3,resolution=$4 WHERE organization_id=$1 AND patient_id=$2 AND outcome='conflict' AND resolved_at IS NULL`, [org, patientId, req.principal.sub, resolution]);
+      await this.audit(c, org, req, 'allocation.conflict.resolved', s, 'patient_allocation', { patient_id: patientId, resolution });
+      return this.allocationView(c, org, patientId);
+    });
   }
 
   @Post('patients/:patientId/tasks')

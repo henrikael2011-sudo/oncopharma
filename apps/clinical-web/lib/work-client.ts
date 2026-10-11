@@ -11,8 +11,14 @@ export const when = (d?: string | null) => (d ? new Date(d).toLocaleString('pt-B
 export type Role = 'pharmacist' | 'physician' | 'nurse' | 'clinical_manager';
 export const ROLE_LABEL: Record<Role, string> = { pharmacist: 'Farmácia', physician: 'Medicina', nurse: 'Enfermagem', clinical_manager: 'Gestão clínica' };
 export type StaffMe = { role: Role; roleLabel: string; name: string | null; mfa: boolean };
-export type Row = { id: string; name: string; record: string | null; severity: 'urgent' | 'review' | null; pending: number };
+export type RowAllocation = { unit: string; floor: string | null; room: string | null; bed: string | null; source: 'hospital' | 'manual'; conflict: boolean };
+export type Row = { id: string; name: string; record: string | null; severity: 'urgent' | 'review' | null; pending: number; allocation: RowAllocation | null };
+export type Worklist = { patients: Row[]; searched: boolean; lastSync: { at: string; source: string } | null };
+export type SyncResult = { at: string; source: string; received: number; updated: number; unchanged: number; conflicts: number; not_found: number };
+export type AllocationView = { current: { label: string; source: 'hospital' | 'manual'; at: string; origin: string; unit: string; floor: string | null; room: string | null; bed: string | null } | null;
+  conflict: { label: string; at: string; origin: string } | null; manualAllowed: boolean };
+export const roomLabel = (a: { room: string | null; bed: string | null }) => [a.room ? (/^\d/.test(a.room) ? `Quarto ${a.room}` : a.room) : null, a.bed ? `Leito ${a.bed}` : null].filter(Boolean).join(' · ');
 export type Action = { to: string; label: string };
 export type Alert = { id: string; code: string; level: string; status: string; statusLabel: string; ruleVersion: string; explanation: string; description: string | null; reportedBy: string | null; createdAt: string; changedAt: string | null; final: boolean; actions: Action[] };
 export type Task = { id: string; kind: 'task' | 'referral'; title: string; details: string | null; assigneeRole: Role; assigneeLabel: string; dueAt: string | null; status: 'open' | 'received' | 'done' | 'cancelled'; createdAt: string; mine: boolean; receivedAt: string | null; closedAt: string | null; outcome: string | null; canReceive: boolean; canComplete: boolean; canCancel: boolean };
-export type PatientData = { patient: { id: string; name: string; record: string | null }; role: Role; alerts: Alert[]; tasks: Task[]; interventionAllowed: boolean };
+export type PatientData = { patient: { id: string; name: string; record: string | null }; allocation: AllocationView; role: Role; alerts: Alert[]; tasks: Task[]; interventionAllowed: boolean };

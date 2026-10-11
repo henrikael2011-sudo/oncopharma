@@ -31,3 +31,7 @@ SELECT '11111111-1111-4111-8111-111111111111','22222222-2222-4222-8222-222222222
 WHERE NOT EXISTS (SELECT 1 FROM clinical_alerts WHERE patient_id='22222222-2222-4222-8222-222222222223' AND status='awaiting_review' AND level='urgent_review');
 ALTER TABLE patients FORCE ROW LEVEL SECURITY; ALTER TABLE care_assignments FORCE ROW LEVEL SECURITY; ALTER TABLE clinical_alerts FORCE ROW LEVEL SECURITY;
 COMMIT;
+-- M15.4b — alocação começa vazia a cada execução E2E (histórico sintético descartável; role administrativa).
+DELETE FROM allocation_sync_items WHERE organization_id='11111111-1111-4111-8111-111111111111';
+DELETE FROM patient_allocations WHERE organization_id='11111111-1111-4111-8111-111111111111';
+DELETE FROM allocation_sync_runs WHERE organization_id='11111111-1111-4111-8111-111111111111';

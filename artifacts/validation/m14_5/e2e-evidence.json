@@ -1,5 +1,5 @@
 {
-  "startedAt": "2026-10-11T23:11:57.225Z",
+  "startedAt": "2026-10-11T23:43:21.199Z",
   "issuer": "http://localhost:8080/realms/oncopharma-test",
   "a11y": {
     "care": [],
@@ -10,6 +10,8 @@
     "careHelp": [],
     "clinicalLoggedIn": [],
     "clinicalWorklist": [],
+    "clinicalAllocation": [],
+    "clinicalGrouped": [],
     "careCaregivers": []
   },
   "tokens": {
@@ -45,11 +47,11 @@
       "exp_minus_iat": 120,
       "cookieMaxAgeSeconds": 103
     },
-    "waitedForExpiryMs": 38896
+    "waitedForExpiryMs": 8394
   },
   "db": {
-    "reportId": "77741eb7-928d-478e-9826-1fb382564fe5",
-    "alertId": "8a8c88b2-ac84-4784-8a3e-bdabd601aa84",
+    "reportId": "20466cbf-f625-43de-84b4-08cd7612086b",
+    "alertId": "c0ed6566-2a76-4725-932a-d8124e7d1ff8",
     "alertStatus": "referred",
     "interventionActorIsPharmacist": true,
     "auditTrail": [
@@ -59,5 +61,13 @@
       "alert.transition"
     ],
     "pharmacistAuditActions": "alert.transition,intervention.created,patient.overview.read,patient.precycle.read,patient.record.read,patient.search,patient.timeline.read,patient.worklist,precycle.reviewed,referral.created"
+  },
+  "allocation": {
+    "runs": 2,
+    "conflictResolvedByHuman": true,
+    "formats": [
+      "fhir_r4",
+      "hl7v2_adt"
+    ]
   }
 }

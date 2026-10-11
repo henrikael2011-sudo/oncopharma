@@ -8,6 +8,7 @@ import { TasksTab } from './TasksTab';
 import { PreCycleTab } from './PreCycleTab';
 import { TimelineTab } from './TimelineTab';
 import { RecordTab } from './RecordTab';
+import { AllocationPanel } from './AllocationPanel';
 
 const TABS = [['alertas', 'Alertas'], ['tarefas', 'Tarefas'], ['preciclo', 'Pré-ciclo'], ['linha', 'Linha do tempo'], ['prontuario', 'Prontuário']] as const;
 type Tab = (typeof TABS)[number][0];
@@ -25,6 +26,7 @@ export function PatientView({ id }: { id: string }) {
   return <article aria-labelledby="pac-nome">
     <nav aria-label="Navegação"><Link href="/clinical" className="clin-back">Lista de pacientes</Link></nav>
     <header className="pac-header"><h1 id="pac-nome">{d.patient.name}</h1><p>{d.patient.record ? `Prontuário ${d.patient.record}` : 'Sem prontuário'} · {openAlerts} {openAlerts === 1 ? 'alerta aberto' : 'alertas abertos'} · {openTasks} {openTasks === 1 ? 'tarefa aberta' : 'tarefas abertas'}</p></header>
+    <AllocationPanel id={id} data={d.allocation} onChange={load} />
     <div role="tablist" aria-label="Informações do paciente" className="tabs">
       {TABS.map(([k, label], i) => <button key={k} id={`tab-${k}`} role="tab" type="button" aria-selected={tab === k} aria-controls={`painel-${k}`} tabIndex={tab === k ? 0 : -1} onClick={() => setTab(k)} onKeyDown={(e) => onKey(e, i)}>{label}</button>)}
     </div>

@@ -1423,6 +1423,177 @@
           }
         }
       }
+    },
+    "/clinical/allocations/sync": {
+      "post": {
+        "summary": "Sincronizar alocação (unidade/andar/quarto/leito) via integration-gateway — hospital simulado FHIR R4 / HL7 ADT. Devolve apenas contagens; manual divergente vira divergência, nunca é sobrescrito.",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem MFA, sem vínculo profissional ou paciente não atribuído"
+          },
+          "502": {
+            "description": "Feed hospitalar indisponível ou inválido"
+          },
+          "503": {
+            "description": "Integração não configurada"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/clinical/patients/{patientId}/allocation": {
+      "post": {
+        "summary": "Alocação manual (somente quando o hospital não informa), com autoria e horário",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem MFA, sem vínculo profissional ou paciente não atribuído"
+          },
+          "409": {
+            "description": "Alocação informada pelo hospital"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "unit"
+                ],
+                "properties": {
+                  "unit": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 80
+                  },
+                  "floor": {
+                    "type": "string",
+                    "maxLength": 40
+                  },
+                  "room": {
+                    "type": "string",
+                    "maxLength": 40
+                  },
+                  "bed": {
+                    "type": "string",
+                    "maxLength": 20
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/clinical/patients/{patientId}/allocation/conflict": {
+      "post": {
+        "summary": "Resolver divergência hospital × manual (decisão humana)",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem MFA, sem vínculo profissional ou paciente não atribuído"
+          },
+          "409": {
+            "description": "Sem divergência pendente"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "resolution"
+                ],
+                "properties": {
+                  "resolution": {
+                    "enum": [
+                      "accepted_hospital",
+                      "kept_manual"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

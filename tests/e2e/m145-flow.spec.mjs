@@ -247,16 +247,26 @@ test.describe.serial('M14.5 E2E sintético', () => {
     expect(c.amr).toContain('otp'); // MFA comprovado pelo formulário OTP do IdP
     await expect(page.getByText(/Farmácia · MFA confirmado/)).toBeVisible();
     // UI-02/UI-03: lista mínima — nomes, prontuário, gravidade e pendências; NENHUM detalhe clínico antes de abrir o paciente.
-    const list = page.getByRole('list', { name: 'Pacientes vinculados' }); await expect(list.getByRole('listitem')).toHaveCount(5);
+    const list = page.locator('[aria-label="Pacientes vinculados"]'); await expect(list.getByRole('listitem')).toHaveCount(5);
     await expect(list.getByRole('listitem').first()).toContainText('Urgente'); await expect(list.getByRole('listitem').filter({ hasText: 'Carlos Menezes' })).toContainText('Urgente');
     await expect(list).toContainText('Ana Ribeiro'); await expect(list).toContainText('Prontuário PR-10021'); await expect(list).not.toContainText('Elisa Prado');
     const main = page.locator('main');
     for (const detail of [`[${RUN}]`, 'Neutrófilos', 'Ondansetrona', 'FOLFOX', 'Penicilina', 'Relato', 'Ciclo']) await expect(main, `lista não pode exibir "${detail}"`).not.toContainText(detail);
     const wl = await (await apiGet(request, 'clinical/worklist', s.token)).json();
-    for (const row of wl.patients) expect(Object.keys(row).sort()).toEqual(['id', 'name', 'pending', 'record', 'severity']);
+    for (const row of wl.patients) expect(Object.keys(row).sort()).toEqual(['allocation', 'id', 'name', 'pending', 'record', 'severity']); // alocação = localização, não dado clínico
     const rank = wl.patients.map((p) => ({ urgent: 2, review: 1 })[p.severity] ?? 0); expect(rank).toEqual([...rank].sort((a, b) => b - a)); // priorizada por gravidade
     expect(sql(`SELECT count(*) FROM audit_events WHERE actor_sub='${sub('farmaceutico')}' AND action='patient.overview.read'`)).toBe('0');
     await shot(page, 'clinical-worklist');
+    // Achado hml: em 390px o nome/perfil sobrepunha a marca no cabeçalho. Sem sobreposição e sem rolagem horizontal.
+    await page.setViewportSize({ width: 390, height: 844 });
+    const box = async (sel) => { const b = await page.locator(sel).first().boundingBox(); expect(b, sel).not.toBeNull(); return b; };
+    const brand = await box('.clinical-header .brand'), user = await box('.clinical-header .clin-user span'), out = await box('.clinical-header .clin-user button');
+    const overlap = (a, b) => a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
+    expect(overlap(brand, user), 'marca × usuário').toBe(false); expect(overlap(brand, out), 'marca × Sair').toBe(false); expect(overlap(user, out), 'usuário × Sair').toBe(false);
+    for (const b of [brand, user, out]) expect(b.x + b.width).toBeLessThanOrEqual(390 + 0.5);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+    await shot(page, 'clinical-worklist-390');
+    await page.setViewportSize({ width: 1280, height: 720 });
     // UI-04: busca restrita ao vínculo (acento indiferente); fora do vínculo => vazio, sem 403 indicativo de existência.
     await page.getByLabel('Buscar paciente').fill('debora'); await page.getByRole('button', { name: 'Buscar' }).click();
     const res = page.getByRole('list', { name: 'Resultado da busca' }); await expect(res.getByRole('listitem')).toHaveCount(1); await expect(res).toContainText('Débora Nunes');
@@ -317,7 +327,7 @@ test.describe.serial('M14.5 E2E sintético', () => {
     const { context, page } = await staffLogin(browser, 'medico', { enroll: true });
     await context.close();
     const md = await staffLogin(browser, 'medico');
-    const list = md.page.getByRole('list', { name: 'Pacientes vinculados' }); await expect(list.getByRole('listitem')).toHaveCount(1); await expect(list).toContainText('Ana Ribeiro');
+    const list = md.page.locator('[aria-label="Pacientes vinculados"]'); await expect(list.getByRole('listitem')).toHaveCount(1); await expect(list).toContainText('Ana Ribeiro');
     await md.page.getByRole('link', { name: /Ana Ribeiro/ }).click(); await md.page.getByRole('tab', { name: 'Tarefas' }).click();
     const task = md.page.getByRole('listitem', { name: `Encaminhamento: Avaliar náusea persistente [${RUN}]` });
     await task.getByRole('button', { name: 'Confirmar recebimento' }).click(); await expect(task).toContainText('Recebida');
@@ -351,10 +361,78 @@ test.describe.serial('M14.5 E2E sintético', () => {
     await nur.context.close();
   });
 
+  test('06c (M15.4b) alocação: Sincronizar (FHIR R4 → HL7 ADT) via integration-gateway, agrupamento por unidade/andar, manual com autoria, divergência e decisão humana', async ({ browser, request }) => {
+    const GW = 'http://127.0.0.1:4310', GH = { authorization: `Bearer ${process.env.INTEGRATION_GATEWAY_TOKEN}` };
+    expect((await request.post(`${GW}/v1/sim/reset`, { headers: GH })).status()).toBe(200);
+    expect((await request.get(`${GW}/v1/locations`)).status()).toBe(401); // gateway exige token de serviço
+    const { context, page } = await staffLogin(browser, 'farmaceutico');
+    await expect(page.getByText('Alocação ainda não sincronizada com o hospital.')).toBeVisible();
+    const groups = page.locator('[aria-label="Pacientes vinculados"]');
+    await expect(groups.getByRole('heading', { level: 2 })).toHaveText(['Sem alocação informada (5)']);
+    await page.getByRole('button', { name: 'Sincronizar' }).click();
+    await expect(page.getByRole('status').filter({ hasText: 'Sincronização concluída: 5 atualizados, 0 sem alteração, 0 divergências, 1 não localizado.' })).toBeVisible();
+    await expect(page.getByText(/Última sincronização: .* · Origem: Hospital simulado · FHIR R4/)).toBeVisible();
+    await expect(groups.getByRole('heading', { level: 2 })).toHaveText(['Hospital-Dia Oncológico · Térreo (1)', 'Oncologia Clínica · 3º andar (3)', 'Sem alocação informada (1)']);
+    const g3 = groups.getByRole('list', { name: 'Oncologia Clínica · 3º andar' });
+    await expect(g3).toContainText('Ana Ribeiro'); await expect(g3).toContainText('Quarto 301 · Leito A'); await expect(groups).not.toContainText('Elisa Prado'); // alocada, mas sem vínculo
+    await expect(groups.getByRole('list', { name: 'Sem alocação informada' })).toContainText('Débora Nunes');
+    for (const detail of ['Neutrófilos', 'Ondansetrona', 'FOLFOX', 'Relato']) await expect(page.locator('main')).not.toContainText(detail);
+    await shot(page, 'clinical-grouped-synced');
+    // Lista desagrupada (opção) continua mínima.
+    await page.getByLabel('Agrupar por unidade e andar').uncheck(); await expect(page.getByRole('heading', { level: 2 })).toHaveCount(0); await page.getByLabel('Agrupar por unidade e andar').check();
+    // Manual: somente quando o hospital não informa — Débora.
+    await page.getByRole('link', { name: /Débora Nunes/ }).click();
+    const panel = page.getByRole('region', { name: 'Alocação' }); await expect(panel).toContainText('Sem alocação informada pelo hospital.');
+    await panel.getByRole('button', { name: 'Informar alocação manual' }).click();
+    await panel.getByLabel('Unidade').fill('Oncologia Clínica'); await panel.getByLabel('Andar').fill('3º andar'); await panel.getByLabel('Quarto').fill('306'); await panel.getByLabel('Leito').fill('A');
+    await panel.getByRole('button', { name: 'Salvar alocação manual' }).click();
+    await expect(page.getByRole('status').filter({ hasText: 'Alocação manual registrada.' })).toBeVisible();
+    await expect(panel).toContainText('Oncologia Clínica · 3º andar · Quarto 306 · Leito A'); await expect(panel).toContainText(/Registro manual — Farmácia, \d{2}\/\d{2}\/\d{4}/);
+    await shot(page, 'clinical-allocation-manual');
+    const t = (await sessionToken(context, CLIN)).token, H = { authorization: `Bearer ${t}`, 'x-organization-id': ORG, 'content-type': 'application/json' };
+    const PAT_D = '22222222-2222-4222-8222-222222222224';
+    expect(sql(`SELECT source||'|'||recorded_by_role||'|'||(recorded_by_sub='${sub('farmaceutico')}') FROM patient_allocations WHERE patient_id='${PAT_D}' AND superseded_at IS NULL`)).toBe('manual|pharmacist|true');
+    // Hospital informa Ana: manual recusado (409); sem vínculo (Elisa): 403.
+    const ana = await request.post(`${API}/v1/clinical/patients/${PAT_A}/allocation`, { headers: H, data: { unit: 'Outra unidade' } });
+    expect(ana.status()).toBe(409);
+    expect((await request.post(`${API}/v1/clinical/patients/22222222-2222-4222-8222-222222222225/allocation`, { headers: H, data: { unit: 'Oncologia Clínica' } })).status()).toBe(403);
+    // Hospital (fase 2, HL7 ADT^A02): transfere Ana; informa Débora diferente do manual => divergência, manual mantido.
+    expect((await request.post(`${GW}/v1/sim/advance`, { headers: GH })).status()).toBe(200);
+    await page.goto(`${CLIN}/clinical`); await page.getByRole('button', { name: 'Sincronizar' }).click();
+    await expect(page.getByRole('status').filter({ hasText: 'Sincronização concluída: 1 atualizado, 1 sem alteração, 1 divergência, 0 não localizados.' })).toBeVisible();
+    await expect(page.getByText(/Origem: Hospital simulado · HL7 ADT/)).toBeVisible();
+    const deb = groups.getByRole('listitem').filter({ hasText: 'Débora Nunes' }); await expect(deb).toContainText('Manual'); await expect(deb).toContainText('Divergência com o hospital');
+    await expect(groups.getByRole('listitem').filter({ hasText: 'Ana Ribeiro' })).toContainText('Quarto 303 · Leito A');
+    expect(sql(`SELECT source FROM patient_allocations WHERE patient_id='${PAT_D}' AND superseded_at IS NULL`)).toBe('manual');
+    await shot(page, 'clinical-allocation-conflict-list');
+    await deb.getByRole('link').click();
+    const warn = page.getByRole('note', { name: 'Divergência de alocação' }); await expect(warn).toContainText('O hospital informa: Oncologia Clínica · 4º andar · Quarto 410 · Leito B (Hospital simulado · HL7 ADT');
+    await shot(page, 'clinical-allocation-conflict');
+    await warn.getByRole('button', { name: 'Usar dado do hospital' }).click();
+    await expect(page.getByRole('status').filter({ hasText: 'Alocação do hospital adotada.' })).toBeVisible();
+    await expect(panel).toContainText('Oncologia Clínica · 4º andar · Quarto 410 · Leito B'); await expect(panel).toContainText('Hospital — Hospital simulado · HL7 ADT');
+    await expect(panel.getByRole('button', { name: /alocação manual/ })).toHaveCount(0);
+    const ax = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze(); evidence.a11y.clinicalAllocation = a11yMap(ax);
+    await page.goto(`${CLIN}/clinical`); evidence.a11y.clinicalGrouped = a11yMap(await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze());
+    // Trilha: histórico preservado (manual substituído), divergência resolvida por humano, auditoria.
+    expect(sql(`SELECT string_agg(source||':'||(superseded_at IS NULL), ',' ORDER BY recorded_at) FROM patient_allocations WHERE patient_id='${PAT_D}'`)).toBe('manual:false,hospital:true');
+    expect(sql(`SELECT resolution||'|'||(resolved_by_sub='${sub('farmaceutico')}') FROM allocation_sync_items WHERE patient_id='${PAT_D}' AND outcome='conflict'`)).toBe('accepted_hospital|true');
+    expect(sql(`SELECT string_agg(source_format||':'||updated||'/'||unchanged||'/'||conflicts||'/'||not_found, ',' ORDER BY at) FROM allocation_sync_runs WHERE organization_id='${ORG}'`)).toBe('fhir_r4:5/0/0/1,hl7v2_adt:1/1/1/0');
+    expect(sql(`SELECT string_agg(action, ',' ORDER BY id) FROM audit_events WHERE actor_sub='${sub('farmaceutico')}' AND action LIKE 'allocation.%'`)).toBe('allocation.sync,allocation.manual,allocation.sync,allocation.conflict.resolved');
+    // Enfermagem (sem vínculo com Débora) não grava alocação dela; admin técnico não sincroniza.
+    const nur = await staffLogin(browser, 'enfermeira'); const tn = (await sessionToken(nur.context, CLIN)).token;
+    expect((await request.post(`${API}/v1/clinical/patients/${PAT_D}/allocation/conflict`, { headers: { ...H, authorization: `Bearer ${tn}` }, data: { resolution: 'kept_manual' } })).status()).toBe(403);
+    await nur.context.close();
+    const adm = await staffLogin(browser, 'admin.tecnico'); const ta = (await sessionToken(adm.context, CLIN)).token;
+    expect((await request.post(`${API}/v1/clinical/allocations/sync`, { headers: { ...H, authorization: `Bearer ${ta}` }, data: {} })).status()).toBe(403);
+    await adm.context.close();
+    evidence.allocation = { runs: 2, conflictResolvedByHuman: true, formats: ['fhir_r4', 'hl7v2_adt'] }; saveEvidence(); await context.close();
+  });
+
   test('07 negativos de papel/MFA/vínculo com tokens reais na API', async ({ browser, request }) => {
     // Farmacêutico sem MFA: autenticado, mas API exige MFA.
     const noMfa = await staffLogin(browser, 'farmaceutico.semmfa');
-    await expect(noMfa.page.getByRole('heading', { name: 'Confirme o login com o aplicativo autenticador' })).toBeVisible(); await expect(noMfa.page.getByRole('list', { name: 'Pacientes vinculados' })).toHaveCount(0);
+    await expect(noMfa.page.getByRole('heading', { name: 'Confirme o login com o aplicativo autenticador' })).toBeVisible(); await expect(noMfa.page.locator('[aria-label="Pacientes vinculados"]')).toHaveCount(0);
     await shot(noMfa.page, 'clinical-pharmacist-without-mfa');
     const t1 = (await sessionToken(noMfa.context, CLIN)).token; expect(claims(t1).amr || []).not.toContain('otp');
     expect((await apiGet(request, 'patients', t1)).status()).toBe(403);
@@ -362,7 +440,7 @@ test.describe.serial('M14.5 E2E sintético', () => {
     await noMfa.context.close();
     // Admin técnico com MFA: sem acesso clínico por padrão.
     const adm = await staffLogin(browser, 'admin.tecnico');
-    await expect(adm.page.getByRole('heading', { name: 'Seu perfil não tem acesso clínico' })).toBeVisible(); await expect(adm.page.getByRole('list', { name: 'Pacientes vinculados' })).toHaveCount(0);
+    await expect(adm.page.getByRole('heading', { name: 'Seu perfil não tem acesso clínico' })).toBeVisible(); await expect(adm.page.locator('[aria-label="Pacientes vinculados"]')).toHaveCount(0);
     await shot(adm.page, 'clinical-admin-no-clinical-access');
     const t2 = (await sessionToken(adm.context, CLIN)).token;
     const r2 = await apiGet(request, 'patients', t2); expect(r2.status()).toBe(403); expect((await r2.json()).message).toContain('Sem vínculo profissional');

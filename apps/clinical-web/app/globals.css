@@ -112,3 +112,15 @@
 .clin-more{margin-top:14px}.clin-more summary,.record summary{cursor:pointer;font-weight:700;padding:8px 0}
 .clinical-page .workflow-form{display:grid;gap:8px;max-width:640px;margin-top:12px}
 @media(max-width:760px){.patient-row{grid-template-columns:1fr;gap:6px}}
+
+/* M15.4b — alocação hospitalar */
+.clin-syncbar{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;margin:0 0 16px;color:var(--navy-text)}.clin-syncbar p{margin:0}
+.clin-toggle{display:inline-flex;align-items:center;gap:8px;font-weight:600;color:var(--ink-navy)}
+.patient-group h2{font-size:18px;margin:20px 0 10px;color:var(--ink-navy)}.grp-count{color:var(--navy-text);font-weight:600}
+.tag-manual{display:inline-block;margin-left:6px;padding:0 8px;border-radius:999px;background:var(--navy-50);color:var(--navy-text);border:1px solid var(--navy-150);font-weight:700;font-size:13px}
+.tag-conflict{display:inline-block;margin-left:6px;padding:0 8px;border-radius:999px;background:var(--gold-50);color:var(--gold-ink);border:1px solid var(--gold-700);font-weight:700;font-size:13px}
+.clin-alloc{background:#fff;border:1px solid var(--navy-150);border-radius:14px;padding:14px 18px;margin:0 0 18px}.clin-alloc h2{font-size:16px;margin:0 0 6px}.clin-alloc p{margin:6px 0}
+
+/* Cabeçalho do Clinical em telas estreitas (achado hml 390px): marca nunca encolhe/sobrepõe; usuário quebra para a linha de baixo. */
+.clinical-header .brand{flex-shrink:0}.clin-user{flex-wrap:wrap;min-width:0}.clin-user span{overflow-wrap:anywhere}
+@media(max-width:640px){.clinical-header{flex-wrap:wrap;row-gap:10px}.clinical-header .clin-user{flex:1 1 100%;justify-content:space-between}}
