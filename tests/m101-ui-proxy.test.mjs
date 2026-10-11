@@ -1,6 +1,6 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';
 const root=new URL('../',import.meta.url);const read=p=>readFileSync(new URL(p,root),'utf8');
-test('BFF requires session and dev flags',()=>{const s=read('apps/portal/lib/workflow-proxy.ts');for(const x of ['await session()','NODE_ENV',"ALLOW_SYNTHETIC_API",'DEV_ORGANIZATION_ID','x-organization-id'])assert.ok(s.includes(x),x)});
+test('BFF requires session and dev flags',()=>{const s=read('apps/portal/lib/workflow-proxy.ts');for(const x of ['await session()','syntheticUiEnabled()','DEV_ORGANIZATION_ID','x-organization-id'])assert.ok(s.includes(x),x);const h=read('apps/portal/lib/synthetic.ts');for(const x of ['NODE_ENV','ALLOW_SYNTHETIC_API','NEXT_PUBLIC_ALLOW_SYNTHETIC_UI'])assert.ok(h.includes(x),x)});
 test('POST requires same origin and JSON with size limit',()=>{const s=read('apps/portal/lib/workflow-proxy.ts');for(const x of ["request.headers.get('origin')",'PORTAL_ORIGIN',"application/json",'body.length>4096'])assert.ok(s.includes(x),x)});
 test('clinical review does not send guidance',()=>{const s=read('apps/portal/components/WorkflowReview.tsx');assert.ok(s.includes("decision:'pending'"));assert.ok(s.includes('Nenhuma orientação foi enviada'))});
 test('care report uses requestId and no advice',()=>{const s=read('apps/portal/components/CareSymptomReport.tsx');assert.ok(s.includes('crypto.randomUUID()'));assert.ok(s.includes('não substitui atendimento'))});

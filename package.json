@@ -1,7 +1,7 @@
 {
   "name": "oncopharma",
   "private": true,
-  "version": "0.14.5-dev",
+  "version": "0.15.1-dev",
   "workspaces": [
     "apps/*",
     "services/*",
@@ -45,7 +45,7 @@
     "test:e2e": "bash tests/e2e/run-e2e.sh",
     "idp:test:setup": "node infra/idp-test/setup-keycloak-test.mjs",
     "build:packages": "npm run build -w @oncopharma/clinical-rules",
-    "test:api:security": "node --test tests/m145-api.security.mjs tests/m15-oidc-providers.mjs"
+    "test:api:security": "node --test tests/m145-api.security.mjs tests/m15-oidc-providers.mjs tests/m151-synthetic-mode.mjs"
   },
   "engines": {
     "node": ">=22 <23"

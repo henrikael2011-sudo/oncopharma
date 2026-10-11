@@ -8,7 +8,7 @@ const KC = process.env.KC_URL.replace(/\/$/, '');
 const REALM = process.env.KC_REALM || 'oncopharma-test';
 const ISSUER = `${KC}/realms/${REALM}`;
 const ORG = '11111111-1111-4111-8111-111111111111';
-const common = { NODE_ENV: 'development', NEXT_TELEMETRY_DISABLED: '1', ALLOW_SYNTHETIC_API: 'true', NEXT_PUBLIC_ALLOW_SYNTHETIC_UI: 'true', DEV_ORGANIZATION_ID: ORG,
+const common = { NODE_ENV: 'development', ONCO_ENVIRONMENT: 'test', NEXT_TELEMETRY_DISABLED: '1', ALLOW_SYNTHETIC_API: 'true', NEXT_PUBLIC_ALLOW_SYNTHETIC_UI: 'true', DEV_ORGANIZATION_ID: ORG,
   API_INTERNAL_URL: 'http://127.0.0.1:4000', SESSION_ENCRYPTION_KEY: process.env.E2E_SESSION_KEY, OIDC_ISSUER: ISSUER,
   OIDC_AUTHORIZATION_ENDPOINT: `${ISSUER}/protocol/openid-connect/auth`, OIDC_TOKEN_ENDPOINT: `${ISSUER}/protocol/openid-connect/token`, OIDC_END_SESSION_ENDPOINT: `${ISSUER}/protocol/openid-connect/logout`, OIDC_JWKS_URI: `${ISSUER}/protocol/openid-connect/certs`, OIDC_AUDIENCE: process.env.OIDC_AUDIENCE || 'oncopharma-api', PATH: process.env.PATH };
 const app = (name, port, extra = {}, cmd = 'dev') => ({
@@ -22,7 +22,7 @@ export default defineConfig({
     locale: 'pt-BR', timezoneId: 'America/Sao_Paulo', video: 'retain-on-failure', trace: 'retain-on-failure', screenshot: 'only-on-failure', actionTimeout: 30_000, navigationTimeout: 90_000 },
   webServer: [
     { command: 'node services/api/dist/main.js', cwd: '../..', url: 'http://127.0.0.1:4000/v1/health', timeout: 60_000, reuseExistingServer: false, stdout: 'pipe', stderr: 'pipe',
-      env: { NODE_ENV: 'test', PORT: '4000', ALLOW_SYNTHETIC_API: 'true', DATABASE_URL: process.env.DATABASE_URL, OIDC_ISSUER: ISSUER, OIDC_AUDIENCE: process.env.OIDC_AUDIENCE || 'oncopharma-api',
+      env: { NODE_ENV: 'test', ONCO_ENVIRONMENT: 'test', PORT: '4000', ALLOW_SYNTHETIC_API: 'true', DATABASE_URL: process.env.DATABASE_URL, OIDC_ISSUER: ISSUER, OIDC_AUDIENCE: process.env.OIDC_AUDIENCE || 'oncopharma-api',
         OIDC_JWKS_URI: `${ISSUER}/protocol/openid-connect/certs`, PATH: process.env.PATH } },
     app('care-web', 3001, { OIDC_CLIENT_ID: 'oncopharma-care-web' }),
     app('clinical-web', 3002, { OIDC_CLIENT_ID: 'oncopharma-clinical-web' }),

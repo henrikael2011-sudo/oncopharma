@@ -5,4 +5,4 @@ test('sessão HttpOnly e criptografada',()=>{const s=read('apps/portal/lib/auth.
 test('callback valida state e expiração',()=>{const s=read('apps/portal/app/api/auth/callback/route.ts');assert.match(s,/flow.state!==state/);assert.match(s,/600000/);});
 test('sem token no navegador',()=>{const s=read('apps/portal/components/ClinicalAccess.tsx');assert.doesNotMatch(s,/localStorage|access_token|Bearer/);});
 test('logout POST e checagem de origem',()=>{const s=read('apps/portal/app/api/auth/logout/route.ts');assert.match(s,/export async function POST/);assert.match(s,/headers.get\('origin'\)/);});
-test('pacientes de teste bloqueados por padrão',()=>{const s=read('apps/portal/app/api/clinical/summary/route.ts');assert.match(s,/NODE_ENV!=='production'/);assert.match(s,/NEXT_PUBLIC_ALLOW_SYNTHETIC_UI/);});
+test('pacientes de teste bloqueados por padrão',()=>{const s=read('apps/portal/app/api/clinical/summary/route.ts');assert.match(s,/syntheticUiEnabled\(\)/);assert.match(read('apps/portal/lib/synthetic.ts'),/NEXT_PUBLIC_ALLOW_SYNTHETIC_UI/);});

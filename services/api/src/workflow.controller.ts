@@ -1,3 +1,4 @@
+import { syntheticApiEnabled } from './synthetic-mode';
 import { BadRequestException, Body, Controller, ForbiddenException, Get, Headers, Param, Post, Req, ServiceUnavailableException, UseGuards } from '@nestjs/common';
 import { AuthGuard, AuthenticatedRequest } from './auth.guard';
 import { DatabaseService } from './database.service';
@@ -6,7 +7,7 @@ import { randomUUID } from 'node:crypto';
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const STAFF = ['pharmacist', 'physician', 'nurse', 'clinical_manager'];
 function syntheticOnly() {
-  if (process.env.NODE_ENV === 'production' || process.env.ALLOW_SYNTHETIC_API !== 'true')
+  if (!syntheticApiEnabled())
     throw new ServiceUnavailableException('Fluxo M10 disponível somente em DEV sintético');
 }
 function tenant(id?: string) { if (!id || !UUID.test(id)) throw new BadRequestException('Organização inválida'); return id; }

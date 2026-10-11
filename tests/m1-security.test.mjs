@@ -4,7 +4,8 @@ import { readFileSync, existsSync } from 'node:fs';
 const f = p => readFileSync(new URL('../'+p, import.meta.url), 'utf8');
 test('endpoints clínicos falham fechados sem habilitação e em produção', () => {
   const s=f('services/api/src/clinical.controller.ts');
-  assert.match(s,/NODE_ENV === 'production'/); assert.match(s,/ALLOW_SYNTHETIC_API !== 'true'/);
+  // M15.1: verificação centralizada no helper de modo sintético.
+  assert.match(s,/!syntheticApiEnabled\(\)/); const m=f('services/api/src/synthetic-mode.ts'); assert.match(m,/NODE_ENV === 'production' \? 'prod'/); assert.match(m,/ALLOW_SYNTHETIC_API === 'true'/);
   assert.match(s,/req\.principal\.mfa/); assert.match(s,/STAFF\.includes/);
   assert.match(s,/care_assignments/); assert.match(s,/audit_events/);
 });

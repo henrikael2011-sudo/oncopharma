@@ -1,3 +1,4 @@
+import { syntheticApiEnabled } from './synthetic-mode';
 import { Controller, Get, Param, Headers, Req, UseGuards, ForbiddenException, BadRequestException, ServiceUnavailableException } from '@nestjs/common';
 import { AuthGuard, AuthenticatedRequest } from './auth.guard';
 import { DatabaseService } from './database.service';
@@ -18,7 +19,7 @@ export class ClinicalController {
   }
   @Get('patients/:patientId/record')
   async record(@Req() req: AuthenticatedRequest, @Param('patientId') patientId: string, @Headers('x-organization-id') organizationId?: string) {
-    if (process.env.NODE_ENV === 'production' || process.env.ALLOW_SYNTHETIC_API !== 'true')
+    if (!syntheticApiEnabled())
       throw new ServiceUnavailableException('Prontuário sintético desabilitado');
     if (!organizationId || !uuid.test(organizationId) || !uuid.test(patientId)) throw new BadRequestException('Identificador inválido');
     if (!req.principal.mfa) throw new ForbiddenException('MFA obrigatório');
@@ -57,7 +58,7 @@ export class ClinicalController {
   }
   @Get('patients')
   async patients(@Req() req: AuthenticatedRequest, @Headers('x-organization-id') organizationId?: string) {
-    if (process.env.NODE_ENV === 'production' || process.env.ALLOW_SYNTHETIC_API !== 'true')
+    if (!syntheticApiEnabled())
       throw new ServiceUnavailableException('Consulta clínica desabilitada até homologação');
     if (!organizationId || !uuid.test(organizationId)) throw new BadRequestException('Organização inválida');
     if (!req.principal.mfa) throw new ForbiddenException('MFA obrigatório para acesso profissional');
