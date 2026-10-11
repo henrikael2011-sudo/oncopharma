@@ -114,7 +114,7 @@
         {
           "title": "M14.5 E2E sintético",
           "file": "m145-flow.spec.mjs",
-          "line": 68,
+          "line": 74,
           "column": 15,
           "specs": [
             {
@@ -129,7 +129,7 @@
                       "type": "serial",
                       "location": {
                         "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
-                        "line": 68,
+                        "line": 74,
                         "column": 15
                       }
                     }
@@ -142,18 +142,18 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 2566,
+                      "duration": 2814,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-11T22:21:10.124Z",
+                      "startTime": "2026-10-11T23:11:57.272Z",
                       "annotations": [
                         {
                           "type": "serial",
                           "location": {
                             "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
-                            "line": 68,
+                            "line": 74,
                             "column": 15
                           }
                         }
@@ -166,7 +166,7 @@
               ],
               "id": "3597eb8adab86113f57d-dbb1efcae48fe50e2da4",
               "file": "m145-flow.spec.mjs",
-              "line": 71,
+              "line": 77,
               "column": 3
             },
             {
@@ -181,7 +181,7 @@
                       "type": "serial",
                       "location": {
                         "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
-                        "line": 68,
+                        "line": 74,
                         "column": 15
                       }
                     }
@@ -194,18 +194,18 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 130,
+                      "duration": 741,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-11T22:21:13.106Z",
+                      "startTime": "2026-10-11T23:12:00.583Z",
                       "annotations": [
                         {
                           "type": "serial",
                           "location": {
                             "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
-                            "line": 68,
+                            "line": 74,
                             "column": 15
                           }
                         }
@@ -218,7 +218,7 @@
               ],
               "id": "3597eb8adab86113f57d-0b5c411b6b3e59d1f0cd",
               "file": "m145-flow.spec.mjs",
-              "line": 79,
+              "line": 85,
               "column": 3
             },
             {
@@ -233,7 +233,7 @@
                       "type": "serial",
                       "location": {
                         "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
-                        "line": 68,
+                        "line": 74,
                         "column": 15
                       }
                     }
@@ -246,18 +246,18 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 5663,
+                      "duration": 6160,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-11T22:21:13.245Z",
+                      "startTime": "2026-10-11T23:12:01.336Z",
                       "annotations": [
                         {
                           "type": "serial",
                           "location": {
                             "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
-                            "line": 68,
+                            "line": 74,
                             "column": 15
                           }
                         }
@@ -270,7 +270,7 @@
               ],
               "id": "3597eb8adab86113f57d-f32beca86fecae18b4fb",
               "file": "m145-flow.spec.mjs",
-              "line": 88,
+              "line": 94,
               "column": 3
             },
             {
@@ -285,7 +285,7 @@
                       "type": "serial",
                       "location": {
                         "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
-                        "line": 68,
+                        "line": 74,
                         "column": 15
                       }
                     }
@@ -298,18 +298,18 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 4795,
+                      "duration": 5226,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-11T22:21:18.918Z",
+                      "startTime": "2026-10-11T23:12:07.506Z",
                       "annotations": [
                         {
                           "type": "serial",
                           "location": {
                             "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
-                            "line": 68,
+                            "line": 74,
                             "column": 15
                           }
                         }
@@ -322,7 +322,7 @@
               ],
               "id": "3597eb8adab86113f57d-0cde9f9a036c0b8df5bb",
               "file": "m145-flow.spec.mjs",
-              "line": 102,
+              "line": 108,
               "column": 3
             },
             {
@@ -337,7 +337,7 @@
                       "type": "serial",
                       "location": {
                         "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
-                        "line": 68,
+                        "line": 74,
                         "column": 15
                       }
                     }
@@ -350,18 +350,18 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 16544,
+                      "duration": 17684,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-11T22:21:23.723Z",
+                      "startTime": "2026-10-11T23:12:12.742Z",
                       "annotations": [
                         {
                           "type": "serial",
                           "location": {
                             "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
-                            "line": 68,
+                            "line": 74,
                             "column": 15
                           }
                         }
@@ -374,7 +374,7 @@
               ],
               "id": "3597eb8adab86113f57d-f92b83c470cbe48f011e",
               "file": "m145-flow.spec.mjs",
-              "line": 121,
+              "line": 127,
               "column": 3
             },
             {
@@ -389,7 +389,7 @@
                       "type": "serial",
                       "location": {
                         "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
-                        "line": 68,
+                        "line": 74,
                         "column": 15
                       }
                     }
@@ -402,18 +402,18 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 8932,
+                      "duration": 9523,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-11T22:21:40.279Z",
+                      "startTime": "2026-10-11T23:12:30.439Z",
                       "annotations": [
                         {
                           "type": "serial",
                           "location": {
                             "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
-                            "line": 68,
+                            "line": 74,
                             "column": 15
                           }
                         }
@@ -426,11 +426,11 @@
               ],
               "id": "3597eb8adab86113f57d-086d36b09c5f489133e6",
               "file": "m145-flow.spec.mjs",
-              "line": 220,
+              "line": 226,
               "column": 3
             },
             {
-              "title": "06 Clinical: farmacêutico com senha+TOTP revisa alerta do relato Care; auditoria no PostgreSQL",
+              "title": "05b (regressão) troca do código ≥2 s após o OTP: access_token.amr mantém \"otp\" e MFA é reconhecido",
               "ok": true,
               "tags": [],
               "tests": [
@@ -441,7 +441,7 @@
                       "type": "serial",
                       "location": {
                         "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
-                        "line": 68,
+                        "line": 74,
                         "column": 15
                       }
                     }
@@ -454,18 +454,18 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 17251,
+                      "duration": 24175,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-11T22:21:49.221Z",
+                      "startTime": "2026-10-11T23:12:39.972Z",
                       "annotations": [
                         {
                           "type": "serial",
                           "location": {
                             "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
-                            "line": 68,
+                            "line": 74,
                             "column": 15
                           }
                         }
@@ -476,9 +476,113 @@
                   "status": "expected"
                 }
               ],
-              "id": "3597eb8adab86113f57d-6aa1471d3e0629a06873",
+              "id": "3597eb8adab86113f57d-0cb835930f08c14ae016",
               "file": "m145-flow.spec.mjs",
-              "line": 228,
+              "line": 234,
+              "column": 3
+            },
+            {
+              "title": "06 Clinical: farmacêutico (senha+TOTP) — lista mínima, busca por vínculo, paciente sob demanda, alerta §5.1, intervenção, encaminhamento, pré-ciclo, linha do tempo; auditoria",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 240000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
+                        "line": 74,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 12745,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-11T23:13:04.164Z",
+                      "annotations": [
+                        {
+                          "type": "serial",
+                          "location": {
+                            "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
+                            "line": 74,
+                            "column": 15
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "3597eb8adab86113f57d-948027755d5524b8775b",
+              "file": "m145-flow.spec.mjs",
+              "line": 242,
+              "column": 3
+            },
+            {
+              "title": "06b Clinical: médico confirma recebimento, conclui com desfecho e resolve o alerta; enfermagem sem decisões farmacêuticas",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 240000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
+                        "line": 74,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 19471,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-11T23:13:16.921Z",
+                      "annotations": [
+                        {
+                          "type": "serial",
+                          "location": {
+                            "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
+                            "line": 74,
+                            "column": 15
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "3597eb8adab86113f57d-49cc6c0c8182beca642b",
+              "file": "m145-flow.spec.mjs",
+              "line": 316,
               "column": 3
             },
             {
@@ -493,7 +597,7 @@
                       "type": "serial",
                       "location": {
                         "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
-                        "line": 68,
+                        "line": 74,
                         "column": 15
                       }
                     }
@@ -506,18 +610,18 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 13444,
+                      "duration": 30846,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-11T22:22:06.487Z",
+                      "startTime": "2026-10-11T23:13:36.407Z",
                       "annotations": [
                         {
                           "type": "serial",
                           "location": {
                             "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
-                            "line": 68,
+                            "line": 74,
                             "column": 15
                           }
                         }
@@ -530,7 +634,7 @@
               ],
               "id": "3597eb8adab86113f57d-3514ee9dd6d418a5b72f",
               "file": "m145-flow.spec.mjs",
-              "line": 259,
+              "line": 354,
               "column": 3
             },
             {
@@ -545,7 +649,7 @@
                       "type": "serial",
                       "location": {
                         "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
-                        "line": 68,
+                        "line": 74,
                         "column": 15
                       }
                     }
@@ -558,18 +662,18 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1686,
+                      "duration": 2307,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-11T22:22:19.953Z",
+                      "startTime": "2026-10-11T23:14:07.266Z",
                       "annotations": [
                         {
                           "type": "serial",
                           "location": {
                             "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
-                            "line": 68,
+                            "line": 74,
                             "column": 15
                           }
                         }
@@ -582,7 +686,7 @@
               ],
               "id": "3597eb8adab86113f57d-435b81f550af929f37e1",
               "file": "m145-flow.spec.mjs",
-              "line": 307,
+              "line": 403,
               "column": 3
             },
             {
@@ -597,7 +701,7 @@
                       "type": "serial",
                       "location": {
                         "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
-                        "line": 68,
+                        "line": 74,
                         "column": 15
                       }
                     }
@@ -610,18 +714,18 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 9391,
+                      "duration": 10099,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-11T22:22:21.651Z",
+                      "startTime": "2026-10-11T23:14:09.583Z",
                       "annotations": [
                         {
                           "type": "serial",
                           "location": {
                             "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
-                            "line": 68,
+                            "line": 74,
                             "column": 15
                           }
                         }
@@ -634,7 +738,7 @@
               ],
               "id": "3597eb8adab86113f57d-db156df3f0bafe4236fe",
               "file": "m145-flow.spec.mjs",
-              "line": 321,
+              "line": 417,
               "column": 3
             },
             {
@@ -649,7 +753,7 @@
                       "type": "serial",
                       "location": {
                         "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
-                        "line": 68,
+                        "line": 74,
                         "column": 15
                       }
                     }
@@ -662,18 +766,18 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 13523,
+                      "duration": 14309,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-11T22:22:31.052Z",
+                      "startTime": "2026-10-11T23:14:19.695Z",
                       "annotations": [
                         {
                           "type": "serial",
                           "location": {
                             "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
-                            "line": 68,
+                            "line": 74,
                             "column": 15
                           }
                         }
@@ -686,7 +790,7 @@
               ],
               "id": "3597eb8adab86113f57d-9462172c4896903339f8",
               "file": "m145-flow.spec.mjs",
-              "line": 339,
+              "line": 435,
               "column": 3
             },
             {
@@ -701,7 +805,7 @@
                       "type": "serial",
                       "location": {
                         "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
-                        "line": 68,
+                        "line": 74,
                         "column": 15
                       }
                     }
@@ -714,18 +818,18 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 82457,
+                      "duration": 39009,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-11T22:22:44.587Z",
+                      "startTime": "2026-10-11T23:14:34.017Z",
                       "annotations": [
                         {
                           "type": "serial",
                           "location": {
                             "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
-                            "line": 68,
+                            "line": 74,
                             "column": 15
                           }
                         }
@@ -738,7 +842,7 @@
               ],
               "id": "3597eb8adab86113f57d-6961a2f6a31bf56512a2",
               "file": "m145-flow.spec.mjs",
-              "line": 392,
+              "line": 488,
               "column": 3
             },
             {
@@ -753,7 +857,7 @@
                       "type": "serial",
                       "location": {
                         "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
-                        "line": 68,
+                        "line": 74,
                         "column": 15
                       }
                     }
@@ -766,18 +870,18 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 3,
+                      "duration": 1,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-11T22:24:07.059Z",
+                      "startTime": "2026-10-11T23:15:13.040Z",
                       "annotations": [
                         {
                           "type": "serial",
                           "location": {
                             "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
-                            "line": 68,
+                            "line": 74,
                             "column": 15
                           }
                         }
@@ -790,7 +894,7 @@
               ],
               "id": "3597eb8adab86113f57d-5036b81c09b2cfda3528",
               "file": "m145-flow.spec.mjs",
-              "line": 408,
+              "line": 504,
               "column": 3
             }
           ]
@@ -800,9 +904,9 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-10-11T22:21:00.323Z",
-    "duration": 186957.224,
-    "expected": 13,
+    "startTime": "2026-10-11T23:11:45.198Z",
+    "duration": 208111.217,
+    "expected": 15,
     "skipped": 0,
     "unexpected": 0,
     "flaky": 0

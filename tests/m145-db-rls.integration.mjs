@@ -65,7 +65,7 @@ test('UPDATE cross-tenant de alerta não afeta linhas da outra organização', (
   const r = psql(APP, tx(F.orgA, `UPDATE clinical_alerts SET status='resolved' WHERE id=${lit(alertB)} RETURNING id`));
   // RETURNING exige SELECT (concedido) — a linha da org B é invisível, então nada retorna.
   assert.equal(r.ok, true, r.err); assert.equal(r.out, '');
-  assert.equal(must(ADMIN, `SELECT status FROM clinical_alerts WHERE id=${lit(alertB)}`), 'open');
+  assert.equal(must(ADMIN, `SELECT status FROM clinical_alerts WHERE id=${lit(alertB)}`), 'awaiting_review'); // M15.4: estado inicial §5.1
 });
 
 test('audit_events: INSERT só no tenant do contexto; sem leitura, UPDATE ou DELETE pela role da API', () => {

@@ -1,7 +1,7 @@
 {
   "name": "oncopharma",
   "private": true,
-  "version": "0.15.3-dev",
+  "version": "0.15.4-dev",
   "workspaces": [
     "apps/*",
     "services/*",
@@ -39,13 +39,13 @@
     "quality:report": "node tools/release-gate.mjs --json",
     "test:readiness": "node --test tests/m141-release-gate.test.mjs",
     "test:lab:e2e": "node --test tests/m142-lab-e2e.test.mjs",
-    "test:db:required": "node tests/require-postgres.mjs && NODE_ENV=test node --test tests/m12-db.integration.mjs tests/m145-db-rls.integration.mjs tests/m145-db.integration.mjs tests/m145-db-0008.integration.mjs tests/m152-db-care.integration.mjs tests/m153-db-caregiver.integration.mjs",
+    "test:db:required": "node tests/require-postgres.mjs && NODE_ENV=test node --test tests/m12-db.integration.mjs tests/m145-db-rls.integration.mjs tests/m145-db.integration.mjs tests/m145-db-0008.integration.mjs tests/m152-db-care.integration.mjs tests/m153-db-caregiver.integration.mjs tests/m154-db-clinical.integration.mjs",
     "verify:local": "npm test && npm run test:extended && npm run test:lab:e2e && npm run check:design && npm run check:brand && npm run check:governance && npm run test:readiness",
     "validate:evidence": "node tools/validate-real.mjs",
     "test:e2e": "bash tests/e2e/run-e2e.sh",
     "idp:test:setup": "node infra/idp-test/setup-keycloak-test.mjs",
     "build:packages": "npm run build -w @oncopharma/clinical-rules",
-    "test:api:security": "node --test tests/m145-api.security.mjs tests/m15-oidc-providers.mjs tests/m151-synthetic-mode.mjs tests/m152-care.mjs tests/m153-caregiver.mjs",
+    "test:api:security": "node --test tests/m145-api.security.mjs tests/m15-oidc-providers.mjs tests/m151-synthetic-mode.mjs tests/m152-care.mjs tests/m153-caregiver.mjs tests/m154-clinical.mjs",
     "check:brand": "node tools/check-brand.mjs"
   },
   "engines": {

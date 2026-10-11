@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "ONCOPHARMA API",
-    "version": "0.15.3-dev",
+    "version": "0.15.4-dev",
     "description": "API versionada (/v1). Somente dados sintéticos fora de produção; uso clínico não aprovado. Autorização: JWT OIDC (Bearer) + vínculo no banco + RLS por organização."
   },
   "servers": [
@@ -879,6 +879,543 @@
                   },
                   "acceptTerms": {
                     "const": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/clinical/me": {
+      "get": {
+        "summary": "Profissional autenticado: papel principal (MFA obrigatório)",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem MFA, sem vínculo profissional ou paciente não atribuído"
+          }
+        }
+      }
+    },
+    "/clinical/worklist": {
+      "get": {
+        "summary": "Lista mínima de pacientes vinculados (nome, prontuário, gravidade, pendências); busca q restrita ao vínculo — sem vínculo, lista vazia",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 60
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem MFA, sem vínculo profissional ou paciente não atribuído"
+          }
+        }
+      }
+    },
+    "/clinical/patients/{patientId}": {
+      "get": {
+        "summary": "Paciente aberto: alertas com transições permitidas ao papel e tarefas (auditado)",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem MFA, sem vínculo profissional ou paciente não atribuído"
+          }
+        }
+      }
+    },
+    "/clinical/patients/{patientId}/precycle": {
+      "get": {
+        "summary": "Checklist pré-ciclo de disponibilidade de dados + pareceres (sem decisão automática)",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem MFA, sem vínculo profissional ou paciente não atribuído"
+          }
+        }
+      }
+    },
+    "/clinical/patients/{patientId}/precycle/reviews": {
+      "post": {
+        "summary": "Parecer pré-ciclo (farmácia/medicina)",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem MFA, sem vínculo profissional ou paciente não atribuído"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "decision",
+                  "rationale"
+                ],
+                "properties": {
+                  "decision": {
+                    "enum": [
+                      "reviewed",
+                      "blocked"
+                    ]
+                  },
+                  "rationale": {
+                    "type": "string",
+                    "minLength": 10,
+                    "maxLength": 2000
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/clinical/patients/{patientId}/timeline": {
+      "get": {
+        "summary": "Linha do tempo multiprofissional com origem e horário (auditado)",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem MFA, sem vínculo profissional ou paciente não atribuído"
+          }
+        }
+      }
+    },
+    "/clinical/patients/{patientId}/tasks": {
+      "post": {
+        "summary": "Cria tarefa ou encaminhamento (encaminhamento de alerta leva-o a \"Encaminhado\")",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem MFA, sem vínculo profissional ou paciente não atribuído"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "kind",
+                  "title",
+                  "assigneeRole"
+                ],
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "task",
+                      "referral"
+                    ]
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 160
+                  },
+                  "details": {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  "assigneeRole": {
+                    "enum": [
+                      "pharmacist",
+                      "physician",
+                      "nurse",
+                      "clinical_manager"
+                    ]
+                  },
+                  "dueAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "alertId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/clinical/tasks/{taskId}/receive": {
+      "post": {
+        "summary": "Responsável confirma o recebimento",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem MFA, sem vínculo profissional ou paciente não atribuído"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/clinical/tasks/{taskId}/complete": {
+      "post": {
+        "summary": "Responsável conclui com desfecho (após recebimento)",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem MFA, sem vínculo profissional ou paciente não atribuído"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "outcome"
+                ],
+                "properties": {
+                  "outcome": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 2000
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/clinical/tasks/{taskId}/cancel": {
+      "post": {
+        "summary": "Autor cancela tarefa em aberto",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem MFA, sem vínculo profissional ou paciente não atribuído"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "reason"
+                ],
+                "properties": {
+                  "reason": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 2000
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/clinical/alerts/{alertId}/transition": {
+      "post": {
+        "summary": "Transição de estado do alerta (Plano v3 §5.1), registrada com autor/papel; descartar exige justificativa",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "alertId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem MFA, sem vínculo profissional ou paciente não atribuído"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "to"
+                ],
+                "properties": {
+                  "to": {
+                    "enum": [
+                      "detected",
+                      "awaiting_review",
+                      "in_evaluation",
+                      "referred",
+                      "monitoring",
+                      "resolved",
+                      "dismissed",
+                      "duplicate"
+                    ]
+                  },
+                  "justification": {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  "duplicateOf": {
+                    "type": "string",
+                    "format": "uuid"
                   }
                 }
               }

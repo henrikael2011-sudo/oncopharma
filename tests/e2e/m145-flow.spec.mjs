@@ -58,8 +58,14 @@ async function kcLogin(page, user, { enroll = false, wrongOtpFirst = false } = {
     await page.fill('#otp', await freshCode(user)); await page.click('#kc-login');
   }
 }
-async function staffLogin(browser, user, { enroll = false, wrongOtpFirst = false } = {}) {
+async function staffLogin(browser, user, { enroll = false, wrongOtpFirst = false, delayCallbackMs = 0 } = {}) {
   const context = await browser.newContext(); const page = await context.newPage();
+  // Regressão (amr maxAge=0): atrasa a troca do código após o OTP; o amr deve continuar com "otp".
+  // O callback é destino de redirecionamento (não interceptável); atrasamos a resposta 302 do IdP após o envio do OTP.
+  if (delayCallbackMs) await page.route('**/login-actions/authenticate**', async (route) => {
+    if (route.request().method() !== 'POST') return route.continue();
+    const res = await route.fetch({ maxRedirects: 0 }); await new Promise((r) => setTimeout(r, delayCallbackMs)); await route.fulfill({ response: res });
+  });
   await page.goto(`${CLIN}/clinical`); await page.getByRole('link', { name: 'Entrar com identidade institucional' }).click();
   await kcLogin(page, user, { enroll, wrongOtpFirst }); await page.waitForURL(`${CLIN}/clinical`); return { context, page };
 }
@@ -80,7 +86,7 @@ test.describe.serial('M14.5 E2E sintético', () => {
     expect((await request.get(`${API}/v1/me`)).status()).toBe(401);
     expect((await request.get(`${API}/v1/me`, { headers: { authorization: 'Bearer abc.def.ghi' } })).status()).toBe(401);
     expect((await request.get(`${API}/v1/patients`, { headers: { 'x-organization-id': ORG } })).status()).toBe(401);
-    expect((await request.get(`${CLIN}/api/clinical/summary`)).status()).toBe(401);
+    expect((await request.get(`${CLIN}/api/work/worklist`)).status()).toBe(401);
     const r = await request.post(`${CARE}/api/care/me/symptoms`, { headers: { origin: CARE, 'content-type': 'application/json' }, data: { symptomCode: 'nausea', intensity: 'leve', onset: 'hoje', requestId: randomUUID() } });
     expect(r.status()).toBe(401);
   });
@@ -225,41 +231,130 @@ test.describe.serial('M14.5 E2E sintético', () => {
     }
   });
 
-  test('06 Clinical: farmacêutico com senha+TOTP revisa alerta do relato Care; auditoria no PostgreSQL', async ({ browser, request }) => {
+  test('05b (regressão) troca do código ≥2 s após o OTP: access_token.amr mantém "otp" e MFA é reconhecido', async ({ browser, request }) => {
+    const { context } = await staffLogin(browser, 'enfermeira', { delayCallbackMs: 2500 });
+    const s = await sessionToken(context, CLIN); const c = claims(s.token);
+    expect(c.amr).toContain('otp'); expect(Date.now() / 1000 - c.auth_time).toBeGreaterThanOrEqual(2);
+    expect((await apiGet(request, 'clinical/me', s.token)).status()).toBe(200);
+    evidence.tokens.delayedCallback = { amr: c.amr, secondsAfterAuth: Math.round(Date.now() / 1000 - c.auth_time) }; saveEvidence(); await context.close();
+  });
+
+  test('06 Clinical: farmacêutico (senha+TOTP) — lista mínima, busca por vínculo, paciente sob demanda, alerta §5.1, intervenção, encaminhamento, pré-ciclo, linha do tempo; auditoria', async ({ browser, request }) => {
     const { context, page } = await staffLogin(browser, 'farmaceutico', { wrongOtpFirst: true });
     const s = await sessionToken(context, CLIN); const c = claims(s.token); pharmacistToken = s.token;
     expect(await page.evaluate(() => document.cookie.includes('onco_session'))).toBe(false);
     evidence.tokens.pharmacist = { iss: c.iss, aud: c.aud, amr: c.amr, exp_minus_iat: c.exp - c.iat, cookieMaxAgeSeconds: Math.round(s.cookie.expires - Date.now() / 1000) };
     expect(c.amr).toContain('otp'); // MFA comprovado pelo formulário OTP do IdP
-    await expect(page.getByText('MFA: confirmado pelo token')).toBeVisible();
-    await expect(page.getByText('Pacientes sintéticos autorizados: 2')).toBeVisible(); await shot(page, 'clinical-pharmacist-mfa');
-    await page.getByRole('button', { name: 'TESTE-FOLFOX-001' }).click(); await expect(page.getByRole('heading', { name: 'Ciclos e protocolos' })).toBeVisible();
-    await shot(page, 'clinical-synthetic-record');
-    await page.selectOption('#review-patient', PAT_A); await page.getByRole('button', { name: 'Consultar alertas' }).click();
-    const card = page.locator('article.module', { hasText: `Relato SINTÉTICO E2E M14.5 [${RUN}]` }); await expect(card).toBeVisible();
-    await card.locator('textarea').fill('Revisão farmacêutica SINTÉTICA: avaliar com equipe; nenhuma conduta automática.');
-    await card.getByRole('button', { name: 'Registrar revisão pendente' }).click();
-    await expect(page.getByRole('region', { name: 'Revisão de alertas fictícios' }).getByRole('status')).toContainText('Revisão registrada em ambiente sintético'); await shot(page, 'clinical-review-registered');
-    const res = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
-    evidence.a11y.clinicalLoggedIn = a11yMap(res);
+    await expect(page.getByText(/Farmácia · MFA confirmado/)).toBeVisible();
+    // UI-02/UI-03: lista mínima — nomes, prontuário, gravidade e pendências; NENHUM detalhe clínico antes de abrir o paciente.
+    const list = page.getByRole('list', { name: 'Pacientes vinculados' }); await expect(list.getByRole('listitem')).toHaveCount(5);
+    await expect(list.getByRole('listitem').first()).toContainText('Urgente'); await expect(list.getByRole('listitem').filter({ hasText: 'Carlos Menezes' })).toContainText('Urgente');
+    await expect(list).toContainText('Ana Ribeiro'); await expect(list).toContainText('Prontuário PR-10021'); await expect(list).not.toContainText('Elisa Prado');
+    const main = page.locator('main');
+    for (const detail of [`[${RUN}]`, 'Neutrófilos', 'Ondansetrona', 'FOLFOX', 'Penicilina', 'Relato', 'Ciclo']) await expect(main, `lista não pode exibir "${detail}"`).not.toContainText(detail);
+    const wl = await (await apiGet(request, 'clinical/worklist', s.token)).json();
+    for (const row of wl.patients) expect(Object.keys(row).sort()).toEqual(['id', 'name', 'pending', 'record', 'severity']);
+    const rank = wl.patients.map((p) => ({ urgent: 2, review: 1 })[p.severity] ?? 0); expect(rank).toEqual([...rank].sort((a, b) => b - a)); // priorizada por gravidade
+    expect(sql(`SELECT count(*) FROM audit_events WHERE actor_sub='${sub('farmaceutico')}' AND action='patient.overview.read'`)).toBe('0');
+    await shot(page, 'clinical-worklist');
+    // UI-04: busca restrita ao vínculo (acento indiferente); fora do vínculo => vazio, sem 403 indicativo de existência.
+    await page.getByLabel('Buscar paciente').fill('debora'); await page.getByRole('button', { name: 'Buscar' }).click();
+    const res = page.getByRole('list', { name: 'Resultado da busca' }); await expect(res.getByRole('listitem')).toHaveCount(1); await expect(res).toContainText('Débora Nunes');
+    await page.getByLabel('Buscar paciente').fill('Elisa'); await page.getByRole('button', { name: 'Buscar' }).click();
+    await expect(page.getByText('Nenhum paciente encontrado entre os seus vínculos.')).toBeVisible(); await shot(page, 'clinical-search-no-link');
+    const elisa = await apiGet(request, 'clinical/worklist?q=Elisa', s.token); expect(elisa.status()).toBe(200); expect((await elisa.json()).patients).toEqual([]);
+    await page.getByLabel('Buscar paciente').fill('PR-10021'); await page.getByRole('button', { name: 'Buscar' }).click();
+    await page.getByRole('link', { name: /Ana Ribeiro/ }).click();
+    // Paciente aberto: agora sim os dados, com leitura auditada.
+    await expect(page.getByRole('heading', { level: 1, name: 'Ana Ribeiro' })).toBeVisible();
+    expect(sql(`SELECT count(*) FROM audit_events WHERE actor_sub='${sub('farmaceutico')}' AND action='patient.overview.read' AND metadata->>'patient_id'='${PAT_A}'`)).not.toBe('0'); // ≥1 (efeitos duplicados do modo dev do React)
+    const card = page.getByRole('article', { name: /Alerta symptom\./ }).filter({ hasText: `[${RUN}]` }); await expect(card).toBeVisible();
+    await expect(card).toContainText('Aguardando revisão'); await expect(card).toContainText('Origem: Care — paciente');
+    await card.getByLabel('Intervenção farmacêutica (nota)').fill('Revisão farmacêutica SINTÉTICA: avaliar com equipe; nenhuma conduta automática.');
+    await card.getByRole('button', { name: 'Registrar intervenção' }).click();
+    await expect(page.getByRole('status').filter({ hasText: 'Intervenção farmacêutica registrada' })).toBeVisible();
+    await expect(card).toContainText('Em avaliação'); await shot(page, 'clinical-review-registered');
+    // Encaminhamento à medicina: cria tarefa e leva o alerta a "Encaminhado".
+    await card.getByRole('button', { name: 'Encaminhar' }).click();
+    await card.getByLabel('Encaminhar para').selectOption('physician'); await card.getByLabel('Motivo do encaminhamento').fill(`Avaliar náusea persistente [${RUN}]`);
+    await card.getByRole('button', { name: 'Criar encaminhamento' }).click();
+    await expect(page.getByRole('status').filter({ hasText: 'Encaminhamento criado' })).toBeVisible(); await expect(card).toContainText('Encaminhado');
+    await page.getByRole('tab', { name: 'Tarefas' }).click();
+    const task = page.getByRole('listitem', { name: `Encaminhamento: Avaliar náusea persistente [${RUN}]` }); await expect(task).toContainText('Aguardando recebimento'); await expect(task).toContainText('Responsável: Medicina');
+    await expect(task.getByRole('button', { name: 'Confirmar recebimento' })).toHaveCount(0); // só o responsável confirma
+    // Pré-ciclo: disponibilidade de dados; ausência => "Não é possível concluir" (nunca "apto").
+    await page.getByRole('tab', { name: 'Pré-ciclo' }).click();
+    await expect(page.getByRole('status').filter({ hasText: 'Não é possível concluir' })).toBeVisible();
+    const chk = page.getByRole('list', { name: 'Checklist pré-ciclo' });
+    await expect(chk).toContainText('Ausente — Protocolo com versão aprovada'); await expect(chk).toContainText('Disponível — Neutrófilos'); await expect(chk).toContainText('Origem: SIM-LAB-001');
+    await page.getByLabel(/Bloqueado/).check(); await page.getByLabel('Fundamentação').fill('Protocolo sem versão aprovada e alergias não confirmadas (sintético).');
+    await page.getByRole('button', { name: 'Registrar parecer' }).click(); await expect(page.getByRole('status').filter({ hasText: 'Parecer pré-ciclo registrado' })).toBeVisible();
+    await shot(page, 'clinical-precycle');
+    // Linha do tempo com origem e horário; prontuário estruturado sob demanda.
+    await page.getByRole('tab', { name: 'Linha do tempo' }).click(); const tl = page.getByRole('list', { name: 'Linha do tempo' });
+    await expect(tl).toContainText('Relato no Care'); await expect(tl).toContainText('Origem: Care — paciente'); await expect(tl).toContainText('Aguardando revisão → Em avaliação'); await expect(tl).toContainText('Parecer pré-ciclo: bloqueado');
+    await shot(page, 'clinical-timeline');
+    await page.getByRole('tab', { name: 'Prontuário' }).click(); await expect(page.getByText('Ciclos e protocolos')).toBeVisible(); await shot(page, 'clinical-synthetic-record');
+    await page.getByRole('tab', { name: 'Alertas' }).focus(); await page.keyboard.press('ArrowRight'); await expect(page.getByRole('tab', { name: 'Tarefas' })).toHaveAttribute('aria-selected', 'true');
+    const ax = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze(); evidence.a11y.clinicalLoggedIn = a11yMap(ax);
+    await page.goto(`${CLIN}/clinical`); evidence.a11y.clinicalWorklist = a11yMap(await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze());
     // Reconstrução da trilha no banco (role administrativa somente para leitura de evidência).
     const alert = sql(`SELECT a.id||'|'||a.status||'|'||a.level FROM clinical_alerts a WHERE a.source_report_id='${reportId}'`).split('|');
-    expect(alert[1]).toBe('acknowledged'); expect(alert[2]).toBe('needs_review');
+    expect(alert[1]).toBe('referred'); expect(alert[2]).toBe('needs_review');
+    expect(sql(`SELECT string_agg(from_status||'>'||to_status||':'||actor_role, ',' ORDER BY at) FROM clinical_alert_transitions WHERE alert_id='${alert[0]}'`)).toBe('awaiting_review>in_evaluation:pharmacist,in_evaluation>referred:pharmacist');
     const intv = sql(`SELECT actor_sub||'|'||decision||'|'||organization_id FROM clinical_interventions WHERE alert_id='${alert[0]}'`);
     expect(intv).toBe(`${sub('farmaceutico')}|pending|${ORG}`);
     const audit = sql(`SELECT action||'|'||actor_sub FROM audit_events WHERE organization_id='${ORG}' AND (metadata->>'report_id'='${reportId}' OR metadata->>'alert_id'='${alert[0]}') ORDER BY id`).split('\n');
-    expect(audit).toEqual([`symptom.created|${sub('paciente.a')}`, `intervention.created|${sub('farmaceutico')}`]);
+    expect(audit).toEqual([`symptom.created|${sub('paciente.a')}`, `intervention.created|${sub('farmaceutico')}`, `referral.created|${sub('farmaceutico')}`, `alert.transition|${sub('farmaceutico')}`]);
     const reads = sql(`SELECT string_agg(DISTINCT action, ',' ORDER BY action) FROM audit_events WHERE organization_id='${ORG}' AND actor_sub='${sub('farmaceutico')}'`);
-    expect(reads).toBe('alert.list,intervention.created,patient.list,patient.record.read');
-    expect(sql(`SELECT count(*) FROM patient_guidance WHERE intervention_id IS NOT NULL OR (status<>'draft' AND approved_by IS NULL)`)).toBe('0'); // nenhuma orientação automática ao paciente (M15.2: só orientações aprovadas semeadas)
+    expect(reads).toBe('alert.transition,intervention.created,patient.overview.read,patient.precycle.read,patient.record.read,patient.search,patient.timeline.read,patient.worklist,precycle.reviewed,referral.created');
+    expect(sql(`SELECT count(*) FROM patient_guidance WHERE intervention_id IS NOT NULL OR (status<>'draft' AND approved_by IS NULL)`)).toBe('0'); // nenhuma orientação automática ao paciente
     evidence.db = { reportId, alertId: alert[0], alertStatus: alert[1], interventionActorIsPharmacist: true, auditTrail: audit.map((x) => x.split('|')[0]), pharmacistAuditActions: reads };
     saveEvidence(); await context.close();
+  });
+
+  test('06b Clinical: médico confirma recebimento, conclui com desfecho e resolve o alerta; enfermagem sem decisões farmacêuticas', async ({ browser, request }) => {
+    const { context, page } = await staffLogin(browser, 'medico', { enroll: true });
+    await context.close();
+    const md = await staffLogin(browser, 'medico');
+    const list = md.page.getByRole('list', { name: 'Pacientes vinculados' }); await expect(list.getByRole('listitem')).toHaveCount(1); await expect(list).toContainText('Ana Ribeiro');
+    await md.page.getByRole('link', { name: /Ana Ribeiro/ }).click(); await md.page.getByRole('tab', { name: 'Tarefas' }).click();
+    const task = md.page.getByRole('listitem', { name: `Encaminhamento: Avaliar náusea persistente [${RUN}]` });
+    await task.getByRole('button', { name: 'Confirmar recebimento' }).click(); await expect(task).toContainText('Recebida');
+    await task.getByRole('button', { name: 'Concluir' }).click(); await task.getByLabel('Desfecho').fill('Avaliado pela medicina no sistema oficial (sintético).');
+    await task.getByRole('button', { name: 'Registrar desfecho' }).click(); await expect(task).toContainText('Concluída'); await expect(task).toContainText('Desfecho: Avaliado pela medicina');
+    await md.page.getByRole('tab', { name: 'Alertas' }).click();
+    const card = md.page.getByRole('article', { name: /Alerta symptom\./ }).filter({ hasText: `[${RUN}]` });
+    await expect(card.getByRole('button', { name: 'Registrar intervenção' })).toHaveCount(0); // intervenção farmacêutica é da farmácia
+    await card.getByRole('button', { name: 'Resolvido', exact: true }).click(); await card.getByLabel('Justificativa').fill('Conduta definida pela medicina no sistema oficial.');
+    await card.getByRole('button', { name: 'Confirmar: Resolvido' }).click(); await expect(md.page.getByRole('status').filter({ hasText: 'Alerta: Resolvido' })).toBeVisible();
+    await shot(md.page, 'clinical-physician-resolved');
+    const alertId = sql(`SELECT id FROM clinical_alerts WHERE source_report_id='${reportId}'`);
+    expect(sql(`SELECT status FROM clinical_alerts WHERE id='${alertId}'`)).toBe('resolved');
+    expect(sql(`SELECT string_agg(to_status||':'||actor_role, ',' ORDER BY at) FROM clinical_alert_transitions WHERE alert_id='${alertId}'`)).toBe('in_evaluation:pharmacist,referred:pharmacist,resolved:physician');
+    expect(sql(`SELECT status||'|'||(received_by_sub='${sub('medico')}')||'|'||(closed_by_sub='${sub('medico')}') FROM clinical_tasks WHERE alert_id='${alertId}'`)).toBe('done|true|true');
+    // Estado final é imutável pela API.
+    const t = (await sessionToken(md.context, CLIN)).token;
+    const reopen = await request.post(`${API}/v1/clinical/alerts/${alertId}/transition`, { headers: { authorization: `Bearer ${t}`, 'x-organization-id': ORG, 'content-type': 'application/json' }, data: { to: 'in_evaluation' } });
+    expect(reopen.status()).toBe(403);
+    await md.context.close();
+    // Enfermagem: lista restrita ao vínculo; não registra intervenção farmacêutica nem descarta alerta.
+    const nur = await staffLogin(browser, 'enfermeira'); const tn = (await sessionToken(nur.context, CLIN)).token;
+    const wl = await (await apiGet(request, 'clinical/worklist', tn)).json(); expect(wl.patients.map((p) => p.name).sort()).toEqual(['Ana Ribeiro', 'Carlos Menezes']);
+    expect((await (await apiGet(request, 'clinical/worklist?q=Bruno', tn)).json()).patients).toEqual([]);
+    const carlosAlert = sql(`SELECT id FROM clinical_alerts WHERE patient_id='22222222-2222-4222-8222-222222222223' AND status='awaiting_review' LIMIT 1`);
+    const H = { authorization: `Bearer ${tn}`, 'x-organization-id': ORG, 'content-type': 'application/json' };
+    expect((await request.post(`${API}/v1/clinical/alerts/${carlosAlert}/transition`, { headers: H, data: { to: 'dismissed', justification: 'Tentativa de descarte pela enfermagem' } })).status()).toBe(403);
+    expect((await request.post(`${API}/v1/workflow/clinical/patients/22222222-2222-4222-8222-222222222223/interventions`, { headers: H, data: { alertId: carlosAlert, note: 'x', decision: 'pending' } })).status()).toBe(403);
+    expect((await request.post(`${API}/v1/clinical/alerts/${carlosAlert}/transition`, { headers: H, data: { to: 'in_evaluation', justification: 'Enfermagem em avaliação' } })).status()).toBe(201);
+    expect((await apiGet(request, `clinical/patients/${PAT_B}`, tn)).status()).toBe(403);
+    await nur.context.close();
   });
 
   test('07 negativos de papel/MFA/vínculo com tokens reais na API', async ({ browser, request }) => {
     // Farmacêutico sem MFA: autenticado, mas API exige MFA.
     const noMfa = await staffLogin(browser, 'farmaceutico.semmfa');
-    await expect(noMfa.page.getByText('MFA: não confirmado')).toBeVisible(); await expect(noMfa.page.getByText('Pacientes sintéticos autorizados: não habilitado')).toBeVisible();
+    await expect(noMfa.page.getByRole('heading', { name: 'Confirme o login com o aplicativo autenticador' })).toBeVisible(); await expect(noMfa.page.getByRole('list', { name: 'Pacientes vinculados' })).toHaveCount(0);
     await shot(noMfa.page, 'clinical-pharmacist-without-mfa');
     const t1 = (await sessionToken(noMfa.context, CLIN)).token; expect(claims(t1).amr || []).not.toContain('otp');
     expect((await apiGet(request, 'patients', t1)).status()).toBe(403);
@@ -267,11 +362,12 @@ test.describe.serial('M14.5 E2E sintético', () => {
     await noMfa.context.close();
     // Admin técnico com MFA: sem acesso clínico por padrão.
     const adm = await staffLogin(browser, 'admin.tecnico');
-    await expect(adm.page.getByText('MFA: confirmado pelo token')).toBeVisible(); await expect(adm.page.getByText('Pacientes sintéticos autorizados: não habilitado')).toBeVisible();
+    await expect(adm.page.getByRole('heading', { name: 'Seu perfil não tem acesso clínico' })).toBeVisible(); await expect(adm.page.getByRole('list', { name: 'Pacientes vinculados' })).toHaveCount(0);
     await shot(adm.page, 'clinical-admin-no-clinical-access');
     const t2 = (await sessionToken(adm.context, CLIN)).token;
     const r2 = await apiGet(request, 'patients', t2); expect(r2.status()).toBe(403); expect((await r2.json()).message).toContain('Sem vínculo profissional');
     expect((await apiGet(request, `patients/${PAT_A}/record`, t2)).status()).toBe(403);
+    expect((await apiGet(request, 'clinical/worklist', t2)).status()).toBe(403); expect((await apiGet(request, `clinical/patients/${PAT_A}`, t2)).status()).toBe(403);
     await adm.context.close();
     // Enfermeira com MFA: atribuída somente ao paciente A.
     const nur = await staffLogin(browser, 'enfermeira');
@@ -396,7 +492,7 @@ test.describe.serial('M14.5 E2E sintético', () => {
     // Cookie de sessão com expiração passada (cifrado com a chave do ambiente de teste) é rejeitado pelo app.
     const ctx = await browser.newContext();
     await ctx.addCookies([{ name: 'onco_session', value: seal({ token: pharmacistToken, expiresAt: Date.now() - 1000 }), url: CLIN, httpOnly: true, sameSite: 'Lax' }]);
-    expect((await ctx.request.get(`${CLIN}/api/clinical/summary`)).status()).toBe(401);
+    expect((await ctx.request.get(`${CLIN}/api/work/worklist`)).status()).toBe(401);
     // Expiração real: aguarda exp + tolerância (5 s) e a API recusa o mesmo token antes válido.
     expect((await request.get(`${API}/v1/me`, { headers: { authorization: `Bearer ${pharmacistToken}` } })).status()).toBe(200);
     const wait = claims(pharmacistToken).exp * 1000 - Date.now() + 7000;

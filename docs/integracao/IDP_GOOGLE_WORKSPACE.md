@@ -22,7 +22,7 @@
 | ONCOPHARMA Care (`oncopharma-care-web`) | `https://care.<env>.<dominio>/api/auth/callback` | `https://care.<env>.<dominio>/` |
 | ONCOPHARMA Clinical (`oncopharma-clinical-web`) | `https://clinical.<env>.<dominio>/api/auth/callback` | `https://clinical.<env>.<dominio>/` |
 | ONCOPHARMA Admin (`oncopharma-admin-web`) | `https://admin.<env>.<dominio>/api/auth/callback` | `https://admin.<env>.<dominio>/` |
-Caminhos conforme `apps/*/app/api/auth/{login,callback,logout}/route.ts`. Clientes confidenciais com PKCE S256 obrigatório, sem implicit/direct grant; audience `oncopharma-api`; mapeamento de `amr`. Mesma configuração validada em `infra/idp-test/setup-keycloak-test.mjs`. IdP Google no broker com **hosted domain** = domínio da instituição. Care: pacientes normalmente não têm conta Workspace — identidade de pacientes é decisão pendente. Admin: sem login no código ainda.
+Caminhos conforme `apps/*/app/api/auth/{login,callback,logout}/route.ts`. Clientes confidenciais com PKCE S256 obrigatório, sem implicit/direct grant; audience `oncopharma-api`; mapeamento de `amr`. Mesma configuração validada em `infra/idp-test/setup-keycloak-test.mjs`. IdP Google no broker com **hosted domain** = domínio da instituição. **Referências AMR do broker:** em cada execução do fluxo (formulário de senha → `pwd`, formulário OTP → `otp`) configurar `default.reference.maxAge` **≥ tempo de sessão ociosa** (ex.: `900` s). Com `0` o Keycloak omite a referência quando a troca do código ocorre ≥1 s após o OTP (`auth_time + maxAge < agora`) e o `amr` sai vazio — MFA aparece como "não confirmado" de forma intermitente (corrigido no IdP de teste no M15.4). Care: pacientes normalmente não têm conta Workspace — identidade de pacientes é decisão pendente. Admin: sem login no código ainda.
 
 ## 3. 2-Step Verification sem SMS (Admin console)
 1. Security → Authentication → **2-step verification** → OU/grupo dos profissionais:
@@ -55,6 +55,6 @@ Grupos `oncopharma-farmaceuticos-<env>@`, `-enfermagem-`, `-medicos-`, `-adminte
 
 ## 7. Revalidação do R5 no Google
 1. Conferir que o ID token do Google (no broker) **não** traz `amr` — registrar como limitação, não como falha nossa.
-2. Conferir no token do broker: `iss`, `aud=oncopharma-api`, `amr` contém `otp`, `sub` estável.
+2. Conferir no token do broker: `iss`, `aud=oncopharma-api`, `amr` contém `otp`, `sub` estável — **inclusive quando a troca do código acontece alguns segundos após o OTP** (repetir o login aguardando ≥2 s antes do callback; regressão coberta pelo E2E 05b).
 3. Negativos: conta fora do domínio → recusada no broker; conta sem TOTP do broker → sem MFA → API 403; conta com 2SV desligado → bloqueada pelo enforcement do Workspace.
 4. Rodar a suíte E2E contra o broker de hml e registrar em `validate:evidence`.

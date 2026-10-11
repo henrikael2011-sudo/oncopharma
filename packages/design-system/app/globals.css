@@ -78,3 +78,37 @@
 .care-page[data-contrast=high] .care-note{color:var(--ink)}
 .care-code{font-size:1.6em;font-weight:800;letter-spacing:.12em;color:var(--teal);background:#fff;border:2px dashed var(--emerald);border-radius:12px;padding:12px 16px;display:inline-block}
 .care-review h3{margin-top:0}
+/* M15.4 — Clinical: lista mínima, paciente sob demanda, abas. Somente tokens/derivados via var(). */
+.clin-user{display:flex;align-items:center;gap:14px;font-size:14px;color:var(--mint-on-dark-strong)}
+.clin-intro{max-width:760px}.clin-intro h1{font-size:clamp(34px,4vw,52px);margin:10px 0 14px}.clin-lead{font-size:18px;line-height:1.55;margin-bottom:22px}
+.clinical-main .kicker{color:var(--gold-700)}
+.clinical-page .btn-primary{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 18px;border-radius:10px;border:2px solid var(--navy);background:var(--navy);color:#fff;font-weight:700;text-decoration:none;cursor:pointer;font:inherit;font-weight:700}
+.clinical-page .btn-secondary{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 18px;border-radius:10px;border:2px solid var(--navy);background:#fff;color:var(--navy);font:inherit;font-weight:700;cursor:pointer}
+.clin-toolbar{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:22px}.clin-toolbar h1{font-size:clamp(30px,3.4vw,44px);margin:6px 0 0}
+.clin-search{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.clin-search label{font-weight:700}
+.clinical-page input,.clinical-page select,.clinical-page textarea{font:inherit;min-height:44px;padding:8px 12px;border:1px solid var(--border-strong);border-radius:10px;background:#fff;color:var(--ink-navy)}
+.clin-search input{min-width:min(320px,70vw)}
+.patient-list{list-style:none;padding:0;margin:0;display:grid;gap:10px}
+.patient-row{display:grid;grid-template-columns:2fr 1.2fr auto auto;align-items:center;gap:16px;padding:16px 20px;background:#fff;border:1px solid var(--navy-150);border-radius:14px;color:var(--ink-navy);text-decoration:none}
+.patient-row:hover{border-color:var(--navy-500)}.pr-name{font-weight:800;font-size:18px}.pr-record,.pr-pending{color:var(--navy-text);font-size:15px}
+.sev{display:inline-block;padding:4px 10px;border-radius:999px;font-size:13px;font-weight:800;white-space:nowrap}
+.sev-urgent{background:var(--danger);color:#fff}.sev-review{background:var(--gold-50);color:var(--gold-ink);border:1px solid var(--gold-700)}.sev-none{background:var(--navy-50);color:var(--navy-text);border:1px solid var(--navy-150)}
+.clin-empty{padding:18px;background:#fff;border-radius:12px;border:1px dashed var(--navy-300)}
+.clin-card{background:#fff;border:1px solid var(--navy-150);border-radius:16px;padding:18px 20px;margin:12px 0}.clin-card h3{margin:8px 0}.clin-card.is-urgent{border-left:6px solid var(--danger)}
+.clin-src{font-size:14px;color:var(--navy-text)}
+.clin-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.clin-ok{padding:10px 14px;border-radius:10px;background:var(--mint-50);border:1px solid var(--emerald);color:var(--ink-teal)}
+.clin-warn{padding:10px 14px;border-radius:10px;background:var(--gold-50);border:1px solid var(--gold-700);color:var(--gold-ink)}
+.clin-error{padding:10px 14px;border-radius:10px;background:#fff;border:2px solid var(--danger);color:var(--danger)}
+.clin-back{display:inline-block;margin-bottom:12px;font-weight:700;color:var(--navy)}
+.pac-header h1{font-size:clamp(28px,3vw,40px);margin:0}.pac-header p{color:var(--navy-text);margin:6px 0 18px}
+.tabs{display:flex;gap:4px;border-bottom:2px solid var(--navy-150);flex-wrap:wrap}
+.tabs [role=tab]{font:inherit;font-weight:700;min-height:44px;padding:10px 16px;border:0;border-bottom:3px solid transparent;background:transparent;color:var(--navy-text);cursor:pointer}
+.tabs [role=tab][aria-selected=true]{color:var(--navy);border-bottom-color:var(--navy)}
+.tab-panel{padding:16px 0}
+.clin-list{list-style:none;padding:0;display:grid;gap:8px}.clin-list>li:not(.clin-card){background:#fff;border:1px solid var(--navy-150);border-radius:10px;padding:10px 14px}
+.checklist{list-style:none;padding:0;display:grid;gap:8px}.checklist li{background:#fff;border-radius:10px;padding:10px 14px;border-left:5px solid var(--emerald)}.checklist li.missing{border-left-color:var(--gold-700)}
+.timeline{list-style:none;padding:0;border-left:3px solid var(--navy-150);margin-left:8px}.timeline li{padding:8px 0 12px 16px}.timeline li.is-urgent strong{color:var(--danger)}.timeline time{color:var(--navy-text);font-size:14px;margin-right:6px}.timeline small{display:block;color:var(--navy-text)}
+.clin-more{margin-top:14px}.clin-more summary,.record summary{cursor:pointer;font-weight:700;padding:8px 0}
+.clinical-page .workflow-form{display:grid;gap:8px;max-width:640px;margin-top:12px}
+@media(max-width:760px){.patient-row{grid-template-columns:1fr;gap:6px}}
