@@ -15,5 +15,5 @@ Referência visual é a arte original do Plano Diretor v3.0, página 1. SVG atua
 
 ## Emendas de 11/10/2026
 - *Emenda D-013, 11/10/2026* — rascunho de prescrição assistido por IA (fase posterior; implementação bloqueada). Ver `PLANO_DIRETOR_V3_BASELINE.md` §1/§3/§5/§14 e `RF_PRESCRICAO_ASSISTIDA_IA.md`.
-- *Emenda UI, 11/10/2026* — diretrizes de interface Care/Clinical, privacidade na lista, busca e alocação hospitalar. Ver `PLANO_DIRETOR_V3_BASELINE.md` §2.3 e `docs/diretrizes-design.md`.
+- *Emenda UI, 11/10/2026* — diretrizes de interface Care/Clinical, privacidade na lista, busca, alocação hospitalar e importação de PDF (`RF_IMPORTACAO_PDF_PACIENTES.md`). Ver `PLANO_DIRETOR_V3_BASELINE.md` §2.3 e `docs/diretrizes-design.md`.
 - As emendas foram inseridas na baseline como blocos marcados, preservando integralmente o texto original v3.0.

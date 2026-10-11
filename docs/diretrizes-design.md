@@ -53,5 +53,17 @@ Mais opções, mas **sem poluir a tela**.
 
 **Aceite:** alocação manual aparece com selo "manual"; sincronização posterior substitui e registra conflito na auditoria.
 
+## 7. Importação de relatório PDF de pacientes do dia (Clinical)
+Requisito completo: `docs/product/RF_IMPORTACAO_PDF_PACIENTES.md`.
+- Upload no Clinical do PDF exportado pelo sistema do hospital (Tasy/MV/outro); extração por **layout configurável por fornecedor**.
+- **Pré-visualização obrigatória** antes de gravar (criar/atualizar paciente, unidade/andar/leito) e **confirmação humana**.
+- Origem exibida: **"PDF importado"**, data/hora, quem importou, hash do arquivo.
+- Divergência com dados existentes é avisada: sincronizado prevalece; manual/PDF sinalizado.
+- Auditoria completa; arquivo original em storage criptografado com retenção definida.
+- Objetivo: piloto na farmácia antes da integração oficial e evidência para a TI.
+- **Restrição:** dados reais só após autorização formal do hospital (farmácia/direção + DPO/LGPD, base legal de tutela da saúde), ambiente sa-east-1 com acesso restrito e repositório privado; nada real em dev/teste público. Até lá, **somente PDFs sintéticos**.
+
+**Aceite:** ver RF §3.
+
 ## Rastreabilidade
-Itens UI-01..UI-06 registrados em `docs/product/MATRIZ_RASTREABILIDADE.md` (seção "Emenda UI / D-013, 11/10/2026").
+Itens UI-01..UI-07 registrados em `docs/product/MATRIZ_RASTREABILIDADE.md` (seção "Emenda UI / D-013, 11/10/2026").
