@@ -10,7 +10,8 @@ curl -fsS "$KC_URL/realms/master/.well-known/openid-configuration" >/dev/null ||
 node infra/idp-test/setup-keycloak-test.mjs
 bash tests/e2e/seed-e2e.sh
 export E2E_SESSION_KEY="$(openssl rand -base64 32)"
-export INTEGRATION_GATEWAY_TOKEN="$(openssl rand -hex 32)"  # token de serviço efêmero API ↔ integration-gateway
+export INTEGRATION_GATEWAY_TOKEN="$(openssl rand -hex 32)"
+export IMPORT_ENCRYPTION_KEY="$(openssl rand -base64 32)"  # M15.4c — chave efêmera de cifra do PDF original  # token de serviço efêmero API ↔ integration-gateway
 [[ -f services/api/dist/main.js ]] || npm run build -w @oncopharma/api
 [[ -d apps/admin-web/.next ]] || npm run build -w @oncopharma/admin-web
 unset NODE_ENV

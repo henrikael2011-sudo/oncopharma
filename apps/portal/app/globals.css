@@ -124,3 +124,12 @@
 /* Cabeçalho do Clinical em telas estreitas (achado hml 390px): marca nunca encolhe/sobrepõe; usuário quebra para a linha de baixo. */
 .clinical-header .brand{flex-shrink:0}.clin-user{flex-wrap:wrap;min-width:0}.clin-user span{overflow-wrap:anywhere}
 @media(max-width:640px){.clinical-header{flex-wrap:wrap;row-gap:10px}.clinical-header .clin-user{flex:1 1 100%;justify-content:space-between}}
+/* M15.4c — prévia de importação de PDF: linha mínima; detalhes ao abrir */
+.imp-row{background:#fff;border:1px solid var(--navy-150);border-radius:14px;padding:12px 16px}
+.imp-row summary{cursor:pointer;display:flex;flex-wrap:wrap;gap:12px;align-items:center;min-height:44px}
+.imp-row summary:focus-visible{outline:3px solid var(--navy);outline-offset:2px}
+.imp-act{font-weight:700;color:var(--ink-navy)}
+.imp-conflict,.imp-invalid,.imp-not_linked{color:var(--gold-ink)}
+.imp-detail{display:grid;grid-template-columns:max-content 1fr;gap:4px 16px;margin:10px 0}
+.imp-detail dt{font-weight:700}
+.imp-detail dd{margin:0}

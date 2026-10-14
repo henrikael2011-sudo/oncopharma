@@ -11,7 +11,7 @@ const ALLOW: [string, RegExp][] = [
   ['GET', new RegExp(`^patients/${ID}$`)], ['GET', new RegExp(`^patients/${ID}/(precycle|timeline)$`)],
   ['POST', new RegExp(`^alerts/${ID}/transition$`)], ['POST', new RegExp(`^patients/${ID}/tasks$`)],
   ['POST', new RegExp(`^tasks/${ID}/(receive|complete|cancel)$`)], ['POST', new RegExp(`^patients/${ID}/precycle/reviews$`)],
-  ['POST', /^allocations\/sync$/], ['POST', new RegExp(`^patients/${ID}/allocation(/conflict)?$`)],
+  ['POST', /^allocations\/sync$/], ['POST', /^imports\/pdf$/], ['POST', new RegExp(`^imports/${ID}/(confirm|discard)$`)], ['POST', new RegExp(`^patients/${ID}/allocation(/conflict)?$`)],
 ];
 export function allowed(method: string, path: string) {
   if (!ALLOW.some(([m, r]) => m === method && r.test(path))) return false;
@@ -32,7 +32,7 @@ export async function workProxy(request: Request, segments: string[]) {
     const origin = request.headers.get('origin'), configured = process.env.PORTAL_ORIGIN;
     if (!origin || !configured || origin !== new URL(configured).origin) return json('Origem não autorizada', 403);
     if (!(request.headers.get('content-type') || '').toLowerCase().startsWith('application/json')) return json('Content-Type inválido', 415);
-    body = await request.text(); if (body.length > 8192) return json('Solicitação excede o limite', 413);
+    body = await request.text(); if (body.length > (path === 'imports/pdf' ? 2_900_000 : 8192)) return json('Solicitação excede o limite', 413);
     try { const p = JSON.parse(body); if (!p || typeof p !== 'object' || Array.isArray(p)) return json('Corpo inválido', 400); } catch { return json('JSON inválido', 400); }
   }
   const base = process.env.API_INTERNAL_URL || 'http://127.0.0.1:4000';

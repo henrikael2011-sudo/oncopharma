@@ -1,5 +1,5 @@
 {
-  "startedAt": "2026-10-11T23:43:21.199Z",
+  "startedAt": "2026-10-14T00:35:35.629Z",
   "issuer": "http://localhost:8080/realms/oncopharma-test",
   "a11y": {
     "care": [],
@@ -12,6 +12,7 @@
     "clinicalWorklist": [],
     "clinicalAllocation": [],
     "clinicalGrouped": [],
+    "clinicalPdfPreview": [],
     "careCaregivers": []
   },
   "tokens": {
@@ -47,11 +48,11 @@
       "exp_minus_iat": 120,
       "cookieMaxAgeSeconds": 103
     },
-    "waitedForExpiryMs": 8394
+    "waitedForExpiryMs": 8213
   },
   "db": {
-    "reportId": "20466cbf-f625-43de-84b4-08cd7612086b",
-    "alertId": "c0ed6566-2a76-4725-932a-d8124e7d1ff8",
+    "reportId": "3e544262-1267-4464-957f-281c4d1f4b31",
+    "alertId": "8eec8d01-d884-445a-98a5-fc22f266c6d1",
     "alertStatus": "referred",
     "interventionActorIsPharmacist": true,
     "auditTrail": [
@@ -69,5 +70,13 @@
       "fhir_r4",
       "hl7v2_adt"
     ]
+  },
+  "pdfImport": {
+    "layouts": [
+      "tasy-censo-v1",
+      "mv-mapa-leitos-v1"
+    ],
+    "confirmedByHuman": true,
+    "conflictNotApplied": true
   }
 }

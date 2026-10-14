@@ -93,7 +93,8 @@ test('Bypass de superusuário/RLS: role da API não é superuser, não tem BYPAS
   const off = psql(APP, `SET row_security = off; SELECT count(*) FROM patients`);
   assert.equal(off.ok, false); assert.match(off.err, /row-level security/);
   // Escrita direta em tabelas clínicas sem GRANT é negada.
-  assert.match(psql(APP, tx(F.orgA, `INSERT INTO patients(organization_id,synthetic) VALUES (${lit(F.orgA)},true)`)).err, /permission denied/);
+  // M15.4c: INSERT de paciente existe só para importação sintética confirmada (política exige synthetic+prontuário+nome).
+  assert.match(psql(APP, tx(F.orgA, `INSERT INTO patients(organization_id,synthetic) VALUES (${lit(F.orgA)},true)`)).err, /permission denied|row-level security/);
   assert.match(psql(APP, tx(F.orgA, `UPDATE patients SET synthetic=false`)).err, /permission denied/);
   assert.match(psql(APP, `TRUNCATE patient_symptom_reports`).err, /permission denied/);
   // Informativo: a role administrativa (superuser em CI) IGNORA RLS. Por isso nunca deve ser usada pela API.
