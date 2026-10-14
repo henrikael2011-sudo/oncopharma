@@ -35,3 +35,10 @@ COMMIT;
 DELETE FROM allocation_sync_items WHERE organization_id='11111111-1111-4111-8111-111111111111';
 DELETE FROM patient_allocations WHERE organization_id='11111111-1111-4111-8111-111111111111';
 DELETE FROM allocation_sync_runs WHERE organization_id='11111111-1111-4111-8111-111111111111';
+-- M15.4c — reinicia importações de PDF e pacientes criados por importação (somente sintéticos, external_reference 'PDF-').
+DO $$ BEGIN IF to_regclass('pdf_imports') IS NOT NULL THEN
+  DELETE FROM pdf_import_rows WHERE organization_id='11111111-1111-4111-8111-111111111111';
+  DELETE FROM pdf_imports WHERE organization_id='11111111-1111-4111-8111-111111111111';
+  DELETE FROM care_assignments WHERE patient_id IN (SELECT id FROM patients WHERE organization_id='11111111-1111-4111-8111-111111111111' AND synthetic AND external_reference LIKE 'PDF-%');
+  DELETE FROM patients WHERE organization_id='11111111-1111-4111-8111-111111111111' AND synthetic AND external_reference LIKE 'PDF-%';
+END IF; END $$;

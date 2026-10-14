@@ -42,9 +42,10 @@ export function validateFeed(raw: unknown): { source: string; format: (typeof FO
 const k = (v: string | null) => (v ?? '').toLocaleLowerCase('pt-BR').replace(/\s+/g, ' ').trim();
 export const sameAllocation = (a: Allocation, b: Allocation) => k(a.unit) === k(b.unit) && k(a.floor) === k(b.floor) && k(a.room) === k(b.room) && k(a.bed) === k(b.bed);
 /** Decide o efeito de um item sincronizado sobre a alocação atual. Manual divergente NUNCA é sobrescrita automaticamente. */
-export function syncOutcome(current: (Allocation & { source: 'hospital' | 'manual' }) | null, incoming: Allocation): 'updated' | 'unchanged' | 'confirmed' | 'conflict' {
+export function syncOutcome(current: (Allocation & { source: 'hospital' | 'manual' | 'pdf' }) | null, incoming: Allocation): 'updated' | 'unchanged' | 'confirmed' | 'conflict' {
   if (!current) return 'updated';
-  if (current.source === 'hospital') return sameAllocation(current, incoming) ? 'unchanged' : 'updated';
+  // hospital ou PDF importado: o dado do hospital mais recente prevalece
+  if (current.source !== 'manual') return sameAllocation(current, incoming) ? 'unchanged' : 'updated';
   return sameAllocation(current, incoming) ? 'confirmed' : 'conflict';
 }
 export const allocationLabel = (a: Allocation) => [a.unit, a.floor, a.room ? (/^\d/.test(a.room) ? `Quarto ${a.room}` : a.room) : null, a.bed ? `Leito ${a.bed}` : null].filter(Boolean).join(' · ');

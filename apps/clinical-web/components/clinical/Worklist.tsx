@@ -13,7 +13,7 @@ function PatientRow({ p }: { p: Row }) {
   return <li><Link className="patient-row" href={`/clinical/pacientes/${p.id}`}>
     <span className="pr-name">{p.name}</span>
     <span className="pr-record">{p.record ? `Prontuário ${p.record}` : 'Sem prontuário'}{a && roomLabel(a) ? ` · ${roomLabel(a)}` : ''}
-      {a?.source === 'manual' && <span className="tag-manual"> Manual</span>}{a?.conflict && <span className="tag-conflict"> Divergência com o hospital</span>}</span>
+      {a?.source === 'manual' && <span className="tag-manual"> Manual</span>}{a?.source === 'pdf' && <span className="tag-manual"> PDF importado</span>}{a?.conflict && <span className="tag-conflict"> Divergência com o hospital</span>}</span>
     <span className={p.severity ? SEV[p.severity][1] : 'sev sev-none'}>{p.severity ? SEV[p.severity][0] : 'Sem alerta aberto'}</span>
     <span className="pr-pending">{p.pending === 0 ? 'Sem pendências' : p.pending === 1 ? '1 pendência' : `${p.pending} pendências`}</span>
   </Link></li>;
@@ -57,6 +57,7 @@ export function Worklist() {
     <div className="clin-syncbar">
       <p id="sync-info">{data?.lastSync ? <>Última sincronização: {when(data.lastSync.at)} · Origem: {data.lastSync.source}</> : 'Alocação ainda não sincronizada com o hospital.'}</p>
       <button type="button" className="btn-secondary" onClick={() => void sync()} disabled={syncing} aria-describedby="sync-info">{syncing ? 'Sincronizando…' : 'Sincronizar'}</button>
+      {me.role !== 'physician' && <Link className="btn-secondary" href="/clinical/importar">Importar lista (PDF)</Link>}
       <label className="clin-toggle"><input type="checkbox" checked={byLocation} onChange={(e) => setByLocation(e.target.checked)} /> Agrupar por unidade e andar</label>
     </div>
     <div aria-live="polite">{syncMsg && <p role="status" className="clin-ok">{syncMsg}</p>}</div>

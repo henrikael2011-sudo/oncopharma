@@ -7,6 +7,7 @@ import type { PoolClient } from 'pg';
 import { AuthGuard, AuthenticatedRequest } from './auth.guard';
 import { DatabaseService } from './database.service';
 import { syntheticApiEnabled } from './synthetic-mode';
+import { encryptFile, importKey, MAX_PDF_BYTES, previewAction, readHospitalPdf, sameName, type PdfRow } from './pdf-import';
 import { type Allocation, allocationLabel, FORMAT_LABEL, normalizeAllocation, syncOutcome, validateFeed } from './allocation-rules';
 import { ALERT_LABEL, ALERT_STATES, type AlertState, allowedTransitions, canTransition, FINAL_STATES, normalizeSearch, preCycleChecklist, primaryRole, ROLE_LABEL, SQL_FOLD, STAFF_ROLES, type StaffRole } from './clinical-work-rules';
 
@@ -139,18 +140,18 @@ export class ClinicalWorkController {
   // ---------- M15.4b — alocação hospitalar ----------
   private async current(c: PoolClient, org: string, patientId: string) {
     return (await c.query(`SELECT id,unit,floor,room,bed,source,recorded_at,recorded_by_role,sync_run_id FROM patient_allocations WHERE organization_id=$1 AND patient_id=$2 AND superseded_at IS NULL FOR UPDATE`, [org, patientId])).rows[0] as
-      (Allocation & { id: string; source: 'hospital' | 'manual'; recorded_at: Date; recorded_by_role: StaffRole; sync_run_id: string | null }) | undefined;
+      (Allocation & { id: string; source: 'hospital' | 'manual' | 'pdf'; recorded_at: Date; recorded_by_role: StaffRole; sync_run_id: string | null }) | undefined;
   }
   private async allocationView(c: PoolClient, org: string, patientId: string) {
-    const a = (await c.query(`SELECT pa.unit,pa.floor,pa.room,pa.bed,pa.source,pa.recorded_at,pa.recorded_by_role,r.source_system,r.source_format
-      FROM patient_allocations pa LEFT JOIN allocation_sync_runs r ON r.id=pa.sync_run_id WHERE pa.organization_id=$1 AND pa.patient_id=$2 AND pa.superseded_at IS NULL`, [org, patientId])).rows[0];
+    const a = (await c.query(`SELECT pa.unit,pa.floor,pa.room,pa.bed,pa.source,pa.recorded_at,pa.recorded_by_role,r.source_system,r.source_format,i.layout_label,i.sha256
+      FROM patient_allocations pa LEFT JOIN allocation_sync_runs r ON r.id=pa.sync_run_id LEFT JOIN pdf_imports i ON i.id=pa.import_id WHERE pa.organization_id=$1 AND pa.patient_id=$2 AND pa.superseded_at IS NULL`, [org, patientId])).rows[0];
     const conflict = (await c.query(`SELECT i.unit,i.floor,i.room,i.bed,r.at,r.source_system,r.source_format FROM allocation_sync_items i JOIN allocation_sync_runs r ON r.id=i.run_id
       WHERE i.organization_id=$1 AND i.patient_id=$2 AND i.outcome='conflict' AND i.resolved_at IS NULL ORDER BY r.at DESC LIMIT 1`, [org, patientId])).rows[0];
     return {
       current: a ? { unit: a.unit, floor: a.floor, room: a.room, bed: a.bed, label: allocationLabel(a), source: a.source, at: iso(a.recorded_at),
-        origin: a.source === 'hospital' ? `${a.source_system} · ${FORMAT_LABEL[a.source_format]}` : ROLE_LABEL[a.recorded_by_role as StaffRole] } : null,
+        origin: a.source === 'hospital' ? `${a.source_system} · ${FORMAT_LABEL[a.source_format]}` : a.source === 'pdf' ? `${a.layout_label} · ${ROLE_LABEL[a.recorded_by_role as StaffRole]} · arquivo ${String(a.sha256).slice(0, 12)}` : ROLE_LABEL[a.recorded_by_role as StaffRole] } : null,
       conflict: conflict ? { label: allocationLabel(conflict), at: iso(conflict.at), origin: `${conflict.source_system} · ${FORMAT_LABEL[conflict.source_format]}` } : null,
-      manualAllowed: !a || a.source === 'manual',
+      manualAllowed: !a || a.source !== 'hospital',
     };
   }
   private async supersede(c: PoolClient, org: string, cur: { id: string } | undefined) {
@@ -238,6 +239,102 @@ export class ClinicalWorkController {
       await this.audit(c, org, req, 'allocation.conflict.resolved', s, 'patient_allocation', { patient_id: patientId, resolution });
       return this.allocationView(c, org, patientId);
     });
+  }
+
+  // ---------- M15.4c — importação de lista por PDF (prévia obrigatória → confirmação humana) ----------
+  private static IMPORT_ROLES: StaffRole[] = ['pharmacist', 'nurse', 'clinical_manager'];
+  private async existingFor(c: PoolClient, org: string, req: AuthenticatedRequest, record: string) {
+    const p = (await c.query(`SELECT p.id,p.display_name,EXISTS (SELECT 1 FROM care_assignments a WHERE a.organization_id=p.organization_id AND a.patient_id=p.id AND a.oidc_issuer=$3 AND a.oidc_sub=$4 AND a.active=true) AS linked
+      FROM patients p WHERE p.organization_id=$1 AND p.hospital_record=$2`, [org, record, req.principal.issuer, req.principal.sub])).rows[0];
+    if (!p) return null;
+    const cur = p.linked ? (await c.query(`SELECT id,unit,floor,room,bed,source FROM patient_allocations WHERE organization_id=$1 AND patient_id=$2 AND superseded_at IS NULL`, [org, p.id])).rows[0] ?? null : null;
+    return { id: p.id as string, name: p.display_name as string | null, linked: p.linked as boolean, current: cur };
+  }
+
+  /** Envio + prévia (nada é escrito em pacientes/alocação). Original cifrado; hash SHA-256; layout do fornecedor. */
+  @Post('imports/pdf')
+  async importPreview(@Req() req: AuthenticatedRequest, @Headers('x-organization-id') org: string, @Body() body: Record<string, unknown>) {
+    const fileName = text(body?.fileName, 1, 120, 'Nome do arquivo')!.replace(/[^\p{L}\p{N} ._()-]/gu, '_');
+    const b64 = typeof body?.contentBase64 === 'string' ? body.contentBase64 : '';
+    if (!b64 || b64.length > Math.ceil(MAX_PDF_BYTES / 3) * 4 + 8 || !/^[A-Za-z0-9+/]+=*$/.test(b64)) throw new BadRequestException('Arquivo ausente, inválido ou maior que 2 MB');
+    const buf = Buffer.from(b64, 'base64');
+    let key: ReturnType<typeof importKey>; try { key = importKey(); } catch { throw new ServiceUnavailableException('Importação indisponível: chave de cifra não configurada'); }
+    await this.run(req, org, async (_c, s) => { if (!ClinicalWorkController.IMPORT_ROLES.includes(s.role)) throw new ForbiddenException('Importação permitida a Farmácia, Enfermagem e Gestão clínica'); });
+    let parsed: Awaited<ReturnType<typeof readHospitalPdf>>;
+    try { parsed = await readHospitalPdf(buf, { requireSyntheticMarker: true }); } catch (e) { throw new BadRequestException((e as Error).message); }
+    const enc = encryptFile(buf, key.key);
+    return this.run(req, org, async (c, s) => {
+      const prev = (await c.query(`SELECT uploaded_at FROM pdf_imports WHERE organization_id=$1 AND sha256=$2 AND status='confirmed' ORDER BY uploaded_at DESC LIMIT 1`, [org, parsed.sha256])).rows[0];
+      const imp = (await c.query(`INSERT INTO pdf_imports(organization_id,file_name,sha256,size_bytes,layout_id,layout_label,encrypted,iv,tag,key_id,uploaded_by_issuer,uploaded_by_sub,uploaded_by_role)
+        VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING id,uploaded_at`, [org, fileName, parsed.sha256, buf.length, parsed.layout.id, parsed.layout.label, enc.ciphertext, enc.iv, enc.tag, key.id, req.principal.issuer, req.principal.sub, s.role])).rows[0];
+      const rows: { id: string; line: number; record: string | null; name: string | null; allocation: string | null; action: string; current: string | null; nameDivergent: boolean; currentName: string | null; error: string | null }[] = [], seen = new Set<string>();
+      for (const r of parsed.rows as PdfRow[]) {
+        const dup = r.record && seen.has(r.record); if (r.record) seen.add(r.record);
+        const ex = !r.error && !dup && r.record ? await this.existingFor(c, org, req, r.record) : null;
+        const action = dup ? 'invalid' : previewAction(r, ex);
+        const nameDivergent = !!ex?.linked && !sameName(ex.name, r.name);
+        const currentLabel = ex?.linked && ex.current ? `${allocationLabel(ex.current)} (${ex.current.source === 'hospital' ? 'hospital' : ex.current.source === 'pdf' ? 'PDF' : 'manual'})` : null;
+        const row = (await c.query(`INSERT INTO pdf_import_rows(organization_id,import_id,line,record,name,unit,floor,room,bed,action,patient_id,current_label,name_divergent,error)
+          VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) RETURNING id`, [org, imp.id, r.line, r.record, r.name, r.unit, r.floor, r.room, r.bed, action, ex?.linked ? ex.id : null, currentLabel, nameDivergent, dup ? 'Prontuário repetido no arquivo' : r.error])).rows[0];
+        rows.push({ id: row.id, line: r.line, record: r.record, name: r.name, allocation: r.unit ? allocationLabel({ unit: r.unit, floor: r.floor, room: r.room, bed: r.bed }) : null, action, current: currentLabel,
+          nameDivergent, currentName: nameDivergent ? ex!.name : null, error: dup ? 'Prontuário repetido no arquivo' : r.error });
+      }
+      await this.audit(c, org, req, 'patient.import.previewed', s, 'pdf_import', { import_id: imp.id, sha256: parsed.sha256, layout: parsed.layout.id, rows: rows.length });
+      const count = (a: string) => rows.filter((r) => r.action === a).length;
+      return { importId: imp.id, fileName, sha256: parsed.sha256, sizeBytes: buf.length, layout: parsed.layout.label, uploadedAt: iso(imp.uploaded_at), previouslyImportedAt: prev ? iso(prev.uploaded_at) : null,
+        counts: { create: count('create'), update: count('update'), unchanged: count('unchanged'), conflict: count('conflict'), not_linked: count('not_linked'), invalid: count('invalid') }, rows };
+    });
+  }
+
+  /** Confirmação humana: aplica criar/atualizar e SOMENTE os conflitos marcados; reavalia cada linha (estado pode ter mudado). */
+  @Post('imports/:importId/confirm')
+  importConfirm(@Req() req: AuthenticatedRequest, @Headers('x-organization-id') org: string, @Param('importId') importId: string, @Body() body: Record<string, unknown>) {
+    id(importId, 'Importação');
+    const applyConflicts = Array.isArray(body?.applyConflicts) ? body.applyConflicts.map(String) : [];
+    if (applyConflicts.length > 300 || applyConflicts.some((x) => !UUID.test(x))) throw new BadRequestException('Seleção inválida');
+    return this.run(req, org, async (c, s) => {
+      const imp = await this.ownImport(c, org, req, importId);
+      const rows = (await c.query(`SELECT * FROM pdf_import_rows WHERE organization_id=$1 AND import_id=$2 ORDER BY line`, [org, importId])).rows;
+      const n = { created: 0, updated: 0, conflicts: 0, skipped: 0 };
+      for (const r of rows) {
+        if (!['create', 'update', 'conflict'].includes(r.action) || (r.action === 'conflict' && !applyConflicts.includes(r.id))) {
+          n.skipped++; await c.query(`UPDATE pdf_import_rows SET skip_reason=$2 WHERE id=$1`, [r.id, r.action === 'conflict' ? 'Divergência com o hospital não aplicada' : r.action === 'unchanged' ? 'Sem alteração' : r.action === 'not_linked' ? 'Paciente sem vínculo assistencial com você' : 'Linha inválida']); continue;
+        }
+        const ex = await this.existingFor(c, org, req, r.record);
+        const now = previewAction({ ...r, error: null }, ex);
+        if (now !== r.action) { n.skipped++; await c.query(`UPDATE pdf_import_rows SET skip_reason='Dados mudaram desde a prévia' WHERE id=$1`, [r.id]); continue; }
+        let patientId = ex?.id;
+        if (r.action === 'create') {
+          patientId = (await c.query(`INSERT INTO patients(organization_id,external_reference,synthetic,display_name,hospital_record) VALUES($1,$2,true,$3,$4) RETURNING id`, [org, `PDF-${r.record}`, r.name, r.record])).rows[0].id;
+          await this.audit(c, org, req, 'patient.created', s, 'patient', { patient_id: patientId!, import_id: importId, source: 'pdf' });
+        } else if (ex?.current) await this.supersede(c, org, ex.current);
+        await c.query(`INSERT INTO patient_allocations(organization_id,patient_id,unit,floor,room,bed,source,import_id,source_ref,recorded_by_issuer,recorded_by_sub,recorded_by_role) VALUES($1,$2,$3,$4,$5,$6,'pdf',$7,$8,$9,$10,$11)`,
+          [org, patientId, r.unit, r.floor, r.room, r.bed, importId, `PDF/${imp.sha256.slice(0, 12)}/linha ${r.line}`, req.principal.issuer, req.principal.sub, s.role]);
+        await c.query(`UPDATE pdf_import_rows SET applied=true, patient_id=$2 WHERE id=$1`, [r.id, patientId]);
+        if (r.action === 'create') await c.query(`INSERT INTO care_assignments(organization_id,patient_id,oidc_issuer,oidc_sub,active) VALUES($1,$2,$3,$4,true)`, [org, patientId, req.principal.issuer, req.principal.sub]);
+        if (r.action === 'create') n.created++; else if (r.action === 'update') n.updated++; else n.conflicts++;
+      }
+      await c.query(`UPDATE pdf_imports SET status='confirmed',decided_at=now(),created_count=$2,updated_count=$3,conflicts_applied=$4,skipped_count=$5 WHERE id=$1`, [importId, n.created, n.updated, n.conflicts, n.skipped]);
+      await this.audit(c, org, req, 'patient.import.confirmed', s, 'pdf_import', { import_id: importId, sha256: imp.sha256, ...n });
+      return { importId, status: 'confirmed', ...n };
+    });
+  }
+  @Post('imports/:importId/discard')
+  importDiscard(@Req() req: AuthenticatedRequest, @Headers('x-organization-id') org: string, @Param('importId') importId: string) {
+    id(importId, 'Importação');
+    return this.run(req, org, async (c, s) => {
+      const imp = await this.ownImport(c, org, req, importId);
+      await c.query(`UPDATE pdf_imports SET status='discarded',decided_at=now() WHERE id=$1`, [importId]);
+      await this.audit(c, org, req, 'patient.import.discarded', s, 'pdf_import', { import_id: importId, sha256: imp.sha256 });
+      return { importId, status: 'discarded' };
+    });
+  }
+  private async ownImport(c: PoolClient, org: string, req: AuthenticatedRequest, importId: string) {
+    const imp = (await c.query(`SELECT id,sha256,status,uploaded_at,uploaded_by_sub,uploaded_by_issuer FROM pdf_imports WHERE id=$1 AND organization_id=$2 FOR UPDATE`, [importId, org])).rows[0];
+    if (!imp || imp.uploaded_by_sub !== req.principal.sub || imp.uploaded_by_issuer !== req.principal.issuer) throw new ForbiddenException('Importação não localizada para você');
+    if (imp.status !== 'previewed') throw new ConflictException('Importação já confirmada ou descartada');
+    if (Date.now() - new Date(imp.uploaded_at).getTime() > 30 * 60_000) throw new ConflictException('Prévia expirada (30 min). Envie o arquivo novamente.');
+    return imp as { id: string; sha256: string };
   }
 
   @Post('patients/:patientId/tasks')

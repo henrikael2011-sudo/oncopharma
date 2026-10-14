@@ -429,6 +429,82 @@ test.describe.serial('M14.5 E2E sintético', () => {
     evidence.allocation = { runs: 2, conflictResolvedByHuman: true, formats: ['fhir_r4', 'hl7v2_adt'] }; saveEvidence(); await context.close();
   });
 
+  test('06d (M15.4c) importação de PDF do hospital: prévia, detalhe só ao abrir, confirmação humana, divergência não aplicada, descarte, papéis', async ({ browser, request }) => {
+    const FX = 'tests/fixtures/pdf';
+    const { context, page } = await staffLogin(browser, 'farmaceutico');
+    await page.getByRole('link', { name: 'Importar lista (PDF)' }).click();
+    await expect(page.getByRole('heading', { level: 1, name: 'Importar lista do hospital' })).toBeVisible();
+    // Sem marcação sintética: recusado antes de qualquer gravação.
+    await page.getByLabel('Arquivo PDF (até 2 MB)').setInputFiles(`${FX}/censo-sem-marcador.pdf`); await page.getByRole('button', { name: 'Gerar prévia' }).click();
+    await expect(page.locator('p.clin-error[role=alert]')).toContainText('DADOS SINTÉTICOS');
+    expect(sql(`SELECT count(*) FROM pdf_imports WHERE organization_id='${ORG}'`)).toBe('0');
+    // Prévia Tasy (colunas): nada gravado em pacientes/alocação.
+    await page.getByLabel('Arquivo PDF (até 2 MB)').setInputFiles(`${FX}/censo-tasy-sintetico.pdf`); await page.getByRole('button', { name: 'Gerar prévia' }).click();
+    const prev = page.getByRole('region', { name: 'Prévia da importação' });
+    await expect(prev.getByRole('status')).toHaveText('1 novos, 0 com alocação a atualizar, 2 sem alteração, 1 com divergência, 1 sem vínculo, 1 não importáveis.');
+    await expect(prev).toContainText('Tasy — censo hospitalar (colunas)');
+    expect(sql(`SELECT count(*) FROM patients WHERE hospital_record='PR-10031'`)).toBe('0');
+    expect(sql(`SELECT status FROM pdf_imports WHERE organization_id='${ORG}'`)).toBe('previewed');
+    const rows = prev.getByRole('list', { name: 'Linhas do arquivo' });
+    await expect(rows.getByRole('listitem')).toHaveCount(6);
+    // Lista mínima: alocação/motivo só ao abrir a linha.
+    await expect(prev.getByText('Alocação no arquivo').first()).toBeHidden();
+    const deb = rows.getByRole('listitem').filter({ hasText: 'Débora Nunes' });
+    await expect(deb).toContainText('Divergência com o hospital');
+    await deb.locator('summary').click();
+    await expect(deb).toContainText('Oncologia Clínica · 4º andar · Quarto 412 · Leito B'); await expect(deb).toContainText('Oncologia Clínica · 4º andar · Quarto 410 · Leito B (hospital)');
+    const fab = rows.getByRole('listitem').filter({ hasText: 'PR-10026' }); await fab.locator('summary').click(); await expect(fab).toContainText('Nome cadastrado'); await expect(fab).toContainText('Fábio Rocha');
+    await expect(rows.getByRole('listitem').filter({ hasText: 'Elisa Prado' })).toContainText('Sem vínculo com você');
+    await expect(rows.getByRole('listitem').filter({ hasText: 'PR-10031' })).toContainText('Novo paciente');
+    await expect(page.locator('main')).not.toContainText(/\b(teste|fict[ií]cio)/i);
+    await shot(page, 'clinical-pdf-preview');
+    evidence.a11y.clinicalPdfPreview = a11yMap(await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze());
+    // Confirmação humana SEM marcar a divergência: Débora permanece com o dado do hospital.
+    await page.getByRole('button', { name: 'Confirmar importação' }).click();
+    await expect(page.getByRole('status').filter({ hasText: 'Importação confirmada: 1 novos, 0 atualizados, 0 divergências aplicadas, 5 não aplicados.' })).toBeVisible();
+    const PAT_D = '22222222-2222-4222-8222-222222222224';
+    expect(sql(`SELECT source||'|'||room FROM patient_allocations WHERE patient_id='${PAT_D}' AND superseded_at IS NULL`)).toBe('hospital|410');
+    expect(sql(`SELECT p.synthetic||'|'||p.display_name||'|'||a.source||'|'||a.room||'|'||(a.import_id IS NOT NULL)||'|'||(SELECT count(*) FROM care_assignments c WHERE c.patient_id=p.id AND c.oidc_sub='${sub('farmaceutico')}' AND c.active)
+      FROM patients p JOIN patient_allocations a ON a.patient_id=p.id AND a.superseded_at IS NULL WHERE p.hospital_record='PR-10031'`)).toBe('true|Gustavo Lima|pdf|401|true|1');
+    expect(sql(`SELECT string_agg(coalesce(skip_reason,'aplicada'), ';' ORDER BY line) FROM pdf_import_rows WHERE organization_id='${ORG}'`)).toBe('Sem alteração;Divergência com o hospital não aplicada;Sem alteração;Paciente sem vínculo assistencial com você;aplicada;Linha inválida');
+    expect(sql(`SELECT count(*) FROM pdf_imports WHERE organization_id='${ORG}' AND length(encrypted) > 1000 AND status='confirmed'`)).toBe('1');
+    // Lista: novo paciente agrupado, marcado como PDF importado; detalhe da origem ao abrir.
+    await page.getByRole('link', { name: 'Ver lista de pacientes' }).click();
+    const g4 = page.locator('[aria-label="Pacientes vinculados"]').getByRole('list', { name: 'Oncologia Clínica · 4º andar' });
+    const gus = g4.getByRole('listitem').filter({ hasText: 'Gustavo Lima' }); await expect(gus).toContainText('Quarto 401 · Leito A'); await expect(gus).toContainText('PDF importado');
+    await shot(page, 'clinical-pdf-imported-list');
+    await gus.getByRole('link').click();
+    await expect(page.getByRole('region', { name: 'Alocação' })).toContainText(/Tasy — censo hospitalar \(colunas\) · Farmácia · arquivo [0-9a-f]{12}/);
+    // Mesmo arquivo de novo: aviso de reimportação; descartar não altera nada.
+    await page.goto(`${CLIN}/clinical/importar`);
+    await page.getByLabel('Arquivo PDF (até 2 MB)').setInputFiles(`${FX}/censo-tasy-sintetico.pdf`); await page.getByRole('button', { name: 'Gerar prévia' }).click();
+    await expect(page.getByRole('note').filter({ hasText: 'Este mesmo arquivo já foi importado em' })).toBeVisible();
+    await expect(prev.getByRole('status')).toContainText('0 novos');
+    await page.getByRole('button', { name: 'Descartar' }).click();
+    await expect(page.getByRole('status').filter({ hasText: 'Importação descartada. Nada foi alterado.' })).toBeVisible();
+    // MV (linhas): novo paciente com confirmação.
+    await page.goto(`${CLIN}/clinical/importar`);
+    await page.getByLabel('Arquivo PDF (até 2 MB)').setInputFiles(`${FX}/mapa-leitos-mv-sintetico.pdf`); await page.getByRole('button', { name: 'Gerar prévia' }).click();
+    await expect(prev).toContainText('MV — mapa de leitos (linhas)');
+    await expect(prev.getByRole('list', { name: 'Linhas do arquivo' }).getByRole('listitem').filter({ hasText: 'PR-10032' })).toContainText('Novo paciente');
+    const t = (await sessionToken(context, CLIN)).token, H = { authorization: `Bearer ${t}`, 'x-organization-id': ORG, 'content-type': 'application/json' };
+    const mvId = sql(`SELECT id FROM pdf_imports WHERE organization_id='${ORG}' AND status='previewed'`);
+    // Papéis: médico não importa; outra pessoa não confirma a prévia alheia.
+    const med = await staffLogin(browser, 'medico'); const tm = (await sessionToken(med.context, CLIN)).token;
+    await med.page.goto(`${CLIN}/clinical`); await expect(med.page.getByRole('link', { name: 'Importar lista (PDF)' })).toHaveCount(0);
+    const b64 = readFileSync(`${FX}/censo-tasy-sintetico.pdf`).toString('base64');
+    expect((await request.post(`${API}/v1/clinical/imports/pdf`, { headers: { ...H, authorization: `Bearer ${tm}` }, data: { fileName: 'c.pdf', contentBase64: b64 } })).status()).toBe(403);
+    expect((await request.post(`${API}/v1/clinical/imports/${mvId}/confirm`, { headers: { ...H, authorization: `Bearer ${tm}` }, data: {} })).status()).toBe(403);
+    await med.context.close();
+    expect((await request.post(`${API}/v1/clinical/imports/pdf`, { headers: H, data: { fileName: 'x.pdf', contentBase64: Buffer.from('<html>').toString('base64') } })).status()).toBe(400);
+    await page.getByRole('button', { name: 'Confirmar importação' }).click();
+    await expect(page.getByRole('status').filter({ hasText: /Importação confirmada: 1 novos/ })).toBeVisible();
+    expect((await request.post(`${API}/v1/clinical/imports/${mvId}/confirm`, { headers: H, data: {} })).status()).toBe(409);
+    expect(sql(`SELECT string_agg(action, ',' ORDER BY id) FROM audit_events WHERE actor_sub='${sub('farmaceutico')}' AND action LIKE 'patient.import.%'`))
+      .toBe('patient.import.previewed,patient.import.confirmed,patient.import.previewed,patient.import.discarded,patient.import.previewed,patient.import.confirmed');
+    evidence.pdfImport = { layouts: ['tasy-censo-v1', 'mv-mapa-leitos-v1'], confirmedByHuman: true, conflictNotApplied: true }; saveEvidence(); await context.close();
+  });
+
   test('07 negativos de papel/MFA/vínculo com tokens reais na API', async ({ browser, request }) => {
     // Farmacêutico sem MFA: autenticado, mas API exige MFA.
     const noMfa = await staffLogin(browser, 'farmaceutico.semmfa');

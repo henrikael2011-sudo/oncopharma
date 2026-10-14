@@ -1594,6 +1594,168 @@
           }
         }
       }
+    },
+    "/clinical/imports/pdf": {
+      "post": {
+        "summary": "Enviar PDF da lista diária do hospital (somente sintético em dev) e gerar prévia. Nada é gravado em pacientes/alocação; original guardado cifrado (AES-256-GCM).",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "400": {
+            "description": "Arquivo inválido, sem marcação sintética ou layout não reconhecido"
+          },
+          "403": {
+            "description": "Papel sem permissão de importação"
+          },
+          "503": {
+            "description": "Chave de cifra não configurada"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "fileName",
+                  "contentBase64"
+                ],
+                "properties": {
+                  "fileName": {
+                    "type": "string",
+                    "maxLength": 120
+                  },
+                  "contentBase64": {
+                    "type": "string",
+                    "description": "PDF ≤ 2 MB"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/clinical/imports/{importId}/confirm": {
+      "post": {
+        "summary": "Confirmação humana da prévia: aplica criar/atualizar e somente as divergências marcadas; reavalia cada linha.",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Org"
+          },
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Importação de outra pessoa"
+          },
+          "409": {
+            "description": "Já decidida ou prévia expirada (30 min)"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "applyConflicts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "maxItems": 300
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/clinical/imports/{importId}/discard": {
+      "post": {
+        "summary": "Descartar a prévia (nada é aplicado).",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Org"
+          },
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Importação de outra pessoa"
+          },
+          "409": {
+            "description": "Já decidida ou prévia expirada"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

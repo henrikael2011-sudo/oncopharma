@@ -1,7 +1,7 @@
 // M14.5 — E2E real: API NestJS + PostgreSQL (role restrita) + care-web + clinical-web + admin-web + IdP de teste.
 // Fail-closed: sem as variáveis abaixo, a suíte não roda (BLOQUEADO), nunca "passa" vazia.
 import { defineConfig } from '@playwright/test';
-const required = ['DATABASE_URL', 'DATABASE_URL_ADMIN', 'E2E_STATE_FILE', 'E2E_USER_PASSWORD', 'E2E_SESSION_KEY', 'KC_URL', 'INTEGRATION_GATEWAY_TOKEN'];
+const required = ['DATABASE_URL', 'DATABASE_URL_ADMIN', 'E2E_STATE_FILE', 'E2E_USER_PASSWORD', 'E2E_SESSION_KEY', 'KC_URL', 'INTEGRATION_GATEWAY_TOKEN', 'IMPORT_ENCRYPTION_KEY'];
 const missing = required.filter((n) => !process.env[n]);
 if (missing.length) { console.error(`BLOQUEADO: variáveis ausentes para E2E: ${missing.join(', ')}`); process.exit(2); }
 const KC = process.env.KC_URL.replace(/\/$/, '');
@@ -24,7 +24,7 @@ export default defineConfig({
   webServer: [
     { command: 'node services/api/dist/main.js', cwd: '../..', url: 'http://127.0.0.1:4000/v1/health', timeout: 60_000, reuseExistingServer: false, stdout: 'pipe', stderr: 'pipe',
       env: { NODE_ENV: 'test', ONCO_ENVIRONMENT: 'test', PORT: '4000', ALLOW_SYNTHETIC_API: 'true', DATABASE_URL: process.env.DATABASE_URL, OIDC_ISSUER: ISSUER, OIDC_AUDIENCE: process.env.OIDC_AUDIENCE || 'oncopharma-api',
-        OIDC_JWKS_URI: `${ISSUER}/protocol/openid-connect/certs`, INTEGRATION_GATEWAY_URL: GATEWAY, INTEGRATION_GATEWAY_TOKEN: process.env.INTEGRATION_GATEWAY_TOKEN, PATH: process.env.PATH } },
+        OIDC_JWKS_URI: `${ISSUER}/protocol/openid-connect/certs`, INTEGRATION_GATEWAY_URL: GATEWAY, INTEGRATION_GATEWAY_TOKEN: process.env.INTEGRATION_GATEWAY_TOKEN, IMPORT_ENCRYPTION_KEY: process.env.IMPORT_ENCRYPTION_KEY, PATH: process.env.PATH } },
     // M15.4b — integration-gateway com hospital simulado (somente sintético).
     { command: 'node services/integration-gateway/src/server.mjs', cwd: '../..', url: `${GATEWAY}/health`, timeout: 30_000, reuseExistingServer: false, stdout: 'pipe', stderr: 'pipe',
       env: { ONCO_ENVIRONMENT: 'test', GATEWAY_PORT: '4310', INTEGRATION_GATEWAY_TOKEN: process.env.INTEGRATION_GATEWAY_TOKEN, PATH: process.env.PATH } },

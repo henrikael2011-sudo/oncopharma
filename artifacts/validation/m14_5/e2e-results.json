@@ -142,12 +142,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 3678,
+                      "duration": 2659,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-11T23:43:21.275Z",
+                      "startTime": "2026-10-14T00:35:35.682Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -194,12 +194,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 856,
+                      "duration": 634,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-11T23:43:25.972Z",
+                      "startTime": "2026-10-14T00:35:38.819Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -246,12 +246,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 8158,
+                      "duration": 5968,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-11T23:43:26.844Z",
+                      "startTime": "2026-10-14T00:35:39.465Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -298,12 +298,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 6068,
+                      "duration": 4884,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-11T23:43:35.017Z",
+                      "startTime": "2026-10-14T00:35:45.445Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -350,12 +350,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 17162,
+                      "duration": 16764,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-11T23:43:41.097Z",
+                      "startTime": "2026-10-14T00:35:50.340Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -402,12 +402,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 9072,
+                      "duration": 9314,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-11T23:43:58.274Z",
+                      "startTime": "2026-10-14T00:36:07.115Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -454,12 +454,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 27159,
+                      "duration": 17942,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-11T23:44:07.355Z",
+                      "startTime": "2026-10-14T00:36:16.447Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -506,12 +506,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 14754,
+                      "duration": 13661,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-11T23:44:34.527Z",
+                      "startTime": "2026-10-14T00:36:34.400Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -558,12 +558,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 16918,
+                      "duration": 18621,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-11T23:44:49.295Z",
+                      "startTime": "2026-10-14T00:36:48.074Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -610,12 +610,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 28320,
+                      "duration": 28273,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-11T23:45:06.231Z",
+                      "startTime": "2026-10-14T00:37:06.707Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -635,6 +635,58 @@
               "id": "3597eb8adab86113f57d-8befd4dc6e5c0d62d4d0",
               "file": "m145-flow.spec.mjs",
               "line": 364,
+              "column": 3
+            },
+            {
+              "title": "06d (M15.4c) importação de PDF do hospital: prévia, detalhe só ao abrir, confirmação humana, divergência não aplicada, descarte, papéis",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 240000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
+                        "line": 74,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 13158,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-14T00:37:34.991Z",
+                      "annotations": [
+                        {
+                          "type": "serial",
+                          "location": {
+                            "file": "/workspace/oncopharma-m14/ONCOPHARMA_M14_4/tests/e2e/m145-flow.spec.mjs",
+                            "line": 74,
+                            "column": 15
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "3597eb8adab86113f57d-535c82214a309c74f7f5",
+              "file": "m145-flow.spec.mjs",
+              "line": 432,
               "column": 3
             },
             {
@@ -662,12 +714,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 35213,
+                      "duration": 21310,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-11T23:45:34.566Z",
+                      "startTime": "2026-10-14T00:37:48.160Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -686,7 +738,7 @@
               ],
               "id": "3597eb8adab86113f57d-3514ee9dd6d418a5b72f",
               "file": "m145-flow.spec.mjs",
-              "line": 432,
+              "line": 508,
               "column": 3
             },
             {
@@ -714,12 +766,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1571,
+                      "duration": 2221,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-11T23:46:09.809Z",
+                      "startTime": "2026-10-14T00:38:09.485Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -738,7 +790,7 @@
               ],
               "id": "3597eb8adab86113f57d-435b81f550af929f37e1",
               "file": "m145-flow.spec.mjs",
-              "line": 481,
+              "line": 557,
               "column": 3
             },
             {
@@ -766,12 +818,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 9499,
+                      "duration": 9788,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-11T23:46:11.396Z",
+                      "startTime": "2026-10-14T00:38:11.715Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -790,7 +842,7 @@
               ],
               "id": "3597eb8adab86113f57d-db156df3f0bafe4236fe",
               "file": "m145-flow.spec.mjs",
-              "line": 495,
+              "line": 571,
               "column": 3
             },
             {
@@ -818,12 +870,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 13615,
+                      "duration": 13174,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-11T23:46:20.908Z",
+                      "startTime": "2026-10-14T00:38:21.517Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -842,7 +894,7 @@
               ],
               "id": "3597eb8adab86113f57d-9462172c4896903339f8",
               "file": "m145-flow.spec.mjs",
-              "line": 513,
+              "line": 589,
               "column": 3
             },
             {
@@ -870,12 +922,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 8484,
+                      "duration": 8315,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-11T23:46:34.533Z",
+                      "startTime": "2026-10-14T00:38:34.704Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -894,7 +946,7 @@
               ],
               "id": "3597eb8adab86113f57d-6961a2f6a31bf56512a2",
               "file": "m145-flow.spec.mjs",
-              "line": 566,
+              "line": 642,
               "column": 3
             },
             {
@@ -927,7 +979,7 @@
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-11T23:46:43.027Z",
+                      "startTime": "2026-10-14T00:38:43.031Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -946,7 +998,7 @@
               ],
               "id": "3597eb8adab86113f57d-5036b81c09b2cfda3528",
               "file": "m145-flow.spec.mjs",
-              "line": 582,
+              "line": 658,
               "column": 3
             }
           ]
@@ -956,9 +1008,9 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-10-11T23:43:05.830Z",
-    "duration": 217479.57700000002,
-    "expected": 16,
+    "startTime": "2026-10-14T00:35:24.286Z",
+    "duration": 199049.324,
+    "expected": 17,
     "skipped": 0,
     "unexpected": 0,
     "flaky": 0
