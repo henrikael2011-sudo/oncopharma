@@ -60,3 +60,17 @@ Necessidade → tela → regra → API → teste → aprovação. Tabela acima p
 | UI-05 Alocação hospitalar por "Sincronizar" (FHIR Location/Encounter.location ou HL7 ADT A01/A02/A03) | `docs/diretrizes-design.md` §5; simulador até D-007 | E2E com simulador; auditoria de sincronização | ABERTO (integração real depende de D-007) |
 | UI-06 Alocação manual marcada, auditada; sincronizado prevalece com aviso de conflito | `docs/diretrizes-design.md` §6 | teste de conflito manual × sincronizado | ABERTO |
 | UI-07 Importação de PDF de pacientes do dia (layout por fornecedor, pré-visualização, confirmação, origem/hash, divergência, auditoria, storage criptografado) | `docs/product/RF_IMPORTACAO_PDF_PACIENTES.md`; `docs/diretrizes-design.md` §7 | E2E com PDFs sintéticos | ABERTO (aprovado); **dados reais BLOQUEADO** até autorização do hospital + DPO/LGPD, ambiente sa-east-1 restrito e repositório privado |
+
+## Atualização M14.6 / M15.5 — 18/10/2026 (histórico anterior preservado)
+
+| Requisito | Implementação local | Testes previstos / evidência | Estado |
+|---|---|---|---|
+| D-012 / RF-M15-SAM-01 | Clinical `MedicalRequests`, API `MedicalRequestsController`, migração 0014 | Segurança API 42 PASS (5 novos); 6 testes PG17 e 2 E2E novos ainda não executados | PARCIAL — validação integrada BLOQUEADA |
+| P-SAM-1 (aprovada) | RLS por autor/destinatário; plantão ativo limitado ao pedido/evidências; sem conceder vínculo | DB: escala e isolamento; E2E 08c: prontuário negado | IMPLEMENTADO LOCALMENTE — teste integrado BLOQUEADO |
+| P-SAM-2 (aprovada) | Autor conclui com desfecho/referência oficial; revisão otimista e lock | Unit PASS; DB/E2E pendentes | PARCIAL |
+| P-SAM-3 (aprovada) | Descarte somente rascunho; eventos preservados | Unit PASS; DB/E2E pendentes | PARCIAL |
+| P-SAM-4 (aprovada) | Critérios por unidade, três prioridades, SLA de referência, recebidas no app; sem encerramento/escalonamento automático | Unit/build PASS; E2E pendente | PARCIAL |
+| D-003/004 e regressão | Nenhuma mudança CSS/tokens/marcas/login; 17 E2E preservados + 2 novos | Build/brand/design PASS; 19 E2E precisam executar | PARCIAL |
+| Gate clínico | `readyForClinicalUse=false` | `quality:gate` exit 1 esperado | BLOQUEADO |
+
+Publicação de branch/PR: BLOQUEADA — GitHub 403, sem instalação de escrita acessível. Nenhum merge/deploy. PDF de prescrição/protocolo fora de escopo; M15.4c de censo permanece como entregue.

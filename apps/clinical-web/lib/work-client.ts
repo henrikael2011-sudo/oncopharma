@@ -10,7 +10,7 @@ export async function work<T>(path: string, init?: { method?: 'GET' | 'POST'; bo
 export const when = (d?: string | null) => (d ? new Date(d).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—');
 export type Role = 'pharmacist' | 'physician' | 'nurse' | 'clinical_manager';
 export const ROLE_LABEL: Record<Role, string> = { pharmacist: 'Farmácia', physician: 'Medicina', nurse: 'Enfermagem', clinical_manager: 'Gestão clínica' };
-export type StaffMe = { role: Role; roleLabel: string; name: string | null; mfa: boolean };
+export type StaffMe = { roles?: string[]; role: Role; roleLabel: string; name: string | null; mfa: boolean };
 export type RowAllocation = { unit: string; floor: string | null; room: string | null; bed: string | null; source: 'hospital' | 'manual' | 'pdf'; conflict: boolean };
 export type Row = { id: string; name: string; record: string | null; severity: 'urgent' | 'review' | null; pending: number; allocation: RowAllocation | null };
 export type Worklist = { patients: Row[]; searched: boolean; lastSync: { at: string; source: string } | null };

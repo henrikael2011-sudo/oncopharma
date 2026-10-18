@@ -1,5 +1,6 @@
 'use client';
 // M15.4 — estrutura do Clinical: sessão institucional, MFA e vínculo profissional antes de qualquer dado de paciente.
+import Link from 'next/link';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { Brand } from '../Brand';
 import { work, WorkError, type StaffMe } from '../../lib/work-client';
@@ -34,6 +35,6 @@ export function ClinicalShell({ children }: { children: React.ReactNode }) {
     <header className="clinical-header"><Brand variant="clinical" />
       {loggedIn && <div className="clin-user">{me && <span>{me.name ? `${me.name} · ` : ''}{me.roleLabel} · MFA confirmado</span>}<form action="/api/auth/logout" method="post"><button type="submit" className="btn-on-dark">Sair</button></form></div>}
     </header>
-    <main id="conteudo" className="clinical-main">{content}</main>
+    <main id="conteudo" className="clinical-main">{me?.roles?.includes('physician') && <nav aria-label="Solicitações médicas"><Link href="/clinical/solicitacoes">Solicitações recebidas</Link></nav>}{content}</main>
   </div>;
 }

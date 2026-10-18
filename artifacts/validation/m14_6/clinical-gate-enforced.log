@@ -1,0 +1,21 @@
+
+> oncopharma@0.15.4-dev quality:gate
+> node tools/release-gate.mjs
+
+ONCOPHARMA — GATE DE EVIDÊNCIAS (não é homologação)
+G01 BLOCKED — Aprovação e evidências completas ausentes
+G02 BLOCKED — Aprovação e evidências completas ausentes
+G03 BLOCKED — Aprovação e evidências completas ausentes
+G04 BLOCKED — Aprovação e evidências completas ausentes
+G05 BLOCKED — Aprovação e evidências completas ausentes
+G06 BLOCKED — Aprovação e evidências completas ausentes
+G07 BLOCKED — Aprovação e evidências completas ausentes
+G08 BLOCKED — Aprovação e evidências completas ausentes
+G09 BLOCKED — Aprovação e evidências completas ausentes
+BLOQUEADO: piloto e produção não autorizados.
+
+(node:1744) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+(node:1757) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)

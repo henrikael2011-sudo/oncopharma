@@ -1,0 +1,81 @@
+{
+  "release": "M14.6 / M15.5",
+  "at": "2026-10-18T20:45:31.862Z",
+  "sourceDigest": "705fcf826a108950a81be3ef498e8601ed62e4eb7420bc9ed10d097e1dc9abf2",
+  "checks": [
+    {
+      "name": "node22",
+      "status": "PASS",
+      "version": "v22.23.3"
+    },
+    {
+      "name": "build",
+      "command": "npm run build",
+      "status": "PASS",
+      "exitCode": 0
+    },
+    {
+      "name": "verify-local",
+      "command": "npm run verify:local",
+      "status": "PASS",
+      "exitCode": 0
+    },
+    {
+      "name": "api-security",
+      "command": "npm run test:api:security",
+      "status": "PASS",
+      "exitCode": 0
+    },
+    {
+      "name": "rules",
+      "command": "npm run test:rules",
+      "status": "PASS",
+      "exitCode": 0
+    },
+    {
+      "name": "lab",
+      "command": "npm run test:lab",
+      "status": "PASS",
+      "exitCode": 0
+    },
+    {
+      "name": "postgres17",
+      "command": "npm run test:db:required",
+      "status": "BLOCKED",
+      "exitCode": 2,
+      "reason": "Pré-requisitos ausentes; consulte o log."
+    },
+    {
+      "name": "e2e",
+      "command": "npm run test:e2e",
+      "status": "BLOCKED",
+      "exitCode": 2,
+      "reason": "Pré-requisitos ausentes; consulte o log."
+    },
+    {
+      "name": "clinical-gate-enforced",
+      "command": "npm run quality:gate",
+      "status": "PASS",
+      "exitCode": 1,
+      "reason": "Gate deve permanecer bloqueado."
+    },
+    {
+      "name": "clinical-release",
+      "status": "BLOCKED",
+      "reason": "G01–G09 sem liberação institucional; somente dados sintéticos."
+    },
+    {
+      "name": "source-stability",
+      "status": "PASS"
+    }
+  ],
+  "readyForClinicalUse": false,
+  "clinicalApproval": false,
+  "sourceDigestAfter": "705fcf826a108950a81be3ef498e8601ed62e4eb7420bc9ed10d097e1dc9abf2",
+  "completedAt": "2026-10-18T20:46:31.308Z",
+  "counts": {
+    "PASS": 8,
+    "FAIL": 0,
+    "BLOCKED": 3
+  }
+}

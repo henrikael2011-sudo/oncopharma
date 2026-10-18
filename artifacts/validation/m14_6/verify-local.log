@@ -1,0 +1,695 @@
+
+> oncopharma@0.15.4-dev verify:local
+> npm test && npm run test:extended && npm run test:lab:e2e && npm run check:design && npm run check:brand && npm run check:governance && npm run test:readiness
+
+
+> oncopharma@0.15.4-dev test
+> node --test tests/*.test.mjs
+
+TAP version 13
+# (node:1150) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: migration gates to dev
+ok 1 - migration gates to dev
+  ---
+  duration_ms: 1.092792
+  type: 'test'
+  ...
+# Subtest: no write grants to app role
+ok 2 - no write grants to app role
+  ---
+  duration_ms: 0.247565
+  type: 'test'
+  ...
+# Subtest: human approval required for guidance
+ok 3 - human approval required for guidance
+  ---
+  duration_ms: 0.256017
+  type: 'test'
+  ...
+# Subtest: pilot marked no-go
+ok 4 - pilot marked no-go
+  ---
+  duration_ms: 0.138665
+  type: 'test'
+  ...
+# Subtest: rules engine included
+ok 5 - rules engine included
+  ---
+  duration_ms: 0.216339
+  type: 'test'
+  ...
+# (node:1151) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: ambientes Care e Clinical existem
+ok 6 - ambientes Care e Clinical existem
+  ---
+  duration_ms: 2.111804
+  type: 'test'
+  ...
+# Subtest: marca sem símbolo de registro não confirmado
+ok 7 - marca sem símbolo de registro não confirmado
+  ---
+  duration_ms: 0.381653
+  type: 'test'
+  ...
+# Subtest: API não expõe prontuários sem controle de acesso
+ok 8 - API não expõe prontuários sem controle de acesso
+  ---
+  duration_ms: 0.185674
+  type: 'test'
+  ...
+# Subtest: produção não possui seed de pacientes
+ok 9 - produção não possui seed de pacientes
+  ---
+  duration_ms: 0.184552
+  type: 'test'
+  ...
+# (node:1152) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: endpoints clínicos falham fechados sem habilitação e em produção
+ok 10 - endpoints clínicos falham fechados sem habilitação e em produção
+  ---
+  duration_ms: 2.258731
+  type: 'test'
+  ...
+# Subtest: JWT usa JWKS remoto, valida issuer, audience e assinatura
+ok 11 - JWT usa JWKS remoto, valida issuer, audience e assinatura
+  ---
+  duration_ms: 0.397216
+  type: 'test'
+  ...
+# Subtest: RLS FORCE e isolamento de transação
+ok 12 - RLS FORCE e isolamento de transação
+  ---
+  duration_ms: 0.282277
+  type: 'test'
+  ...
+# Subtest: seed não contém paciente real e usa sub do provedor
+ok 13 - seed não contém paciente real e usa sub do provedor
+  ---
+  duration_ms: 0.377427
+  type: 'test'
+  ...
+# Subtest: segredos e bancos não estão embutidos no app
+ok 14 - segredos e bancos não estão embutidos no app
+  ---
+  duration_ms: 0.330407
+  type: 'test'
+  ...
+# (node:1158) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: M10 bloqueado em produção
+ok 15 - M10 bloqueado em produção
+  ---
+  duration_ms: 1.052542
+  type: 'test'
+  ...
+# Subtest: M10 usa autenticação
+ok 16 - M10 usa autenticação
+  ---
+  duration_ms: 0.152706
+  type: 'test'
+  ...
+# Subtest: M10 verifica vínculo paciente e atribuição profissional
+ok 17 - M10 verifica vínculo paciente e atribuição profissional
+  ---
+  duration_ms: 0.147097
+  type: 'test'
+  ...
+# Subtest: M10 registra auditoria e idempotência
+ok 18 - M10 registra auditoria e idempotência
+  ---
+  duration_ms: 0.228347
+  type: 'test'
+  ...
+# Subtest: M10 usa transações por tenant
+ok 19 - M10 usa transações por tenant
+  ---
+  duration_ms: 0.231512
+  type: 'test'
+  ...
+# Subtest: M10 ativa RLS
+ok 20 - M10 ativa RLS
+  ---
+  duration_ms: 0.190821
+  type: 'test'
+  ...
+# (node:1159) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: BFF requires session and dev flags
+ok 21 - BFF requires session and dev flags
+  ---
+  duration_ms: 1.11196
+  type: 'test'
+  ...
+# Subtest: POST requires same origin and JSON with size limit
+ok 22 - POST requires same origin and JSON with size limit
+  ---
+  duration_ms: 0.24376
+  type: 'test'
+  ...
+# Subtest: clinical review does not send guidance
+ok 23 - clinical review does not send guidance
+  ---
+  duration_ms: 0.40019
+  type: 'test'
+  ...
+# Subtest: care report uses requestId and no advice
+ok 24 - care report uses requestId and no advice
+  ---
+  duration_ms: 0.247395
+  type: 'test'
+  ...
+# Subtest: all proxy routes present
+ok 25 - all proxy routes present
+  ---
+  duration_ms: 0.436714
+  type: 'test'
+  ...
+# (node:1170) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: M10.2: homepage no longer claims M1
+ok 26 - M10.2: homepage no longer claims M1
+  ---
+  duration_ms: 1.575864
+  type: 'test'
+  ...
+# Subtest: M10.2: Care never claims that reporting is impossible
+ok 27 - M10.2: Care never claims that reporting is impossible
+  ---
+  duration_ms: 0.239183
+  type: 'test'
+  ...
+# Subtest: M10.2: Clinical states technical validation limits
+ok 28 - M10.2: Clinical states technical validation limits
+  ---
+  duration_ms: 0.280343
+  type: 'test'
+  ...
+# Subtest: M10.2: brand care includes family and heart
+ok 29 - M10.2: brand care includes family and heart
+  ---
+  duration_ms: 0.131434
+  type: 'test'
+  ...
+# Subtest: M10.2: brand clinical includes professional and infusion
+ok 30 - M10.2: brand clinical includes professional and infusion
+  ---
+  duration_ms: 0.302005
+  type: 'test'
+  ...
+# Subtest: M10.2: plan baseline is preserved
+ok 31 - M10.2: plan baseline is preserved
+  ---
+  duration_ms: 0.254775
+  type: 'test'
+  ...
+# (node:1176) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Care não publica endpoint de revisão clínica
+ok 32 - Care não publica endpoint de revisão clínica
+  ---
+  duration_ms: 0.749765
+  type: 'test'
+  ...
+# Subtest: Clinical não publica endpoint de sintomas do paciente
+ok 33 - Clinical não publica endpoint de sintomas do paciente
+  ---
+  duration_ms: 0.145635
+  type: 'test'
+  ...
+# Subtest: Admin não possui rotas de prontuário
+ok 34 - Admin não possui rotas de prontuário
+  ---
+  duration_ms: 0.097504
+  type: 'test'
+  ...
+# Subtest: portal legado preservado
+ok 35 - portal legado preservado
+  ---
+  duration_ms: 0.249438
+  type: 'test'
+  ...
+# Subtest: planejamento v3 mantido
+ok 36 - planejamento v3 mantido
+  ---
+  duration_ms: 0.323667
+  type: 'test'
+  ...
+# Subtest: sem marca registrada na assinatura
+ok 37 - sem marca registrada na assinatura
+  ---
+  duration_ms: 0.107649
+  type: 'test'
+  ...
+# (node:1206) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: PKCE S256 e state presentes
+ok 38 - PKCE S256 e state presentes
+  ---
+  duration_ms: 0.970752
+  type: 'test'
+  ...
+# Subtest: sessão HttpOnly e criptografada
+ok 39 - sessão HttpOnly e criptografada
+  ---
+  duration_ms: 0.183781
+  type: 'test'
+  ...
+# Subtest: callback valida state e expiração
+ok 40 - callback valida state e expiração
+  ---
+  duration_ms: 0.17612
+  type: 'test'
+  ...
+# Subtest: sem token no navegador
+ok 41 - sem token no navegador
+  ---
+  duration_ms: 0.179545
+  type: 'test'
+  ...
+# Subtest: logout POST e checagem de origem
+ok 42 - logout POST e checagem de origem
+  ---
+  duration_ms: 0.291159
+  type: 'test'
+  ...
+# Subtest: pacientes de teste bloqueados por padrão
+ok 43 - pacientes de teste bloqueados por padrão
+  ---
+  duration_ms: 0.160617
+  type: 'test'
+  ...
+# (node:1212) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: runtime sem permissões de alteração clínica
+ok 44 - runtime sem permissões de alteração clínica
+  ---
+  duration_ms: 0.78665
+  type: 'test'
+  ...
+# Subtest: reset limitado a dev e sem apagar auditoria
+ok 45 - reset limitado a dev e sem apagar auditoria
+  ---
+  duration_ms: 0.147378
+  type: 'test'
+  ...
+# Subtest: login mantém PKCE e cookie HttpOnly
+ok 46 - login mantém PKCE e cookie HttpOnly
+  ---
+  duration_ms: 0.194557
+  type: 'test'
+  ...
+# (node:1213) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: gate falha fechado com aprovações pendentes
+ok 47 - gate falha fechado com aprovações pendentes
+  ---
+  duration_ms: 58.933928
+  type: 'test'
+  ...
+# Subtest: gate falha fechado sem arquivo
+ok 48 - gate falha fechado sem arquivo
+  ---
+  duration_ms: 53.3065
+  type: 'test'
+  ...
+# Subtest: gate rejeita alegação approved sem artefatos e aprovador
+ok 49 - gate rejeita alegação approved sem artefatos e aprovador
+  ---
+  duration_ms: 48.662701
+  type: 'test'
+  ...
+# Subtest: gate nunca autoriza uso clínico mesmo com declarações completas
+ok 50 - gate nunca autoriza uso clínico mesmo com declarações completas
+  ---
+  duration_ms: 42.659318
+  type: 'test'
+  ...
+# (node:1219) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: M14.2: laboratório sintético HTTP ponta a ponta e isolamento local
+ok 51 - M14.2: laboratório sintético HTTP ponta a ponta e isolamento local
+  ---
+  duration_ms: 130.169293
+  type: 'test'
+  ...
+# (node:1225) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: CI usa banco DEV permitido pelas migrações
+ok 52 - CI usa banco DEV permitido pelas migrações
+  ---
+  duration_ms: 2.094068
+  type: 'test'
+  ...
+# Subtest: CI provisiona role antes do teste real de RLS
+ok 53 - CI provisiona role antes do teste real de RLS
+  ---
+  duration_ms: 0.410425
+  type: 'test'
+  ...
+# Subtest: migração inclui política INSERT de auditoria com tenant
+ok 54 - migração inclui política INSERT de auditoria com tenant
+  ---
+  duration_ms: 0.266653
+  type: 'test'
+  ...
+# Subtest: testes obrigatórios recusam conexão administrativa
+ok 55 - testes obrigatórios recusam conexão administrativa
+  ---
+  duration_ms: 0.246664
+  type: 'test'
+  ...
+# Subtest: bootstrap exige ambiente test e não usa seeds
+ok 56 - bootstrap exige ambiente test e não usa seeds
+  ---
+  duration_ms: 0.32541
+  type: 'test'
+  ...
+# (node:1236) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: OpenAPI documenta exatamente as rotas da API
+ok 57 - OpenAPI documenta exatamente as rotas da API
+  ---
+  duration_ms: 6.351897
+  type: 'test'
+  ...
+# Subtest: modo sintético: nunca habilita em prod; exige ONCO_ENVIRONMENT conhecido
+ok 58 - modo sintético: nunca habilita em prod; exige ONCO_ENVIRONMENT conhecido
+  ---
+  duration_ms: 0.579244
+  type: 'test'
+  ...
+# Subtest: Care não contém componentes do Clinical e vice-versa (D-002)
+ok 59 - Care não contém componentes do Clinical e vice-versa (D-002)
+  ---
+  duration_ms: 0.268876
+  type: 'test'
+  ...
+# (node:1246) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: tools/check-brand.mjs: tokens §2.2, sem cores fora da paleta, contraste AA, títulos, sem ®
+ok 60 - tools/check-brand.mjs: tokens §2.2, sem cores fora da paleta, contraste AA, títulos, sem ®
+  ---
+  duration_ms: 50.674478
+  type: 'test'
+  ...
+# Subtest: nomes de marca exatos e sem ®
+ok 61 - nomes de marca exatos e sem ®
+  ---
+  duration_ms: 2.585743
+  type: 'test'
+  ...
+# (node:1264) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: M2: prontuário somente sintético, autenticado e auditado
+ok 62 - M2: prontuário somente sintético, autenticado e auditado
+  ---
+  duration_ms: 1.446974
+  type: 'test'
+  ...
+# Subtest: M2: RLS em todas as tabelas clínicas
+ok 63 - M2: RLS em todas as tabelas clínicas
+  ---
+  duration_ms: 0.198713
+  type: 'test'
+  ...
+# Subtest: M2: proxy autenticado e bloqueado em produção
+ok 64 - M2: proxy autenticado e bloqueado em produção
+  ---
+  duration_ms: 0.155489
+  type: 'test'
+  ...
+1..64
+# tests 64
+# suites 0
+# pass 64
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 359.593263
+
+> oncopharma@0.15.4-dev test:extended
+> node --test services/integration-gateway/tests/*.test.mjs services/ai-orchestrator/tests/*.test.mjs tests/m103-m14.test.mjs
+
+TAP version 13
+# (node:1342) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: rascunho sempre pendente de revisão
+ok 1 - rascunho sempre pendente de revisão
+  ---
+  duration_ms: 1.304353
+  type: 'test'
+  ...
+# Subtest: bloqueia referência não aprovada
+ok 2 - bloqueia referência não aprovada
+  ---
+  duration_ms: 0.33947
+  type: 'test'
+  ...
+# Subtest: bloqueia ação terapêutica
+ok 3 - bloqueia ação terapêutica
+  ---
+  duration_ms: 0.168749
+  type: 'test'
+  ...
+# Subtest: bloqueia evidência sem origem
+ok 4 - bloqueia evidência sem origem
+  ---
+  duration_ms: 0.103312
+  type: 'test'
+  ...
+# (node:1343) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: bundle sintético normalizado
+ok 5 - bundle sintético normalizado
+  ---
+  duration_ms: 0.776595
+  type: 'test'
+  ...
+# Subtest: deduplicação idempotente
+ok 6 - deduplicação idempotente
+  ---
+  duration_ms: 0.203409
+  type: 'test'
+  ...
+# Subtest: bloqueia ID não sintético
+ok 7 - bloqueia ID não sintético
+  ---
+  duration_ms: 0.313792
+  type: 'test'
+  ...
+# Subtest: bloqueia tipo não autorizado
+ok 8 - bloqueia tipo não autorizado
+  ---
+  duration_ms: 0.121048
+  type: 'test'
+  ...
+# Subtest: bloqueia duplicatas
+ok 9 - bloqueia duplicatas
+  ---
+  duration_ms: 0.227526
+  type: 'test'
+  ...
+# (node:1344) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Care não publica endpoint de revisão clínica
+ok 10 - Care não publica endpoint de revisão clínica
+  ---
+  duration_ms: 0.737998
+  type: 'test'
+  ...
+# Subtest: Clinical não publica endpoint de sintomas do paciente
+ok 11 - Clinical não publica endpoint de sintomas do paciente
+  ---
+  duration_ms: 0.124494
+  type: 'test'
+  ...
+# Subtest: Admin não possui rotas de prontuário
+ok 12 - Admin não possui rotas de prontuário
+  ---
+  duration_ms: 0.089842
+  type: 'test'
+  ...
+# Subtest: portal legado preservado
+ok 13 - portal legado preservado
+  ---
+  duration_ms: 0.14267
+  type: 'test'
+  ...
+# Subtest: planejamento v3 mantido
+ok 14 - planejamento v3 mantido
+  ---
+  duration_ms: 0.276918
+  type: 'test'
+  ...
+# Subtest: sem marca registrada na assinatura
+ok 15 - sem marca registrada na assinatura
+  ---
+  duration_ms: 0.192213
+  type: 'test'
+  ...
+1..15
+# tests 15
+# suites 0
+# pass 15
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 80.572228
+
+> oncopharma@0.15.4-dev test:lab:e2e
+> node --test tests/m142-lab-e2e.test.mjs
+
+TAP version 13
+# (node:1386) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: M14.2: laboratório sintético HTTP ponta a ponta e isolamento local
+ok 1 - M14.2: laboratório sintético HTTP ponta a ponta e isolamento local
+  ---
+  duration_ms: 124.815311
+  type: 'test'
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 1
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 205.718818
+
+> oncopharma@0.15.4-dev check:design
+> node tools/check-design.mjs
+
+Design system: 15 arquivos alinhados à referência canônica
+
+> oncopharma@0.15.4-dev check:brand
+> node tools/check-brand.mjs
+
+texto Care                   ink-teal/mint-50 11.12:1 (mín 4.5)
+texto Care em cartão         ink-teal/white 11.96:1 (mín 4.5)
+rótulo Care                  emerald/mint-50 5.36:1 (mín 4.5)
+botão Care                   white/emerald 5.77:1 (mín 4.5)
+botão Clinical               white/navy 13.10:1 (mín 4.5)
+cabeçalho Care               white/teal 11.79:1 (mín 4.5)
+cabeçalho Clinical           white/navy-800 14.20:1 (mín 4.5)
+texto Clinical               ink-navy/navy-50 11.79:1 (mín 4.5)
+rótulo Clinical              gold-700/navy-50 4.75:1 (mín 4.5)
+texto auxiliar               ink-muted/white 6.64:1 (mín 4.5)
+nota Care                    ink-muted/mint-50 6.18:1 (mín 4.5)
+navegação Care               ink-teal/white 11.96:1 (mín 4.5)
+botão secundário Care        teal/white 11.79:1 (mín 4.5)
+botão Ligar 192              white/danger 6.57:1 (mín 4.5)
+título urgente               danger/white 6.57:1 (mín 4.5)
+borda de escolha             border-strong/white 4.47:1 (mín 3)
+texto secundário             navy-text/navy-50 7.07:1 (mín 4.5)
+aviso claro                  gold-ink/gold-50 9.49:1 (mín 4.5)
+rótulo planejado             emerald-ink/mint-100 6.48:1 (mín 4.5)
+alerta crítico               danger/white 6.57:1 (mín 4.5)
+texto claro                  ink/canvas 13.66:1 (mín 4.5)
+foco claro (Care)            navy/mint-50 12.18:1 (mín 3)
+foco claro (Clinical)        navy/navy-50 11.72:1 (mín 3)
+foco escuro (Care)           gold/teal 5.41:1 (mín 3)
+foco escuro (Clinical)       gold/navy-800 6.51:1 (mín 3)
+borda de controle            border-strong/white 4.47:1 (mín 3)
+borda de controle (Care)     border-strong/mint-50 4.15:1 (mín 3)
+borda de controle (painel)   border-strong/navy-100 3.60:1 (mín 3)
+gravidade urgente            white/danger 6.57:1 (mín 4.5)
+gravidade revisão            gold-ink/gold-50 9.49:1 (mín 4.5)
+sem alerta                   navy-text/navy-50 7.07:1 (mín 4.5)
+texto secundário em cartão   navy-text/white 7.90:1 (mín 4.5)
+aba ativa                    navy/navy-50 11.72:1 (mín 4.5)
+mensagem de sucesso          ink-teal/mint-50 11.12:1 (mín 4.5)
+erro em cartão               danger/white 6.57:1 (mín 4.5)
+borda de gravidade (revisão) gold-700/gold-50 4.99:1 (mín 3)
+borda pendente no checklist  gold-700/white 5.30:1 (mín 3)
+Identidade: OK (4 folhas de estilo, 75 fontes TS/TSX, 37 pares de contraste)
+
+> oncopharma@0.15.4-dev check:governance
+> node tools/check-governance.mjs
+
+Governança: documentos e limites de release presentes
+
+> oncopharma@0.15.4-dev test:readiness
+> node --test tests/m141-release-gate.test.mjs
+
+TAP version 13
+# (node:1489) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: gate falha fechado com aprovações pendentes
+ok 1 - gate falha fechado com aprovações pendentes
+  ---
+  duration_ms: 43.35898
+  type: 'test'
+  ...
+# Subtest: gate falha fechado sem arquivo
+ok 2 - gate falha fechado sem arquivo
+  ---
+  duration_ms: 41.23285
+  type: 'test'
+  ...
+# Subtest: gate rejeita alegação approved sem artefatos e aprovador
+ok 3 - gate rejeita alegação approved sem artefatos e aprovador
+  ---
+  duration_ms: 41.625774
+  type: 'test'
+  ...
+# Subtest: gate nunca autoriza uso clínico mesmo com declarações completas
+ok 4 - gate nunca autoriza uso clínico mesmo com declarações completas
+  ---
+  duration_ms: 47.971208
+  type: 'test'
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 4
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 244.197517
+
+(node:1117) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+(node:1130) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+(node:1143) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1322) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+(node:1335) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1366) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+(node:1379) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1406) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+(node:1419) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1427) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+(node:1440) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1448) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+(node:1461) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1469) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+(node:1482) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)

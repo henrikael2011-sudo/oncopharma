@@ -8,9 +8,10 @@ import { TasksTab } from './TasksTab';
 import { PreCycleTab } from './PreCycleTab';
 import { TimelineTab } from './TimelineTab';
 import { RecordTab } from './RecordTab';
+import { MedicalRequestList } from './MedicalRequests';
 import { AllocationPanel } from './AllocationPanel';
 
-const TABS = [['alertas', 'Alertas'], ['tarefas', 'Tarefas'], ['preciclo', 'Pré-ciclo'], ['linha', 'Linha do tempo'], ['prontuario', 'Prontuário']] as const;
+const TABS = [['alertas', 'Alertas'], ['tarefas', 'Tarefas'], ['preciclo', 'Pré-ciclo'], ['linha', 'Linha do tempo'], ['prontuario', 'Prontuário'], ['solicitacoes', 'Solicitações médicas']] as const;
 type Tab = (typeof TABS)[number][0];
 export function PatientView({ id }: { id: string }) {
   const [d, setD] = useState<PatientData | null>(null), [err, setErr] = useState(''), [tab, setTab] = useState<Tab>('alertas');
@@ -35,6 +36,7 @@ export function PatientView({ id }: { id: string }) {
       {tab === 'tarefas' && <TasksTab data={d} reload={load} />}
       {tab === 'preciclo' && <PreCycleTab id={id} />}
       {tab === 'linha' && <TimelineTab id={id} />}
+      {tab === 'solicitacoes' && <MedicalRequestList patientId={id} />}
       {tab === 'prontuario' && <RecordTab id={id} />}
     </section>
   </article>;

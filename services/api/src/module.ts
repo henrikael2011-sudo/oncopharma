@@ -4,6 +4,7 @@ import { DatabaseService } from './database.service';
 import { AuthGuard } from './auth.guard';
 import { WorkflowController } from './workflow.controller';
 import { CareController } from './care.controller';
+import { MedicalRequestsController } from './medical-requests.controller';
 import { ClinicalWorkController } from './clinical-work.controller';
 
 @Controller('health')
@@ -15,5 +16,5 @@ class ReadyController {
   constructor(private readonly db: DatabaseService) {}
   @Get() async ready() { if (!(await this.db.ready())) throw new ServiceUnavailableException('Banco indisponível'); return { databaseReady: true, clinicalOperationsEnabled: false }; }
 }
-@Module({ controllers: [HealthController, ReadyController, ClinicalController, WorkflowController, CareController, ClinicalWorkController], providers: [DatabaseService, AuthGuard] })
+@Module({ controllers: [MedicalRequestsController, HealthController, ReadyController, ClinicalController, WorkflowController, CareController, ClinicalWorkController], providers: [DatabaseService, AuthGuard] })
 export class AppModule {}

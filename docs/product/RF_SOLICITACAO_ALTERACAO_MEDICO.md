@@ -36,3 +36,11 @@
 - **P-SAM-1:** plantonista sem vínculo prévio vê só a solicitação + evidências vinculadas (não o prontuário inteiro), acesso auditado com motivo `on_call`.
 - **P-SAM-2:** apenas o autor registra `concluida`, informando a referência do registro no sistema oficial (texto livre); o médico pode registrar observação, mas não conclui pelo autor.
 - **P-SAM-3:** rascunho pode ser descartado (`descartada`) apenas antes do envio; após `enviada` não há exclusão (somente estados finais).
+
+## Atualização M14.6 / M15.5 — 18/10/2026
+
+P-SAM-1..4 aprovadas expressamente pelo responsável. Primeira implementação usa justificativa **manual** (nenhuma assistência rotulada como IA). O drafter da seção anterior permanece opção futura, não implementada. Rotas atuais: `/v1/clinical/patients/:patientId/medical-requests`, `/v1/clinical/medical-requests/inbox`, `/v1/clinical/medical-requests/:requestId` e ações `edit`/`transition`.
+
+Rascunhos/listas restritos a autor/destinatário autorizado; médico vê solicitação enviada, e plantonista sem vínculo somente enquanto a escala designada estiver ativa. Sem repasse automático. Abertura gera leitura auditada; início de revisão é ação explícita. Prioridade configurada por unidade, com snapshot no envio. Confirmação humana obrigatória no envio. Concorrência rejeita revisão desatualizada com 409.
+
+Estado desta entrega: implementação local, validação PostgreSQL/E2E e publicação BLOQUEADAS por ambiente/conexão. Critérios originais de aceite continuam obrigatórios; nenhuma aprovação clínica. Ver relatório M14.6.
