@@ -3,7 +3,7 @@
 ## Diagnóstico
 Base: `main` em `f64870b00a68cb28f877d4e88ab5c6669769b54d` (PR #10, M15.4c). A importação existente é de censo/alocação; prescrição/protocolo PDF permanece fora desta entrega. D-012 e P-SAM-1..4 aprovadas pelo responsável em 18/10/2026.
 
-**Implementação local; NÃO pronta para merge.** Branch `m14.6-m15.5-solicitacoes`. Publicação no GitHub recusada com HTTP 403 (`Resource not accessible by integration`); `git push --dry-run` também sem credencial. Nenhum PR criado, nenhum merge ou deploy efetuado. A conexão instalada não retornou instalações GitHub acessíveis.
+**Implementação publicada em PR rascunho; NÃO pronta para merge.** Branch `m14.6-m15.5-solicitacoes`, [PR #11](https://github.com/henrikael2011-sudo/oncopharma/pull/11). O bloqueio inicial HTTP 403 foi resolvido com instalação do conector somente neste repositório. CI integrado iniciado na execução 39167977428. Nenhum merge ou deploy efetuado.
 
 ## Solução e implementação
 - Solicitação humana com evidências selecionadas (alerta, exame, ordem, administração ou relato), justificativa obrigatória e prioridade.
@@ -49,14 +49,14 @@ O relatório desta entrega está em `artifacts/validation/m14_6/validation-repor
 
 - Build de todos os workspaces, `verify:local`, segurança da API (42 testes), regras e laboratório: resultados locais nos logs.
 - 17 testes E2E existentes preservados; 2 cenários novos (19 declarações): vinculado → ajustada → conclusão/auditoria; plantonista sem vínculo → aceita/recusada, descarte, falta de escala, perda de acesso. Incluem teclado, zoom 200%, 390/768/1440, axe e capturas **a gerar quando executados**.
-- 6 testes novos de PostgreSQL incluem RLS, MFA/contexto, admin/sem vínculo, evidência cruzada, escala ausente/ambígua/expirada/futura, transições, resposta/conclusão obrigatórias, imutabilidade e snapshots. Ainda precisam executar em PG17 real.
+- 5 testes novos de PostgreSQL incluem RLS, MFA/contexto, admin/sem vínculo, evidência cruzada, escala ausente/ambígua/expirada/futura, transições, resposta/conclusão obrigatórias, imutabilidade e snapshots. Ainda precisam executar em PG17 real.
 - O container expõe apenas UID 0 (`/proc/self/uid_map: 0 0 1`), sem Docker ou psql; `initdb` PG17 recusa root. URLs e IdP de teste não estão configurados. Os comandos exigidos encerram em 2, sem pular testes nem simular aprovação.
 - Diagnóstico auxiliar de sintaxe SQL foi feito com PGlite/WASM em scratch, inclusive caminho até conclusão; **não é PostgreSQL 17**, não é E2E e não é evidência de aceite integrado. Encontrou e permitiu corrigir parênteses na expressão CASE da guarda SQL antes da entrega. Não foi adicionado como dependência do projeto.
 - Primeira coleta local detectou alteração de fonte durante a execução (correção SQL); relatório preservado em `attempt-01`. A coleta final tem digest estável: **8 PASS / 0 FAIL / 3 BLOCKED**. A coleta intermediária está em `attempt-02`.
 
 ## Riscos e próximos passos
-1. **Bloqueante:** restabelecer conexão GitHub com escrita neste repositório para publicar a branch e abrir PR. Não colar token/senha no chat.
-2. **Bloqueante:** CI deve comprovar migração 0014, 41 testes totais de banco e 19 E2E (17 anteriores + 2 novos); contagens esperadas, não resultados obtidos. Não fazer merge antes disso e da confirmação do responsável.
+1. **Resolvido:** conexão de escrita restabelecida; branch publicada e PR #11 aberto em rascunho.
+2. **Bloqueante:** CI deve comprovar migração 0014, 40 testes totais de banco e 19 E2E (17 anteriores + 2 novos); contagens esperadas, não resultados obtidos. Não fazer merge antes disso e da confirmação do responsável.
 3. Revisão humana do diff, autorização/escala, aparência e auditoria. Sem repasse de plantão nesta fase: pedido continua pendente; nunca roteia ou conclui sozinho. Casos operacionais de perda do autor/vínculo exigem decisão futura.
 4. Confirmar nomes no cadastro sintético de médicos; sem nome, a UI informa ausência. Não inferir identidade a partir de e-mail/domínio.
 5. Os testes de acessibilidade novos e capturas autenticadas estão BLOQUEADOS com o E2E; nenhum screenshot de fluxo simulado foi apresentado como real.

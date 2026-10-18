@@ -9,3 +9,6 @@
 - 5 testes unitários/segurança novos (total 42); 6 de banco novos (execução PG17 pendente); 2 E2E novos, mantendo os 17 anteriores (execução integrada pendente).
 - Evidência local isolada em m14_6, PASS/FAIL/BLOCKED separados; histórico anterior mantido.
 - Prescrição/protocolo PDF e IA/D-013 fora de escopo. `readyForClinicalUse=false`.
+
+
+Atualização 18/10/2026, 18:28 BRT: acesso de escrita restabelecido; branch publicada e PR #11 aberto em rascunho (https://github.com/henrikael2011-sudo/oncopharma/pull/11). CI 39167977428 em execução. Bloqueio de publicação acima é histórico. Sem merge/deploy. Contagem corrigida: 5 novos testes de banco, 40 totais esperados; resultado integrado ainda pendente.

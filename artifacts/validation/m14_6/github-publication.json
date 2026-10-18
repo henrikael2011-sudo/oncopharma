@@ -1,11 +1,22 @@
 {
-  "status": "BLOCKED",
-  "operation": "create branch m14.6-m15.5-solicitacoes",
-  "error": "GitHub API 403 Resource not accessible by integration",
-  "gitDryRun": "fatal: could not read Username for https://github.com: No such device or address",
-  "accessibleInstallations": 0,
-  "branchCreatedRemotely": false,
-  "prCreated": false,
+  "status": "PASS",
+  "branchCreatedRemotely": true,
+  "prCreated": true,
+  "prUrl": "https://github.com/henrikael2011-sudo/oncopharma/pull/11",
+  "headSha": "c2557c7f7d8b99da29406491a71b71c1356327af",
   "merged": false,
-  "mainChanged": false
+  "mainChanged": false,
+  "history": [
+    {
+      "status": "BLOCKED",
+      "operation": "create branch m14.6-m15.5-solicitacoes",
+      "error": "GitHub API 403 Resource not accessible by integration",
+      "gitDryRun": "fatal: could not read Username for https://github.com: No such device or address",
+      "accessibleInstallations": 0,
+      "branchCreatedRemotely": false,
+      "prCreated": false,
+      "merged": false,
+      "mainChanged": false
+    }
+  ]
 }

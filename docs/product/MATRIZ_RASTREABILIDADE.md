@@ -74,3 +74,6 @@ Necessidade → tela → regra → API → teste → aprovação. Tabela acima p
 | Gate clínico | `readyForClinicalUse=false` | `quality:gate` exit 1 esperado | BLOQUEADO |
 
 Publicação de branch/PR: BLOQUEADA — GitHub 403, sem instalação de escrita acessível. Nenhum merge/deploy. PDF de prescrição/protocolo fora de escopo; M15.4c de censo permanece como entregue.
+
+
+Atualização 18/10/2026, 18:28 BRT: acesso de escrita restabelecido; branch publicada e PR #11 aberto em rascunho (https://github.com/henrikael2011-sudo/oncopharma/pull/11). CI 39167977428 em execução. Bloqueio de publicação acima é histórico. Sem merge/deploy. Contagem corrigida: 5 novos testes de banco, 40 totais esperados; resultado integrado ainda pendente.
