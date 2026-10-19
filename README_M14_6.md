@@ -3,7 +3,7 @@
 ## Diagnóstico
 Base: `main` em `f64870b00a68cb28f877d4e88ab5c6669769b54d` (PR #10, M15.4c). A importação existente é de censo/alocação; prescrição/protocolo PDF permanece fora desta entrega. D-012 e P-SAM-1..4 aprovadas pelo responsável em 18/10/2026.
 
-**Correções implementadas no PR #11, sem merge/deploy.** Branch `m14.6-m15.5-solicitacoes`. Execução [39186760947](https://github.com/henrikael2011-sudo/oncopharma/actions/runs/39186760947), commit `918e78379aac35bdde76bd348951ab4e618b4936`: integration e unit-and-structure verdes; banco 40/40, E2E 19/19 e segurança 42/42. Revisão e autorização de merge do responsável continuam pendentes. Os registros de bloqueios locais abaixo são históricos; o CI resolveu os pré-requisitos técnicos.
+**Correções completas no PR #11, sem merge/deploy.** Branch `m14.6-m15.5-solicitacoes`. Execução [39187685667](https://github.com/henrikael2011-sudo/oncopharma/actions/runs/39187685667), commit `164135c0175bc0c96f33f03a2b86ae20523e78f8`: integration e unit-and-structure verdes; banco 40/40, E2E 19/19 e segurança 42/42. Inclui exigência de nome cadastrado, registro opcional, prazo com ressalva e pedido órfão. Revisão e autorização de merge continuam pendentes. Os bloqueios e resultados anteriores abaixo são históricos.
 
 ## Solução e implementação
 - Solicitação humana com evidências selecionadas (alerta, exame, ordem, administração ou relato), justificativa obrigatória e prioridade.
@@ -99,3 +99,11 @@ Run **39186760947**, jobs **117850707239 (integration)** e **117850707026 (unit-
 A falha anterior do run 39168363344 permanece registrada, sem ser apresentada como aprovação. PASS, FAIL e BLOCKED estão separados no relatório; bloqueio clínico continua ativo. As funções SECURITY DEFINER têm finalidade restrita e search_path fixo; não concedem acesso direto do app a eventos nem aceitam ação/snapshot do cliente.
 
 Reforço final do E2E: cadastro sintético do autor com nome/CRF e prazo de referência de 60 minutos, com assertivas de identificação e “sem escalonamento”. O fechamento da revisão também exige nome cadastrado para qualquer evento novo e testa a recusa atômica de cadastro sem nome. O CI do commit final deve ficar verde antes do parecer final.
+
+
+## Fechamento técnico — versão completa
+**Run 39187685667**: integration **117853464279** e unit-and-structure **117853464102**, ambos success. Comandos e resultados: npm run build (0); npm run test:api:security (42/42, 0); npm run test:db:required (40/40, 0); bash tests/e2e/run-e2e.sh (19/19, 0), com 08c e 09 axe, zero ignorados. O cadastro sem nome é recusado atomicamente; nomes e registros sintéticos aparecem nas capturas e são verificados no E2E. O prazo preenchido é testado com a ressalva sem escalonamento.
+
+Logs, relatório e JSON E2E atualizados em artifacts/validation/m14_6. Manifesto das nove capturas M15.5 em ci-39187685667/artifact-manifest.json; ZIP oficial do artefato 12158598810 tem SHA-256 adae5cef6dab9dbf90f0361483d016cd4ad326ab880638075a90a8fbd72b5f43. Zero violações axe nas telas novas analisadas. Histórico preservado. Este fechamento altera apenas documentação/evidências; o CI do commit documental também será conferido no PR.
+
+**GO técnico para revisão; merge não autorizado. NO-GO clínico, readyForClinicalUse=false.**

@@ -81,3 +81,5 @@ Atualização 18/10/2026, 18:28 BRT: acesso de escrita restabelecido; branch pub
 Revisão PR #11: P-SAM-1 → allowlists SQL + negação de eventos forjados no teste m155-db; P-SAM-2/3 → histórico nominal imutável; P-SAM-4 → recipientActive, aviso de perda do destinatário e ressalvas sem aviso/escalonamento (E2E 08c). Contingência → SQL de revogação ensaiado no teste m155-db. Próximo CI pendente; readyForClinicalUse=false.
 
 Validação real da revisão — run 39186760947, commit 918e783: integration e unit-and-structure verdes; banco 40/40 (inclui eventos falsos recusados e ensaio de desativação), API 42/42, E2E 19/19 incluindo 08c e 09 axe. Artefato de capturas 12158547454, SHA-256 no manifesto. Sem merge/deploy; readyForClinicalUse=false.
+
+Fechamento da versão completa: run 39187685667 / commit 164135c, integration e unit-and-structure success; banco 40/40, API 42/42, E2E 19/19 incluindo 08c e 09. Nome obrigatório e prazo com ressalva comprovados. Evidências no diretório ci-39187685667 e logs correspondentes; histórico anterior mantido. Sem merge/deploy; readyForClinicalUse=false.

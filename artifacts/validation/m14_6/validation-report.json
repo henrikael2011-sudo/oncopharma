@@ -1,15 +1,15 @@
 {
   "release": "M14.6 / M15.5",
-  "validatedCommit": "918e78379aac35bdde76bd348951ab4e618b4936",
-  "runId": 39186760947,
-  "runUrl": "https://github.com/henrikael2011-sudo/oncopharma/actions/runs/39186760947",
+  "validatedCommit": "164135c0175bc0c96f33f03a2b86ae20523e78f8",
+  "runId": 39187685667,
+  "runUrl": "https://github.com/henrikael2011-sudo/oncopharma/actions/runs/39187685667",
   "jobs": {
     "integration": {
-      "id": 117850707239,
+      "id": 117853464279,
       "conclusion": "success"
     },
     "unit-and-structure": {
-      "id": 117850707026,
+      "id": 117853464102,
       "conclusion": "success"
     }
   },
@@ -38,7 +38,8 @@
         "recipient inactive after shift",
         "allowlist",
         "immutable actor identity",
-        "non-destructive disable rehearsal"
+        "non-destructive disable rehearsal",
+        "missing actor name denied atomically"
       ]
     },
     {
@@ -50,7 +51,9 @@
       "exitCode": 0,
       "includes": [
         "08c",
-        "09 axe"
+        "09 axe",
+        "actor name and registration",
+        "reference deadline disclaimer"
       ]
     },
     {
@@ -87,6 +90,11 @@
         "notRun": 1
       },
       "reason": "08c strict selector; corrected in validated commit"
+    },
+    {
+      "runId": 39186760947,
+      "status": "PASS",
+      "note": "Antes da exigência de nome cadastrado; relatório preservado."
     }
   ]
 }

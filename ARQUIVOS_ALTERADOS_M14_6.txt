@@ -20,6 +20,12 @@ artifacts/validation/m14_6/ci-39186760947-unit.log
 artifacts/validation/m14_6/ci-39186760947/artifact-manifest.json
 artifacts/validation/m14_6/ci-39186760947/e2e-evidence.json
 artifacts/validation/m14_6/ci-39186760947/e2e-results.json
+artifacts/validation/m14_6/ci-39186760947/validation-report.json
+artifacts/validation/m14_6/ci-39187685667-integration.log
+artifacts/validation/m14_6/ci-39187685667-unit.log
+artifacts/validation/m14_6/ci-39187685667/artifact-manifest.json
+artifacts/validation/m14_6/ci-39187685667/e2e-evidence.json
+artifacts/validation/m14_6/ci-39187685667/e2e-results.json
 artifacts/validation/m14_6/clinical-gate-enforced.log
 artifacts/validation/m14_6/e2e.log
 artifacts/validation/m14_6/github-publication.json
