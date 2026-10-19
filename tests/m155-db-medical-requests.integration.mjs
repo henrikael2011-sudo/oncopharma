@@ -75,7 +75,13 @@ test('SAM transições, resposta/conclusão obrigatórias, conteúdo congelado, 
  assert.equal(must(ADMIN,`SELECT actor_name FROM medical_request_events WHERE request_id=${l(f.request)} AND action='created'`),'Farmácia Sintética');
 });
 test('SAM rascunho editável pelo autor, snapshot anterior preservado e descarte final',()=>{
- const id=randomUUID();must(APP,tx('farm',insert(id)));
+ const id=randomUUID();
+ must(ADMIN,`UPDATE memberships SET display_name=NULL WHERE organization_id=${l(f.org)} AND oidc_sub='farm'`);
+ fails(tx('farm',insert(id)),/Nome profissional obrigatório/);
+ fails(tx('farm',`SELECT sam_record_read(${l(f.org)},${l(f.request)})`),/Nome profissional obrigatório/);
+ assert.equal(must(ADMIN,`SELECT count(*) FROM medical_requests WHERE id=${l(id)}`),'0');
+ must(ADMIN,`UPDATE memberships SET display_name='Farmácia Sintética' WHERE organization_id=${l(f.org)} AND oidc_sub='farm'`);
+ must(APP,tx('farm',insert(id)));
  must(APP,tx('farm',`UPDATE medical_requests SET justification='Justificativa revisada pelo autor' WHERE id=${l(id)}`));
  assert.equal(must(ADMIN,`SELECT count(DISTINCT snapshot->>'justification') FROM medical_request_events WHERE request_id=${l(id)}`),'2');
  must(APP,tx('farm',`UPDATE medical_requests SET status='discarded' WHERE id=${l(id)}`));

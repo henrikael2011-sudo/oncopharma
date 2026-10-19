@@ -29,7 +29,7 @@ export class MedicalRequestsController {
       // Não devolver SQL, parâmetros, texto clínico ou detalhes de constraints para o cliente/logs.
       if (code === '23514') {
         const message = (e as Error).message;
-        const safe = ['Sem médico de plantão configurado para esta unidade ou escala ambígua', 'Critério de prioridade não configurado para esta unidade', 'Alocação mudou; descarte e crie novo rascunho', 'Médico sem vínculo ativo', 'Destinatário deve ser outro profissional médico'];
+        const safe = ['Nome profissional obrigatório no cadastro para registrar eventos', 'Sem médico de plantão configurado para esta unidade ou escala ambígua', 'Critério de prioridade não configurado para esta unidade', 'Alocação mudou; descarte e crie novo rascunho', 'Médico sem vínculo ativo', 'Destinatário deve ser outro profissional médico'];
         throw new ConflictException(safe.includes(message) ? message : 'Solicitação recusada: verifique estado, destinatário e evidências');
       }
       if (['42501', '23503'].includes(code ?? '')) throw new ForbiddenException('Recurso não disponível para este acesso');

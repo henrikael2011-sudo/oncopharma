@@ -165,8 +165,9 @@ BEGIN
  act:=CASE WHEN TG_OP='INSERT' THEN 'created' WHEN NEW.status=OLD.status THEN 'edited' ELSE NEW.status END;
  why:=CASE WHEN NEW.author_issuer=current_setting('app.sam_issuer',true) AND NEW.author_sub=current_setting('app.sam_sub',true) THEN 'author' WHEN NEW.recipient_mode='on_call' THEN 'on_call' ELSE 'linked' END;
  role_name:=CASE WHEN why='author' THEN NEW.author_role ELSE 'physician' END;
- SELECT coalesce(m.display_name,'Nome não cadastrado ('||m.oidc_sub||')'),m.professional_registration INTO actor_label,actor_reg FROM public.memberships m
+ SELECT m.display_name,m.professional_registration INTO actor_label,actor_reg FROM public.memberships m
  WHERE m.organization_id=NEW.organization_id AND m.oidc_issuer=current_setting('app.sam_issuer',true) AND m.oidc_sub=current_setting('app.sam_sub',true) AND m.role=role_name AND m.active;
+ IF actor_label IS NULL THEN RAISE EXCEPTION 'Nome profissional obrigatório no cadastro para registrar eventos' USING ERRCODE='check_violation'; END IF;
  INSERT INTO public.medical_request_events(organization_id,request_id,revision,action,actor_issuer,actor_sub,actor_role,access_reason,snapshot,actor_name,actor_registration)
  VALUES(NEW.organization_id,NEW.id,NEW.revision,act,current_setting('app.sam_issuer',true),current_setting('app.sam_sub',true),role_name,why,to_jsonb(NEW)-'organization_id',actor_label,actor_reg);
  INSERT INTO audit_events(organization_id,actor_issuer,actor_sub,action,resource_type,metadata) VALUES(NEW.organization_id,current_setting('app.sam_issuer',true),current_setting('app.sam_sub',true),'medical_request.'||act,'medical_request',jsonb_build_object('request_id',NEW.id,'revision',NEW.revision,'actor_role',role_name,'access_reason',why));
@@ -183,9 +184,10 @@ BEGIN
  SELECT * INTO m FROM public.memberships t WHERE t.organization_id=o AND t.oidc_issuer=current_setting('app.sam_issuer',true) AND t.oidc_sub=current_setting('app.sam_sub',true) AND t.active
  AND t.role=CASE WHEN r.author_issuer=current_setting('app.sam_issuer',true) AND r.author_sub=current_setting('app.sam_sub',true) THEN r.author_role ELSE 'physician' END;
  IF NOT FOUND THEN RAISE EXCEPTION 'Leitura não autorizada' USING ERRCODE='insufficient_privilege'; END IF;
+ IF m.display_name IS NULL THEN RAISE EXCEPTION 'Nome profissional obrigatório no cadastro para registrar eventos' USING ERRCODE='check_violation'; END IF;
  why:=CASE WHEN m.oidc_issuer=r.author_issuer AND m.oidc_sub=r.author_sub THEN 'author' WHEN r.recipient_mode='on_call' THEN 'on_call' ELSE 'linked' END;
  INSERT INTO public.medical_request_events(organization_id,request_id,revision,action,actor_issuer,actor_sub,actor_role,access_reason,snapshot,actor_name,actor_registration)
- VALUES(o,r.id,r.revision,'read',m.oidc_issuer,m.oidc_sub,m.role,why,'{}',coalesce(m.display_name,'Nome não cadastrado ('||m.oidc_sub||')'),m.professional_registration);
+ VALUES(o,r.id,r.revision,'read',m.oidc_issuer,m.oidc_sub,m.role,why,'{}',m.display_name,m.professional_registration);
 END $$;
 GRANT SELECT ON on_call_shifts,request_priority_criteria,medical_request_events TO oncopharma_app;
 GRANT SELECT,INSERT ON medical_requests TO oncopharma_app;
