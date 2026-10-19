@@ -40,7 +40,7 @@ export class MedicalRequestsController {
     if (!(await c.query('SELECT sam_link($1,$2) AS ok', [org, validId(patientId)])).rows[0]?.ok) throw new ForbiddenException('Paciente não atribuído');
   }
   private async row(c: PoolClient, org: string, requestId: string) {
-    const r = (await c.query(`SELECT * FROM medical_requests WHERE organization_id=$1 AND id=$2 FOR UPDATE`, [org, validId(requestId)])).rows[0];
+    const r = (await c.query(`SELECT id,patient_id,status,priority,created_at,revision,author_issuer,author_sub,recipient_mode,recipient_issuer,recipient_sub,justification,response,outcome,official_reference,unit,evidence,criteria_snapshot FROM medical_requests WHERE organization_id=$1 AND id=$2 FOR UPDATE`, [org, validId(requestId)])).rows[0];
     if (!r) throw new ForbiddenException('Solicitação indisponível');
     return r;
   }
@@ -107,11 +107,12 @@ export class MedicalRequestsController {
       const author = this.mine(req, r), recipient = (await c.query(`SELECT sam_recipient(r) AS ok FROM medical_requests r WHERE id=$1`, [r.id])).rows[0]?.ok === true;
       const reason = author ? 'author' : r.recipient_mode === 'on_call' ? 'on_call' : 'linked';
       await this.audit(c, org, req, role, 'medical_request.read', 'medical_request', { request_id: r.id, revision: r.revision, access_reason: reason });
-      await c.query(`INSERT INTO medical_request_events(organization_id,request_id,revision,action,actor_issuer,actor_sub,actor_role,access_reason,snapshot) VALUES($1,$2,$3,'read',$4,$5,$6,$7,'{}')`, [org, r.id, r.revision, req.principal.issuer, req.principal.sub, role, reason]);
+      await c.query('SELECT sam_record_read($1,$2)', [org, r.id]);
+      const recipientActive = (await c.query('SELECT sam_destination_active(r) AS active FROM medical_requests r WHERE id=$1', [r.id])).rows[0]?.active === true;
       const patient = (await c.query('SELECT display_name AS name,hospital_record AS record FROM patients WHERE organization_id=$1 AND id=$2', [org,r.patient_id])).rows[0];
       const recipientLabel = r.recipient_sub ? (await c.query("SELECT display_name FROM memberships WHERE organization_id=$1 AND oidc_issuer=$2 AND oidc_sub=$3 AND role='physician'", [org,r.recipient_issuer,r.recipient_sub])).rows[0]?.display_name ?? 'Nome profissional não cadastrado' : 'Resolvido no envio';
-      const events = (await c.query(`SELECT revision,action,actor_role,at,access_reason FROM medical_request_events WHERE request_id=$1 AND organization_id=$2 ORDER BY id`, [r.id, org])).rows;
-      return { ...r, patient, recipientLabel, statusLabel: REQUEST_LABELS[r.status as RequestStatus], mine: author,
+      const events = (await c.query(`SELECT revision,action,actor_role,actor_name,actor_registration,at,access_reason FROM medical_request_events WHERE request_id=$1 AND organization_id=$2 ORDER BY id`, [r.id, org])).rows;
+      return { id:r.id, patient, recipientLabel, recipientActive, status:r.status, priority:r.priority, created_at:r.created_at, revision:r.revision, justification:r.justification, response:r.response, outcome:r.outcome, official_reference:r.official_reference, unit:r.unit, recipient_mode:r.recipient_mode, evidence:r.evidence, criteria_snapshot:r.criteria_snapshot, statusLabel: REQUEST_LABELS[r.status as RequestStatus], mine: author,
         actions: Object.keys(REQUEST_LABELS).filter((s) => requestTransition(r.status, s as RequestStatus, author, recipient)), events, prescriptionChanged: false };
     });
   }

@@ -2,6 +2,7 @@
 DO $$ BEGIN IF current_database() <> 'oncopharma_dev' THEN RAISE EXCEPTION 'Somente oncopharma_dev'; END IF; END $$;
 BEGIN;
 ALTER TABLE memberships ADD COLUMN display_name text CHECK(display_name IS NULL OR length(trim(display_name)) BETWEEN 2 AND 80);
+ALTER TABLE memberships ADD COLUMN professional_registration text CHECK(professional_registration IS NULL OR length(trim(professional_registration)) BETWEEN 2 AND 80);
 CREATE TABLE on_call_shifts (
  id uuid PRIMARY KEY DEFAULT gen_random_uuid(), organization_id uuid NOT NULL REFERENCES organizations(id), unit text NOT NULL,
  physician_issuer text NOT NULL, physician_sub text NOT NULL, starts_at timestamptz NOT NULL, ends_at timestamptz NOT NULL,
@@ -33,6 +34,7 @@ CREATE INDEX medical_request_recipient ON medical_requests(organization_id,recip
 CREATE TABLE medical_request_events (
  id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, organization_id uuid NOT NULL REFERENCES organizations(id), request_id uuid NOT NULL REFERENCES medical_requests(id),
  revision integer NOT NULL, action text NOT NULL, actor_issuer text NOT NULL, actor_sub text NOT NULL, actor_role text NOT NULL,
+ actor_name text NOT NULL, actor_registration text,
  at timestamptz NOT NULL DEFAULT now(), access_reason text NOT NULL CHECK(access_reason IN ('author','linked','on_call')),
  snapshot jsonb NOT NULL
 );
@@ -46,12 +48,17 @@ CREATE FUNCTION sam_link(o uuid,p uuid) RETURNS boolean LANGUAGE sql STABLE AS $
  WHERE a.organization_id=o AND a.patient_id=p AND a.active AND t.synthetic
  AND a.oidc_issuer=current_setting('app.sam_issuer',true) AND a.oidc_sub=current_setting('app.sam_sub',true))
 $$;
+-- Disponibilidade independente do ator que consulta: também informada ao autor.
+CREATE FUNCTION sam_destination_active(r medical_requests) RETURNS boolean LANGUAGE sql STABLE AS $$
+ SELECT coalesce(EXISTS(SELECT 1 FROM memberships m WHERE m.organization_id=r.organization_id AND m.active AND m.role='physician'
+ AND m.oidc_issuer=r.recipient_issuer AND m.oidc_sub=r.recipient_sub) AND (
+ (r.recipient_mode='specific' AND EXISTS(SELECT 1 FROM care_assignments a WHERE a.organization_id=r.organization_id AND a.patient_id=r.patient_id AND a.active AND a.oidc_issuer=r.recipient_issuer AND a.oidc_sub=r.recipient_sub)) OR
+ (r.recipient_mode='on_call' AND EXISTS(SELECT 1 FROM on_call_shifts s WHERE s.id=r.shift_id AND s.organization_id=r.organization_id AND s.unit=r.unit
+ AND s.physician_issuer=r.recipient_issuer AND s.physician_sub=r.recipient_sub AND s.starts_at<=now() AND s.ends_at>now()))),false)
+$$;
 CREATE FUNCTION sam_recipient(r medical_requests) RETURNS boolean LANGUAGE sql STABLE AS $$
  SELECT r.recipient_issuer=current_setting('app.sam_issuer',true) AND r.recipient_sub=current_setting('app.sam_sub',true)
- AND sam_member(r.organization_id,ARRAY['physician']) AND r.status NOT IN ('draft','discarded') AND (
- (r.recipient_mode='specific' AND sam_link(r.organization_id,r.patient_id)) OR
- (r.recipient_mode='on_call' AND EXISTS(SELECT 1 FROM on_call_shifts s WHERE s.id=r.shift_id AND s.organization_id=r.organization_id AND s.unit=r.unit
- AND s.physician_issuer=r.recipient_issuer AND s.physician_sub=r.recipient_sub AND s.starts_at<=now() AND s.ends_at>now())))
+ AND sam_member(r.organization_id,ARRAY['physician']) AND r.status NOT IN ('draft','discarded') AND sam_destination_active(r)
 $$;
 CREATE FUNCTION sam_access(r medical_requests) RETURNS boolean LANGUAGE sql STABLE AS $$
  SELECT r.organization_id=nullif(current_setting('app.organization_id',true),'')::uuid AND
@@ -70,18 +77,22 @@ CREATE POLICY request_insert ON medical_requests FOR INSERT WITH CHECK(organizat
 CREATE POLICY request_update ON medical_requests FOR UPDATE USING(sam_access(medical_requests)) WITH CHECK(sam_access(medical_requests));
 CREATE POLICY request_event_read ON medical_request_events FOR SELECT USING(organization_id=nullif(current_setting('app.organization_id',true),'')::uuid
  AND EXISTS(SELECT 1 FROM medical_requests r WHERE r.id=request_id AND r.organization_id=medical_request_events.organization_id));
-CREATE POLICY request_event_insert ON medical_request_events FOR INSERT WITH CHECK(organization_id=nullif(current_setting('app.organization_id',true),'')::uuid
- AND actor_issuer=current_setting('app.sam_issuer',true) AND actor_sub=current_setting('app.sam_sub',true)
- AND sam_member(organization_id,ARRAY[actor_role]) AND EXISTS(SELECT 1 FROM medical_requests r WHERE r.id=request_id AND r.organization_id=medical_request_events.organization_id));
 -- Gera snapshot e Provenance diretamente dos registros de origem, sem aceitar texto clínico do cliente.
 CREATE FUNCTION sam_evidence(o uuid,p uuid,refs jsonb) RETURNS jsonb LANGUAGE plpgsql AS $$
-DECLARE ref jsonb; row_data jsonb; result jsonb='[]'; tab text; at_col text; source_ref text; source_at text;
+DECLARE ref jsonb; row_data jsonb; result jsonb='[]'; tab text; at_col text; source_ref text; source_at text; fields text;
 BEGIN
  IF jsonb_typeof(refs)<>'array' OR jsonb_array_length(refs) NOT BETWEEN 1 AND 10 THEN RAISE EXCEPTION 'Selecione de 1 a 10 evidências' USING ERRCODE='check_violation'; END IF;
  FOR ref IN SELECT * FROM jsonb_array_elements(refs) LOOP
   SELECT CASE ref->>'type' WHEN 'alert' THEN 'clinical_alerts' WHEN 'order' THEN 'clinical_medication_orders' WHEN 'administration' THEN 'clinical_medication_administrations' WHEN 'lab' THEN 'clinical_labs' WHEN 'symptom' THEN 'patient_symptom_reports' END INTO tab;
   IF tab IS NULL THEN RAISE EXCEPTION 'Tipo de evidência inválido' USING ERRCODE='check_violation'; END IF;
-  EXECUTE format('SELECT to_jsonb(t) FROM %I t WHERE id=$1 AND organization_id=$2 AND patient_id=$3',tab) INTO row_data USING (ref->>'id')::uuid,o,p;
+  -- Allowlist fechada: nenhum identificador de ator, atribuição, detalhe livre adicional ou coluna futura.
+  fields := CASE ref->>'type'
+   WHEN 'alert' THEN 'code,level,status,rule_version,explanation,created_at'
+   WHEN 'lab' THEN 'analyte_code,analyte_label,result_value,unit,reference_low,reference_high,collected_at,source_reference'
+   WHEN 'order' THEN 'medication,dose_value,dose_unit,route,frequency_text,status,ordered_at,source_reference'
+   WHEN 'administration' THEN 'medication,dose_value,dose_unit,status,administered_at,source_reference'
+   WHEN 'symptom' THEN 'symptom_code,description,triage_status,reported_at,source_reference' END;
+  EXECUTE format('SELECT to_jsonb(t) FROM (SELECT %s FROM %I WHERE id=$1 AND organization_id=$2 AND patient_id=$3) t',fields,tab) INTO row_data USING (ref->>'id')::uuid,o,p;
   IF row_data IS NULL THEN RAISE EXCEPTION 'Evidência não pertence ao paciente/instituição' USING ERRCODE='check_violation'; END IF;
   at_col := CASE ref->>'type' WHEN 'alert' THEN 'created_at' WHEN 'order' THEN 'ordered_at' WHEN 'administration' THEN 'administered_at' WHEN 'lab' THEN 'collected_at' ELSE 'reported_at' END;
   source_ref := coalesce(row_data->>'source_reference','alert:'||(ref->>'id')); source_at := row_data->>at_col;
@@ -148,24 +159,42 @@ BEGIN
  NEW.updated_at:=now(); RETURN NEW;
 END $$;
 CREATE TRIGGER medical_request_guard BEFORE INSERT OR UPDATE ON medical_requests FOR EACH ROW EXECUTE FUNCTION sam_request_guard();
-CREATE FUNCTION sam_request_history() RETURNS trigger LANGUAGE plpgsql AS $$
-DECLARE act text; why text; role_name text;
+CREATE FUNCTION sam_request_history() RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, public, pg_temp AS $$
+DECLARE act text; why text; role_name text; actor_label text; actor_reg text;
 BEGIN
  act:=CASE WHEN TG_OP='INSERT' THEN 'created' WHEN NEW.status=OLD.status THEN 'edited' ELSE NEW.status END;
  why:=CASE WHEN NEW.author_issuer=current_setting('app.sam_issuer',true) AND NEW.author_sub=current_setting('app.sam_sub',true) THEN 'author' WHEN NEW.recipient_mode='on_call' THEN 'on_call' ELSE 'linked' END;
  role_name:=CASE WHEN why='author' THEN NEW.author_role ELSE 'physician' END;
- INSERT INTO medical_request_events(organization_id,request_id,revision,action,actor_issuer,actor_sub,actor_role,access_reason,snapshot)
- VALUES(NEW.organization_id,NEW.id,NEW.revision,act,current_setting('app.sam_issuer',true),current_setting('app.sam_sub',true),role_name,why,to_jsonb(NEW)-'organization_id');
+ SELECT coalesce(m.display_name,'Nome não cadastrado ('||m.oidc_sub||')'),m.professional_registration INTO actor_label,actor_reg FROM public.memberships m
+ WHERE m.organization_id=NEW.organization_id AND m.oidc_issuer=current_setting('app.sam_issuer',true) AND m.oidc_sub=current_setting('app.sam_sub',true) AND m.role=role_name AND m.active;
+ INSERT INTO public.medical_request_events(organization_id,request_id,revision,action,actor_issuer,actor_sub,actor_role,access_reason,snapshot,actor_name,actor_registration)
+ VALUES(NEW.organization_id,NEW.id,NEW.revision,act,current_setting('app.sam_issuer',true),current_setting('app.sam_sub',true),role_name,why,to_jsonb(NEW)-'organization_id',actor_label,actor_reg);
  INSERT INTO audit_events(organization_id,actor_issuer,actor_sub,action,resource_type,metadata) VALUES(NEW.organization_id,current_setting('app.sam_issuer',true),current_setting('app.sam_sub',true),'medical_request.'||act,'medical_request',jsonb_build_object('request_id',NEW.id,'revision',NEW.revision,'actor_role',role_name,'access_reason',why));
  RETURN NEW;
 END $$;
 CREATE TRIGGER medical_request_history AFTER INSERT OR UPDATE ON medical_requests FOR EACH ROW EXECUTE FUNCTION sam_request_history();
 CREATE TRIGGER medical_request_events_immutable BEFORE UPDATE OR DELETE ON medical_request_events FOR EACH ROW EXECUTE FUNCTION prevent_audit_mutation();
-GRANT SELECT ON on_call_shifts,request_priority_criteria TO oncopharma_app;
-GRANT SELECT,INSERT ON medical_requests,medical_request_events TO oncopharma_app;
+-- Única entrada de leitura: parâmetros só identificam o recurso; ator, revisão e conteúdo são derivados.
+CREATE FUNCTION sam_record_read(o uuid, request uuid) RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, public, pg_temp AS $$
+DECLARE r public.medical_requests; m public.memberships; why text;
+BEGIN
+ SELECT * INTO r FROM public.medical_requests t WHERE t.id=request AND t.organization_id=o;
+ IF NOT FOUND OR NOT coalesce(public.sam_access(r),false) THEN RAISE EXCEPTION 'Leitura não autorizada' USING ERRCODE='insufficient_privilege'; END IF;
+ SELECT * INTO m FROM public.memberships t WHERE t.organization_id=o AND t.oidc_issuer=current_setting('app.sam_issuer',true) AND t.oidc_sub=current_setting('app.sam_sub',true) AND t.active
+ AND t.role=CASE WHEN r.author_issuer=current_setting('app.sam_issuer',true) AND r.author_sub=current_setting('app.sam_sub',true) THEN r.author_role ELSE 'physician' END;
+ IF NOT FOUND THEN RAISE EXCEPTION 'Leitura não autorizada' USING ERRCODE='insufficient_privilege'; END IF;
+ why:=CASE WHEN m.oidc_issuer=r.author_issuer AND m.oidc_sub=r.author_sub THEN 'author' WHEN r.recipient_mode='on_call' THEN 'on_call' ELSE 'linked' END;
+ INSERT INTO public.medical_request_events(organization_id,request_id,revision,action,actor_issuer,actor_sub,actor_role,access_reason,snapshot,actor_name,actor_registration)
+ VALUES(o,r.id,r.revision,'read',m.oidc_issuer,m.oidc_sub,m.role,why,'{}',coalesce(m.display_name,'Nome não cadastrado ('||m.oidc_sub||')'),m.professional_registration);
+END $$;
+GRANT SELECT ON on_call_shifts,request_priority_criteria,medical_request_events TO oncopharma_app;
+GRANT SELECT,INSERT ON medical_requests TO oncopharma_app;
 GRANT UPDATE(justification,priority,evidence,status,response,outcome,official_reference) ON medical_requests TO oncopharma_app;
-GRANT USAGE ON SEQUENCE medical_request_events_id_seq TO oncopharma_app;
--- Funções são SECURITY INVOKER e não aceitam promover privilégios.
-REVOKE ALL ON FUNCTION sam_member(uuid,text[]),sam_link(uuid,uuid),sam_recipient(medical_requests),sam_access(medical_requests),sam_evidence(uuid,uuid,jsonb),sam_request_guard(),sam_request_history() FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION sam_member(uuid,text[]),sam_link(uuid,uuid),sam_recipient(medical_requests),sam_access(medical_requests),sam_evidence(uuid,uuid,jsonb),sam_request_guard(),sam_request_history() TO oncopharma_app;
+-- App não insere eventos nem usa sua sequência. Gatilho gera transições; função dedicada grava somente leitura.
+REVOKE INSERT ON medical_request_events FROM oncopharma_app;
+REVOKE ALL ON SEQUENCE medical_request_events_id_seq FROM oncopharma_app;
+REVOKE ALL ON FUNCTION sam_member(uuid,text[]),sam_link(uuid,uuid),sam_destination_active(medical_requests),sam_recipient(medical_requests),sam_access(medical_requests),sam_evidence(uuid,uuid,jsonb),sam_request_guard(),sam_request_history(),sam_record_read(uuid,uuid) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION sam_member(uuid,text[]),sam_link(uuid,uuid),sam_destination_active(medical_requests),sam_recipient(medical_requests),sam_access(medical_requests),sam_evidence(uuid,uuid,jsonb),sam_request_guard(),sam_record_read(uuid,uuid) TO oncopharma_app;
+-- A função de histórico só é executada pelo gatilho, nunca diretamente pelo app.
+REVOKE ALL ON FUNCTION sam_request_history() FROM oncopharma_app;
 COMMIT;

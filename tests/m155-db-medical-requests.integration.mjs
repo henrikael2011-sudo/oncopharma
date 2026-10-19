@@ -1,4 +1,5 @@
 // PostgreSQL 17 real, sem mocks, role restrita. Banco administrativo só cria fixtures sintéticas.
+import {readFileSync} from 'node:fs';
 import test from 'node:test';import assert from 'node:assert/strict';import {spawnSync} from 'node:child_process';import {randomUUID} from 'node:crypto';
 const APP=process.env.DATABASE_URL,ADMIN=process.env.DATABASE_URL_ADMIN,iss='https://sam.synthetic.invalid';
 const f=Object.fromEntries(['org','other','pat','pat2','lab','lab2','request','shift'].map(k=>[k,randomUUID()]));
@@ -18,8 +19,12 @@ test('SAM fixtures isoladas e sintéticas',()=>{
  INSERT INTO clinical_labs(id,organization_id,patient_id,analyte_code,analyte_label,unit,collected_at,source_reference) VALUES(${l(f.lab)},${l(f.org)},${l(f.pat)},'ANC','Exame sintético','x',now(),'SAM-LAB'),(${l(f.lab2)},${l(f.other)},${l(f.pat2)},'ANC','Outro paciente','x',now(),'SAM-OTHER');
  INSERT INTO patient_allocations(organization_id,patient_id,unit,source,recorded_by_issuer,recorded_by_sub,recorded_by_role) VALUES(${l(f.org)},${l(f.pat)},'Unidade SAM','manual',${l(iss)},'farm','pharmacist');
  INSERT INTO request_priority_criteria(organization_id,unit,priority,description) VALUES(${l(f.org)},'Unidade SAM','routine','Critério demonstrativo de teste');`);
+ must(ADMIN,`UPDATE memberships SET display_name=CASE oidc_sub WHEN 'farm' THEN 'Farmácia Sintética' ELSE 'Médico Sintético' END,professional_registration='CONSELHO-SINT-001' WHERE organization_id=${l(f.org)}`);
  must(APP,tx('farm',insert()));
  assert.equal(must(APP,tx('farm',`SELECT evidence->0->>'source_reference' FROM medical_requests WHERE id=${l(f.request)}`)),'SAM-LAB');
+ const keys=JSON.parse(must(APP,tx('farm',`SELECT jsonb_agg(k ORDER BY k) FROM medical_requests r,jsonb_object_keys(r.evidence->0->'snapshot') k WHERE r.id=${l(f.request)}`)));
+ assert.deepEqual(keys,['analyte_code','analyte_label','collected_at','reference_high','reference_low','result_value','source_reference','unit']);
+ assert.equal(must(ADMIN,`SELECT actor_name||'|'||actor_registration FROM medical_request_events WHERE request_id=${l(f.request)}`),'Farmácia Sintética|CONSELHO-SINT-001');
 });
 test('SAM RLS: sem contexto, outra organização, sem vínculo, admin e sem MFA não leem/criam',()=>{
  assert.equal(must(APP,`SELECT count(*) FROM medical_requests WHERE id=${l(f.request)}`),'0');
@@ -39,6 +44,7 @@ test('SAM envio bloqueia escala ausente/ambígua; fronteiras início inclusivo e
  assert.equal(must(APP,tx('other-med',`SELECT count(*) FROM medical_requests WHERE id=${l(f.request)}`)),'0');
  must(ADMIN,`UPDATE on_call_shifts SET ends_at=now()-interval '1 second' WHERE id=${l(f.shift)}`);
  assert.equal(must(APP,tx('med',`SELECT count(*) FROM medical_requests WHERE id=${l(f.request)}`)),'0');
+ assert.equal(must(APP,tx('farm',`SELECT status||'|'||sam_destination_active(r)::text FROM medical_requests r WHERE id=${l(f.request)}`)),'sent|false');
  must(ADMIN,`UPDATE on_call_shifts SET starts_at=now()+interval '1 hour',ends_at=now()+interval '2 hours' WHERE id=${l(f.shift)}`);
  assert.equal(must(APP,tx('med',`SELECT count(*) FROM medical_requests WHERE id=${l(f.request)}`)),'0');
  must(ADMIN,`UPDATE on_call_shifts SET starts_at=now()-interval '1 hour',ends_at=now()+interval '1 hour' WHERE id=${l(f.shift)}`);
@@ -58,6 +64,15 @@ test('SAM transições, resposta/conclusão obrigatórias, conteúdo congelado, 
  fails(tx('farm',`DELETE FROM medical_request_events WHERE request_id=${l(f.request)}`),/permission denied/);
  assert.equal(must(ADMIN,`SELECT string_agg(action,',' ORDER BY id) FROM medical_request_events WHERE request_id=${l(f.request)}`),'created,sent,in_review,adjusted,completed');
  assert.equal(must(ADMIN,`SELECT count(*) FROM audit_events WHERE metadata->>'request_id'=${l(f.request)}`),'5');
+ // Nenhuma ação/snapshot arbitrária, nem mesmo 'read', pode ser inserida diretamente pelo app.
+ for(const action of ['completed','read'])fails(tx('farm',`INSERT INTO medical_request_events(organization_id,request_id,revision,action,actor_issuer,actor_sub,actor_role,access_reason,snapshot,actor_name) VALUES(${l(f.org)},${l(f.request)},99,${l(action)},${l(iss)},'farm','pharmacist','author','{"status":"completed"}','Falso')`),/permission denied/);
+ fails(tx('admin',`SELECT sam_record_read(${l(f.org)},${l(f.request)})`),/não autorizada/);
+ fails(tx('farm',`SELECT sam_record_read(${l(f.org)},${l(f.request)})`,f.org,false),/não autorizada/);
+ fails(tx('farm',`SELECT sam_record_read(${l(f.org)},${l(f.request)})`,f.other),/não autorizada/);
+ must(APP,tx('farm',`SELECT sam_record_read(${l(f.org)},${l(f.request)})`));
+ assert.equal(must(ADMIN,`SELECT action||'|'||snapshot::text FROM medical_request_events WHERE request_id=${l(f.request)} ORDER BY id DESC LIMIT 1`),'read|{}');
+ must(ADMIN,`UPDATE memberships SET display_name='Nome alterado posteriormente' WHERE organization_id=${l(f.org)} AND oidc_sub='farm'`);
+ assert.equal(must(ADMIN,`SELECT actor_name FROM medical_request_events WHERE request_id=${l(f.request)} AND action='created'`),'Farmácia Sintética');
 });
 test('SAM rascunho editável pelo autor, snapshot anterior preservado e descarte final',()=>{
  const id=randomUUID();must(APP,tx('farm',insert(id)));
@@ -65,4 +80,17 @@ test('SAM rascunho editável pelo autor, snapshot anterior preservado e descarte
  assert.equal(must(ADMIN,`SELECT count(DISTINCT snapshot->>'justification') FROM medical_request_events WHERE request_id=${l(id)}`),'2');
  must(APP,tx('farm',`UPDATE medical_requests SET status='discarded' WHERE id=${l(id)}`));
  fails(tx('farm',`UPDATE medical_requests SET status='sent' WHERE id=${l(id)}`),/Transição/);
+ // Ensaio da contingência em transação revertida: mesmos dados antes/depois, app sem acesso.
+ const before=must(ADMIN,`SELECT count(*) FROM medical_request_events WHERE organization_id=${l(f.org)}`);
+ const disable=readFileSync(new URL('../infra/rollback/0014_disable_medical_requests.sql',import.meta.url),'utf8');
+ must(ADMIN,`BEGIN;${disable}
+ SET LOCAL ROLE oncopharma_app;
+ DO $$ BEGIN
+ IF has_table_privilege(current_user,'medical_requests','SELECT') OR has_table_privilege(current_user,'medical_request_events','INSERT') OR has_column_privilege(current_user,'medical_requests','status','UPDATE') OR has_function_privilege(current_user,'sam_record_read(uuid,uuid)','EXECUTE') THEN RAISE EXCEPTION 'Desativação incompleta'; END IF;
+ IF NOT has_table_privilege(current_user,'patients','SELECT') THEN RAISE EXCEPTION 'Regressão em módulo anterior'; END IF;
+ BEGIN PERFORM 1 FROM medical_requests; RAISE EXCEPTION 'Acesso indevido'; EXCEPTION WHEN insufficient_privilege THEN NULL; END;
+ END $$; RESET ROLE;
+ DO $$ BEGIN IF (SELECT count(*)::text FROM medical_request_events WHERE organization_id=${l(f.org)})<>${l(before)} THEN RAISE EXCEPTION 'Histórico alterado'; END IF; END $$;
+ ROLLBACK;`);
+ assert.equal(must(APP,tx('farm',`SELECT count(*) FROM medical_requests WHERE id=${l(id)}`)),'1');
 });

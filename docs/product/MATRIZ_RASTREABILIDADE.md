@@ -77,3 +77,5 @@ Publicação de branch/PR: BLOQUEADA — GitHub 403, sem instalação de escrita
 
 
 Atualização 18/10/2026, 18:28 BRT: acesso de escrita restabelecido; branch publicada e PR #11 aberto em rascunho (https://github.com/henrikael2011-sudo/oncopharma/pull/11). CI 39167977428 em execução. Bloqueio de publicação acima é histórico. Sem merge/deploy. Contagem corrigida: 5 novos testes de banco, 40 totais esperados; resultado integrado ainda pendente.
+
+Revisão PR #11: P-SAM-1 → allowlists SQL + negação de eventos forjados no teste m155-db; P-SAM-2/3 → histórico nominal imutável; P-SAM-4 → recipientActive, aviso de perda do destinatário e ressalvas sem aviso/escalonamento (E2E 08c). Contingência → SQL de revogação ensaiado no teste m155-db. Próximo CI pendente; readyForClinicalUse=false.
