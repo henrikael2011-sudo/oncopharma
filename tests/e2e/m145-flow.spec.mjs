@@ -662,7 +662,8 @@ test.describe.serial('M14.5 E2E sintético', () => {
     const token=(await sessionToken(farm.context,CLIN)).token;
     const unit=sql(`SELECT unit FROM patient_allocations WHERE organization_id='${ORG}' AND patient_id='${PAT_A}' AND superseded_at IS NULL`);
     const lit=v=>`'${String(v).replaceAll("'","''")}'`;
-    sql(`INSERT INTO request_priority_criteria(organization_id,unit,priority,description) VALUES('${ORG}',${lit(unit)},'routine','Critério demonstrativo: avaliação durante o serviço') ON CONFLICT DO NOTHING;
+    sql(`INSERT INTO request_priority_criteria(organization_id,unit,priority,description,sla_minutes) VALUES('${ORG}',${lit(unit)},'routine','Critério demonstrativo: avaliação durante o serviço',60) ON CONFLICT DO NOTHING;
+      UPDATE memberships SET display_name='Dra. Sofia (conta sintética)',professional_registration='CRF-SINT-001' WHERE organization_id='${ORG}' AND oidc_sub='${sub('farmaceutico')}' AND role='pharmacist';
       UPDATE memberships SET display_name='Dr. Miguel (conta sintética)',professional_registration='CRM-SINT-001' WHERE organization_id='${ORG}' AND oidc_sub='${sub('medico')}' AND role='physician'`);
     await farm.page.goto(`${CLIN}/clinical/pacientes/${PAT_A}`);
     await farm.page.getByRole('tab',{name:'Solicitações médicas'}).click();
@@ -687,6 +688,8 @@ test.describe.serial('M14.5 E2E sintético', () => {
     evidence.a11y.m155Draft=a11yMap(await new AxeBuilder({page:farm.page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze());
     await farm.page.getByRole('button',{name:'Enviar ao médico'}).click();
     await expect(farm.page.getByRole('heading',{name:'Enviada',exact:true})).toBeVisible();
+    await expect(farm.page.getByText(/60 minutos; sem escalonamento/)).toBeVisible();
+    await expect(farm.page.getByText(/CRF-SINT-001/).first()).toBeVisible();
     expect((await post(farm.context,`medical-requests/${id}/transition`,{revision:2,to:'sent',confirmed:true})).status()).toBe(409);
     await doc.page.goto(`${CLIN}/clinical/solicitacoes`);
     await doc.page.locator(`a[href='/clinical/solicitacoes/${id}']`).click();

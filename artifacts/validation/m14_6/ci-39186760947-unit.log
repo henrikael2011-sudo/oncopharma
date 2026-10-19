@@ -1,0 +1,1494 @@
+﻿2026-10-19T01:45:00.5631556Z Current runner version: '2.337.0'
+2026-10-19T01:45:00.5658340Z ##[group]Runner Image Provisioner
+2026-10-19T01:45:00.5659209Z Hosted Compute Agent
+2026-10-19T01:45:00.5659919Z Version: 20261012.601
+2026-10-19T01:45:00.5660622Z Commit: f3dc54e1fb89da6852db922499a0233137369e1d
+2026-10-19T01:45:00.5661413Z Build Date: 2026-10-12T17:48:21Z
+2026-10-19T01:45:00.5662136Z Worker ID: {d55c1658-29b3-4fba-bacc-4d576acfdc37}
+2026-10-19T01:45:00.5663093Z Region: southcentralus
+2026-10-19T01:45:00.5663760Z Cloud: Azure
+2026-10-19T01:45:00.5664359Z ##[endgroup]
+2026-10-19T01:45:00.5666417Z ##[group]Operating System
+2026-10-19T01:45:00.5667099Z Ubuntu
+2026-10-19T01:45:00.5667646Z 24.04.5
+2026-10-19T01:45:00.5668264Z LTS
+2026-10-19T01:45:00.5668810Z ##[endgroup]
+2026-10-19T01:45:00.5669370Z ##[group]Runner Image
+2026-10-19T01:45:00.5670055Z Image: ubuntu-24.04
+2026-10-19T01:45:00.5670641Z Version: 20261012.334.1
+2026-10-19T01:45:00.5671980Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-19T01:45:00.5673747Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334
+2026-10-19T01:45:00.5674801Z ##[endgroup]
+2026-10-19T01:45:00.5675998Z ##[group]GITHUB_TOKEN Permissions
+2026-10-19T01:45:00.5678226Z Contents: read
+2026-10-19T01:45:00.5678853Z Metadata: read
+2026-10-19T01:45:00.5679503Z Packages: read
+2026-10-19T01:45:00.5680137Z ##[endgroup]
+2026-10-19T01:45:00.5682203Z Secret source: Actions
+2026-10-19T01:45:00.5683758Z Cache mode: write
+2026-10-19T01:45:00.5684481Z Prepare workflow directory
+2026-10-19T01:45:00.6022057Z Prepare all required actions
+2026-10-19T01:45:00.6070860Z Getting action download info
+2026-10-19T01:45:00.9092313Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-19T01:45:01.0642307Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+2026-10-19T01:45:01.1567035Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-19T01:45:01.4214734Z Complete job name: unit-and-structure
+2026-10-19T01:45:01.6182324Z ##[group]Run actions/checkout@v4
+2026-10-19T01:45:01.6183624Z with:
+2026-10-19T01:45:01.6184109Z   repository: henrikael2011-sudo/oncopharma
+2026-10-19T01:45:01.6187856Z   token: ***
+2026-10-19T01:45:01.6188300Z   ssh-strict: true
+2026-10-19T01:45:01.6188752Z   ssh-user: git
+2026-10-19T01:45:01.6189208Z   persist-credentials: true
+2026-10-19T01:45:01.6189699Z   clean: true
+2026-10-19T01:45:01.6190146Z   sparse-checkout-cone-mode: true
+2026-10-19T01:45:01.6190673Z   fetch-depth: 1
+2026-10-19T01:45:01.6191109Z   fetch-tags: false
+2026-10-19T01:45:01.6191555Z   show-progress: true
+2026-10-19T01:45:01.6192010Z   lfs: false
+2026-10-19T01:45:01.6192420Z   submodules: false
+2026-10-19T01:45:01.6193047Z   set-safe-directory: true
+2026-10-19T01:45:01.6193569Z   allow-unsafe-pr-checkout: false
+2026-10-19T01:45:01.6194348Z ##[endgroup]
+2026-10-19T01:45:01.7257380Z Syncing repository: henrikael2011-sudo/oncopharma
+2026-10-19T01:45:01.7260338Z ##[group]Getting Git version info
+2026-10-19T01:45:01.7261686Z Working directory is '/home/runner/work/oncopharma/oncopharma'
+2026-10-19T01:45:01.7263135Z [command]/usr/bin/git version
+2026-10-19T01:45:01.7388430Z git version 2.55.0
+2026-10-19T01:45:01.7412325Z ##[endgroup]
+2026-10-19T01:45:01.7430895Z Temporarily overriding HOME='/home/runner/work/_temp/a345f28d-e544-4eee-a33b-7a64f5fdb5d6' before making global git config changes
+2026-10-19T01:45:01.7433812Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-19T01:45:01.7436572Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/oncopharma/oncopharma
+2026-10-19T01:45:01.7507203Z Deleting the contents of '/home/runner/work/oncopharma/oncopharma'
+2026-10-19T01:45:01.7513386Z ##[group]Initializing the repository
+2026-10-19T01:45:01.7518039Z [command]/usr/bin/git init /home/runner/work/oncopharma/oncopharma
+2026-10-19T01:45:01.7660557Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-19T01:45:01.7665278Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-19T01:45:01.7666836Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-19T01:45:01.7668023Z hint: call:
+2026-10-19T01:45:01.7668955Z hint:
+2026-10-19T01:45:01.7669765Z hint: 	git config --global init.defaultBranch <name>
+2026-10-19T01:45:01.7670805Z hint:
+2026-10-19T01:45:01.7671749Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-19T01:45:01.7673634Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-19T01:45:01.7674872Z hint:
+2026-10-19T01:45:01.7675562Z hint: 	git branch -m <name>
+2026-10-19T01:45:01.7676367Z hint:
+2026-10-19T01:45:01.7677372Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-19T01:45:01.7679052Z Initialized empty Git repository in /home/runner/work/oncopharma/oncopharma/.git/
+2026-10-19T01:45:01.7681266Z [command]/usr/bin/git remote add origin https://github.com/henrikael2011-sudo/oncopharma
+2026-10-19T01:45:01.7739452Z ##[endgroup]
+2026-10-19T01:45:01.7740840Z ##[group]Disabling automatic garbage collection
+2026-10-19T01:45:01.7745061Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-19T01:45:01.7780234Z ##[endgroup]
+2026-10-19T01:45:01.7781563Z ##[group]Setting up auth
+2026-10-19T01:45:01.7868049Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-19T01:45:01.7872960Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-19T01:45:01.8306483Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-19T01:45:01.8343998Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-19T01:45:01.8563964Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-19T01:45:01.8600534Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-19T01:45:01.8821480Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-19T01:45:01.8863783Z ##[endgroup]
+2026-10-19T01:45:01.8864606Z ##[group]Fetching the repository
+2026-10-19T01:45:01.8878253Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +531b1ed52194195ec7b95afea5f194f343df303d:refs/remotes/pull/11/merge
+2026-10-19T01:45:03.0306363Z From https://github.com/henrikael2011-sudo/oncopharma
+2026-10-19T01:45:03.0308053Z  * [new ref]         531b1ed52194195ec7b95afea5f194f343df303d -> pull/11/merge
+2026-10-19T01:45:03.0312125Z ##[endgroup]
+2026-10-19T01:45:03.0314104Z ##[group]Determining the checkout info
+2026-10-19T01:45:03.0315849Z ##[endgroup]
+2026-10-19T01:45:03.0319312Z [command]/usr/bin/git sparse-checkout disable
+2026-10-19T01:45:03.0379415Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-19T01:45:03.0420974Z ##[group]Checking out the ref
+2026-10-19T01:45:03.0423548Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/11/merge
+2026-10-19T01:45:03.1324243Z Note: switching to 'refs/remotes/pull/11/merge'.
+2026-10-19T01:45:03.1325741Z 
+2026-10-19T01:45:03.1326844Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-19T01:45:03.1329553Z changes and commit them, and you can discard any commits you make in this
+2026-10-19T01:45:03.1332313Z state without impacting any branches by switching back to a branch.
+2026-10-19T01:45:03.1333963Z 
+2026-10-19T01:45:03.1334687Z If you want to create a new branch to retain commits you create, you may
+2026-10-19T01:45:03.1336802Z do so (now or later) by using -c with the switch command. Example:
+2026-10-19T01:45:03.1338255Z 
+2026-10-19T01:45:03.1338875Z   git switch -c <new-branch-name>
+2026-10-19T01:45:03.1339876Z 
+2026-10-19T01:45:03.1340556Z Or undo this operation with:
+2026-10-19T01:45:03.1341288Z 
+2026-10-19T01:45:03.1341706Z   git switch -
+2026-10-19T01:45:03.1342438Z 
+2026-10-19T01:45:03.1343574Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-19T01:45:03.1344869Z 
+2026-10-19T01:45:03.1346326Z HEAD is now at 531b1ed Merge 918e78379aac35bdde76bd348951ab4e618b4936 into f64870b00a68cb28f877d4e88ab5c6669769b54d
+2026-10-19T01:45:03.1351173Z ##[endgroup]
+2026-10-19T01:45:03.1414787Z [command]/usr/bin/git log -1 --format=%H
+2026-10-19T01:45:03.1441592Z 531b1ed52194195ec7b95afea5f194f343df303d
+2026-10-19T01:45:03.1828206Z ##[group]Run actions/setup-node@v4
+2026-10-19T01:45:03.1829320Z with:
+2026-10-19T01:45:03.1830268Z   node-version: 22
+2026-10-19T01:45:03.1831161Z   always-auth: false
+2026-10-19T01:45:03.1832059Z   check-latest: false
+2026-10-19T01:45:03.1841771Z   token: ***
+2026-10-19T01:45:03.1842828Z ##[endgroup]
+2026-10-19T01:45:03.3291967Z Found in cache @ /opt/hostedtoolcache/node/22.23.3/x64
+2026-10-19T01:45:03.3296568Z (node:2239) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-19T01:45:03.3301227Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-19T01:45:03.3305386Z ##[group]Environment details
+2026-10-19T01:45:03.7665426Z node: v22.23.3
+2026-10-19T01:45:03.7666119Z npm: 10.9.9
+2026-10-19T01:45:03.7666625Z yarn: 1.22.22
+2026-10-19T01:45:03.7668437Z ##[endgroup]
+2026-10-19T01:45:03.7816267Z ##[group]Run npm ci --no-audit --no-fund
+2026-10-19T01:45:03.7816806Z [36;1mnpm ci --no-audit --no-fund[0m
+2026-10-19T01:45:03.8155559Z shell: /usr/bin/bash -e {0}
+2026-10-19T01:45:03.8155992Z ##[endgroup]
+2026-10-19T01:45:17.8859240Z 
+2026-10-19T01:45:17.8866152Z added 369 packages in 14s
+2026-10-19T01:45:17.9516444Z ##[group]Run npm test
+2026-10-19T01:45:17.9516753Z [36;1mnpm test[0m
+2026-10-19T01:45:17.9583958Z shell: /usr/bin/bash -e {0}
+2026-10-19T01:45:17.9584224Z ##[endgroup]
+2026-10-19T01:45:18.0705337Z 
+2026-10-19T01:45:18.0706125Z > oncopharma@0.15.4-dev test
+2026-10-19T01:45:18.0706743Z > node --test tests/*.test.mjs
+2026-10-19T01:45:18.0706985Z 
+2026-10-19T01:45:18.1414091Z TAP version 13
+2026-10-19T01:45:18.1854292Z # Subtest: migration gates to dev
+2026-10-19T01:45:18.1883573Z ok 1 - migration gates to dev
+2026-10-19T01:45:18.1903743Z   ---
+2026-10-19T01:45:18.1933511Z   duration_ms: 1.601084
+2026-10-19T01:45:18.1934133Z   type: 'test'
+2026-10-19T01:45:18.1934628Z   ...
+2026-10-19T01:45:18.1935291Z # Subtest: no write grants to app role
+2026-10-19T01:45:18.1935918Z ok 2 - no write grants to app role
+2026-10-19T01:45:18.1936530Z   ---
+2026-10-19T01:45:18.1937052Z   duration_ms: 0.503873
+2026-10-19T01:45:18.1937625Z   type: 'test'
+2026-10-19T01:45:18.1938151Z   ...
+2026-10-19T01:45:18.1938915Z # Subtest: human approval required for guidance
+2026-10-19T01:45:18.1939598Z ok 3 - human approval required for guidance
+2026-10-19T01:45:18.1940131Z   ---
+2026-10-19T01:45:18.1940684Z   duration_ms: 0.268432
+2026-10-19T01:45:18.1941207Z   type: 'test'
+2026-10-19T01:45:18.1941668Z   ...
+2026-10-19T01:45:18.1942197Z # Subtest: pilot marked no-go
+2026-10-19T01:45:18.1942973Z ok 4 - pilot marked no-go
+2026-10-19T01:45:18.1943522Z   ---
+2026-10-19T01:45:18.1944052Z   duration_ms: 1.13347
+2026-10-19T01:45:18.1944602Z   type: 'test'
+2026-10-19T01:45:18.1945059Z   ...
+2026-10-19T01:45:18.1945647Z # Subtest: rules engine included
+2026-10-19T01:45:18.1946212Z ok 5 - rules engine included
+2026-10-19T01:45:18.1946703Z   ---
+2026-10-19T01:45:18.1947181Z   duration_ms: 0.449571
+2026-10-19T01:45:18.1947765Z   type: 'test'
+2026-10-19T01:45:18.1948219Z   ...
+2026-10-19T01:45:18.2144209Z # Subtest: ambientes Care e Clinical existem
+2026-10-19T01:45:18.2153922Z ok 6 - ambientes Care e Clinical existem
+2026-10-19T01:45:18.2155270Z   ---
+2026-10-19T01:45:18.2156158Z   duration_ms: 1.600775
+2026-10-19T01:45:18.2156875Z   type: 'test'
+2026-10-19T01:45:18.2157504Z   ...
+2026-10-19T01:45:18.2158686Z # Subtest: marca sem símbolo de registro não confirmado
+2026-10-19T01:45:18.2159966Z ok 7 - marca sem símbolo de registro não confirmado
+2026-10-19T01:45:18.2160814Z   ---
+2026-10-19T01:45:18.2161471Z   duration_ms: 0.453007
+2026-10-19T01:45:18.2162159Z   type: 'test'
+2026-10-19T01:45:18.2163002Z   ...
+2026-10-19T01:45:18.2164111Z # Subtest: API não expõe prontuários sem controle de acesso
+2026-10-19T01:45:18.2165481Z ok 8 - API não expõe prontuários sem controle de acesso
+2026-10-19T01:45:18.2166387Z   ---
+2026-10-19T01:45:18.2167015Z   duration_ms: 0.257772
+2026-10-19T01:45:18.2167688Z   type: 'test'
+2026-10-19T01:45:18.2168318Z   ...
+2026-10-19T01:45:18.2169260Z # Subtest: produção não possui seed de pacientes
+2026-10-19T01:45:18.2170427Z ok 9 - produção não possui seed de pacientes
+2026-10-19T01:45:18.2171296Z   ---
+2026-10-19T01:45:18.2171961Z   duration_ms: 0.234599
+2026-10-19T01:45:18.2172881Z   type: 'test'
+2026-10-19T01:45:18.2173521Z   ...
+2026-10-19T01:45:18.2174746Z # Subtest: endpoints clínicos falham fechados sem habilitação e em produção
+2026-10-19T01:45:18.2176200Z ok 10 - endpoints clínicos falham fechados sem habilitação e em produção
+2026-10-19T01:45:18.2177077Z   ---
+2026-10-19T01:45:18.2177642Z   duration_ms: 1.962661
+2026-10-19T01:45:18.2178216Z   type: 'test'
+2026-10-19T01:45:18.2178847Z   ...
+2026-10-19T01:45:18.2179701Z # Subtest: JWT usa JWKS remoto, valida issuer, audience e assinatura
+2026-10-19T01:45:18.2180842Z ok 11 - JWT usa JWKS remoto, valida issuer, audience e assinatura
+2026-10-19T01:45:18.2181633Z   ---
+2026-10-19T01:45:18.2182161Z   duration_ms: 0.375091
+2026-10-19T01:45:18.2183739Z   type: 'test'
+2026-10-19T01:45:18.2184395Z   ...
+2026-10-19T01:45:18.2185336Z # Subtest: RLS FORCE e isolamento de transação
+2026-10-19T01:45:18.2186105Z ok 12 - RLS FORCE e isolamento de transação
+2026-10-19T01:45:18.2186939Z   ---
+2026-10-19T01:45:18.2187294Z   duration_ms: 2.456095
+2026-10-19T01:45:18.2187693Z   type: 'test'
+2026-10-19T01:45:18.2188037Z   ...
+2026-10-19T01:45:18.2188502Z # Subtest: seed não contém paciente real e usa sub do provedor
+2026-10-19T01:45:18.2189116Z ok 13 - seed não contém paciente real e usa sub do provedor
+2026-10-19T01:45:18.2189702Z   ---
+2026-10-19T01:45:18.2190077Z   duration_ms: 1.799977
+2026-10-19T01:45:18.2190515Z   type: 'test'
+2026-10-19T01:45:18.2190888Z   ...
+2026-10-19T01:45:18.2191627Z # Subtest: segredos e bancos não estão embutidos no app
+2026-10-19T01:45:18.2192847Z ok 14 - segredos e bancos não estão embutidos no app
+2026-10-19T01:45:18.2193467Z   ---
+2026-10-19T01:45:18.2193838Z   duration_ms: 0.672017
+2026-10-19T01:45:18.2194261Z   type: 'test'
+2026-10-19T01:45:18.2194632Z   ...
+2026-10-19T01:45:18.2638890Z # Subtest: M10 bloqueado em produção
+2026-10-19T01:45:18.2659260Z ok 15 - M10 bloqueado em produção
+2026-10-19T01:45:18.2660164Z   ---
+2026-10-19T01:45:18.2660852Z   duration_ms: 1.375864
+2026-10-19T01:45:18.2663102Z   type: 'test'
+2026-10-19T01:45:18.2663863Z   ...
+2026-10-19T01:45:18.2664593Z # Subtest: M10 usa autenticação
+2026-10-19T01:45:18.2665322Z ok 16 - M10 usa autenticação
+2026-10-19T01:45:18.2665955Z   ---
+2026-10-19T01:45:18.2666476Z   duration_ms: 0.259365
+2026-10-19T01:45:18.2667015Z   type: 'test'
+2026-10-19T01:45:18.2667530Z   ...
+2026-10-19T01:45:18.2668436Z # Subtest: M10 verifica vínculo paciente e atribuição profissional
+2026-10-19T01:45:18.2669627Z ok 17 - M10 verifica vínculo paciente e atribuição profissional
+2026-10-19T01:45:18.2670437Z   ---
+2026-10-19T01:45:18.2693422Z   duration_ms: 0.210534
+2026-10-19T01:45:18.2702009Z   type: 'test'
+2026-10-19T01:45:18.2703200Z   ...
+2026-10-19T01:45:18.2704110Z # Subtest: M10 registra auditoria e idempotência
+2026-10-19T01:45:18.2705076Z ok 18 - M10 registra auditoria e idempotência
+2026-10-19T01:45:18.2705799Z   ---
+2026-10-19T01:45:18.2706353Z   duration_ms: 0.275625
+2026-10-19T01:45:18.2707354Z   type: 'test'
+2026-10-19T01:45:18.2707937Z   ...
+2026-10-19T01:45:18.2742185Z # Subtest: M10 usa transações por tenant
+2026-10-19T01:45:18.2753493Z ok 19 - M10 usa transações por tenant
+2026-10-19T01:45:18.2754244Z   ---
+2026-10-19T01:45:18.2754820Z   duration_ms: 0.193362
+2026-10-19T01:45:18.2755428Z   type: 'test'
+2026-10-19T01:45:18.2755971Z   ...
+2026-10-19T01:45:18.2756526Z # Subtest: M10 ativa RLS
+2026-10-19T01:45:18.2757143Z ok 20 - M10 ativa RLS
+2026-10-19T01:45:18.2757698Z   ---
+2026-10-19T01:45:18.2758269Z   duration_ms: 0.197089
+2026-10-19T01:45:18.2758887Z   type: 'test'
+2026-10-19T01:45:18.2759434Z   ...
+2026-10-19T01:45:18.2807725Z # Subtest: BFF requires session and dev flags
+2026-10-19T01:45:18.2823542Z ok 21 - BFF requires session and dev flags
+2026-10-19T01:45:18.2841664Z   ---
+2026-10-19T01:45:18.2842248Z   duration_ms: 1.072897
+2026-10-19T01:45:18.2842889Z   type: 'test'
+2026-10-19T01:45:18.2843264Z   ...
+2026-10-19T01:45:18.2853428Z # Subtest: POST requires same origin and JSON with size limit
+2026-10-19T01:45:18.2854493Z ok 22 - POST requires same origin and JSON with size limit
+2026-10-19T01:45:18.2855140Z   ---
+2026-10-19T01:45:18.2855539Z   duration_ms: 0.253845
+2026-10-19T01:45:18.2855988Z   type: 'test'
+2026-10-19T01:45:18.2856372Z   ...
+2026-10-19T01:45:18.2856935Z # Subtest: clinical review does not send guidance
+2026-10-19T01:45:18.2857694Z ok 23 - clinical review does not send guidance
+2026-10-19T01:45:18.2858250Z   ---
+2026-10-19T01:45:18.2858631Z   duration_ms: 0.210404
+2026-10-19T01:45:18.2859063Z   type: 'test'
+2026-10-19T01:45:18.2859434Z   ...
+2026-10-19T01:45:18.2859991Z # Subtest: care report uses requestId and no advice
+2026-10-19T01:45:18.2860764Z ok 24 - care report uses requestId and no advice
+2026-10-19T01:45:18.2861333Z   ---
+2026-10-19T01:45:18.2861908Z   duration_ms: 1.125898
+2026-10-19T01:45:18.2862335Z   type: 'test'
+2026-10-19T01:45:18.2863241Z   ...
+2026-10-19T01:45:18.2863777Z # Subtest: all proxy routes present
+2026-10-19T01:45:18.2864801Z ok 25 - all proxy routes present
+2026-10-19T01:45:18.2865305Z   ---
+2026-10-19T01:45:18.2865698Z   duration_ms: 0.287999
+2026-10-19T01:45:18.2866121Z   type: 'test'
+2026-10-19T01:45:18.2866499Z   ...
+2026-10-19T01:45:18.2867036Z # Subtest: M10.2: homepage no longer claims M1
+2026-10-19T01:45:18.2867764Z ok 26 - M10.2: homepage no longer claims M1
+2026-10-19T01:45:18.2868293Z   ---
+2026-10-19T01:45:18.2868685Z   duration_ms: 1.770683
+2026-10-19T01:45:18.2869116Z   type: 'test'
+2026-10-19T01:45:18.2869477Z   ...
+2026-10-19T01:45:18.2870152Z # Subtest: M10.2: Care never claims that reporting is impossible
+2026-10-19T01:45:18.2871118Z ok 27 - M10.2: Care never claims that reporting is impossible
+2026-10-19T01:45:18.2871763Z   ---
+2026-10-19T01:45:18.2872146Z   duration_ms: 0.391683
+2026-10-19T01:45:18.2872579Z   type: 'test'
+2026-10-19T01:45:18.2873926Z   ...
+2026-10-19T01:45:18.2874675Z # Subtest: M10.2: Clinical states technical validation limits
+2026-10-19T01:45:18.2875721Z ok 28 - M10.2: Clinical states technical validation limits
+2026-10-19T01:45:18.2876371Z   ---
+2026-10-19T01:45:18.2876811Z   duration_ms: 0.357999
+2026-10-19T01:45:18.2877253Z   type: 'test'
+2026-10-19T01:45:18.2877613Z   ...
+2026-10-19T01:45:18.2878194Z # Subtest: M10.2: brand care includes family and heart
+2026-10-19T01:45:18.2879005Z ok 29 - M10.2: brand care includes family and heart
+2026-10-19T01:45:18.2879588Z   ---
+2026-10-19T01:45:18.2879979Z   duration_ms: 1.695351
+2026-10-19T01:45:18.2880420Z   type: 'test'
+2026-10-19T01:45:18.2880795Z   ...
+2026-10-19T01:45:18.2881488Z # Subtest: M10.2: brand clinical includes professional and infusion
+2026-10-19T01:45:18.2882490Z ok 30 - M10.2: brand clinical includes professional and infusion
+2026-10-19T01:45:18.2883506Z   ---
+2026-10-19T01:45:18.2883850Z   duration_ms: 0.396763
+2026-10-19T01:45:18.2884248Z   type: 'test'
+2026-10-19T01:45:18.2884581Z   ...
+2026-10-19T01:45:18.2885037Z # Subtest: M10.2: plan baseline is preserved
+2026-10-19T01:45:18.2885656Z ok 31 - M10.2: plan baseline is preserved
+2026-10-19T01:45:18.2886441Z   ---
+2026-10-19T01:45:18.2886786Z   duration_ms: 0.464709
+2026-10-19T01:45:18.2887171Z   type: 'test'
+2026-10-19T01:45:18.2887493Z   ...
+2026-10-19T01:45:18.3270781Z # Subtest: Care não publica endpoint de revisão clínica
+2026-10-19T01:45:18.3303978Z ok 32 - Care não publica endpoint de revisão clínica
+2026-10-19T01:45:18.3305140Z   ---
+2026-10-19T01:45:18.3331426Z   duration_ms: 1.279223
+2026-10-19T01:45:18.3332264Z   type: 'test'
+2026-10-19T01:45:18.3333328Z   ...
+2026-10-19T01:45:18.3334633Z # Subtest: Clinical não publica endpoint de sintomas do paciente
+2026-10-19T01:45:18.3336167Z ok 33 - Clinical não publica endpoint de sintomas do paciente
+2026-10-19T01:45:18.3337185Z   ---
+2026-10-19T01:45:18.3337889Z   duration_ms: 0.314358
+2026-10-19T01:45:18.3338634Z   type: 'test'
+2026-10-19T01:45:18.3339337Z   ...
+2026-10-19T01:45:18.3340318Z # Subtest: Admin não possui rotas de prontuário
+2026-10-19T01:45:18.3341548Z ok 34 - Admin não possui rotas de prontuário
+2026-10-19T01:45:18.3342465Z   ---
+2026-10-19T01:45:18.3343398Z   duration_ms: 0.209211
+2026-10-19T01:45:18.3344054Z   type: 'test'
+2026-10-19T01:45:18.3344666Z   ...
+2026-10-19T01:45:18.3356552Z # Subtest: portal legado preservado
+2026-10-19T01:45:18.3357756Z ok 35 - portal legado preservado
+2026-10-19T01:45:18.3358532Z   ---
+2026-10-19T01:45:18.3359141Z   duration_ms: 0.271929
+2026-10-19T01:45:18.3359826Z   type: 'test'
+2026-10-19T01:45:18.3360552Z   ...
+2026-10-19T01:45:18.3361357Z # Subtest: planejamento v3 mantido
+2026-10-19T01:45:18.3393544Z ok 36 - planejamento v3 mantido
+2026-10-19T01:45:18.3398718Z   ---
+2026-10-19T01:45:18.3399528Z   duration_ms: 1.930843
+2026-10-19T01:45:18.3400260Z   type: 'test'
+2026-10-19T01:45:18.3400988Z   ...
+2026-10-19T01:45:18.3401813Z # Subtest: sem marca registrada na assinatura
+2026-10-19T01:45:18.3403227Z ok 37 - sem marca registrada na assinatura
+2026-10-19T01:45:18.3403975Z   ---
+2026-10-19T01:45:18.3404543Z   duration_ms: 0.260617
+2026-10-19T01:45:18.3405141Z   type: 'test'
+2026-10-19T01:45:18.3405720Z   ...
+2026-10-19T01:45:18.3467497Z # Subtest: PKCE S256 e state presentes
+2026-10-19T01:45:18.3493610Z ok 38 - PKCE S256 e state presentes
+2026-10-19T01:45:18.3519425Z   ---
+2026-10-19T01:45:18.3520101Z   duration_ms: 1.784057
+2026-10-19T01:45:18.3520754Z   type: 'test'
+2026-10-19T01:45:18.3521339Z   ...
+2026-10-19T01:45:18.3522413Z # Subtest: sessão HttpOnly e criptografada
+2026-10-19T01:45:18.3523829Z ok 39 - sessão HttpOnly e criptografada
+2026-10-19T01:45:18.3524560Z   ---
+2026-10-19T01:45:18.3525141Z   duration_ms: 0.348332
+2026-10-19T01:45:18.3525748Z   type: 'test'
+2026-10-19T01:45:18.3526261Z   ...
+2026-10-19T01:45:18.3527009Z # Subtest: callback valida state e expiração
+2026-10-19T01:45:18.3528195Z ok 40 - callback valida state e expiração
+2026-10-19T01:45:18.3528987Z   ---
+2026-10-19T01:45:18.3529679Z   duration_ms: 0.431196
+2026-10-19T01:45:18.3577089Z   type: 'test'
+2026-10-19T01:45:18.3599991Z   ...
+2026-10-19T01:45:18.3600923Z # Subtest: sem token no navegador
+2026-10-19T01:45:18.3601687Z ok 41 - sem token no navegador
+2026-10-19T01:45:18.3602615Z   ---
+2026-10-19T01:45:18.3603471Z   duration_ms: 1.927596
+2026-10-19T01:45:18.3603991Z   type: 'test'
+2026-10-19T01:45:18.3604694Z   ...
+2026-10-19T01:45:18.3605522Z # Subtest: logout POST e checagem de origem
+2026-10-19T01:45:18.3606404Z ok 42 - logout POST e checagem de origem
+2026-10-19T01:45:18.3610650Z   ---
+2026-10-19T01:45:18.3611471Z   duration_ms: 0.455321
+2026-10-19T01:45:18.3611909Z   type: 'test'
+2026-10-19T01:45:18.3612262Z   ...
+2026-10-19T01:45:18.3613696Z # Subtest: pacientes de teste bloqueados por padrão
+2026-10-19T01:45:18.3614572Z ok 43 - pacientes de teste bloqueados por padrão
+2026-10-19T01:45:18.3615099Z   ---
+2026-10-19T01:45:18.3615441Z   duration_ms: 0.366386
+2026-10-19T01:45:18.3615835Z   type: 'test'
+2026-10-19T01:45:18.3616168Z   ...
+2026-10-19T01:45:18.3631437Z # Subtest: runtime sem permissões de alteração clínica
+2026-10-19T01:45:18.3632550Z ok 44 - runtime sem permissões de alteração clínica
+2026-10-19T01:45:18.3634231Z   ---
+2026-10-19T01:45:18.3634895Z   duration_ms: 1.56119
+2026-10-19T01:45:18.3635606Z   type: 'test'
+2026-10-19T01:45:18.3636235Z   ...
+2026-10-19T01:45:18.3637074Z # Subtest: reset limitado a dev e sem apagar auditoria
+2026-10-19T01:45:18.3638075Z ok 45 - reset limitado a dev e sem apagar auditoria
+2026-10-19T01:45:18.3638819Z   ---
+2026-10-19T01:45:18.3639365Z   duration_ms: 0.415326
+2026-10-19T01:45:18.3639956Z   type: 'test'
+2026-10-19T01:45:18.3640488Z   ...
+2026-10-19T01:45:18.3641340Z # Subtest: login mantém PKCE e cookie HttpOnly
+2026-10-19T01:45:18.3642326Z ok 46 - login mantém PKCE e cookie HttpOnly
+2026-10-19T01:45:18.3643296Z   ---
+2026-10-19T01:45:18.3643846Z   duration_ms: 0.465992
+2026-10-19T01:45:18.3644447Z   type: 'test'
+2026-10-19T01:45:18.3644998Z   ...
+2026-10-19T01:45:18.5772578Z # Subtest: gate falha fechado com aprovações pendentes
+2026-10-19T01:45:18.5773943Z ok 47 - gate falha fechado com aprovações pendentes
+2026-10-19T01:45:18.5837531Z   ---
+2026-10-19T01:45:18.5853449Z   duration_ms: 34.177035
+2026-10-19T01:45:18.5963572Z   type: 'test'
+2026-10-19T01:45:18.5967506Z   ...
+2026-10-19T01:45:18.5984910Z # Subtest: gate falha fechado sem arquivo
+2026-10-19T01:45:18.5985856Z ok 48 - gate falha fechado sem arquivo
+2026-10-19T01:45:18.5986569Z   ---
+2026-10-19T01:45:18.5987129Z   duration_ms: 39.36145
+2026-10-19T01:45:18.5987710Z   type: 'test'
+2026-10-19T01:45:18.5988287Z   ...
+2026-10-19T01:45:18.5989639Z # Subtest: gate rejeita alegação approved sem artefatos e aprovador
+2026-10-19T01:45:18.5990961Z ok 49 - gate rejeita alegação approved sem artefatos e aprovador
+2026-10-19T01:45:18.5991865Z   ---
+2026-10-19T01:45:18.5992504Z   duration_ms: 53.678101
+2026-10-19T01:45:18.5993429Z   type: 'test'
+2026-10-19T01:45:18.5994000Z   ...
+2026-10-19T01:45:18.5995098Z # Subtest: gate nunca autoriza uso clínico mesmo com declarações completas
+2026-10-19T01:45:18.5996494Z ok 50 - gate nunca autoriza uso clínico mesmo com declarações completas
+2026-10-19T01:45:18.5997546Z   ---
+2026-10-19T01:45:18.5998458Z   duration_ms: 53.025837
+2026-10-19T01:45:18.5999091Z   type: 'test'
+2026-10-19T01:45:18.5999675Z   ...
+2026-10-19T01:45:18.6296408Z # Subtest: M14.2: laboratório sintético HTTP ponta a ponta e isolamento local
+2026-10-19T01:45:18.6324012Z ok 51 - M14.2: laboratório sintético HTTP ponta a ponta e isolamento local
+2026-10-19T01:45:18.6333289Z   ---
+2026-10-19T01:45:18.6353790Z   duration_ms: 179.919389
+2026-10-19T01:45:18.6354643Z   type: 'test'
+2026-10-19T01:45:18.6355279Z   ...
+2026-10-19T01:45:18.7030380Z # Subtest: CI usa banco DEV permitido pelas migrações
+2026-10-19T01:45:18.7031981Z ok 52 - CI usa banco DEV permitido pelas migrações
+2026-10-19T01:45:18.7033110Z   ---
+2026-10-19T01:45:18.7033784Z   duration_ms: 1.615532
+2026-10-19T01:45:18.7034460Z   type: 'test'
+2026-10-19T01:45:18.7035061Z   ...
+2026-10-19T01:45:18.7035931Z # Subtest: CI provisiona role antes do teste real de RLS
+2026-10-19T01:45:18.7037036Z ok 53 - CI provisiona role antes do teste real de RLS
+2026-10-19T01:45:18.7037880Z   ---
+2026-10-19T01:45:18.7038468Z   duration_ms: 2.462065
+2026-10-19T01:45:18.7039278Z   type: 'test'
+2026-10-19T01:45:18.7040296Z   ...
+2026-10-19T01:45:18.7041413Z # Subtest: migração inclui política INSERT de auditoria com tenant
+2026-10-19T01:45:18.7043066Z ok 54 - migração inclui política INSERT de auditoria com tenant
+2026-10-19T01:45:18.7044048Z   ---
+2026-10-19T01:45:18.7044665Z   duration_ms: 0.278521
+2026-10-19T01:45:18.7045296Z   type: 'test'
+2026-10-19T01:45:18.7045836Z   ...
+2026-10-19T01:45:18.7046792Z # Subtest: testes obrigatórios recusam conexão administrativa
+2026-10-19T01:45:18.7048038Z ok 55 - testes obrigatórios recusam conexão administrativa
+2026-10-19T01:45:18.7048814Z   ---
+2026-10-19T01:45:18.7049353Z   duration_ms: 2.604693
+2026-10-19T01:45:18.7049925Z   type: 'test'
+2026-10-19T01:45:18.7050372Z   ...
+2026-10-19T01:45:18.7050890Z # Subtest: bootstrap exige ambiente test e não usa seeds
+2026-10-19T01:45:18.7051493Z ok 56 - bootstrap exige ambiente test e não usa seeds
+2026-10-19T01:45:18.7052234Z   ---
+2026-10-19T01:45:18.7052514Z   duration_ms: 0.386624
+2026-10-19T01:45:18.7053564Z   type: 'test'
+2026-10-19T01:45:18.7066652Z   ...
+2026-10-19T01:45:18.7067146Z # Subtest: OpenAPI documenta exatamente as rotas da API
+2026-10-19T01:45:18.7067604Z ok 57 - OpenAPI documenta exatamente as rotas da API
+2026-10-19T01:45:18.7067917Z   ---
+2026-10-19T01:45:18.7068120Z   duration_ms: 8.69781
+2026-10-19T01:45:18.7068345Z   type: 'test'
+2026-10-19T01:45:18.7068541Z   ...
+2026-10-19T01:45:18.7069114Z # Subtest: modo sintético: nunca habilita em prod; exige ONCO_ENVIRONMENT conhecido
+2026-10-19T01:45:18.7069839Z ok 58 - modo sintético: nunca habilita em prod; exige ONCO_ENVIRONMENT conhecido
+2026-10-19T01:45:18.7070279Z   ---
+2026-10-19T01:45:18.7070474Z   duration_ms: 0.688558
+2026-10-19T01:45:18.7070701Z   type: 'test'
+2026-10-19T01:45:18.7070896Z   ...
+2026-10-19T01:45:18.7071353Z # Subtest: Care não contém componentes do Clinical e vice-versa (D-002)
+2026-10-19T01:45:18.7071977Z ok 59 - Care não contém componentes do Clinical e vice-versa (D-002)
+2026-10-19T01:45:18.7072323Z   ---
+2026-10-19T01:45:18.7072523Z   duration_ms: 0.370803
+2026-10-19T01:45:18.7073063Z   type: 'test'
+2026-10-19T01:45:18.7073271Z   ...
+2026-10-19T01:45:18.7081944Z # Subtest: tools/check-brand.mjs: tokens §2.2, sem cores fora da paleta, contraste AA, títulos, sem ®
+2026-10-19T01:45:18.7084028Z ok 60 - tools/check-brand.mjs: tokens §2.2, sem cores fora da paleta, contraste AA, títulos, sem ®
+2026-10-19T01:45:18.7089625Z   ---
+2026-10-19T01:45:18.7089909Z   duration_ms: 96.313686
+2026-10-19T01:45:18.7090258Z   type: 'test'
+2026-10-19T01:45:18.7090516Z   ...
+2026-10-19T01:45:18.7090918Z # Subtest: nomes de marca exatos e sem ®
+2026-10-19T01:45:18.7091395Z ok 61 - nomes de marca exatos e sem ®
+2026-10-19T01:45:18.7091722Z   ---
+2026-10-19T01:45:18.7091994Z   duration_ms: 4.659216
+2026-10-19T01:45:18.7092223Z   type: 'test'
+2026-10-19T01:45:18.7092419Z   ...
+2026-10-19T01:45:18.7093425Z # Subtest: M2: prontuário somente sintético, autenticado e auditado
+2026-10-19T01:45:18.7094062Z ok 62 - M2: prontuário somente sintético, autenticado e auditado
+2026-10-19T01:45:18.7094399Z   ---
+2026-10-19T01:45:18.7094596Z   duration_ms: 1.050014
+2026-10-19T01:45:18.7094818Z   type: 'test'
+2026-10-19T01:45:18.7095018Z   ...
+2026-10-19T01:45:18.7095338Z # Subtest: M2: RLS em todas as tabelas clínicas
+2026-10-19T01:45:18.7095749Z ok 63 - M2: RLS em todas as tabelas clínicas
+2026-10-19T01:45:18.7096021Z   ---
+2026-10-19T01:45:18.7096213Z   duration_ms: 0.280335
+2026-10-19T01:45:18.7096436Z   type: 'test'
+2026-10-19T01:45:18.7096625Z   ...
+2026-10-19T01:45:18.7096987Z # Subtest: M2: proxy autenticado e bloqueado em produção
+2026-10-19T01:45:18.7097462Z ok 64 - M2: proxy autenticado e bloqueado em produção
+2026-10-19T01:45:18.7097767Z   ---
+2026-10-19T01:45:18.7097969Z   duration_ms: 0.206627
+2026-10-19T01:45:18.7098189Z   type: 'test'
+2026-10-19T01:45:18.7098383Z   ...
+2026-10-19T01:45:18.7098565Z 1..64
+2026-10-19T01:45:18.7098744Z # tests 64
+2026-10-19T01:45:18.7098946Z # suites 0
+2026-10-19T01:45:18.7099144Z # pass 64
+2026-10-19T01:45:18.7099326Z # fail 0
+2026-10-19T01:45:18.7099507Z # cancelled 0
+2026-10-19T01:45:18.7099701Z # skipped 0
+2026-10-19T01:45:18.7099892Z # todo 0
+2026-10-19T01:45:18.7100096Z # duration_ms 597.696658
+2026-10-19T01:45:18.7243283Z ##[group]Run npm run test:extended
+2026-10-19T01:45:18.7243622Z [36;1mnpm run test:extended[0m
+2026-10-19T01:45:18.7306410Z shell: /usr/bin/bash -e {0}
+2026-10-19T01:45:18.7306663Z ##[endgroup]
+2026-10-19T01:45:18.8270050Z 
+2026-10-19T01:45:18.8270875Z > oncopharma@0.15.4-dev test:extended
+2026-10-19T01:45:18.8272257Z > node --test services/integration-gateway/tests/*.test.mjs services/ai-orchestrator/tests/*.test.mjs tests/m103-m14.test.mjs
+2026-10-19T01:45:18.8273381Z 
+2026-10-19T01:45:18.8840201Z TAP version 13
+2026-10-19T01:45:18.9410509Z # Subtest: rascunho sempre pendente de revisão
+2026-10-19T01:45:18.9422951Z ok 1 - rascunho sempre pendente de revisão
+2026-10-19T01:45:18.9423895Z   ---
+2026-10-19T01:45:18.9424262Z   duration_ms: 1.42696
+2026-10-19T01:45:18.9424661Z   type: 'test'
+2026-10-19T01:45:18.9425005Z   ...
+2026-10-19T01:45:18.9464500Z # Subtest: bloqueia referência não aprovada
+2026-10-19T01:45:18.9487387Z ok 2 - bloqueia referência não aprovada
+2026-10-19T01:45:18.9488535Z   ---
+2026-10-19T01:45:18.9489203Z   duration_ms: 0.382075
+2026-10-19T01:45:18.9489808Z   type: 'test'
+2026-10-19T01:45:18.9490356Z   ...
+2026-10-19T01:45:18.9491092Z # Subtest: bloqueia ação terapêutica
+2026-10-19T01:45:18.9491641Z ok 3 - bloqueia ação terapêutica
+2026-10-19T01:45:18.9492034Z   ---
+2026-10-19T01:45:18.9492360Z   duration_ms: 0.248014
+2026-10-19T01:45:18.9493030Z   type: 'test'
+2026-10-19T01:45:18.9493541Z   ...
+2026-10-19T01:45:18.9494107Z # Subtest: bloqueia evidência sem origem
+2026-10-19T01:45:18.9494624Z ok 4 - bloqueia evidência sem origem
+2026-10-19T01:45:18.9494894Z   ---
+2026-10-19T01:45:18.9495184Z   duration_ms: 0.237254
+2026-10-19T01:45:18.9495532Z   type: 'test'
+2026-10-19T01:45:18.9495988Z   ...
+2026-10-19T01:45:18.9533646Z # Subtest: bundle sintético normalizado
+2026-10-19T01:45:18.9534156Z ok 5 - bundle sintético normalizado
+2026-10-19T01:45:18.9534437Z   ---
+2026-10-19T01:45:18.9534655Z   duration_ms: 1.636722
+2026-10-19T01:45:18.9534949Z   type: 'test'
+2026-10-19T01:45:18.9535227Z   ...
+2026-10-19T01:45:18.9535540Z # Subtest: deduplicação idempotente
+2026-10-19T01:45:18.9536580Z ok 6 - deduplicação idempotente
+2026-10-19T01:45:18.9537274Z   ---
+2026-10-19T01:45:18.9537792Z   duration_ms: 0.425736
+2026-10-19T01:45:18.9538360Z   type: 'test'
+2026-10-19T01:45:18.9538861Z   ...
+2026-10-19T01:45:18.9539590Z # Subtest: bloqueia ID não sintético
+2026-10-19T01:45:18.9540464Z ok 7 - bloqueia ID não sintético
+2026-10-19T01:45:18.9541098Z   ---
+2026-10-19T01:45:18.9541589Z   duration_ms: 1.891419
+2026-10-19T01:45:18.9542141Z   type: 'test'
+2026-10-19T01:45:18.9543423Z   ...
+2026-10-19T01:45:18.9544107Z # Subtest: bloqueia tipo não autorizado
+2026-10-19T01:45:18.9545059Z ok 8 - bloqueia tipo não autorizado
+2026-10-19T01:45:18.9545719Z   ---
+2026-10-19T01:45:18.9546204Z   duration_ms: 0.2675
+2026-10-19T01:45:18.9546722Z   type: 'test'
+2026-10-19T01:45:18.9547229Z   ...
+2026-10-19T01:45:18.9547826Z # Subtest: bloqueia duplicatas
+2026-10-19T01:45:18.9548502Z ok 9 - bloqueia duplicatas
+2026-10-19T01:45:18.9549051Z   ---
+2026-10-19T01:45:18.9549558Z   duration_ms: 0.344033
+2026-10-19T01:45:18.9550125Z   type: 'test'
+2026-10-19T01:45:18.9550590Z   ...
+2026-10-19T01:45:18.9569493Z # Subtest: Care não publica endpoint de revisão clínica
+2026-10-19T01:45:18.9570902Z ok 10 - Care não publica endpoint de revisão clínica
+2026-10-19T01:45:18.9571830Z   ---
+2026-10-19T01:45:18.9572449Z   duration_ms: 1.300472
+2026-10-19T01:45:18.9573620Z   type: 'test'
+2026-10-19T01:45:18.9574195Z   ...
+2026-10-19T01:45:18.9575251Z # Subtest: Clinical não publica endpoint de sintomas do paciente
+2026-10-19T01:45:18.9576715Z ok 11 - Clinical não publica endpoint de sintomas do paciente
+2026-10-19T01:45:18.9577360Z   ---
+2026-10-19T01:45:18.9577755Z   duration_ms: 0.305822
+2026-10-19T01:45:18.9578168Z   type: 'test'
+2026-10-19T01:45:18.9578528Z   ...
+2026-10-19T01:45:18.9579191Z # Subtest: Admin não possui rotas de prontuário
+2026-10-19T01:45:18.9580002Z ok 12 - Admin não possui rotas de prontuário
+2026-10-19T01:45:18.9580955Z   ---
+2026-10-19T01:45:18.9581342Z   duration_ms: 0.200936
+2026-10-19T01:45:18.9581774Z   type: 'test'
+2026-10-19T01:45:18.9582144Z   ...
+2026-10-19T01:45:18.9582939Z # Subtest: portal legado preservado
+2026-10-19T01:45:18.9583603Z ok 13 - portal legado preservado
+2026-10-19T01:45:18.9584095Z   ---
+2026-10-19T01:45:18.9603749Z   duration_ms: 0.293248
+2026-10-19T01:45:18.9604437Z   type: 'test'
+2026-10-19T01:45:18.9604980Z   ...
+2026-10-19T01:45:18.9605637Z # Subtest: planejamento v3 mantido
+2026-10-19T01:45:18.9606483Z ok 14 - planejamento v3 mantido
+2026-10-19T01:45:18.9607262Z   ---
+2026-10-19T01:45:18.9607818Z   duration_ms: 1.978421
+2026-10-19T01:45:18.9608440Z   type: 'test'
+2026-10-19T01:45:18.9609389Z   ...
+2026-10-19T01:45:18.9610119Z # Subtest: sem marca registrada na assinatura
+2026-10-19T01:45:18.9611053Z ok 15 - sem marca registrada na assinatura
+2026-10-19T01:45:18.9611668Z   ---
+2026-10-19T01:45:18.9612183Z   duration_ms: 0.263303
+2026-10-19T01:45:18.9613029Z   type: 'test'
+2026-10-19T01:45:18.9613668Z   ...
+2026-10-19T01:45:18.9614072Z 1..15
+2026-10-19T01:45:18.9614415Z # tests 15
+2026-10-19T01:45:18.9614937Z # suites 0
+2026-10-19T01:45:18.9616469Z # pass 15
+2026-10-19T01:45:18.9616865Z # fail 0
+2026-10-19T01:45:18.9617224Z # cancelled 0
+2026-10-19T01:45:18.9617841Z # skipped 0
+2026-10-19T01:45:18.9618278Z # todo 0
+2026-10-19T01:45:18.9618811Z # duration_ms 93.185791
+2026-10-19T01:45:18.9746687Z ##[group]Run npm run check:design
+2026-10-19T01:45:18.9747021Z [36;1mnpm run check:design[0m
+2026-10-19T01:45:18.9809527Z shell: /usr/bin/bash -e {0}
+2026-10-19T01:45:18.9809774Z ##[endgroup]
+2026-10-19T01:45:19.0805484Z 
+2026-10-19T01:45:19.0806210Z > oncopharma@0.15.4-dev check:design
+2026-10-19T01:45:19.0806936Z > node tools/check-design.mjs
+2026-10-19T01:45:19.0807265Z 
+2026-10-19T01:45:19.1125573Z Design system: 15 arquivos alinhados à referência canônica
+2026-10-19T01:45:19.1285052Z ##[group]Run npm run check:brand
+2026-10-19T01:45:19.1285367Z [36;1mnpm run check:brand[0m
+2026-10-19T01:45:19.1348792Z shell: /usr/bin/bash -e {0}
+2026-10-19T01:45:19.1349042Z ##[endgroup]
+2026-10-19T01:45:19.2329041Z 
+2026-10-19T01:45:19.2329614Z > oncopharma@0.15.4-dev check:brand
+2026-10-19T01:45:19.2330133Z > node tools/check-brand.mjs
+2026-10-19T01:45:19.2330307Z 
+2026-10-19T01:45:19.2726244Z texto Care                   ink-teal/mint-50 11.12:1 (mín 4.5)
+2026-10-19T01:45:19.2726950Z texto Care em cartão         ink-teal/white 11.96:1 (mín 4.5)
+2026-10-19T01:45:19.2727677Z rótulo Care                  emerald/mint-50 5.36:1 (mín 4.5)
+2026-10-19T01:45:19.2728559Z botão Care                   white/emerald 5.77:1 (mín 4.5)
+2026-10-19T01:45:19.2729060Z botão Clinical               white/navy 13.10:1 (mín 4.5)
+2026-10-19T01:45:19.2729576Z cabeçalho Care               white/teal 11.79:1 (mín 4.5)
+2026-10-19T01:45:19.2730222Z cabeçalho Clinical           white/navy-800 14.20:1 (mín 4.5)
+2026-10-19T01:45:19.2730812Z texto Clinical               ink-navy/navy-50 11.79:1 (mín 4.5)
+2026-10-19T01:45:19.2731374Z rótulo Clinical              gold-700/navy-50 4.75:1 (mín 4.5)
+2026-10-19T01:45:19.2731922Z texto auxiliar               ink-muted/white 6.64:1 (mín 4.5)
+2026-10-19T01:45:19.2732483Z nota Care                    ink-muted/mint-50 6.18:1 (mín 4.5)
+2026-10-19T01:45:19.2733355Z navegação Care               ink-teal/white 11.96:1 (mín 4.5)
+2026-10-19T01:45:19.2733922Z botão secundário Care        teal/white 11.79:1 (mín 4.5)
+2026-10-19T01:45:19.2734473Z botão Ligar 192              white/danger 6.57:1 (mín 4.5)
+2026-10-19T01:45:19.2734989Z título urgente               danger/white 6.57:1 (mín 4.5)
+2026-10-19T01:45:19.2735543Z borda de escolha             border-strong/white 4.47:1 (mín 3)
+2026-10-19T01:45:19.2736142Z texto secundário             navy-text/navy-50 7.07:1 (mín 4.5)
+2026-10-19T01:45:19.2736691Z aviso claro                  gold-ink/gold-50 9.49:1 (mín 4.5)
+2026-10-19T01:45:19.2737264Z rótulo planejado             emerald-ink/mint-100 6.48:1 (mín 4.5)
+2026-10-19T01:45:19.2737803Z alerta crítico               danger/white 6.57:1 (mín 4.5)
+2026-10-19T01:45:19.2738447Z texto claro                  ink/canvas 13.66:1 (mín 4.5)
+2026-10-19T01:45:19.2739302Z foco claro (Care)            navy/mint-50 12.18:1 (mín 3)
+2026-10-19T01:45:19.2739792Z foco claro (Clinical)        navy/navy-50 11.72:1 (mín 3)
+2026-10-19T01:45:19.2740246Z foco escuro (Care)           gold/teal 5.41:1 (mín 3)
+2026-10-19T01:45:19.2740699Z foco escuro (Clinical)       gold/navy-800 6.51:1 (mín 3)
+2026-10-19T01:45:19.2741181Z borda de controle            border-strong/white 4.47:1 (mín 3)
+2026-10-19T01:45:19.2741730Z borda de controle (Care)     border-strong/mint-50 4.15:1 (mín 3)
+2026-10-19T01:45:19.2742289Z borda de controle (painel)   border-strong/navy-100 3.60:1 (mín 3)
+2026-10-19T01:45:19.2743471Z gravidade urgente            white/danger 6.57:1 (mín 4.5)
+2026-10-19T01:45:19.2744012Z gravidade revisão            gold-ink/gold-50 9.49:1 (mín 4.5)
+2026-10-19T01:45:19.2744535Z sem alerta                   navy-text/navy-50 7.07:1 (mín 4.5)
+2026-10-19T01:45:19.2745055Z texto secundário em cartão   navy-text/white 7.90:1 (mín 4.5)
+2026-10-19T01:45:19.2745592Z aba ativa                    navy/navy-50 11.72:1 (mín 4.5)
+2026-10-19T01:45:19.2746084Z mensagem de sucesso          ink-teal/mint-50 11.12:1 (mín 4.5)
+2026-10-19T01:45:19.2746572Z erro em cartão               danger/white 6.57:1 (mín 4.5)
+2026-10-19T01:45:19.2747056Z borda de gravidade (revisão) gold-700/gold-50 4.99:1 (mín 3)
+2026-10-19T01:45:19.2747549Z borda pendente no checklist  gold-700/white 5.30:1 (mín 3)
+2026-10-19T01:45:19.2748077Z Identidade: OK (4 folhas de estilo, 75 fontes TS/TSX, 37 pares de contraste)
+2026-10-19T01:45:19.2865686Z ##[group]Run npm run check:governance
+2026-10-19T01:45:19.2866034Z [36;1mnpm run check:governance[0m
+2026-10-19T01:45:19.2929003Z shell: /usr/bin/bash -e {0}
+2026-10-19T01:45:19.2929254Z ##[endgroup]
+2026-10-19T01:45:19.3953043Z 
+2026-10-19T01:45:19.3953920Z > oncopharma@0.15.4-dev check:governance
+2026-10-19T01:45:19.3954655Z > node tools/check-governance.mjs
+2026-10-19T01:45:19.3954977Z 
+2026-10-19T01:45:19.4267667Z Governança: documentos e limites de release presentes
+2026-10-19T01:45:19.4440356Z ##[group]Run npm run build
+2026-10-19T01:45:19.4440643Z [36;1mnpm run build[0m
+2026-10-19T01:45:19.4501700Z shell: /usr/bin/bash -e {0}
+2026-10-19T01:45:19.4501949Z ##[endgroup]
+2026-10-19T01:45:19.5532101Z 
+2026-10-19T01:45:19.5532413Z > oncopharma@0.15.4-dev build
+2026-10-19T01:45:19.5533665Z > npm run build:apps && npm run build -w @oncopharma/api && npm run build:packages && npm run build -w @oncopharma/portal
+2026-10-19T01:45:19.5534189Z 
+2026-10-19T01:45:19.6515232Z 
+2026-10-19T01:45:19.6515715Z > oncopharma@0.15.4-dev build:apps
+2026-10-19T01:45:19.6516680Z > npm run build -w @oncopharma/care-web && npm run build -w @oncopharma/clinical-web && npm run build -w @oncopharma/admin-web
+2026-10-19T01:45:19.6517191Z 
+2026-10-19T01:45:19.7747622Z 
+2026-10-19T01:45:19.7748392Z > @oncopharma/care-web@0.1.0 build
+2026-10-19T01:45:19.7748939Z > next build
+2026-10-19T01:45:19.7749160Z 
+2026-10-19T01:45:20.6197359Z ⚠ No build cache found. Please configure build caching for faster rebuilds. Read more: https://nextjs.org/docs/messages/no-cache
+2026-10-19T01:45:20.6309833Z Attention: Next.js now collects completely anonymous telemetry regarding usage.
+2026-10-19T01:45:20.6311191Z This information is used to shape Next.js' roadmap and prioritize features.
+2026-10-19T01:45:20.6313174Z You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+2026-10-19T01:45:20.6314534Z https://nextjs.org/telemetry
+2026-10-19T01:45:20.6314995Z 
+2026-10-19T01:45:20.7131020Z    ▲ Next.js 15.5.27
+2026-10-19T01:45:20.7132046Z 
+2026-10-19T01:45:20.7630342Z    Creating an optimized production build ...
+2026-10-19T01:45:29.1633604Z  ✓ Compiled successfully in 6.0s
+2026-10-19T01:45:29.1679867Z    Linting and checking validity of types ...
+2026-10-19T01:45:31.8820586Z    Collecting page data ...
+2026-10-19T01:45:33.4205327Z    Generating static pages (0/17) ...
+2026-10-19T01:45:33.8459956Z    Generating static pages (4/17) 
+2026-10-19T01:45:33.9930470Z    Generating static pages (8/17) 
+2026-10-19T01:45:34.1312699Z    Generating static pages (12/17) 
+2026-10-19T01:45:34.1313758Z  ✓ Generating static pages (17/17)
+2026-10-19T01:45:34.7892197Z    Finalizing page optimization ...
+2026-10-19T01:45:34.7893029Z    Collecting build traces ...
+2026-10-19T01:45:40.1427962Z 
+2026-10-19T01:45:40.1457651Z Route (app)                                 Size  First Load JS
+2026-10-19T01:45:40.1458922Z ┌ ○ /                                      140 B         103 kB
+2026-10-19T01:45:40.1459880Z ├ ○ /_not-found                            987 B         104 kB
+2026-10-19T01:45:40.1461229Z ├ ƒ /api/auth/callback                     140 B         103 kB
+2026-10-19T01:45:40.1462272Z ├ ƒ /api/auth/login                        140 B         103 kB
+2026-10-19T01:45:40.1463543Z ├ ƒ /api/auth/logout                       140 B         103 kB
+2026-10-19T01:45:40.1464506Z ├ ƒ /api/care/[...path]                    140 B         103 kB
+2026-10-19T01:45:40.1465523Z ├ ƒ /api/health                            140 B         103 kB
+2026-10-19T01:45:40.1466465Z ├ ○ /care                                3.66 kB         110 kB
+2026-10-19T01:45:40.1467353Z ├ ○ /care/ajuda                          1.25 kB         104 kB
+2026-10-19T01:45:40.1468264Z ├ ○ /care/cuidador                       2.24 kB         105 kB
+2026-10-19T01:45:40.1469173Z ├ ○ /care/jornada                        1.06 kB         104 kB
+2026-10-19T01:45:40.1470030Z ├ ○ /care/medicamentos                   1.29 kB         104 kB
+2026-10-19T01:45:40.1470886Z ├ ○ /care/preferencias                    3.3 kB         109 kB
+2026-10-19T01:45:40.1471483Z ├ ○ /care/sintoma                        4.39 kB         110 kB
+2026-10-19T01:45:40.1471977Z ├ ○ /icon.svg                                0 B            0 B
+2026-10-19T01:45:40.1473041Z └ ○ /manifest.webmanifest                  140 B         103 kB
+2026-10-19T01:45:40.1473514Z + First Load JS shared by all             103 kB
+2026-10-19T01:45:40.1474311Z   ├ chunks/18-25b11e3a132b87ef.js        46.5 kB
+2026-10-19T01:45:40.1474756Z   ├ chunks/87c73c54-24122e7b92478d00.js  54.2 kB
+2026-10-19T01:45:40.1475129Z   └ other shared chunks (total)          1.92 kB
+2026-10-19T01:45:40.1475328Z 
+2026-10-19T01:45:40.1475335Z 
+2026-10-19T01:45:40.1475537Z ○  (Static)   prerendered as static content
+2026-10-19T01:45:40.1475918Z ƒ  (Dynamic)  server-rendered on demand
+2026-10-19T01:45:40.1476118Z 
+2026-10-19T01:45:40.2999528Z 
+2026-10-19T01:45:40.3000380Z > @oncopharma/clinical-web@0.1.0 build
+2026-10-19T01:45:40.3001054Z > next build
+2026-10-19T01:45:40.3001311Z 
+2026-10-19T01:45:40.9841764Z ⚠ No build cache found. Please configure build caching for faster rebuilds. Read more: https://nextjs.org/docs/messages/no-cache
+2026-10-19T01:45:41.0219556Z Attention: Next.js now collects completely anonymous telemetry regarding usage.
+2026-10-19T01:45:41.0221243Z This information is used to shape Next.js' roadmap and prioritize features.
+2026-10-19T01:45:41.0223486Z You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+2026-10-19T01:45:41.0224884Z https://nextjs.org/telemetry
+2026-10-19T01:45:41.0225522Z 
+2026-10-19T01:45:41.1052850Z    ▲ Next.js 15.5.27
+2026-10-19T01:45:41.1053648Z 
+2026-10-19T01:45:41.1585321Z    Creating an optimized production build ...
+2026-10-19T01:45:49.4012175Z  ✓ Compiled successfully in 6.0s
+2026-10-19T01:45:49.4059948Z    Linting and checking validity of types ...
+2026-10-19T01:45:52.4734043Z    Collecting page data ...
+2026-10-19T01:45:54.0086377Z    Generating static pages (0/13) ...
+2026-10-19T01:45:54.4628830Z    Generating static pages (3/13) 
+2026-10-19T01:45:54.5583859Z    Generating static pages (6/13) 
+2026-10-19T01:45:54.5969678Z    Generating static pages (9/13) 
+2026-10-19T01:45:54.6594999Z  ✓ Generating static pages (13/13)
+2026-10-19T01:45:55.3193010Z    Finalizing page optimization ...
+2026-10-19T01:45:55.3193774Z    Collecting build traces ...
+2026-10-19T01:46:00.7298265Z 
+2026-10-19T01:46:00.7327921Z Route (app)                                       Size  First Load JS
+2026-10-19T01:46:00.7329226Z ┌ ○ /                                            147 B         103 kB
+2026-10-19T01:46:00.7330240Z ├ ○ /_not-found                                  987 B         104 kB
+2026-10-19T01:46:00.7331236Z ├ ƒ /api/auth/callback                           147 B         103 kB
+2026-10-19T01:46:00.7332313Z ├ ƒ /api/auth/login                              147 B         103 kB
+2026-10-19T01:46:00.7333608Z ├ ƒ /api/auth/logout                             147 B         103 kB
+2026-10-19T01:46:00.7335044Z ├ ƒ /api/clinical/patients/[id]                  147 B         103 kB
+2026-10-19T01:46:00.7336117Z ├ ƒ /api/health                                  147 B         103 kB
+2026-10-19T01:46:00.7337190Z ├ ƒ /api/work/[...path]                          147 B         103 kB
+2026-10-19T01:46:00.7338235Z ├ ƒ /api/workflow/patients/[id]/alerts           147 B         103 kB
+2026-10-19T01:46:00.7338932Z ├ ƒ /api/workflow/patients/[id]/interventions    147 B         103 kB
+2026-10-19T01:46:00.7339543Z ├ ○ /clinical                                  3.71 kB         110 kB
+2026-10-19T01:46:00.7340063Z ├ ○ /clinical/importar                         3.98 kB         110 kB
+2026-10-19T01:46:00.7341126Z ├ ƒ /clinical/pacientes/[id]                   5.89 kB         117 kB
+2026-10-19T01:46:00.7342001Z ├ ○ /clinical/solicitacoes                       162 B         111 kB
+2026-10-19T01:46:00.7342566Z ├ ƒ /clinical/solicitacoes/[id]                  162 B         111 kB
+2026-10-19T01:46:00.7343432Z ├ ○ /icon.svg                                      0 B            0 B
+2026-10-19T01:46:00.7344339Z └ ○ /manifest.webmanifest                        147 B         103 kB
+2026-10-19T01:46:00.7345324Z + First Load JS shared by all                   103 kB
+2026-10-19T01:46:00.7346192Z   ├ chunks/18-25b11e3a132b87ef.js              46.5 kB
+2026-10-19T01:46:00.7346893Z   ├ chunks/87c73c54-24122e7b92478d00.js        54.2 kB
+2026-10-19T01:46:00.7347884Z   └ other shared chunks (total)                1.92 kB
+2026-10-19T01:46:00.7348253Z 
+2026-10-19T01:46:00.7348262Z 
+2026-10-19T01:46:00.7348590Z ○  (Static)   prerendered as static content
+2026-10-19T01:46:00.7349178Z ƒ  (Dynamic)  server-rendered on demand
+2026-10-19T01:46:00.7349476Z 
+2026-10-19T01:46:00.8930896Z 
+2026-10-19T01:46:00.8932056Z > @oncopharma/admin-web@0.14.0 build
+2026-10-19T01:46:00.8932418Z > next build
+2026-10-19T01:46:00.8932548Z 
+2026-10-19T01:46:01.5835111Z ⚠ No build cache found. Please configure build caching for faster rebuilds. Read more: https://nextjs.org/docs/messages/no-cache
+2026-10-19T01:46:01.5904001Z Attention: Next.js now collects completely anonymous telemetry regarding usage.
+2026-10-19T01:46:01.5905101Z This information is used to shape Next.js' roadmap and prioritize features.
+2026-10-19T01:46:01.5906591Z You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+2026-10-19T01:46:01.5907666Z https://nextjs.org/telemetry
+2026-10-19T01:46:01.5907957Z 
+2026-10-19T01:46:01.6763761Z    ▲ Next.js 15.5.27
+2026-10-19T01:46:01.6764438Z 
+2026-10-19T01:46:01.7221137Z    Creating an optimized production build ...
+2026-10-19T01:46:08.4951774Z  ✓ Compiled successfully in 4.5s
+2026-10-19T01:46:08.4988928Z    Linting and checking validity of types ...
+2026-10-19T01:46:10.3255508Z    Collecting page data ...
+2026-10-19T01:46:11.6086242Z    Generating static pages (0/6) ...
+2026-10-19T01:46:12.0719979Z    Generating static pages (1/6) 
+2026-10-19T01:46:12.2119476Z    Generating static pages (2/6) 
+2026-10-19T01:46:12.2120258Z    Generating static pages (4/6) 
+2026-10-19T01:46:12.2121061Z  ✓ Generating static pages (6/6)
+2026-10-19T01:46:12.9030155Z    Finalizing page optimization ...
+2026-10-19T01:46:12.9030833Z    Collecting build traces ...
+2026-10-19T01:46:18.2510342Z 
+2026-10-19T01:46:18.2535368Z Route (app)                                 Size  First Load JS
+2026-10-19T01:46:18.2536657Z ┌ ○ /                                      130 B         103 kB
+2026-10-19T01:46:18.2537640Z ├ ○ /_not-found                            987 B         104 kB
+2026-10-19T01:46:18.2538634Z ├ ƒ /api/health                            130 B         103 kB
+2026-10-19T01:46:18.2539593Z └ ○ /manifest.webmanifest                  130 B         103 kB
+2026-10-19T01:46:18.2540416Z + First Load JS shared by all             103 kB
+2026-10-19T01:46:18.2541235Z   ├ chunks/18-25b11e3a132b87ef.js        46.5 kB
+2026-10-19T01:46:18.2541987Z   ├ chunks/87c73c54-24122e7b92478d00.js  54.2 kB
+2026-10-19T01:46:18.2543031Z   └ other shared chunks (total)           1.9 kB
+2026-10-19T01:46:18.2543822Z 
+2026-10-19T01:46:18.2543835Z 
+2026-10-19T01:46:18.2544304Z ○  (Static)   prerendered as static content
+2026-10-19T01:46:18.2545051Z ƒ  (Dynamic)  server-rendered on demand
+2026-10-19T01:46:18.2545416Z 
+2026-10-19T01:46:18.4263827Z 
+2026-10-19T01:46:18.4264348Z > @oncopharma/api@0.2.0 build
+2026-10-19T01:46:18.4264802Z > nest build
+2026-10-19T01:46:18.4264932Z 
+2026-10-19T01:46:21.7340638Z 
+2026-10-19T01:46:21.7341347Z > oncopharma@0.15.4-dev build:packages
+2026-10-19T01:46:21.7342152Z > npm run build -w @oncopharma/clinical-rules
+2026-10-19T01:46:21.7342574Z 
+2026-10-19T01:46:21.8513609Z 
+2026-10-19T01:46:21.8514439Z > @oncopharma/clinical-rules@0.1.0 build
+2026-10-19T01:46:21.8515129Z > node --check src/index.mjs
+2026-10-19T01:46:21.8515344Z 
+2026-10-19T01:46:22.0022288Z 
+2026-10-19T01:46:22.0023015Z > @oncopharma/portal@0.1.0 build
+2026-10-19T01:46:22.0023541Z > next build
+2026-10-19T01:46:22.0023673Z 
+2026-10-19T01:46:22.6891275Z ⚠ No build cache found. Please configure build caching for faster rebuilds. Read more: https://nextjs.org/docs/messages/no-cache
+2026-10-19T01:46:22.6961502Z Attention: Next.js now collects completely anonymous telemetry regarding usage.
+2026-10-19T01:46:22.6963032Z This information is used to shape Next.js' roadmap and prioritize features.
+2026-10-19T01:46:22.6965190Z You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+2026-10-19T01:46:22.6966467Z https://nextjs.org/telemetry
+2026-10-19T01:46:22.6966928Z 
+2026-10-19T01:46:22.7888787Z    ▲ Next.js 15.5.27
+2026-10-19T01:46:22.7889102Z 
+2026-10-19T01:46:22.8389493Z    Creating an optimized production build ...
+2026-10-19T01:46:30.7486140Z  ✓ Compiled successfully in 5.6s
+2026-10-19T01:46:30.7540211Z    Linting and checking validity of types ...
+2026-10-19T01:46:33.2639246Z    Collecting page data ...
+2026-10-19T01:46:34.7059682Z    Generating static pages (0/11) ...
+2026-10-19T01:46:35.1670806Z    Generating static pages (2/11) 
+2026-10-19T01:46:35.3811487Z    Generating static pages (5/11) 
+2026-10-19T01:46:35.3811888Z    Generating static pages (8/11) 
+2026-10-19T01:46:35.3812445Z  ✓ Generating static pages (11/11)
+2026-10-19T01:46:36.0375602Z    Finalizing page optimization ...
+2026-10-19T01:46:36.0376221Z    Collecting build traces ...
+2026-10-19T01:46:41.4883514Z 
+2026-10-19T01:46:41.4912023Z Route (app)                                       Size  First Load JS
+2026-10-19T01:46:41.4913681Z ┌ ○ /                                            160 B         106 kB
+2026-10-19T01:46:41.4914806Z ├ ○ /_not-found                                  987 B         104 kB
+2026-10-19T01:46:41.4915955Z ├ ƒ /api/auth/callback                           142 B         103 kB
+2026-10-19T01:46:41.4917102Z ├ ƒ /api/auth/login                              142 B         103 kB
+2026-10-19T01:46:41.4918231Z ├ ƒ /api/auth/logout                             142 B         103 kB
+2026-10-19T01:46:41.4919398Z ├ ƒ /api/clinical/patients/[id]                  142 B         103 kB
+2026-10-19T01:46:41.4920266Z ├ ƒ /api/clinical/summary                        142 B         103 kB
+2026-10-19T01:46:41.4921478Z ├ ƒ /api/workflow/patients/[id]/alerts           142 B         103 kB
+2026-10-19T01:46:41.4923014Z ├ ƒ /api/workflow/patients/[id]/interventions    142 B         103 kB
+2026-10-19T01:46:41.4924241Z ├ ƒ /api/workflow/patients/[id]/symptoms         142 B         103 kB
+2026-10-19T01:46:41.4925153Z ├ ○ /care                                      1.16 kB         107 kB
+2026-10-19T01:46:41.4925732Z ├ ○ /clinical                                  2.84 kB         109 kB
+2026-10-19T01:46:41.4926262Z └ ○ /icon.svg                                      0 B            0 B
+2026-10-19T01:46:41.4926699Z + First Load JS shared by all                   103 kB
+2026-10-19T01:46:41.4927149Z   ├ chunks/18-25b11e3a132b87ef.js              46.5 kB
+2026-10-19T01:46:41.4927581Z   ├ chunks/87c73c54-24122e7b92478d00.js        54.2 kB
+2026-10-19T01:46:41.4928254Z   └ other shared chunks (total)                 1.9 kB
+2026-10-19T01:46:41.4928477Z 
+2026-10-19T01:46:41.4928483Z 
+2026-10-19T01:46:41.4928700Z ○  (Static)   prerendered as static content
+2026-10-19T01:46:41.4929093Z ƒ  (Dynamic)  server-rendered on demand
+2026-10-19T01:46:41.4929281Z 
+2026-10-19T01:46:41.5545942Z ##[group]Run npm run test:api:security
+2026-10-19T01:46:41.5546307Z [36;1mnpm run test:api:security[0m
+2026-10-19T01:46:41.5608217Z shell: /usr/bin/bash -e {0}
+2026-10-19T01:46:41.5608498Z ##[endgroup]
+2026-10-19T01:46:41.6711085Z 
+2026-10-19T01:46:41.6711699Z > oncopharma@0.15.4-dev test:api:security
+2026-10-19T01:46:41.6713551Z > node --test tests/m145-api.security.mjs tests/m15-oidc-providers.mjs tests/m151-synthetic-mode.mjs tests/m152-care.mjs tests/m153-caregiver.mjs tests/m154-clinical.mjs tests/m154b-allocation.mjs tests/m154c-pdf-import.mjs tests/m155-medical-requests.mjs
+2026-10-19T01:46:41.6714612Z 
+2026-10-19T01:46:41.7245626Z TAP version 13
+2026-10-19T01:46:41.9780765Z # Subtest: DatabaseService refuses superuser, BYPASSRLS and unexpected role before transaction
+2026-10-19T01:46:41.9804223Z ok 1 - DatabaseService refuses superuser, BYPASSRLS and unexpected role before transaction
+2026-10-19T01:46:41.9808389Z   ---
+2026-10-19T01:46:41.9809098Z   duration_ms: 2.797258
+2026-10-19T01:46:41.9809800Z   type: 'test'
+2026-10-19T01:46:41.9810393Z   ...
+2026-10-19T01:46:41.9811560Z # Subtest: staff assignments are checked inside tenant context, with MFA and active membership
+2026-10-19T01:46:41.9813517Z ok 2 - staff assignments are checked inside tenant context, with MFA and active membership
+2026-10-19T01:46:41.9814621Z   ---
+2026-10-19T01:46:41.9815167Z   duration_ms: 1.027444
+2026-10-19T01:46:41.9815794Z   type: 'test'
+2026-10-19T01:46:41.9816337Z   ...
+2026-10-19T01:46:41.9962995Z # Subtest: padrão (IdP de teste Keycloak): otp/mfa aceitos; pwd sozinho recusado
+2026-10-19T01:46:42.0021872Z ok 3 - padrão (IdP de teste Keycloak): otp/mfa aceitos; pwd sozinho recusado
+2026-10-19T01:46:42.0049731Z   ---
+2026-10-19T01:46:42.0053227Z   duration_ms: 1.358724
+2026-10-19T01:46:42.0053948Z   type: 'test'
+2026-10-19T01:46:42.0054581Z   ...
+2026-10-19T01:46:42.0056010Z # Subtest: Entra ID: OIDC_MFA_AMR=mfa não aceita "otp" (no Entra significa SMS/e-mail)
+2026-10-19T01:46:42.0084438Z ok 4 - Entra ID: OIDC_MFA_AMR=mfa não aceita "otp" (no Entra significa SMS/e-mail)
+2026-10-19T01:46:42.0113670Z   ---
+2026-10-19T01:46:42.0143449Z   duration_ms: 0.292768
+2026-10-19T01:46:42.0167006Z   type: 'test'
+2026-10-19T01:46:42.0193202Z   ...
+2026-10-19T01:46:42.0204076Z # Subtest: Entra ID com Authentication Context: exige acrs=c1 além de amr=mfa
+2026-10-19T01:46:42.0223952Z ok 5 - Entra ID com Authentication Context: exige acrs=c1 além de amr=mfa
+2026-10-19T01:46:42.0253284Z   ---
+2026-10-19T01:46:42.0283395Z   duration_ms: 0.379291
+2026-10-19T01:46:42.0284140Z   type: 'test'
+2026-10-19T01:46:42.0313500Z   ...
+2026-10-19T01:46:42.0314780Z # Subtest: Google Workspace direto (sem amr): MFA nunca é inferido — fail closed
+2026-10-19T01:46:42.0316207Z ok 6 - Google Workspace direto (sem amr): MFA nunca é inferido — fail closed
+2026-10-19T01:46:42.0317011Z   ---
+2026-10-19T01:46:42.0317470Z   duration_ms: 0.376575
+2026-10-19T01:46:42.0317981Z   type: 'test'
+2026-10-19T01:46:42.0318444Z   ...
+2026-10-19T01:46:42.1049956Z # Subtest: AuthGuard: assinatura real; OIDC_SUBJECT_CLAIM=oid usa oid como identificador; ausência do claim => 401
+2026-10-19T01:46:42.1074114Z ok 7 - AuthGuard: assinatura real; OIDC_SUBJECT_CLAIM=oid usa oid como identificador; ausência do claim => 401
+2026-10-19T01:46:42.1078499Z   ---
+2026-10-19T01:46:42.1079079Z   duration_ms: 115.078084
+2026-10-19T01:46:42.1079649Z   type: 'test'
+2026-10-19T01:46:42.1080146Z   ...
+2026-10-19T01:46:42.2054066Z # Subtest: modo sintético por ambiente explícito
+2026-10-19T01:46:42.2088418Z ok 8 - modo sintético por ambiente explícito
+2026-10-19T01:46:42.2103693Z   ---
+2026-10-19T01:46:42.2104676Z   duration_ms: 1.527941
+2026-10-19T01:46:42.2105477Z   type: 'test'
+2026-10-19T01:46:42.2106582Z   ...
+2026-10-19T01:46:42.2107747Z # Subtest: relato estruturado: validação fecha entradas desconhecidas
+2026-10-19T01:46:42.2109098Z ok 9 - relato estruturado: validação fecha entradas desconhecidas
+2026-10-19T01:46:42.2109895Z   ---
+2026-10-19T01:46:42.2110852Z   duration_ms: 3.611633
+2026-10-19T01:46:42.2111460Z   type: 'test'
+2026-10-19T01:46:42.2111970Z   ...
+2026-10-19T01:46:42.2113733Z # Subtest: sinais de alerta, febre ou intensidade forte => prioridade + orientação de procurar atendimento (nunca conduta/dose)
+2026-10-19T01:46:42.2117730Z ok 10 - sinais de alerta, febre ou intensidade forte => prioridade + orientação de procurar atendimento (nunca conduta/dose)
+2026-10-19T01:46:42.2118946Z   ---
+2026-10-19T01:46:42.2119457Z   duration_ms: 0.98786
+2026-10-19T01:46:42.2120001Z   type: 'test'
+2026-10-19T01:46:42.2120493Z   ...
+2026-10-19T01:46:42.2121562Z # Subtest: R3: API do Care não aceita identificador de paciente; rota antiga removida
+2026-10-19T01:46:42.2123226Z ok 11 - R3: API do Care não aceita identificador de paciente; rota antiga removida
+2026-10-19T01:46:42.2124145Z   ---
+2026-10-19T01:46:42.2124659Z   duration_ms: 0.485469
+2026-10-19T01:46:42.2125234Z   type: 'test'
+2026-10-19T01:46:42.2125746Z   ...
+2026-10-19T01:46:42.2126648Z # Subtest: BFF do Care: somente rotas /me permitidas, CSRF por origem e JSON
+2026-10-19T01:46:42.2127894Z ok 12 - BFF do Care: somente rotas /me permitidas, CSRF por origem e JSON
+2026-10-19T01:46:42.2128741Z   ---
+2026-10-19T01:46:42.2129247Z   duration_ms: 0.32036
+2026-10-19T01:46:42.2129795Z   type: 'test'
+2026-10-19T01:46:42.2130322Z   ...
+2026-10-19T01:46:42.2131471Z # Subtest: interface do Care: sem campo de UUID, sem rótulos de teste/fictício, sem dose
+2026-10-19T01:46:42.2133258Z ok 13 - interface do Care: sem campo de UUID, sem rótulos de teste/fictício, sem dose
+2026-10-19T01:46:42.2134217Z   ---
+2026-10-19T01:46:42.2134715Z   duration_ms: 3.094244
+2026-10-19T01:46:42.2135264Z   type: 'test'
+2026-10-19T01:46:42.2135750Z   ...
+2026-10-19T01:46:42.3320272Z # Subtest: código: 12 símbolos sem ambíguos (60 bits), normalização e hash estável sem guardar o código
+2026-10-19T01:46:42.3364554Z ok 14 - código: 12 símbolos sem ambíguos (60 bits), normalização e hash estável sem guardar o código
+2026-10-19T01:46:42.3372472Z   ---
+2026-10-19T01:46:42.3373452Z   duration_ms: 19.40243
+2026-10-19T01:46:42.3373886Z   type: 'test'
+2026-10-19T01:46:42.3374224Z   ...
+2026-10-19T01:46:42.3375034Z # Subtest: escopos: paciente tem tudo; cuidador só o concedido; ações do paciente negadas ao cuidador
+2026-10-19T01:46:42.3376047Z ok 15 - escopos: paciente tem tudo; cuidador só o concedido; ações do paciente negadas ao cuidador
+2026-10-19T01:46:42.3376641Z   ---
+2026-10-19T01:46:42.3376960Z   duration_ms: 1.280928
+2026-10-19T01:46:42.3377317Z   type: 'test'
+2026-10-19T01:46:42.3377634Z   ...
+2026-10-19T01:46:42.3378529Z # Subtest: controlador: gestão de cuidadores exige paciente; aceite com recusa auditada em transação própria; adesão só do paciente
+2026-10-19T01:46:42.3379862Z ok 16 - controlador: gestão de cuidadores exige paciente; aceite com recusa auditada em transação própria; adesão só do paciente
+2026-10-19T01:46:42.3380557Z   ---
+2026-10-19T01:46:42.3380881Z   duration_ms: 0.756376
+2026-10-19T01:46:42.3381227Z   type: 'test'
+2026-10-19T01:46:42.3381558Z   ...
+2026-10-19T01:46:42.3382051Z # Subtest: BFF permite só as rotas do cuidador previstas
+2026-10-19T01:46:42.3382910Z ok 17 - BFF permite só as rotas do cuidador previstas
+2026-10-19T01:46:42.3383606Z   ---
+2026-10-19T01:46:42.3383983Z   duration_ms: 0.303237
+2026-10-19T01:46:42.3384358Z   type: 'test'
+2026-10-19T01:46:42.3384641Z   ...
+2026-10-19T01:46:42.3385231Z # Subtest: histórico do cuidador: ação sempre no padrão care.* aceito pelo CHECK da 0010
+2026-10-19T01:46:42.3385988Z ok 18 - histórico do cuidador: ação sempre no padrão care.* aceito pelo CHECK da 0010
+2026-10-19T01:46:42.3386399Z   ---
+2026-10-19T01:46:42.3386596Z   duration_ms: 0.490438
+2026-10-19T01:46:42.3386821Z   type: 'test'
+2026-10-19T01:46:42.3387989Z   ...
+2026-10-19T01:46:42.3613720Z # Subtest: estados §5.1: grafo idêntico ao trigger da 0011; finais sem saída; sem fechamento por tempo
+2026-10-19T01:46:42.3619839Z ok 19 - estados §5.1: grafo idêntico ao trigger da 0011; finais sem saída; sem fechamento por tempo
+2026-10-19T01:46:42.3621243Z   ---
+2026-10-19T01:46:42.3621904Z   duration_ms: 5.099889
+2026-10-19T01:46:42.3623109Z   type: 'test'
+2026-10-19T01:46:42.3623753Z   ...
+2026-10-19T01:46:42.3625286Z # Subtest: papéis (P-CLIN-1): resolver/descartar/duplicar só farmácia ou medicina; enfermagem avalia, acompanha, encaminha
+2026-10-19T01:46:42.3628402Z ok 20 - papéis (P-CLIN-1): resolver/descartar/duplicar só farmácia ou medicina; enfermagem avalia, acompanha, encaminha
+2026-10-19T01:46:42.3629690Z   ---
+2026-10-19T01:46:42.3630262Z   duration_ms: 0.455894
+2026-10-19T01:46:42.3630930Z   type: 'test'
+2026-10-19T01:46:42.3631620Z   ...
+2026-10-19T01:46:42.3632833Z # Subtest: busca: normaliza acento/caixa, remove curingas, limita tamanho
+2026-10-19T01:46:42.3634177Z ok 21 - busca: normaliza acento/caixa, remove curingas, limita tamanho
+2026-10-19T01:46:42.3635010Z   ---
+2026-10-19T01:46:42.3635561Z   duration_ms: 0.558806
+2026-10-19T01:46:42.3636171Z   type: 'test'
+2026-10-19T01:46:42.3636727Z   ...
+2026-10-19T01:46:42.3638174Z # Subtest: pré-ciclo: só disponibilidade; qualquer ausência => "Não é possível concluir"; nunca declara aptidão
+2026-10-19T01:46:42.3640130Z ok 22 - pré-ciclo: só disponibilidade; qualquer ausência => "Não é possível concluir"; nunca declara aptidão
+2026-10-19T01:46:42.3641293Z   ---
+2026-10-19T01:46:42.3641886Z   duration_ms: 1.020291
+2026-10-19T01:46:42.3642484Z   type: 'test'
+2026-10-19T01:46:42.3643278Z   ...
+2026-10-19T01:46:42.3644711Z # Subtest: lista mínima: SELECT da worklist não traz campos clínicos; intervenção só farmácia; lista sem vínculo vazia
+2026-10-19T01:46:42.3646617Z ok 23 - lista mínima: SELECT da worklist não traz campos clínicos; intervenção só farmácia; lista sem vínculo vazia
+2026-10-19T01:46:42.3647659Z   ---
+2026-10-19T01:46:42.3648180Z   duration_ms: 1.094329
+2026-10-19T01:46:42.3648761Z   type: 'test'
+2026-10-19T01:46:42.3649248Z   ...
+2026-10-19T01:46:42.3650279Z # Subtest: BFF do Clinical: lista fechada de rotas, CSRF por origem, só "q" repassado
+2026-10-19T01:46:42.3651702Z ok 24 - BFF do Clinical: lista fechada de rotas, CSRF por origem, só "q" repassado
+2026-10-19T01:46:42.3652549Z   ---
+2026-10-19T01:46:42.3653350Z   duration_ms: 0.38967
+2026-10-19T01:46:42.3653894Z   type: 'test'
+2026-10-19T01:46:42.3654381Z   ...
+2026-10-19T01:46:42.3655431Z # Subtest: interface do Clinical: sem rótulos de teste/fictício e sem versões antigas
+2026-10-19T01:46:42.3656861Z ok 25 - interface do Clinical: sem rótulos de teste/fictício e sem versões antigas
+2026-10-19T01:46:42.3657706Z   ---
+2026-10-19T01:46:42.3658190Z   duration_ms: 4.232332
+2026-10-19T01:46:42.3658724Z   type: 'test'
+2026-10-19T01:46:42.3659207Z   ...
+2026-10-19T01:46:42.3660238Z # Subtest: IdP de teste: referência AMR válida durante a sessão (regressão maxAge=0)
+2026-10-19T01:46:42.3661637Z ok 26 - IdP de teste: referência AMR válida durante a sessão (regressão maxAge=0)
+2026-10-19T01:46:42.3662477Z   ---
+2026-10-19T01:46:42.3663320Z   duration_ms: 0.908091
+2026-10-19T01:46:42.3664054Z   type: 'test'
+2026-10-19T01:46:42.3664631Z   ...
+2026-10-19T01:46:42.3665999Z # Subtest: FHIR R4: só Encounter em andamento com unidade; Location por physicalType; sem dado clínico
+2026-10-19T01:46:42.3667754Z ok 27 - FHIR R4: só Encounter em andamento com unidade; Location por physicalType; sem dado clínico
+2026-10-19T01:46:42.3668759Z   ---
+2026-10-19T01:46:42.3669342Z   duration_ms: 4.159208
+2026-10-19T01:46:42.3669936Z   type: 'test'
+2026-10-19T01:46:42.3670493Z   ...
+2026-10-19T01:46:42.3671990Z # Subtest: HL7 v2 ADT A02: PID-3 + PV1-3 (unidade^quarto^leito^…^andar); rejeita origem não sintética e eventos não suportados
+2026-10-19T01:46:42.3674328Z ok 28 - HL7 v2 ADT A02: PID-3 + PV1-3 (unidade^quarto^leito^…^andar); rejeita origem não sintética e eventos não suportados
+2026-10-19T01:46:42.3675770Z   ---
+2026-10-19T01:46:42.3676285Z   duration_ms: 1.416562
+2026-10-19T01:46:42.3676879Z   type: 'test'
+2026-10-19T01:46:42.3677381Z   ...
+2026-10-19T01:46:42.3679012Z # Subtest: gateway: exige token de serviço (comparação constante), fail-closed sem token, controla fases do simulador
+2026-10-19T01:46:42.3680988Z ok 29 - gateway: exige token de serviço (comparação constante), fail-closed sem token, controla fases do simulador
+2026-10-19T01:46:42.3682072Z   ---
+2026-10-19T01:46:42.3682577Z   duration_ms: 76.144778
+2026-10-19T01:46:42.3683367Z   type: 'test'
+2026-10-19T01:46:42.3683940Z   ...
+2026-10-19T01:46:42.3685431Z # Subtest: regras: validação do feed na API, comparação tolerante a caixa/espaço, manual divergente nunca sobrescrito
+2026-10-19T01:46:42.3687393Z ok 30 - regras: validação do feed na API, comparação tolerante a caixa/espaço, manual divergente nunca sobrescrito
+2026-10-19T01:46:42.3688495Z   ---
+2026-10-19T01:46:42.3689164Z   duration_ms: 1.376317
+2026-10-19T01:46:42.3689802Z   type: 'test'
+2026-10-19T01:46:42.3690331Z   ...
+2026-10-19T01:46:42.3691804Z # Subtest: API/BFF: sincronização devolve só contagens; manual bloqueado quando o hospital informa; rotas fechadas no BFF
+2026-10-19T01:46:42.3694304Z ok 31 - API/BFF: sincronização devolve só contagens; manual bloqueado quando o hospital informa; rotas fechadas no BFF
+2026-10-19T01:46:42.3695514Z   ---
+2026-10-19T01:46:42.3696073Z   duration_ms: 0.875249
+2026-10-19T01:46:42.3696654Z   type: 'test'
+2026-10-19T01:46:42.3697169Z   ...
+2026-10-19T01:46:43.0047021Z # Subtest: Tasy (colunas): linhas, normalização e linha inválida sinalizada
+2026-10-19T01:46:43.0048591Z ok 32 - Tasy (colunas): linhas, normalização e linha inválida sinalizada
+2026-10-19T01:46:43.0049443Z   ---
+2026-10-19T01:46:43.0049846Z   duration_ms: 745.080561
+2026-10-19T01:46:43.0050319Z   type: 'test'
+2026-10-19T01:46:43.0050723Z   ...
+2026-10-19T01:46:43.0177493Z # Subtest: MV (linhas por regex): setor/andar/leito e nome
+2026-10-19T01:46:43.0181930Z ok 33 - MV (linhas por regex): setor/andar/leito e nome
+2026-10-19T01:46:43.0183939Z   ---
+2026-10-19T01:46:43.0184594Z   duration_ms: 12.662009
+2026-10-19T01:46:43.0185169Z   type: 'test'
+2026-10-19T01:46:43.0185685Z   ...
+2026-10-19T01:46:43.0256594Z # Subtest: fail-closed: sem marcação sintética, não PDF, vazio, grande demais
+2026-10-19T01:46:43.0289841Z ok 34 - fail-closed: sem marcação sintética, não PDF, vazio, grande demais
+2026-10-19T01:46:43.0290846Z   ---
+2026-10-19T01:46:43.0291432Z   duration_ms: 8.690944
+2026-10-19T01:46:43.0291892Z   type: 'test'
+2026-10-19T01:46:43.0292287Z   ...
+2026-10-19T01:46:43.0293815Z # Subtest: prévia: criar / atualizar / sem alteração / divergência com hospital / sem vínculo / inválida
+2026-10-19T01:46:43.0295597Z ok 35 - prévia: criar / atualizar / sem alteração / divergência com hospital / sem vínculo / inválida
+2026-10-19T01:46:43.0296495Z   ---
+2026-10-19T01:46:43.0296880Z   duration_ms: 0.483575
+2026-10-19T01:46:43.0297308Z   type: 'test'
+2026-10-19T01:46:43.0297756Z   ...
+2026-10-19T01:46:43.0298794Z # Subtest: cifra: AES-256-GCM, chave obrigatória de 32 bytes, adulteração detectada
+2026-10-19T01:46:43.0300212Z ok 36 - cifra: AES-256-GCM, chave obrigatória de 32 bytes, adulteração detectada
+2026-10-19T01:46:43.0301011Z   ---
+2026-10-19T01:46:43.0301416Z   duration_ms: 1.191571
+2026-10-19T01:46:43.0301863Z   type: 'test'
+2026-10-19T01:46:43.0302221Z   ...
+2026-10-19T01:46:43.0303805Z # Subtest: API/BFF: prévia não grava paciente/alocação; confirmação reavalia; conflitos só marcados; rotas e limites fechados
+2026-10-19T01:46:43.0305175Z ok 37 - API/BFF: prévia não grava paciente/alocação; confirmação reavalia; conflitos só marcados; rotas e limites fechados
+2026-10-19T01:46:43.0305731Z   ---
+2026-10-19T01:46:43.0305938Z   duration_ms: 0.71061
+2026-10-19T01:46:43.0306172Z   type: 'test'
+2026-10-19T01:46:43.0306374Z   ...
+2026-10-19T01:46:43.0418041Z # Subtest: grafo de estados: ator correto, sem atalhos/reabertura
+2026-10-19T01:46:43.0418992Z ok 38 - grafo de estados: ator correto, sem atalhos/reabertura
+2026-10-19T01:46:43.0419995Z   ---
+2026-10-19T01:46:43.0420331Z   duration_ms: 1.101873
+2026-10-19T01:46:43.0431859Z   type: 'test'
+2026-10-19T01:46:43.0432185Z   ...
+2026-10-19T01:46:43.0433598Z # Subtest: evidências: quantidade, UUID, tipo fechado e duplicatas
+2026-10-19T01:46:43.0434605Z ok 39 - evidências: quantidade, UUID, tipo fechado e duplicatas
+2026-10-19T01:46:43.0435189Z   ---
+2026-10-19T01:46:43.0435516Z   duration_ms: 1.110078
+2026-10-19T01:46:43.0435837Z   type: 'test'
+2026-10-19T01:46:43.0436045Z   ...
+2026-10-19T01:46:43.0436524Z # Subtest: MFA, papéis, vínculo e contexto somente derivado do principal
+2026-10-19T01:46:43.0437136Z ok 40 - MFA, papéis, vínculo e contexto somente derivado do principal
+2026-10-19T01:46:43.0437502Z   ---
+2026-10-19T01:46:43.0437708Z   duration_ms: 2.012619
+2026-10-19T01:46:43.0437938Z   type: 'test'
+2026-10-19T01:46:43.0438136Z   ...
+2026-10-19T01:46:43.0438666Z # Subtest: envio exige confirmação explícita, versão e autoria; nunca escreve prescrição
+2026-10-19T01:46:43.0439416Z ok 41 - envio exige confirmação explícita, versão e autoria; nunca escreve prescrição
+2026-10-19T01:46:43.0439818Z   ---
+2026-10-19T01:46:43.0440070Z   duration_ms: 1.227338
+2026-10-19T01:46:43.0440314Z   type: 'test'
+2026-10-19T01:46:43.0440522Z   ...
+2026-10-19T01:46:43.0441183Z # Subtest: resposta só destinatário e conclusão só autor com referência; rascunho pode ser descartado
+2026-10-19T01:46:43.0442106Z ok 42 - resposta só destinatário e conclusão só autor com referência; rascunho pode ser descartado
+2026-10-19T01:46:43.0442577Z   ---
+2026-10-19T01:46:43.0443108Z   duration_ms: 0.878575
+2026-10-19T01:46:43.0443359Z   type: 'test'
+2026-10-19T01:46:43.0443563Z   ...
+2026-10-19T01:46:43.0443769Z 1..42
+2026-10-19T01:46:43.0443970Z # tests 42
+2026-10-19T01:46:43.0444181Z # suites 0
+2026-10-19T01:46:43.0444392Z # pass 42
+2026-10-19T01:46:43.0444592Z # fail 0
+2026-10-19T01:46:43.0444799Z # cancelled 0
+2026-10-19T01:46:43.0445016Z # skipped 0
+2026-10-19T01:46:43.0445247Z # todo 0
+2026-10-19T01:46:43.0445462Z # duration_ms 1340.249762
+2026-10-19T01:46:43.0571587Z ##[group]Run npm run test:rules
+2026-10-19T01:46:43.0571902Z [36;1mnpm run test:rules[0m
+2026-10-19T01:46:43.0634049Z shell: /usr/bin/bash -e {0}
+2026-10-19T01:46:43.0634306Z ##[endgroup]
+2026-10-19T01:46:43.1614423Z 
+2026-10-19T01:46:43.1615011Z > oncopharma@0.15.4-dev test:rules
+2026-10-19T01:46:43.1615518Z > node --test packages/clinical-rules/tests/*.test.mjs
+2026-10-19T01:46:43.1615781Z 
+2026-10-19T01:46:43.2057998Z TAP version 13
+2026-10-19T01:46:43.2431070Z # Subtest: reject real patient input
+2026-10-19T01:46:43.2440807Z ok 1 - reject real patient input
+2026-10-19T01:46:43.2442924Z   ---
+2026-10-19T01:46:43.2453693Z   duration_ms: 1.017755
+2026-10-19T01:46:43.2454434Z   type: 'test'
+2026-10-19T01:46:43.2455283Z   ...
+2026-10-19T01:46:43.2456160Z # Subtest: never authorizes chemotherapy
+2026-10-19T01:46:43.2457085Z ok 2 - never authorizes chemotherapy
+2026-10-19T01:46:43.2457860Z   ---
+2026-10-19T01:46:43.2458509Z   duration_ms: 0.177612
+2026-10-19T01:46:43.2459231Z   type: 'test'
+2026-10-19T01:46:43.2459848Z   ...
+2026-10-19T01:46:43.2460673Z # Subtest: fever routes to human urgent review
+2026-10-19T01:46:43.2461754Z ok 3 - fever routes to human urgent review
+2026-10-19T01:46:43.2462583Z   ---
+2026-10-19T01:46:43.2463469Z   duration_ms: 0.228087
+2026-10-19T01:46:43.2464168Z   type: 'test'
+2026-10-19T01:46:43.2464790Z   ...
+2026-10-19T01:46:43.2465571Z # Subtest: missing labs flag review
+2026-10-19T01:46:43.2466540Z ok 4 - missing labs flag review
+2026-10-19T01:46:43.2467330Z   ---
+2026-10-19T01:46:43.2467961Z   duration_ms: 0.230171
+2026-10-19T01:46:43.2468643Z   type: 'test'
+2026-10-19T01:46:43.2469272Z   ...
+2026-10-19T01:46:43.2470425Z # Subtest: urgent text uses deterministic classifier
+2026-10-19T01:46:43.2472060Z ok 5 - urgent text uses deterministic classifier
+2026-10-19T01:46:43.2472923Z   ---
+2026-10-19T01:46:43.2473302Z   duration_ms: 0.96707
+2026-10-19T01:46:43.2473716Z   type: 'test'
+2026-10-19T01:46:43.2474511Z   ...
+2026-10-19T01:46:43.2557989Z 1..5
+2026-10-19T01:46:43.2558564Z # tests 5
+2026-10-19T01:46:43.2559062Z # suites 0
+2026-10-19T01:46:43.2559534Z # pass 5
+2026-10-19T01:46:43.2560004Z # fail 0
+2026-10-19T01:46:43.2560482Z # cancelled 0
+2026-10-19T01:46:43.2560992Z # skipped 0
+2026-10-19T01:46:43.2561477Z # todo 0
+2026-10-19T01:46:43.2561990Z # duration_ms 62.94394
+2026-10-19T01:46:43.2719763Z ##[group]Run npm run test:readiness
+2026-10-19T01:46:43.2720300Z [36;1mnpm run test:readiness[0m
+2026-10-19T01:46:43.2783895Z shell: /usr/bin/bash -e {0}
+2026-10-19T01:46:43.2784153Z ##[endgroup]
+2026-10-19T01:46:43.3850739Z 
+2026-10-19T01:46:43.3851219Z > oncopharma@0.15.4-dev test:readiness
+2026-10-19T01:46:43.3851694Z > node --test tests/m141-release-gate.test.mjs
+2026-10-19T01:46:43.3851936Z 
+2026-10-19T01:46:43.4304597Z TAP version 13
+2026-10-19T01:46:43.5987020Z # Subtest: gate falha fechado com aprovações pendentes
+2026-10-19T01:46:43.5994755Z ok 1 - gate falha fechado com aprovações pendentes
+2026-10-19T01:46:43.5995404Z   ---
+2026-10-19T01:46:43.5995801Z   duration_ms: 34.066668
+2026-10-19T01:46:43.5996261Z   type: 'test'
+2026-10-19T01:46:43.5996636Z   ...
+2026-10-19T01:46:43.6000824Z # Subtest: gate falha fechado sem arquivo
+2026-10-19T01:46:43.6003166Z ok 2 - gate falha fechado sem arquivo
+2026-10-19T01:46:43.6004014Z   ---
+2026-10-19T01:46:43.6004472Z   duration_ms: 30.71487
+2026-10-19T01:46:43.6004903Z   type: 'test'
+2026-10-19T01:46:43.6005267Z   ...
+2026-10-19T01:46:43.6006323Z # Subtest: gate rejeita alegação approved sem artefatos e aprovador
+2026-10-19T01:46:43.6008077Z ok 3 - gate rejeita alegação approved sem artefatos e aprovador
+2026-10-19T01:46:43.6008907Z   ---
+2026-10-19T01:46:43.6009404Z   duration_ms: 33.523395
+2026-10-19T01:46:43.6009988Z   type: 'test'
+2026-10-19T01:46:43.6010496Z   ...
+2026-10-19T01:46:43.6011551Z # Subtest: gate nunca autoriza uso clínico mesmo com declarações completas
+2026-10-19T01:46:43.6013098Z ok 4 - gate nunca autoriza uso clínico mesmo com declarações completas
+2026-10-19T01:46:43.6014018Z   ---
+2026-10-19T01:46:43.6014521Z   duration_ms: 31.191491
+2026-10-19T01:46:43.6015115Z   type: 'test'
+2026-10-19T01:46:43.6015641Z   ...
+2026-10-19T01:46:43.6088914Z 1..4
+2026-10-19T01:46:43.6089729Z # tests 4
+2026-10-19T01:46:43.6090353Z # suites 0
+2026-10-19T01:46:43.6090926Z # pass 4
+2026-10-19T01:46:43.6091451Z # fail 0
+2026-10-19T01:46:43.6092058Z # cancelled 0
+2026-10-19T01:46:43.6092559Z # skipped 0
+2026-10-19T01:46:43.6093468Z # todo 0
+2026-10-19T01:46:43.6094073Z # duration_ms 190.437373
+2026-10-19T01:46:43.6259449Z ##[group]Run npm run test:lab:e2e
+2026-10-19T01:46:43.6259772Z [36;1mnpm run test:lab:e2e[0m
+2026-10-19T01:46:43.6321804Z shell: /usr/bin/bash -e {0}
+2026-10-19T01:46:43.6322060Z ##[endgroup]
+2026-10-19T01:46:43.7313243Z 
+2026-10-19T01:46:43.7313675Z > oncopharma@0.15.4-dev test:lab:e2e
+2026-10-19T01:46:43.7314299Z > node --test tests/m142-lab-e2e.test.mjs
+2026-10-19T01:46:43.7314515Z 
+2026-10-19T01:46:43.7754680Z TAP version 13
+2026-10-19T01:46:44.0005108Z # Subtest: M14.2: laboratório sintético HTTP ponta a ponta e isolamento local
+2026-10-19T01:46:44.0012967Z ok 1 - M14.2: laboratório sintético HTTP ponta a ponta e isolamento local
+2026-10-19T01:46:44.0013705Z   ---
+2026-10-19T01:46:44.0014071Z   duration_ms: 161.14176
+2026-10-19T01:46:44.0014475Z   type: 'test'
+2026-10-19T01:46:44.0014805Z   ...
+2026-10-19T01:46:44.0269877Z 1..1
+2026-10-19T01:46:44.0270598Z # tests 1
+2026-10-19T01:46:44.0271591Z # suites 0
+2026-10-19T01:46:44.0272474Z # pass 1
+2026-10-19T01:46:44.0274656Z # fail 0
+2026-10-19T01:46:44.0275599Z # cancelled 0
+2026-10-19T01:46:44.0276305Z # skipped 0
+2026-10-19T01:46:44.0278086Z # todo 0
+2026-10-19T01:46:44.0278634Z # duration_ms 264.194292
+2026-10-19T01:46:44.0412540Z ##[group]Run npm run validate:evidence
+2026-10-19T01:46:44.0413390Z [36;1mnpm run validate:evidence[0m
+2026-10-19T01:46:44.0474938Z shell: /usr/bin/bash -e {0}
+2026-10-19T01:46:44.0475200Z ##[endgroup]
+2026-10-19T01:46:44.1503308Z 
+2026-10-19T01:46:44.1503854Z > oncopharma@0.15.4-dev validate:evidence
+2026-10-19T01:46:44.1504883Z > node tools/validate-real.mjs
+2026-10-19T01:46:44.1505219Z 
+2026-10-19T01:48:09.3650719Z {
+2026-10-19T01:48:09.3651345Z   "schema": "oncopharma-validation-v2",
+2026-10-19T01:48:09.3651890Z   "date": "2026-10-19T01:46:44.185Z",
+2026-10-19T01:48:09.3652244Z   "baseline": "Plano Diretor v3.0",
+2026-10-19T01:48:09.3652560Z   "release": "M14.5-consolidado",
+2026-10-19T01:48:09.3653262Z   "sourceDigest": "7aeb38f4e786723816a5ca9a4da30719c9e5497c590336653c04e876a23507e5",
+2026-10-19T01:48:09.3653711Z   "clinicalApproval": false,
+2026-10-19T01:48:09.3653957Z   "checks": [
+2026-10-19T01:48:09.3654150Z     {
+2026-10-19T01:48:09.3654342Z       "name": "node22",
+2026-10-19T01:48:09.3654628Z       "status": "PASS",
+2026-10-19T01:48:09.3654858Z       "reason": "v22.23.3"
+2026-10-19T01:48:09.3655077Z     },
+2026-10-19T01:48:09.3655250Z     {
+2026-10-19T01:48:09.3655434Z       "name": "lockfile",
+2026-10-19T01:48:09.3655666Z       "status": "PASS",
+2026-10-19T01:48:09.3656008Z       "reason": "package-lock.json versionado (CI usa npm ci)."
+2026-10-19T01:48:09.3656330Z     },
+2026-10-19T01:48:09.3656501Z     {
+2026-10-19T01:48:09.3656687Z       "name": "local-tests",
+2026-10-19T01:48:09.3656928Z       "status": "PASS",
+2026-10-19T01:48:09.3657143Z       "exitCode": 0,
+2026-10-19T01:48:09.3657348Z       "reason": "",
+2026-10-19T01:48:09.3657588Z       "command": "npm run verify:local"
+2026-10-19T01:48:09.3657840Z     },
+2026-10-19T01:48:09.3658010Z     {
+2026-10-19T01:48:09.3658215Z       "name": "lab-unit-tests",
+2026-10-19T01:48:09.3658634Z       "status": "PASS",
+2026-10-19T01:48:09.3659034Z       "exitCode": 0,
+2026-10-19T01:48:09.3659384Z       "reason": "",
+2026-10-19T01:48:09.3659772Z       "command": "npm run test:lab"
+2026-10-19T01:48:09.3660171Z     },
+2026-10-19T01:48:09.3660433Z     {
+2026-10-19T01:48:09.3660759Z       "name": "clinical-rules",
+2026-10-19T01:48:09.3661146Z       "status": "PASS",
+2026-10-19T01:48:09.3661495Z       "exitCode": 0,
+2026-10-19T01:48:09.3661834Z       "reason": "",
+2026-10-19T01:48:09.3662217Z       "command": "npm run test:rules"
+2026-10-19T01:48:09.3662793Z     },
+2026-10-19T01:48:09.3663081Z     {
+2026-10-19T01:48:09.3663430Z       "name": "postgres-required",
+2026-10-19T01:48:09.3663863Z       "status": "BLOCKED",
+2026-10-19T01:48:09.3664468Z       "reason": "DATABASE_URL ausente; nenhum teste PostgreSQL executado."
+2026-10-19T01:48:09.3665060Z     },
+2026-10-19T01:48:09.3665319Z     {
+2026-10-19T01:48:09.3665648Z       "name": "migration-0003",
+2026-10-19T01:48:09.3666042Z       "status": "BLOCKED",
+2026-10-19T01:48:09.3666835Z       "reason": "Execução no banco não comprovada."
+2026-10-19T01:48:09.3667316Z     },
+2026-10-19T01:48:09.3667596Z     {
+2026-10-19T01:48:09.3667944Z       "name": "migration-0008-nullif",
+2026-10-19T01:48:09.3668381Z       "status": "BLOCKED",
+2026-10-19T01:48:09.3668946Z       "reason": "Execução no banco não comprovada."
+2026-10-19T01:48:09.3669408Z     },
+2026-10-19T01:48:09.3669727Z     {
+2026-10-19T01:48:09.3670035Z       "name": "full-build",
+2026-10-19T01:48:09.3670419Z       "status": "PASS",
+2026-10-19T01:48:09.3670774Z       "exitCode": 0,
+2026-10-19T01:48:09.3671093Z       "reason": "",
+2026-10-19T01:48:09.3671491Z       "command": "npm run build"
+2026-10-19T01:48:09.3671861Z     },
+2026-10-19T01:48:09.3672126Z     {
+2026-10-19T01:48:09.3672465Z       "name": "api-security-unit",
+2026-10-19T01:48:09.3673151Z       "status": "PASS",
+2026-10-19T01:48:09.3673500Z       "exitCode": 0,
+2026-10-19T01:48:09.3673833Z       "reason": "",
+2026-10-19T01:48:09.3674261Z       "command": "npm run test:api:security"
+2026-10-19T01:48:09.3674691Z     },
+2026-10-19T01:48:09.3674968Z     {
+2026-10-19T01:48:09.3675594Z       "name": "design",
+2026-10-19T01:48:09.3675969Z       "status": "PASS",
+2026-10-19T01:48:09.3676316Z       "exitCode": 0,
+2026-10-19T01:48:09.3676655Z       "reason": "",
+2026-10-19T01:48:09.3677048Z       "command": "npm run check:design"
+2026-10-19T01:48:09.3677456Z     },
+2026-10-19T01:48:09.3677954Z     {
+2026-10-19T01:48:09.3678247Z       "name": "governance",
+2026-10-19T01:48:09.3678616Z       "status": "PASS",
+2026-10-19T01:48:09.3678974Z       "exitCode": 0,
+2026-10-19T01:48:09.3679302Z       "reason": "",
+2026-10-19T01:48:09.3679705Z       "command": "npm run check:governance"
+2026-10-19T01:48:09.3680141Z     },
+2026-10-19T01:48:09.3680416Z     {
+2026-10-19T01:48:09.3680763Z       "name": "e2e-care-clinical",
+2026-10-19T01:48:09.3681182Z       "status": "BLOCKED",
+2026-10-19T01:48:09.3682971Z       "reason": "Variáveis ausentes: DATABASE_URL, DATABASE_URL_ADMIN, KC_URL, KC_BOOTSTRAP_ADMIN_USERNAME, KC_BOOTSTRAP_ADMIN_PASSWORD, E2E_USER_PASSWORD, E2E_STATE_FILE"
+2026-10-19T01:48:09.3684173Z     },
+2026-10-19T01:48:09.3684452Z     {
+2026-10-19T01:48:09.3684807Z       "name": "oidc-mfa-test-idp",
+2026-10-19T01:48:09.3685227Z       "status": "BLOCKED",
+2026-10-19T01:48:09.3685757Z       "reason": "Suíte E2E não executada."
+2026-10-19T01:48:09.3686175Z     },
+2026-10-19T01:48:09.3686458Z     {
+2026-10-19T01:48:09.3686848Z       "name": "vertical-care-clinical-audit",
+2026-10-19T01:48:09.3687309Z       "status": "BLOCKED",
+2026-10-19T01:48:09.3687953Z       "reason": "Fluxo vertical não comprovado nesta execução."
+2026-10-19T01:48:09.3688500Z     },
+2026-10-19T01:48:09.3688772Z     {
+2026-10-19T01:48:09.3689069Z       "name": "oidc-mfa",
+2026-10-19T01:48:09.3689442Z       "status": "BLOCKED",
+2026-10-19T01:48:09.3691006Z       "reason": "IdP de homologação institucional não definido (D-008). A validação M14.5 usou somente IdP de teste local; repetir a suíte no IdP escolhido antes de qualquer piloto."
+2026-10-19T01:48:09.3692208Z     },
+2026-10-19T01:48:09.3692484Z     {
+2026-10-19T01:48:09.3693046Z       "name": "release-gate-enforced",
+2026-10-19T01:48:09.3693491Z       "status": "PASS",
+2026-10-19T01:48:09.3694281Z       "reason": "quality:gate sai com 1 e bloqueia G01–G09 (comportamento esperado).",
+2026-10-19T01:48:09.3694944Z       "exitCode": 1,
+2026-10-19T01:48:09.3695355Z       "command": "npm run quality:gate"
+2026-10-19T01:48:09.3695776Z     },
+2026-10-19T01:48:09.3696042Z     {
+2026-10-19T01:48:09.3696390Z       "name": "clinical-release",
+2026-10-19T01:48:09.3696804Z       "status": "BLOCKED",
+2026-10-19T01:48:09.3697885Z       "reason": "G01–G09 exigem aprovações externas (clínica, LGPD/RIPD, SaMD/Anvisa, instituição, operação de alertas)."
+2026-10-19T01:48:09.3698739Z     },
+2026-10-19T01:48:09.3699013Z     {
+2026-10-19T01:48:09.3699361Z       "name": "browser-lab-render",
+2026-10-19T01:48:09.3699789Z       "status": "PASS",
+2026-10-19T01:48:09.3700816Z       "reason": "/usr/bin/chromium renderizou laboratório sintético (o E2E dos apps é o check e2e-care-clinical)."
+2026-10-19T01:48:09.3701640Z     },
+2026-10-19T01:48:09.3701920Z     {
+2026-10-19T01:48:09.3702257Z       "name": "source-stability",
+2026-10-19T01:48:09.3702830Z       "status": "PASS",
+2026-10-19T01:48:09.3703538Z       "reason": "Fontes inalteradas durante a validação."
+2026-10-19T01:48:09.3704067Z     }
+2026-10-19T01:48:09.3704360Z   ],
+2026-10-19T01:48:09.3704734Z   "readyForIntegratedValidation": false,
+2026-10-19T01:48:09.3705237Z   "readyForClinicalUse": false,
+2026-10-19T01:48:09.3705714Z   "completedAt": "2026-10-19T01:48:09.354Z",
+2026-10-19T01:48:09.3706560Z   "sourceDigestAfter": "7aeb38f4e786723816a5ca9a4da30719c9e5497c590336653c04e876a23507e5"
+2026-10-19T01:48:09.3707306Z }
+2026-10-19T01:48:09.3927071Z ##[group]Run actions/upload-artifact@v4
+2026-10-19T01:48:09.3927371Z with:
+2026-10-19T01:48:09.3927609Z   name: oncopharma-synthetic-test-evidence
+2026-10-19T01:48:09.3927906Z   path: artifacts/validation/
+2026-10-19T01:48:09.3928154Z   if-no-files-found: ignore
+2026-10-19T01:48:09.3928388Z   compression-level: 6
+2026-10-19T01:48:09.3928602Z   overwrite: false
+2026-10-19T01:48:09.3928808Z   include-hidden-files: false
+2026-10-19T01:48:09.3929037Z ##[endgroup]
+2026-10-19T01:48:09.5602821Z (node:4931) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-19T01:48:09.5604206Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-19T01:48:09.6099728Z With the provided path, there will be 105 files uploaded
+2026-10-19T01:48:09.6101067Z Artifact name is valid!
+2026-10-19T01:48:09.6101711Z Root directory input is valid!
+2026-10-19T01:48:09.9322923Z Beginning upload of artifact content to blob storage
+2026-10-19T01:48:10.2996061Z (node:4931) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-19T01:48:10.8779755Z Uploaded bytes 8388608
+2026-10-19T01:48:10.9389859Z Uploaded bytes 9344170
+2026-10-19T01:48:10.9852385Z Finished uploading artifact content to blob storage!
+2026-10-19T01:48:10.9853907Z SHA256 digest of uploaded artifact zip is a27af749078a4a729c52ee217d2454ada10fba7719ac076421724e286babb203
+2026-10-19T01:48:10.9855257Z Finalizing artifact upload
+2026-10-19T01:48:11.2380695Z Artifact oncopharma-synthetic-test-evidence.zip successfully finalized. Artifact ID 12158327776
+2026-10-19T01:48:11.2382454Z Artifact oncopharma-synthetic-test-evidence has been successfully uploaded! Final size is 9344170 bytes. Artifact ID is 12158327776
+2026-10-19T01:48:11.2387579Z Artifact download URL: https://github.com/henrikael2011-sudo/oncopharma/actions/runs/39186760947/artifacts/12158327776
+2026-10-19T01:48:11.2588335Z Post job cleanup.
+2026-10-19T01:48:11.3821280Z (node:4945) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-19T01:48:11.3822206Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-19T01:48:11.3991099Z Post job cleanup.
+2026-10-19T01:48:11.4912260Z [command]/usr/bin/git version
+2026-10-19T01:48:11.4972136Z git version 2.55.0
+2026-10-19T01:48:11.5016683Z Temporarily overriding HOME='/home/runner/work/_temp/ea8a5633-f110-443c-b650-dc7e332cf587' before making global git config changes
+2026-10-19T01:48:11.5018609Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-19T01:48:11.5023703Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/oncopharma/oncopharma
+2026-10-19T01:48:11.5078648Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-19T01:48:11.5131767Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-19T01:48:11.5440017Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-19T01:48:11.5477391Z http.https://github.com/.extraheader
+2026-10-19T01:48:11.5491057Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-19T01:48:11.5546204Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-19T01:48:11.5803137Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-19T01:48:11.5842525Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-19T01:48:11.6243230Z Cleaning up orphan processes
+2026-10-19T01:48:11.6586933Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-node@v4, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

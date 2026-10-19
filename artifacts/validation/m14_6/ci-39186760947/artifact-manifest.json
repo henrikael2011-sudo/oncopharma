@@ -1,0 +1,45 @@
+{
+  "runId": 39186760947,
+  "headSha": "918e78379aac35bdde76bd348951ab4e618b4936",
+  "artifactId": 12158547454,
+  "artifactName": "oncopharma-e2e-evidence",
+  "zipSha256": "bdb8d83fbaea6ba275f03aef9e89d833fbc519c877c3725f616a868d1ec9f2a0",
+  "screens": [
+    {
+      "path": "screens/m155-completed-1440.png",
+      "sha256": "c9ed063e6812570d624cc89d51ee56d31bed0365c75811f04ad782252205a648"
+    },
+    {
+      "path": "screens/m155-completed-390.png",
+      "sha256": "434c741e92d1cf9479d3789e3b68d2b2abd0915a1e83d27b2e29e199b020776b"
+    },
+    {
+      "path": "screens/m155-completed-768.png",
+      "sha256": "32e99d621f8f29193bbc3b2e7fbba5d19b05f0e8ae0e0ed9575f7e1dad5f0073"
+    },
+    {
+      "path": "screens/m155-draft-reviewed.png",
+      "sha256": "d837b906b775078ead607af38892358b1bf768492f6fb4852461f690f53e0c3e"
+    },
+    {
+      "path": "screens/m155-error-no-oncall.png",
+      "sha256": "7a385cddb6652c9a1a7f86f87d6475edfdb3857b9fa6b74e9721486c9524d13c"
+    },
+    {
+      "path": "screens/m155-oncall-limited.png",
+      "sha256": "877d69c1bc9d19ad5c62dd6437b8b9739719aca49c8e2dd602858d4e14d466da"
+    },
+    {
+      "path": "screens/m155-orphan-author-warning.png",
+      "sha256": "e788e88a1f1cce6af8b1c4d7292f823db5f6ae74c3e07fda55b1cb77208de6fe"
+    },
+    {
+      "path": "screens/m155-physician-adjusted.png",
+      "sha256": "5d7d69566db249b3edbf3c7d00a9256a2bb20df3e7168fa258ba392bd226b564"
+    },
+    {
+      "path": "screens/m155-zoom200.png",
+      "sha256": "cee3361eb0547e99fb50cb1dbdee86d83401bf18d710db244d01a6d12274abc6"
+    }
+  ]
+}

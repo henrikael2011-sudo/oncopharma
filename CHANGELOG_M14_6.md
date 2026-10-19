@@ -14,3 +14,5 @@
 Atualização 18/10/2026, 18:28 BRT: acesso de escrita restabelecido; branch publicada e PR #11 aberto em rascunho (https://github.com/henrikael2011-sudo/oncopharma/pull/11). CI 39167977428 em execução. Bloqueio de publicação acima é histórico. Sem merge/deploy. Contagem corrigida: 5 novos testes de banco, 40 totais esperados; resultado integrado ainda pendente.
 
 Revisão técnica PR #11: restringidos eventos a gatilho/função de leitura; campos mínimos de evidências e resposta explícita; identidade histórica; recipientActive e aviso de pedido órfão; ressalvas de comunicação/urgência; desativação não destrutiva; seletor 08c corrigido. Reexecução CI pendente.
+
+Validação real da revisão — run 39186760947, commit 918e783: integration e unit-and-structure verdes; banco 40/40 (inclui eventos falsos recusados e ensaio de desativação), API 42/42, E2E 19/19 incluindo 08c e 09 axe. Artefato de capturas 12158547454, SHA-256 no manifesto. Sem merge/deploy; readyForClinicalUse=false.

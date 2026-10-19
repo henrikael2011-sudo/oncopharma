@@ -3,7 +3,7 @@
 ## Diagnóstico
 Base: `main` em `f64870b00a68cb28f877d4e88ab5c6669769b54d` (PR #10, M15.4c). A importação existente é de censo/alocação; prescrição/protocolo PDF permanece fora desta entrega. D-012 e P-SAM-1..4 aprovadas pelo responsável em 18/10/2026.
 
-**Implementação publicada em PR rascunho; NÃO pronta para merge.** Branch `m14.6-m15.5-solicitacoes`, [PR #11](https://github.com/henrikael2011-sudo/oncopharma/pull/11). O bloqueio inicial HTTP 403 foi resolvido com instalação do conector somente neste repositório. A execução 39168363344 confirmou 40 testes de banco e falhou no seletor E2E 08c (17 passaram; axe 09 não executou). Correções da revisão técnica aguardam nova execução. Nenhum merge ou deploy efetuado.
+**Correções implementadas no PR #11, sem merge/deploy.** Branch `m14.6-m15.5-solicitacoes`. Execução [39186760947](https://github.com/henrikael2011-sudo/oncopharma/actions/runs/39186760947), commit `918e78379aac35bdde76bd348951ab4e618b4936`: integration e unit-and-structure verdes; banco 40/40, E2E 19/19 e segurança 42/42. Revisão e autorização de merge do responsável continuam pendentes. Os registros de bloqueios locais abaixo são históricos; o CI resolveu os pré-requisitos técnicos.
 
 ## Solução e implementação
 - Solicitação humana com evidências selecionadas (alerta, exame, ordem, administração ou relato), justificativa obrigatória e prioridade.
@@ -48,21 +48,21 @@ node tools/validate-m146.mjs
 O relatório desta entrega está em `artifacts/validation/m14_6/validation-report.json`; logs separados por comando. O validador M14.5 foi preservado. `PASS` de verificações locais não significa que PostgreSQL/E2E passaram.
 
 - Build de todos os workspaces, `verify:local`, segurança da API (42 testes), regras e laboratório: resultados locais nos logs.
-- 17 testes E2E existentes preservados; 2 cenários novos (19 declarações): vinculado → ajustada → conclusão/auditoria; plantonista sem vínculo → aceita/recusada, descarte, falta de escala, perda de acesso. Incluem teclado, zoom 200%, 390/768/1440, axe e capturas. Correção de seletor e caso de pedido órfão aguardam CI.
-- 5 testes novos de PostgreSQL incluem RLS, MFA/contexto, admin/sem vínculo, evidência cruzada, escala ausente/ambígua/expirada/futura, transições, resposta/conclusão obrigatórias, imutabilidade e snapshots. Ainda precisam executar em PG17 real.
+- 17 testes E2E existentes preservados; 2 cenários novos (19 declarações): vinculado → ajustada → conclusão/auditoria; plantonista sem vínculo → aceita/recusada, descarte, falta de escala, perda de acesso. Incluem teclado, zoom 200%, 390/768/1440, axe e capturas. Seletor, pedido órfão e axe aprovados no run 39186760947.
+- 5 testes novos de PostgreSQL incluem RLS, MFA/contexto, admin/sem vínculo, evidência cruzada, escala ausente/ambígua/expirada/futura, transições, resposta/conclusão obrigatórias, imutabilidade e snapshots. Executados e aprovados no PostgreSQL 17 do run 39186760947.
 - O container expõe apenas UID 0 (`/proc/self/uid_map: 0 0 1`), sem Docker ou psql; `initdb` PG17 recusa root. URLs e IdP de teste não estão configurados. Os comandos exigidos encerram em 2, sem pular testes nem simular aprovação.
 - Diagnóstico auxiliar de sintaxe SQL foi feito com PGlite/WASM em scratch, inclusive caminho até conclusão; **não é PostgreSQL 17**, não é E2E e não é evidência de aceite integrado. Encontrou e permitiu corrigir parênteses na expressão CASE da guarda SQL antes da entrega. Não foi adicionado como dependência do projeto.
 - Primeira coleta local detectou alteração de fonte durante a execução (correção SQL); relatório preservado em `attempt-01`. A coleta final tem digest estável: **8 PASS / 0 FAIL / 3 BLOCKED**. A coleta intermediária está em `attempt-02`.
 
 ## Riscos e próximos passos
 1. **Resolvido:** conexão de escrita restabelecida; branch publicada e PR #11 aberto em rascunho.
-2. **Bloqueante:** CI deve comprovar migração 0014, 40 testes totais de banco e 19 E2E (17 anteriores + 2 novos); contagens esperadas, não resultados obtidos. Não fazer merge antes disso e da confirmação do responsável.
+2. **Comprovado no CI:** migração 0014, banco 40/40 e E2E 19/19. Aguardar revisão e confirmação do responsável antes de qualquer merge.
 3. Revisão humana do diff, autorização/escala, aparência e auditoria. Sem repasse de plantão nesta fase: pedido continua pendente; recipientActive=false e aviso ao autor expõem a perda de acesso. Nunca roteia ou conclui sozinho. Casos operacionais de perda do autor/vínculo exigem decisão futura.
 4. Confirmar nomes no cadastro sintético de médicos; sem nome, a UI informa ausência. Não inferir identidade a partir de e-mail/domínio.
-5. Os testes de acessibilidade novos e capturas autenticadas estão BLOQUEADOS com o E2E; nenhum screenshot de fluxo simulado foi apresentado como real.
+5. Acessibilidade e capturas autenticadas geradas no run 39186760947. Axe: zero violações nas telas novas verificadas. Manifesto com hashes em artifacts/validation/m14_6/ci-39186760947/.
 6. D-007, IdP institucional, aprovação clínica, LGPD/retenção e gates G01–G09 continuam dependências externas. Sem dados reais, sem nova hospedagem/custo e sem alegação de homologação.
 
-**NO-GO para merge, piloto e uso clínico nesta entrega parcial. `readyForClinicalUse=false`.**
+**GO técnico para revisão do PR; merge pendente de confirmação. NO-GO para piloto e uso clínico. `readyForClinicalUse=false`.**
 
 
 ## Revisão técnica do PR #11 — 18/10/2026
@@ -90,4 +90,12 @@ NODE_ENV=test bash infra/scripts/disable-medical-requests.sh
 ```
 O script aplica infra/rollback/0014_disable_medical_requests.sql em transação única. Revoga permissões de tabelas, colunas, sequência e funções novas do app; não apaga registros nem altera módulos anteriores. A API permanece com falha fechada para M15.5; retirar a versão de aplicação é decisão operacional separada. Não reaplicar 0014 inteira sobre banco já migrado. Reativação requer nova revisão e concessões explícitas.
 
-Ensaio automatizado incluído no teste de banco: aplica o mesmo SQL, verifica negação de acesso/execução, compara quantidade de eventos, comprova SELECT de patients preservado e faz ROLLBACK somente da transação do ensaio. Validação real desse ensaio depende do próximo CI.
+Ensaio automatizado incluído no teste de banco: aplica o mesmo SQL, verifica negação de acesso/execução, compara quantidade de eventos, comprova SELECT de patients preservado e faz ROLLBACK somente da transação do ensaio. Ensaio aprovado no PostgreSQL 17 no run 39186760947.
+
+
+## Evidência integrada da revisão
+Run **39186760947**, jobs **117850707239 (integration)** e **117850707026 (unit-and-structure)** concluídos com success. Banco 40/40, segurança API 42/42, E2E 19/19 (zero ignorados), incluindo 08c e 09 axe. Todos os workspaces compilaram. Logs separados, relatório e JSON E2E estão em artifacts/validation/m14_6; capturas completas no artefato oncopharma-e2e-evidence desse run (manifesto e SHA-256 verificados).
+
+A falha anterior do run 39168363344 permanece registrada, sem ser apresentada como aprovação. PASS, FAIL e BLOCKED estão separados no relatório; bloqueio clínico continua ativo. As funções SECURITY DEFINER têm finalidade restrita e search_path fixo; não concedem acesso direto do app a eventos nem aceitam ação/snapshot do cliente.
+
+Reforço final do E2E: cadastro sintético do autor com nome/CRF e prazo de referência de 60 minutos, com assertivas de identificação e “sem escalonamento”. A implementação de produção é a mesma validada acima; o CI do commit com esse reforço também deve ficar verde antes do parecer final.

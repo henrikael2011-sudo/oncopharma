@@ -1,0 +1,89 @@
+{
+  "startedAt": "2026-10-19T01:47:52.547Z",
+  "issuer": "http://localhost:8080/realms/oncopharma-test",
+  "a11y": {
+    "care": [],
+    "clinical": [],
+    "admin": [],
+    "careSymptomForm": [],
+    "careLoggedIn": [],
+    "careHelp": [],
+    "clinicalLoggedIn": [],
+    "clinicalWorklist": [],
+    "clinicalAllocation": [],
+    "clinicalGrouped": [],
+    "clinicalPdfPreview": [],
+    "careCaregivers": [],
+    "m155Draft": [],
+    "m155Completed": [],
+    "m155Oncall": []
+  },
+  "tokens": {
+    "patientA": {
+      "iss": "http://localhost:8080/realms/oncopharma-test",
+      "aud": [
+        "oncopharma-api",
+        "account"
+      ],
+      "amr": [
+        "pwd"
+      ],
+      "exp_minus_iat": 120,
+      "sub_matches": true
+    },
+    "delayedCallback": {
+      "amr": [
+        "pwd",
+        "otp"
+      ],
+      "secondsAfterAuth": 4
+    },
+    "pharmacist": {
+      "iss": "http://localhost:8080/realms/oncopharma-test",
+      "aud": [
+        "oncopharma-api",
+        "account"
+      ],
+      "amr": [
+        "pwd",
+        "otp"
+      ],
+      "exp_minus_iat": 120,
+      "cookieMaxAgeSeconds": 103
+    },
+    "waitedForExpiryMs": 9183
+  },
+  "db": {
+    "reportId": "2da1a4a1-36ac-4c5d-a186-2f4298e2ce77",
+    "alertId": "b70fb60a-83ae-4d9b-962b-bcfaa0f07c8a",
+    "alertStatus": "referred",
+    "interventionActorIsPharmacist": true,
+    "auditTrail": [
+      "symptom.created",
+      "intervention.created",
+      "referral.created",
+      "alert.transition"
+    ],
+    "pharmacistAuditActions": "alert.transition,intervention.created,patient.overview.read,patient.precycle.read,patient.record.read,patient.search,patient.timeline.read,patient.worklist,precycle.reviewed,referral.created",
+    "m155Linked": {
+      "requestId": "d388cc03-5205-48a1-b0e8-c233c2bf9d7c",
+      "actions": "created,edited,sent,in_review,adjusted,completed"
+    }
+  },
+  "allocation": {
+    "runs": 2,
+    "conflictResolvedByHuman": true,
+    "formats": [
+      "fhir_r4",
+      "hl7v2_adt"
+    ]
+  },
+  "pdfImport": {
+    "layouts": [
+      "tasy-censo-v1",
+      "mv-mapa-leitos-v1"
+    ],
+    "confirmedByHuman": true,
+    "conflictNotApplied": true
+  }
+}
