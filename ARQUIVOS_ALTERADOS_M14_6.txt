@@ -9,6 +9,7 @@ apps/clinical-web/components/clinical/MedicalRequests.tsx
 apps/clinical-web/components/clinical/PatientView.tsx
 apps/clinical-web/lib/work-client.ts
 apps/clinical-web/lib/work-proxy.ts
+artifacts/validation/m14_6/README-history-before-final-review.md
 artifacts/validation/m14_6/api-security.log
 artifacts/validation/m14_6/attempt-01/validation-report.json
 artifacts/validation/m14_6/attempt-02/validation-report.json
@@ -26,6 +27,16 @@ artifacts/validation/m14_6/ci-39187685667-unit.log
 artifacts/validation/m14_6/ci-39187685667/artifact-manifest.json
 artifacts/validation/m14_6/ci-39187685667/e2e-evidence.json
 artifacts/validation/m14_6/ci-39187685667/e2e-results.json
+artifacts/validation/m14_6/ci-39255481888-integration.log
+artifacts/validation/m14_6/ci-39255481888-unit-and-structure.log
+artifacts/validation/m14_6/ci-39255481888/artifact-manifest.json
+artifacts/validation/m14_6/ci-39255481888/e2e-evidence.json
+artifacts/validation/m14_6/ci-39255481888/e2e-results.json
+artifacts/validation/m14_6/ci-39255489726-integration.log
+artifacts/validation/m14_6/ci-39255489726-unit-and-structure.log
+artifacts/validation/m14_6/ci-39255489726/artifact-manifest.json
+artifacts/validation/m14_6/ci-39255489726/e2e-evidence.json
+artifacts/validation/m14_6/ci-39255489726/e2e-results.json
 artifacts/validation/m14_6/clinical-gate-enforced.log
 artifacts/validation/m14_6/e2e.log
 artifacts/validation/m14_6/github-publication.json
@@ -35,6 +46,7 @@ artifacts/validation/m14_6/postgres17.log
 artifacts/validation/m14_6/review-status.json
 artifacts/validation/m14_6/rules.log
 artifacts/validation/m14_6/sql-diagnostic-wasm-only.log
+artifacts/validation/m14_6/validation-report-before-final-revalidation.json
 artifacts/validation/m14_6/validation-report-local-before-review.json
 artifacts/validation/m14_6/validation-report.json
 artifacts/validation/m14_6/verify-local.log

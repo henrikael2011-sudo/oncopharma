@@ -18,3 +18,7 @@ Revisão técnica PR #11: restringidos eventos a gatilho/função de leitura; ca
 Validação real da revisão — run 39186760947, commit 918e783: integration e unit-and-structure verdes; banco 40/40 (inclui eventos falsos recusados e ensaio de desativação), API 42/42, E2E 19/19 incluindo 08c e 09 axe. Artefato de capturas 12158547454, SHA-256 no manifesto. Sem merge/deploy; readyForClinicalUse=false.
 
 Fechamento da versão completa: run 39187685667 / commit 164135c, integration e unit-and-structure success; banco 40/40, API 42/42, E2E 19/19 incluindo 08c e 09. Nome obrigatório e prazo com ressalva comprovados. Evidências no diretório ci-39187685667 e logs correspondentes; histórico anterior mantido. Sem merge/deploy; readyForClinicalUse=false.
+
+
+## Revalidação final — 19/10/2026
+Commit 0fc0a0e79ed6dcc41d958e7be7d4b61512981540; pull_request 39255489726 success; push 39255481888 success. Banco 40/40, segurança 42/42 e E2E 19/19 em ambos. Token próprio no08; consulta sem nome auditada com aviso e alterações bloqueadas; órfão por vínculo coberto; nota de desativação foraDEV. Histórico acima preservado; estes são os resultados vigentes da implementação. readyForClinicalUse=false; sem merge/deploy.

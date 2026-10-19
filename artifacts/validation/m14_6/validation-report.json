@@ -1,15 +1,15 @@
 {
   "release": "M14.6 / M15.5",
-  "validatedCommit": "164135c0175bc0c96f33f03a2b86ae20523e78f8",
-  "runId": 39187685667,
-  "runUrl": "https://github.com/henrikael2011-sudo/oncopharma/actions/runs/39187685667",
+  "validatedCommit": "0fc0a0e79ed6dcc41d958e7be7d4b61512981540",
+  "runId": 39255489726,
+  "runUrl": "https://github.com/henrikael2011-sudo/oncopharma/actions/runs/39255489726",
   "jobs": {
     "integration": {
-      "id": 117853464279,
+      "id": 118069603502,
       "conclusion": "success"
     },
     "unit-and-structure": {
-      "id": 117853464102,
+      "id": 118069603933,
       "conclusion": "success"
     }
   },
@@ -34,12 +34,12 @@
       "exitCode": 0,
       "includes": [
         "event forgery denied",
-        "read function authorization",
-        "recipient inactive after shift",
-        "allowlist",
+        "authorized read without name audited by issuer/sub",
+        "mutations without name rejected atomically",
+        "inactive on-call and linked recipients",
+        "explicit evidence allowlist",
         "immutable actor identity",
-        "non-destructive disable rehearsal",
-        "missing actor name denied atomically"
+        "non-destructive disable rehearsal"
       ]
     },
     {
@@ -50,7 +50,9 @@
       "skipped": 0,
       "exitCode": 0,
       "includes": [
-        "08c",
+        "08 own real login and real token expiry",
+        "08b consultation without name and linked recipient orphan",
+        "08c on-call orphan",
         "09 axe",
         "actor name and registration",
         "reference deadline disclaimer"
@@ -95,6 +97,140 @@
       "runId": 39186760947,
       "status": "PASS",
       "note": "Antes da exigência de nome cadastrado; relatório preservado."
+    },
+    {
+      "runId": 39187685667,
+      "commit": "164135c0175bc0c96f33f03a2b86ae20523e78f8",
+      "event": "pull_request",
+      "status": "PASS",
+      "note": "Historical, superseded by current revalidation."
+    },
+    {
+      "runId": 39187680176,
+      "commit": "164135c0175bc0c96f33f03a2b86ae20523e78f8",
+      "event": "push",
+      "status": "FAIL",
+      "reason": "E2E08 reused token from06; expired before positive assertion."
     }
-  ]
+  ],
+  "sourceDigest": "a913e0781b60cbc4cf91a774e9f84573ec6346dcd6ddca4ed4d261028d0ebefb",
+  "runs": [
+    {
+      "id": 39255489726,
+      "event": "pull_request",
+      "url": "https://github.com/henrikael2011-sudo/oncopharma/actions/runs/39255489726",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 118069603502,
+          "name": "integration",
+          "conclusion": "success"
+        },
+        {
+          "id": 118069603933,
+          "name": "unit-and-structure",
+          "conclusion": "success"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 12187534297,
+          "name": "oncopharma-e2e-evidence",
+          "size_in_bytes": 8662898,
+          "url": "https://api.github.com/repos/henrikael2011-sudo/oncopharma/actions/artifacts/12187534297",
+          "archive_download_url": "https://api.github.com/repos/henrikael2011-sudo/oncopharma/actions/artifacts/12187534297/zip",
+          "expired": false,
+          "created_at": "2026-10-19T13:01:54Z",
+          "expires_at": "2027-01-17T12:52:42Z",
+          "updated_at": "2026-10-19T13:01:54Z",
+          "digest": "sha256:ce0ab1d484a53f2cf91ed4df558769f82de9fcef72f4c7a723f169cb56f0cac1",
+          "workflow_run": {
+            "id": 39255489726,
+            "repository_id": 1414755248,
+            "head_repository_id": 1414755248,
+            "head_branch": "m14.6-m15.5-solicitacoes",
+            "head_sha": "0fc0a0e79ed6dcc41d958e7be7d4b61512981540"
+          }
+        },
+        {
+          "id": 12187488195,
+          "name": "oncopharma-synthetic-test-evidence",
+          "size_in_bytes": 9674149,
+          "url": "https://api.github.com/repos/henrikael2011-sudo/oncopharma/actions/artifacts/12187488195",
+          "archive_download_url": "https://api.github.com/repos/henrikael2011-sudo/oncopharma/actions/artifacts/12187488195/zip",
+          "expired": false,
+          "created_at": "2026-10-19T12:56:09Z",
+          "expires_at": "2027-01-17T12:52:42Z",
+          "updated_at": "2026-10-19T12:56:09Z",
+          "digest": "sha256:f469164dcabed911d384446e4dda7f4d3de2b4ad0d18a243225435f76330fadb",
+          "workflow_run": {
+            "id": 39255489726,
+            "repository_id": 1414755248,
+            "head_repository_id": 1414755248,
+            "head_branch": "m14.6-m15.5-solicitacoes",
+            "head_sha": "0fc0a0e79ed6dcc41d958e7be7d4b61512981540"
+          }
+        }
+      ]
+    },
+    {
+      "id": 39255481888,
+      "event": "push",
+      "url": "https://github.com/henrikael2011-sudo/oncopharma/actions/runs/39255481888",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 118069576954,
+          "name": "unit-and-structure",
+          "conclusion": "success"
+        },
+        {
+          "id": 118069577635,
+          "name": "integration",
+          "conclusion": "success"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 12187868569,
+          "name": "oncopharma-e2e-evidence",
+          "size_in_bytes": 8629700,
+          "url": "https://api.github.com/repos/henrikael2011-sudo/oncopharma/actions/artifacts/12187868569",
+          "archive_download_url": "https://api.github.com/repos/henrikael2011-sudo/oncopharma/actions/artifacts/12187868569/zip",
+          "expired": false,
+          "created_at": "2026-10-19T13:02:15Z",
+          "expires_at": "2027-01-17T12:52:39Z",
+          "updated_at": "2026-10-19T13:02:15Z",
+          "digest": "sha256:c6ce8da4b101fc39f50560ae8665c43a3aa88caf88e1f2ea123315780e2d6b5d",
+          "workflow_run": {
+            "id": 39255481888,
+            "repository_id": 1414755248,
+            "head_repository_id": 1414755248,
+            "head_branch": "m14.6-m15.5-solicitacoes",
+            "head_sha": "0fc0a0e79ed6dcc41d958e7be7d4b61512981540"
+          }
+        },
+        {
+          "id": 12187233462,
+          "name": "oncopharma-synthetic-test-evidence",
+          "size_in_bytes": 9674148,
+          "url": "https://api.github.com/repos/henrikael2011-sudo/oncopharma/actions/artifacts/12187233462",
+          "archive_download_url": "https://api.github.com/repos/henrikael2011-sudo/oncopharma/actions/artifacts/12187233462/zip",
+          "expired": false,
+          "created_at": "2026-10-19T12:56:06Z",
+          "expires_at": "2027-01-17T12:52:39Z",
+          "updated_at": "2026-10-19T12:56:06Z",
+          "digest": "sha256:d74966a75a9af5a63eefe1ed6f0051bc27bbda2eb10c22afd0374d4b37bdc305",
+          "workflow_run": {
+            "id": 39255481888,
+            "repository_id": 1414755248,
+            "head_repository_id": 1414755248,
+            "head_branch": "m14.6-m15.5-solicitacoes",
+            "head_sha": "0fc0a0e79ed6dcc41d958e7be7d4b61512981540"
+          }
+        }
+      ]
+    }
+  ],
+  "scope": "Implementation commit; subsequent documentation-only commits preserve sourceDigest. HEAD runs tracked in PR body."
 }

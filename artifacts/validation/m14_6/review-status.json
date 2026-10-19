@@ -1,7 +1,23 @@
 {
-  "validatedRun": 39187685667,
-  "validatedCommit": "164135c0175bc0c96f33f03a2b86ae20523e78f8",
+  "validatedCommit": "0fc0a0e79ed6dcc41d958e7be7d4b61512981540",
+  "sourceDigest": "a913e0781b60cbc4cf91a774e9f84573ec6346dcd6ddca4ed4d261028d0ebefb",
+  "validatedRuns": [
+    {
+      "id": 39255489726,
+      "event": "pull_request",
+      "url": "https://github.com/henrikael2011-sudo/oncopharma/actions/runs/39255489726",
+      "conclusion": "success"
+    },
+    {
+      "id": 39255481888,
+      "event": "push",
+      "url": "https://github.com/henrikael2011-sudo/oncopharma/actions/runs/39255481888",
+      "conclusion": "success"
+    }
+  ],
   "status": "PASS technical checks; awaiting human review",
   "readyForClinicalUse": false,
-  "mergeAuthorized": false
+  "mergeAuthorized": false,
+  "clinicalApproval": false,
+  "scope": "Implementation commit; subsequent documentation-only commits preserve sourceDigest. HEAD runs tracked in PR body."
 }
