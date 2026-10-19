@@ -640,19 +640,22 @@ test.describe.serial('M14.5 E2E sintético', () => {
   });
 
   test('08 token adulterado, sessão forjada vencida e expiração real do token', async ({ browser, request }) => {
-    const [h, p, sig] = pharmacistToken.split('.');
+    // Login real próprio: não depende do tempo consumido pelos testes 06/07.
+    const fresh = await staffLogin(browser, 'farmaceutico');
+    const expiryToken = (await sessionToken(fresh.context, CLIN)).token;
+    const [h, p, sig] = expiryToken.split('.');
     const forged = JSON.parse(Buffer.from(p, 'base64url')); forged.sub = sub('enfermeira');
     expect((await request.get(`${API}/v1/me`, { headers: { authorization: `Bearer ${h}.${Buffer.from(JSON.stringify(forged)).toString('base64url')}.${sig}` } })).status()).toBe(401);
     // Cookie de sessão com expiração passada (cifrado com a chave do ambiente de teste) é rejeitado pelo app.
     const ctx = await browser.newContext();
-    await ctx.addCookies([{ name: 'onco_session', value: seal({ token: pharmacistToken, expiresAt: Date.now() - 1000 }), url: CLIN, httpOnly: true, sameSite: 'Lax' }]);
+    await ctx.addCookies([{ name: 'onco_session', value: seal({ token: expiryToken, expiresAt: Date.now() - 1000 }), url: CLIN, httpOnly: true, sameSite: 'Lax' }]);
     expect((await ctx.request.get(`${CLIN}/api/work/worklist`)).status()).toBe(401);
     // Expiração real: aguarda exp + tolerância (5 s) e a API recusa o mesmo token antes válido.
-    expect((await request.get(`${API}/v1/me`, { headers: { authorization: `Bearer ${pharmacistToken}` } })).status()).toBe(200);
-    const wait = claims(pharmacistToken).exp * 1000 - Date.now() + 7000;
+    expect((await request.get(`${API}/v1/me`, { headers: { authorization: `Bearer ${expiryToken}` } })).status()).toBe(200);
+    const wait = claims(expiryToken).exp * 1000 - Date.now() + 7000;
     evidence.tokens.waitedForExpiryMs = wait; if (wait > 0) await new Promise((r) => setTimeout(r, wait));
-    expect((await request.get(`${API}/v1/me`, { headers: { authorization: `Bearer ${pharmacistToken}` } })).status()).toBe(401);
-    saveEvidence(); await ctx.close();
+    expect((await request.get(`${API}/v1/me`, { headers: { authorization: `Bearer ${expiryToken}` } })).status()).toBe(401);
+    saveEvidence(); await ctx.close(); await fresh.context.close();
   });
 
 
@@ -713,12 +716,28 @@ test.describe.serial('M14.5 E2E sintético', () => {
     expect(actions).toBe('created,edited,sent,in_review,adjusted,completed');
     expect(sql(`SELECT count(*) FROM audit_events WHERE metadata->>'request_id'='${id}' AND action='medical_request.completed'`)).toBe('1');
     expect((await apiGet(request,`clinical/medical-requests/${id}`,token,'99999999-9999-4999-8999-999999999999')).status()).toBe(403);
+    // Consulta sem nome cadastrado continua auditada; nenhuma transição pode ser feita sem identificação nominal.
+    sql(`UPDATE memberships SET display_name=NULL WHERE organization_id='${ORG}' AND oidc_sub='${sub('farmaceutico')}' AND role='pharmacist'`);
+    await farm.page.reload();await expect(farm.page.getByRole('heading',{name:'Concluída',exact:true})).toBeVisible();
+    await expect(farm.page.getByRole('alert').filter({hasText:'Seu nome profissional não está cadastrado'})).toBeVisible();
+    await shot(farm.page,'m155-missing-name-readable');
+    sql(`UPDATE memberships SET display_name='Dra. Sofia (conta sintética)' WHERE organization_id='${ORG}' AND oidc_sub='${sub('farmaceutico')}' AND role='pharmacist'`);
+    // Pedido órfão também quando o médico vinculado perde a atribuição (não apenas plantão).
+    const linkedDraft=await post(farm.context,`patients/${PAT_A}/medical-requests`,{justification:'Revisar evidência sintética antes da perda do vínculo',recipientMode:'specific',recipientIssuer:STATE.issuer,recipientSub:sub('medico'),priority:'routine',evidence:JSON.parse(sql(`SELECT jsonb_agg(jsonb_build_object('type',e->>'type','id',e->>'id')) FROM medical_requests r,jsonb_array_elements(r.evidence) e WHERE r.id='${id}'`))});
+    expect(linkedDraft.status()).toBe(201);const linkedOrphan=await linkedDraft.json();
+    expect((await post(farm.context,`medical-requests/${linkedOrphan.id}/transition`,{revision:1,to:'sent',confirmed:true})).status()).toBe(201);
+    sql(`UPDATE care_assignments SET active=false WHERE organization_id='${ORG}' AND patient_id='${PAT_A}' AND oidc_sub='${sub('medico')}'`);
+    expect(await(await farm.context.request.get(`${CLIN}/api/work/medical-requests/${linkedOrphan.id}`)).json()).toMatchObject({recipientActive:false,status:'sent'});
+    await farm.page.goto(`${CLIN}/clinical/solicitacoes/${linkedOrphan.id}`);
+    await expect(farm.page.getByRole('alert').filter({hasText:'Destinatário sem acesso ativo'})).toBeVisible();await shot(farm.page,'m155-linked-orphan');
+    expect((await doc.context.request.get(`${CLIN}/api/work/medical-requests/${linkedOrphan.id}`)).status()).toBe(403);
+    sql(`UPDATE care_assignments SET active=true WHERE organization_id='${ORG}' AND patient_id='${PAT_A}' AND oidc_sub='${sub('medico')}'`);
     // Novas rotas não concedem permissões a outros perfis nem a vínculos inexistentes.
     for(const user of ['admin.tecnico','enfermeira','farmaceutico.semmfa']){
       const x=await staffLogin(browser,user);const t=(await sessionToken(x.context,CLIN)).token;
       expect((await apiGet(request,`clinical/medical-requests/${id}`,t)).status()).toBe(403);await x.context.close();
     }
-    evidence.db.m155Linked={requestId:id,actions};saveEvidence();await farm.context.close();await doc.context.close();
+    evidence.db.m155Linked={requestId:id,actions,orphanRequestId:linkedOrphan.id};saveEvidence();await farm.context.close();await doc.context.close();
   });
 
   test('08c (M15.5) plantonista sem vínculo: evidências limitadas, escala ausente bloqueia, aceita/recusa, descarta e nega prontuário', async ({ browser, request }) => {

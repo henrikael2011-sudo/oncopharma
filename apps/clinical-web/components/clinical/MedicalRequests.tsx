@@ -12,9 +12,9 @@ type Ref = {type:string;id:string};
 type Option = Ref & {label:string;at:string;source:string};
 type Options = {unit:string|null; doctors:{issuer:string;sub:string;label:string}[];priorities:{priority:string;label:string;description:string;sla_minutes:number|null}[];evidence:Option[]};
 type Item = {id:string;status:Status;priority:string;created_at:string};
-type Detail = Item & { patient:{name:string|null;record:string|null}; revision:number;mine:boolean;actions:Status[];justification:string;response:string|null;outcome:string|null;official_reference:string|null;unit:string;recipient_mode:string;recipientLabel:string;recipientActive:boolean;
+type Detail = Item & { patient:{name:string|null;record:string|null}; revision:number;mine:boolean;actions:Status[];justification:string;response:string|null;outcome:string|null;official_reference:string|null;unit:string;recipient_mode:string;recipientLabel:string;recipientActive:boolean;actorProfileComplete:boolean;
  evidence:(Ref & {source_reference:string;source_at:string;snapshot:Record<string,unknown>})[];
- criteria_snapshot:{description:string;sla_minutes:number|null}|null;events:{revision:number;action:string;actor_role:string;actor_name:string;actor_registration:string|null;at:string;access_reason:string}[]};
+ criteria_snapshot:{description:string;sla_minutes:number|null}|null;events:{revision:number;action:string;actor_role:string;actor_name:string|null;actor_reference:string|null;actor_registration:string|null;at:string;access_reason:string}[]};
 const message = (e: unknown) => e instanceof Error ? e.message : 'Não foi possível concluir agora.';
 const refKey = (r:Ref) => `${r.type}:${r.id}`;
 
@@ -72,6 +72,7 @@ export function MedicalRequestDetail({id}:{id:string}) {
  {notice&&<p role="status" className="clin-ok">{notice}</p>}
  {!d&&!error&&<p role="status">Carregando solicitação…</p>}
  {d&&<>
+ {!d.actorProfileComplete&&<p role="alert" className="clin-error">Seu nome profissional não está cadastrado. Você pode consultar este pedido, e a leitura foi registrada com seu identificador autenticado. Solicite à equipe responsável a atualização do cadastro para realizar alterações.</p>}
  {d.mine&&!d.recipientActive&&['sent','in_review'].includes(d.status)&&<p role="alert" className="clin-error">Destinatário sem acesso ativo: o plantão terminou ou o vínculo foi encerrado. O pedido continua pendente, sem redirecionamento ou escalonamento automático. Fale diretamente com o médico e com a equipe responsável.</p>}
  <section className="clin-card" aria-labelledby="sam-status"><h2 id="sam-status">{LABEL[d.status]}</h2><p>{d.patient.name??'Sem nome registrado'} · Prontuário {d.patient.record??'Não informado'} · {d.unit}</p><p>{PRIORITY[d.priority]} · Criada em {when(d.created_at)}</p>
  <p>Destinatário: {d.recipient_mode==='on_call'?'Médico do plantão da unidade':'Médico vinculado selecionado'} · {d.recipientLabel}</p>
@@ -80,7 +81,7 @@ export function MedicalRequestDetail({id}:{id:string}) {
  {d.response&&<><h3>Resposta médica</h3><p>{d.response}</p></>}{d.outcome&&<><h3>Desfecho</h3><p>{d.outcome}</p><p>Referência no sistema oficial: {d.official_reference}</p></>}
  </section>
  <section aria-labelledby="sam-evidence"><h2 id="sam-evidence">Evidências vinculadas</h2><ul className="clin-list">{d.evidence.map(e=><li className="clin-card" key={refKey(e)}><strong>{TYPES[e.type]}</strong><p>{String(e.snapshot.analyte_label??e.snapshot.medication??e.snapshot.symptom_code??e.snapshot.code??'Registro')}: {String(e.snapshot.explanation??e.snapshot.description??e.snapshot.result_value??e.snapshot.status??'Sem detalhe textual')}</p><p>Origem: {e.source_reference} · {when(e.source_at)}</p></li>)}</ul></section>
- {d.mine&&d.status==='draft'&&<>
+ {d.mine&&d.actorProfileComplete&&d.status==='draft'&&<>
  <button type="button" className="btn-secondary" aria-expanded={edit} onClick={()=>setEdit(!edit)}>Editar justificativa e prioridade</button>
  {edit&&<form className="workflow-form" onSubmit={async e=>{e.preventDefault();setBusy(true);setError('');try{await work(`medical-requests/${id}/edit`,{method:'POST',body:{revision:d.revision,justification,priority,evidence:d.evidence.map(({id,type})=>({id,type}))}});await load();setEdit(false);setNotice('Rascunho atualizado.');}catch(e){setError(message(e));}finally{setBusy(false);}}}>
  <label htmlFor="sam-edit-justification">Justificativa revisada</label><textarea id="sam-edit-justification" required minLength={10} maxLength={2000} value={justification} onChange={e=>setJustification(e.target.value)}/>
@@ -92,7 +93,7 @@ export function MedicalRequestDetail({id}:{id:string}) {
  {d.actions.includes('in_review')&&<button type="button" className="btn-primary" disabled={busy} onClick={()=>void move('in_review')}>Iniciar revisão médica</button>}
  {d.actions.includes('accepted')&&<form className="workflow-form" onSubmit={e=>e.preventDefault()}><label htmlFor="sam-response">Resposta médica obrigatória</label><textarea id="sam-response" required minLength={3} maxLength={2000} value={response} onChange={e=>setResponse(e.target.value)}/><div className="clin-actions">{(['accepted','adjusted','declined'] as Status[]).map(s=><button key={s} type="button" className="btn-primary" disabled={busy||response.trim().length<3} onClick={()=>void move(s)}>{LABEL[s]}</button>)}</div></form>}
  {d.actions.includes('completed')&&<form className="workflow-form" onSubmit={e=>{e.preventDefault();void move('completed');}}><label htmlFor="sam-outcome">Desfecho</label><textarea id="sam-outcome" required minLength={3} maxLength={2000} value={outcome} onChange={e=>setOutcome(e.target.value)}/><label htmlFor="sam-reference">Referência do registro no sistema oficial</label><input id="sam-reference" required minLength={3} maxLength={300} value={reference} onChange={e=>setReference(e.target.value)}/><button className="btn-primary" type="submit" disabled={busy}>Registrar conclusão</button></form>}
- <section aria-labelledby="sam-history"><h2 id="sam-history">Histórico da solicitação</h2><ol className="timeline">{d.events.map((e,i)=><li key={i}><time dateTime={e.at}>{when(e.at)}</time> <strong>{({created:'Criada',edited:'Editada',read:'Leitura',...LABEL} as Record<string,string>)[e.action]??e.action}</strong> · {e.actor_name}{e.actor_registration?` · ${e.actor_registration}`:''} · {({pharmacist:'Farmácia',physician:'Medicina',nurse:'Enfermagem'} as Record<string,string>)[e.actor_role]??'Profissional'} · {e.access_reason==='on_call'?'Acesso de plantão':'Acesso autorizado'}</li>)}</ol></section>
+ <section aria-labelledby="sam-history"><h2 id="sam-history">Histórico da solicitação</h2><ol className="timeline">{d.events.map((e,i)=><li key={i}><time dateTime={e.at}>{when(e.at)}</time> <strong>{({created:'Criada',edited:'Editada',read:'Leitura',...LABEL} as Record<string,string>)[e.action]??e.action}</strong> · {e.actor_name??`Nome pendente · identificação ${e.actor_reference}`}{e.actor_registration?` · ${e.actor_registration}`:''} · {({pharmacist:'Farmácia',physician:'Medicina',nurse:'Enfermagem'} as Record<string,string>)[e.actor_role]??'Profissional'} · {e.access_reason==='on_call'?'Acesso de plantão':'Acesso autorizado'}</li>)}</ol></section>
  </>}
  </article>;
 }

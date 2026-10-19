@@ -34,7 +34,7 @@ CREATE INDEX medical_request_recipient ON medical_requests(organization_id,recip
 CREATE TABLE medical_request_events (
  id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, organization_id uuid NOT NULL REFERENCES organizations(id), request_id uuid NOT NULL REFERENCES medical_requests(id),
  revision integer NOT NULL, action text NOT NULL, actor_issuer text NOT NULL, actor_sub text NOT NULL, actor_role text NOT NULL,
- actor_name text NOT NULL, actor_registration text,
+ actor_name text, actor_registration text, CHECK(action='read' OR actor_name IS NOT NULL),
  at timestamptz NOT NULL DEFAULT now(), access_reason text NOT NULL CHECK(access_reason IN ('author','linked','on_call')),
  snapshot jsonb NOT NULL
 );
@@ -176,7 +176,7 @@ END $$;
 CREATE TRIGGER medical_request_history AFTER INSERT OR UPDATE ON medical_requests FOR EACH ROW EXECUTE FUNCTION sam_request_history();
 CREATE TRIGGER medical_request_events_immutable BEFORE UPDATE OR DELETE ON medical_request_events FOR EACH ROW EXECUTE FUNCTION prevent_audit_mutation();
 -- Única entrada de leitura: parâmetros só identificam o recurso; ator, revisão e conteúdo são derivados.
-CREATE FUNCTION sam_record_read(o uuid, request uuid) RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, public, pg_temp AS $$
+CREATE FUNCTION sam_record_read(o uuid, request uuid) RETURNS boolean LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, public, pg_temp AS $$
 DECLARE r public.medical_requests; m public.memberships; why text;
 BEGIN
  SELECT * INTO r FROM public.medical_requests t WHERE t.id=request AND t.organization_id=o;
@@ -184,10 +184,11 @@ BEGIN
  SELECT * INTO m FROM public.memberships t WHERE t.organization_id=o AND t.oidc_issuer=current_setting('app.sam_issuer',true) AND t.oidc_sub=current_setting('app.sam_sub',true) AND t.active
  AND t.role=CASE WHEN r.author_issuer=current_setting('app.sam_issuer',true) AND r.author_sub=current_setting('app.sam_sub',true) THEN r.author_role ELSE 'physician' END;
  IF NOT FOUND THEN RAISE EXCEPTION 'Leitura não autorizada' USING ERRCODE='insufficient_privilege'; END IF;
- IF m.display_name IS NULL THEN RAISE EXCEPTION 'Nome profissional obrigatório no cadastro para registrar eventos' USING ERRCODE='check_violation'; END IF;
+ -- Leitura sem nome continua auditada pelo issuer/sub; ações de alteração exigem nome.
  why:=CASE WHEN m.oidc_issuer=r.author_issuer AND m.oidc_sub=r.author_sub THEN 'author' WHEN r.recipient_mode='on_call' THEN 'on_call' ELSE 'linked' END;
  INSERT INTO public.medical_request_events(organization_id,request_id,revision,action,actor_issuer,actor_sub,actor_role,access_reason,snapshot,actor_name,actor_registration)
  VALUES(o,r.id,r.revision,'read',m.oidc_issuer,m.oidc_sub,m.role,why,'{}',m.display_name,m.professional_registration);
+ RETURN m.display_name IS NOT NULL;
 END $$;
 GRANT SELECT ON on_call_shifts,request_priority_criteria,medical_request_events TO oncopharma_app;
 GRANT SELECT,INSERT ON medical_requests TO oncopharma_app;

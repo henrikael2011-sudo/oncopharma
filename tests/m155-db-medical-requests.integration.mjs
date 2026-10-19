@@ -78,7 +78,8 @@ test('SAM rascunho editável pelo autor, snapshot anterior preservado e descarte
  const id=randomUUID();
  must(ADMIN,`UPDATE memberships SET display_name=NULL WHERE organization_id=${l(f.org)} AND oidc_sub='farm'`);
  fails(tx('farm',insert(id)),/Nome profissional obrigatório/);
- fails(tx('farm',`SELECT sam_record_read(${l(f.org)},${l(f.request)})`),/Nome profissional obrigatório/);
+ assert.equal(must(APP,tx('farm',`SELECT sam_record_read(${l(f.org)},${l(f.request)})`)),'f');
+ assert.equal(must(ADMIN,`SELECT action||'|'||actor_sub||'|'||(actor_name IS NULL)::text||'|'||snapshot::text FROM medical_request_events WHERE request_id=${l(f.request)} ORDER BY id DESC LIMIT 1`),'read|farm|true|{}');
  assert.equal(must(ADMIN,`SELECT count(*) FROM medical_requests WHERE id=${l(id)}`),'0');
  must(ADMIN,`UPDATE memberships SET display_name='Farmácia Sintética' WHERE organization_id=${l(f.org)} AND oidc_sub='farm'`);
  must(APP,tx('farm',insert(id)));
@@ -86,6 +87,13 @@ test('SAM rascunho editável pelo autor, snapshot anterior preservado e descarte
  assert.equal(must(ADMIN,`SELECT count(DISTINCT snapshot->>'justification') FROM medical_request_events WHERE request_id=${l(id)}`),'2');
  must(APP,tx('farm',`UPDATE medical_requests SET status='discarded' WHERE id=${l(id)}`));
  fails(tx('farm',`UPDATE medical_requests SET status='sent' WHERE id=${l(id)}`),/Transição/);
+ // Destinatário específico: revogar o vínculo expõe perda de acesso ao autor e impede leitura médica.
+ must(ADMIN,`INSERT INTO care_assignments(organization_id,patient_id,oidc_issuer,oidc_sub) VALUES(${l(f.org)},${l(f.pat)},${l(iss)},'med')`);
+ const specific=randomUUID();must(APP,tx('farm',insert(specific,'specific')));must(APP,tx('farm',`UPDATE medical_requests SET status='sent' WHERE id=${l(specific)}`));
+ assert.equal(must(APP,tx('med',`SELECT count(*) FROM medical_requests WHERE id=${l(specific)}`)),'1');
+ must(ADMIN,`UPDATE care_assignments SET active=false WHERE organization_id=${l(f.org)} AND patient_id=${l(f.pat)} AND oidc_sub='med'`);
+ assert.equal(must(APP,tx('farm',`SELECT status||'|'||sam_destination_active(r)::text FROM medical_requests r WHERE id=${l(specific)}`)),'sent|false');
+ assert.equal(must(APP,tx('med',`SELECT count(*) FROM medical_requests WHERE id=${l(specific)}`)),'0');
  // Ensaio da contingência em transação revertida: mesmos dados antes/depois, app sem acesso.
  const before=must(ADMIN,`SELECT count(*) FROM medical_request_events WHERE organization_id=${l(f.org)}`);
  const disable=readFileSync(new URL('../infra/rollback/0014_disable_medical_requests.sql',import.meta.url),'utf8');

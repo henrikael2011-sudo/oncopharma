@@ -68,7 +68,7 @@ O relatório desta entrega está em `artifacts/validation/m14_6/validation-repor
 ## Revisão técnica do PR #11 — 18/10/2026
 Diagnóstico confirmado no run 39168363344: 40/40 banco; 17 E2E passaram, 08c falhou por dois elementos role=alert e 09 axe não executou. Esse resultado não aprova a entrega.
 
-Correções: seletor filtrado (demais alertas revisados); eventos protegidos contra inserção arbitrária; disponibilidade do destinatário independente do usuário consultante; aviso ao autor quando pedido enviado/em revisão perde destinatário; campos explícitos na API; nome e registro profissional opcional copiados para cada evento, preservando identidade histórica mesmo após mudança cadastral. O cadastro usa memberships.display_name e professional_registration. Nome profissional é obrigatório para gravar qualquer evento novo (inclusive leitura); cadastro sem nome recebe erro explícito e a transação é revertida. Registro de conselho é opcional. Testes negativos comprovam que não há gravação parcial nem identidade inventada.
+Correções: seletor filtrado (demais alertas revisados); eventos protegidos contra inserção arbitrária; disponibilidade do destinatário independente do usuário consultante; aviso ao autor quando pedido enviado/em revisão perde destinatário; campos explícitos na API; nome e registro profissional opcional copiados para cada evento, preservando identidade histórica mesmo após mudança cadastral. O cadastro usa memberships.display_name e professional_registration. Nome profissional é pré-requisito para criar, editar ou decidir solicitações. Registro de conselho é opcional. A consulta permanece disponível sem nome: exibe aviso de cadastro pendente, oculta ações de alteração e registra read com nome nulo e issuer/sub autenticados; o histórico identifica explicitamente a pendência, sem inventar identidade. Eventos de alteração continuam exigindo nome e rejeitam gravação parcial.
 
 Autor e médico veem: o pedido só é visto ao abrir Solicitações recebidas; não há aviso nem acompanhamento de prazo; urgência requer contato direto. O prazo repete “sem escalonamento”. A confirmação antes do envio é revisão pelo próprio autor, não dupla checagem independente.
 
@@ -107,3 +107,12 @@ Reforço final do E2E: cadastro sintético do autor com nome/CRF e prazo de refe
 Logs, relatório e JSON E2E atualizados em artifacts/validation/m14_6. Manifesto das nove capturas M15.5 em ci-39187685667/artifact-manifest.json; ZIP oficial do artefato 12158598810 tem SHA-256 adae5cef6dab9dbf90f0361483d016cd4ad326ab880638075a90a8fbd72b5f43. Zero violações axe nas telas novas analisadas. Histórico preservado. Este fechamento altera apenas documentação/evidências; o CI do commit documental também será conferido no PR.
 
 **GO técnico para revisão; merge não autorizado. NO-GO clínico, readyForClinicalUse=false.**
+
+
+## Revalidação final — 19/10/2026
+- E2E 08 obtém token próprio por novo login OIDC/PKCE/TOTP e comprova 200 antes de aguardar expiração e 401 após expirar. Mantidos os 120 segundos do IdP de teste; não depende mais do teste 06.
+- Leitura sem nome: permitido consultar com aviso claro e auditoria pelo identificador autenticado. Nome cadastrado continua obrigatório para alterar estado/conteúdo. Pré-requisito: equipe administrativa deve preencher memberships.display_name; professional_registration é opcional. Não remover histórico nem preencher nomes presumidos.
+- Perda de vínculo do médico específico agora tem teste de banco e E2E, além do plantão: recipientActive=false para o autor e 403 para o destinatário desvinculado.
+- Desativação fora de DEV: o script entregue recusa execução fora de NODE_ENV=test e do banco oncopharma_dev. Não trocar variáveis nem remover guardas para forçar uso em HML/produção. A entrega não autoriza esses ambientes. Antes de qualquer liberação, a equipe operacional deverá preparar procedimento específico, revisar nomes de banco/papéis/permissões, preservar dados e ensaiar a revogação em cópia isolada, com aprovação institucional. Não executar a 0014 novamente em banco já migrado.
+
+Runs push e pull_request da revalidação serão registrados após conclusão. Resultados anteriores estão preservados como históricos, não como evidência desta revisão.

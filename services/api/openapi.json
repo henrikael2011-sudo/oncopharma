@@ -2038,7 +2038,7 @@
             "$ref": "#/components/responses/Unavailable"
           }
         },
-        "description": "Detalhe minimizado com recipientActive (disponibilidade atual do destinatário), evidências com allowlist por tipo e eventos identificados por actor_name e actor_registration opcional. Leitura auditada por função dedicada; sem alerta ou escalonamento automático."
+        "description": "Detalhe minimizado com recipientActive (disponibilidade atual do destinatário), evidências com allowlist por tipo e eventos identificados por actor_name e actor_registration opcional. Leitura auditada por função dedicada; sem alerta ou escalonamento automático. actorProfileComplete=false permite leitura auditada com aviso de cadastro sem nome e actions vazias; nome obrigatório para alterações."
       }
     },
     "/clinical/medical-requests/{requestId}/edit": {

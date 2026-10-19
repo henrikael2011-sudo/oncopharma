@@ -107,13 +107,13 @@ export class MedicalRequestsController {
       const author = this.mine(req, r), recipient = (await c.query(`SELECT sam_recipient(r) AS ok FROM medical_requests r WHERE id=$1`, [r.id])).rows[0]?.ok === true;
       const reason = author ? 'author' : r.recipient_mode === 'on_call' ? 'on_call' : 'linked';
       await this.audit(c, org, req, role, 'medical_request.read', 'medical_request', { request_id: r.id, revision: r.revision, access_reason: reason });
-      await c.query('SELECT sam_record_read($1,$2)', [org, r.id]);
+      const actorProfileComplete = (await c.query('SELECT sam_record_read($1,$2) AS complete', [org, r.id])).rows[0]?.complete === true;
       const recipientActive = (await c.query('SELECT sam_destination_active(r) AS active FROM medical_requests r WHERE id=$1', [r.id])).rows[0]?.active === true;
       const patient = (await c.query('SELECT display_name AS name,hospital_record AS record FROM patients WHERE organization_id=$1 AND id=$2', [org,r.patient_id])).rows[0];
       const recipientLabel = r.recipient_sub ? (await c.query("SELECT display_name FROM memberships WHERE organization_id=$1 AND oidc_issuer=$2 AND oidc_sub=$3 AND role='physician'", [org,r.recipient_issuer,r.recipient_sub])).rows[0]?.display_name ?? 'Nome profissional não cadastrado' : 'Resolvido no envio';
-      const events = (await c.query(`SELECT revision,action,actor_role,actor_name,actor_registration,at,access_reason FROM medical_request_events WHERE request_id=$1 AND organization_id=$2 ORDER BY id`, [r.id, org])).rows;
-      return { id:r.id, patient, recipientLabel, recipientActive, status:r.status, priority:r.priority, created_at:r.created_at, revision:r.revision, justification:r.justification, response:r.response, outcome:r.outcome, official_reference:r.official_reference, unit:r.unit, recipient_mode:r.recipient_mode, evidence:r.evidence, criteria_snapshot:r.criteria_snapshot, statusLabel: REQUEST_LABELS[r.status as RequestStatus], mine: author,
-        actions: Object.keys(REQUEST_LABELS).filter((s) => requestTransition(r.status, s as RequestStatus, author, recipient)), events, prescriptionChanged: false };
+      const events = (await c.query(`SELECT revision,action,actor_role,actor_name,actor_registration,CASE WHEN actor_name IS NULL THEN actor_sub END AS actor_reference,at,access_reason FROM medical_request_events WHERE request_id=$1 AND organization_id=$2 ORDER BY id`, [r.id, org])).rows;
+      return { id:r.id, patient, recipientLabel, recipientActive, actorProfileComplete, status:r.status, priority:r.priority, created_at:r.created_at, revision:r.revision, justification:r.justification, response:r.response, outcome:r.outcome, official_reference:r.official_reference, unit:r.unit, recipient_mode:r.recipient_mode, evidence:r.evidence, criteria_snapshot:r.criteria_snapshot, statusLabel: REQUEST_LABELS[r.status as RequestStatus], mine: author,
+        actions: actorProfileComplete ? Object.keys(REQUEST_LABELS).filter((s) => requestTransition(r.status, s as RequestStatus, author, recipient)) : [], events, prescriptionChanged: false };
     });
   }
   @Post('medical-requests/:requestId/edit')
