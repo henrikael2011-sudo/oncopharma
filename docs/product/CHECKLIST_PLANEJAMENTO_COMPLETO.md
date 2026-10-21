@@ -1,7 +1,7 @@
 # Checklist do planejamento completo (documento vivo)
 
 > Gerado em 21/10/2026 a partir de `main` @ `9d7da01`. `[x]` = coberto (com evidência), `[ ]` = pendente (marco + o que falta). Coberto **não** significa liberação clínica.
-> **Totais (inclui subitens):** 51 cobertos · 151 pendentes (dos quais 66 parciais).
+> **Totais (inclui subitens):** 51 cobertos · 151 pendentes (dos quais 67 parciais).
 > Detalhe: `RF_PRESCRICAO_FOTO_E_ONLINE.md`, `LACUNAS_PLANO_DIRETOR_M15.md`, `DECISOES_M15.md`.
 
 ## 114 itens do protótipo (comparacao-plano)
