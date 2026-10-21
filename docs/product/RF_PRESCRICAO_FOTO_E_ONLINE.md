@@ -47,10 +47,25 @@ Marco: fase A em **M18 (PR #15)**; itens 2 e 3 em fase B, bloqueada (`FASE_B_HAB
 ### 5d. Conferência de diluição (por medicamento)
 - Diluente, volume, concentração final e estabilidade, cada um ok/divergente com a fonte.
 
+### 5d-bis. Volume a aspirar (mL) por medicamento/rótulo, com a regra de três na tela
+- Para cada medicamento/rótulo, o sistema mostra o **volume em mL a aspirar** e o cálculo por regra de três. Ex.: dose prescrita 30 mg e concentração da bula X mg/mL ⇒ **30 ÷ X = Y mL**.
+- A concentração vem da **bula do produto registrado na Anvisa/apresentação selecionada** (nome comercial, fabricante, apresentação).
+- A tela mostra as entradas (dose, unidade, concentração, apresentação), a fonte, a **regra de arredondamento** aplicada e o valor antes e depois do arredondamento.
+- Sinaliza quando o volume passa do frasco e informa **quantos frascos/apresentações** são necessários.
+- **Exibição só auxiliar**: nada é aplicado automaticamente; a validação final é do farmacêutico.
+
 ### 5e. Fontes
 - **Primária (alinhada à Anvisa):** bulas registradas na Anvisa (Bulário Eletrônico) e protocolos oncológicos de alto nível adotados no Brasil (normas Anvisa/MS, DDT/PCDT de oncologia do Ministério da Saúde).
 - **Complementar:** NCCN, ESMO e protocolos institucionais.
 - Referência de bulas: [`REFERENCIA_BULAS_ANVISA_QUIMIOTERAPICOS.md`](REFERENCIA_BULAS_ANVISA_QUIMIOTERAPICOS.md) (em elaboração por outro trabalho).
+
+## 6. (Proposto) Anotação com caneta/dedo na foto e na tela de conferência
+- Camada de anotação sobre a foto da prescrição e sobre a tela de conferência (5c).
+- Técnica: sobreposição HTML canvas/SVG com **Pointer Events API** (`pointerType` `pen`, `pressure`); rejeição da palma ignorando `touch` enquanto a caneta estiver ativa. Alvos: **Safari iPadOS + Apple Pencil** e **Chrome Android + stylus**.
+- Os traços são salvos como **JSON vetorial**, ligados à versão do rascunho, com autor e horário na trilha de auditoria.
+- A anotação é **nota do farmacêutico** e **nunca altera o conteúdo da prescrição**. Há exportação de imagem achatada para registro.
+- Hoje: a página é responsiva (alvos ≥ 44 px), mas **não tem desenho**.
+- Marco: junto da UI da fase A (continuação do PR #15), com dados fictícios.
 
 ## Checklist (vivo)
 Checklist mestre: [`CHECKLIST_PLANEJAMENTO_COMPLETO.md`](CHECKLIST_PLANEJAMENTO_COMPLETO.md).
@@ -67,6 +82,16 @@ Checklist mestre: [`CHECKLIST_PLANEJAMENTO_COMPLETO.md`](CHECKLIST_PLANEJAMENTO_
   - [ ] 5c. IA sugere ordem de manipulação e de infusão (rascunho)
   - [ ] 5c. Divergência = valor concreto + regra/fonte + correção sugerida/próximo passo (M15.5); nunca correção automática
   - [ ] 5d. Diluição por medicamento: diluente, volume, concentração final, estabilidade
+  - [ ] 5d-bis. Volume em mL por medicamento/rótulo, com a regra de três visível (dose ÷ concentração = mL)
+  - [ ] 5d-bis. Concentração da bula do produto registrado/apresentação selecionada; entradas e fonte exibidas
+  - [ ] 5d-bis. Regra de arredondamento explícita (valor antes e depois)
+  - [ ] 5d-bis. Alerta de volume acima do frasco + nº de frascos/apresentações; só auxiliar, validação final do farmacêutico
   - [ ] 5e. Fontes: Anvisa (bulas) + protocolos adotados no Brasil; complementar NCCN/ESMO/institucional; `REFERENCIA_BULAS_ANVISA_QUIMIOTERAPICOS.md`
   - [ ] 5e. Pendências: fontes e licenciamento (NCCN/ESMO exigem licença), carga versionada, validação farmacêutica do Henrikael
   - [ ] Liberação final sempre do farmacêutico/médico; fase B bloqueada até protocolos carregados e validados
+- [ ] **6. (Proposto) Anotação caneta/dedo:** *FALTA*, continuação do PR #15 (fase A, fictícia). Ref.: Q4 iPad/Safari (`docs/decisoes-provisorias-prescricao-foto.md`), D-005.
+  - [ ] Componente de sobreposição canvas/SVG com Pointer Events (pen/pressure, rejeição da palma)
+  - [ ] Esquema de armazenamento + migração (traços JSON vetorial por versão do rascunho, autor/horário)
+  - [ ] RLS por organização + trilha de auditoria
+  - [ ] Anotação nunca altera a prescrição; exportação de imagem achatada
+  - [ ] Testes em iPad real (Safari + Apple Pencil) e Android real (Chrome + stylus)
