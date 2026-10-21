@@ -7,6 +7,9 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-
 const ID = '[0-9a-f-]{36}';
 const json = (error: string, status: number) => NextResponse.json({ error }, { status, headers: { 'Cache-Control': 'no-store' } });
 const ALLOW: [string, RegExp][] = [
+  ['GET', /^medical-requests\/inbox$/], ['GET', new RegExp(`^medical-requests/${ID}$`)],
+  ['POST', new RegExp(`^medical-requests/${ID}/(edit|transition)$`)],
+  ['GET', new RegExp(`^patients/${ID}/(medical-requests|medical-request-options)$`)], ['POST', new RegExp(`^patients/${ID}/medical-requests$`)],
   ['GET', /^me$/], ['GET', /^worklist$/],
   ['GET', new RegExp(`^patients/${ID}$`)], ['GET', new RegExp(`^patients/${ID}/(precycle|timeline)$`)],
   ['POST', new RegExp(`^alerts/${ID}/transition$`)], ['POST', new RegExp(`^patients/${ID}/tasks$`)],

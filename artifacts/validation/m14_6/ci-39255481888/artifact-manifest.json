@@ -1,0 +1,68 @@
+{
+  "runId": 39255481888,
+  "event": "push",
+  "validatedCommit": "0fc0a0e79ed6dcc41d958e7be7d4b61512981540",
+  "artifactId": 12187868569,
+  "archiveSha256": "c6ce8da4b101fc39f50560ae8665c43a3aa88caf88e1f2ea123315780e2d6b5d",
+  "screenshots": [
+    {
+      "path": "screens/m155-completed-1440.png",
+      "sha256": "74c8bf179b95b0c276f2d0e28710002c216c6bb80791c8bd85c0c1a5939529bc",
+      "bytes": 351110
+    },
+    {
+      "path": "screens/m155-completed-390.png",
+      "sha256": "298c696133f8cba55c6e183322e278f8b325882961600bcc84fb4d12cea31275",
+      "bytes": 333912
+    },
+    {
+      "path": "screens/m155-completed-768.png",
+      "sha256": "486fbfb2588ddc29b0371b5e42135ec504d06b10252e0d3a0661177ad4a1db68",
+      "bytes": 345910
+    },
+    {
+      "path": "screens/m155-draft-reviewed.png",
+      "sha256": "2f2bda35c4dd7144345252cfe80120952fbbf78d6156178b2fbbf3bc8de31bb5",
+      "bytes": 209833
+    },
+    {
+      "path": "screens/m155-error-no-oncall.png",
+      "sha256": "f70fa2ca674331628fd849c6d4bafa8c3b96199ba900572e6dbd3303a4e736a5",
+      "bytes": 202476
+    },
+    {
+      "path": "screens/m155-linked-orphan.png",
+      "sha256": "e3ea1016d3bbcc2bc99fe50895fd9b53ac2ca4995819bad83ff5eb1bc9ba9c31",
+      "bytes": 210088
+    },
+    {
+      "path": "screens/m155-missing-name-readable.png",
+      "sha256": "5b9f8a54a6ed03c83d6982c66b128b6023295dc11ad88aeb6949038cc9393aed",
+      "bytes": 389905
+    },
+    {
+      "path": "screens/m155-oncall-limited.png",
+      "sha256": "932080d1770045636a6e65466c68a4747a0e4cb4d36cc0c26971d6b558ae6b62",
+      "bytes": 268329
+    },
+    {
+      "path": "screens/m155-orphan-author-warning.png",
+      "sha256": "56d994a11d4bb41dec07d43cfdbeb645df144c9fb7ce6707e411df87accffa71",
+      "bytes": 193975
+    },
+    {
+      "path": "screens/m155-physician-adjusted.png",
+      "sha256": "928cc7ea91ab82f5bd0cbd47cf46a6797e5b9e4758b74b0ff5dbafc950f3c850",
+      "bytes": 294254
+    },
+    {
+      "path": "screens/m155-zoom200.png",
+      "sha256": "d047edc0dd717d58b598994d123c5c62cbab73b6dec012dd49b2c29ebf57d454",
+      "bytes": 816535
+    }
+  ],
+  "visualReview": [
+    "m155-missing-name-readable.png: aviso claro, detalhe legível e identidade pendente explícita",
+    "m155-linked-orphan.png: estado Enviada acompanhado do aviso de destinatário sem acesso"
+  ]
+}

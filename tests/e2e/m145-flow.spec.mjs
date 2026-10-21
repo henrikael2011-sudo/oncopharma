@@ -649,19 +649,145 @@ test.describe.serial('M14.5 E2E sintético', () => {
   });
 
   test('08 token adulterado, sessão forjada vencida e expiração real do token', async ({ browser, request }) => {
-    const [h, p, sig] = pharmacistToken.split('.');
+    // Login real próprio: não depende do tempo consumido pelos testes 06/07.
+    const fresh = await staffLogin(browser, 'farmaceutico');
+    const expiryToken = (await sessionToken(fresh.context, CLIN)).token;
+    const [h, p, sig] = expiryToken.split('.');
     const forged = JSON.parse(Buffer.from(p, 'base64url')); forged.sub = sub('enfermeira');
     expect((await request.get(`${API}/v1/me`, { headers: { authorization: `Bearer ${h}.${Buffer.from(JSON.stringify(forged)).toString('base64url')}.${sig}` } })).status()).toBe(401);
     // Cookie de sessão com expiração passada (cifrado com a chave do ambiente de teste) é rejeitado pelo app.
     const ctx = await browser.newContext();
-    await ctx.addCookies([{ name: 'onco_session', value: seal({ token: pharmacistToken, expiresAt: Date.now() - 1000 }), url: CLIN, httpOnly: true, sameSite: 'Lax' }]);
+    await ctx.addCookies([{ name: 'onco_session', value: seal({ token: expiryToken, expiresAt: Date.now() - 1000 }), url: CLIN, httpOnly: true, sameSite: 'Lax' }]);
     expect((await ctx.request.get(`${CLIN}/api/work/worklist`)).status()).toBe(401);
     // Expiração real: aguarda exp + tolerância (5 s) e a API recusa o mesmo token antes válido.
-    expect((await request.get(`${API}/v1/me`, { headers: { authorization: `Bearer ${pharmacistToken}` } })).status()).toBe(200);
-    const wait = claims(pharmacistToken).exp * 1000 - Date.now() + 7000;
+    expect((await request.get(`${API}/v1/me`, { headers: { authorization: `Bearer ${expiryToken}` } })).status()).toBe(200);
+    const wait = claims(expiryToken).exp * 1000 - Date.now() + 7000;
     evidence.tokens.waitedForExpiryMs = wait; if (wait > 0) await new Promise((r) => setTimeout(r, wait));
-    expect((await request.get(`${API}/v1/me`, { headers: { authorization: `Bearer ${pharmacistToken}` } })).status()).toBe(401);
-    saveEvidence(); await ctx.close();
+    expect((await request.get(`${API}/v1/me`, { headers: { authorization: `Bearer ${expiryToken}` } })).status()).toBe(401);
+    saveEvidence(); await ctx.close(); await fresh.context.close();
+  });
+
+
+  test('08b (M15.5) solicitação a médico vinculado: revisão humana, resposta ajustada, conclusão e auditoria', async ({ browser, request }) => {
+    const farm = await staffLogin(browser, 'farmaceutico');
+    const doc = await staffLogin(browser, 'medico');
+    const token=(await sessionToken(farm.context,CLIN)).token;
+    const unit=sql(`SELECT unit FROM patient_allocations WHERE organization_id='${ORG}' AND patient_id='${PAT_A}' AND superseded_at IS NULL`);
+    const lit=v=>`'${String(v).replaceAll("'","''")}'`;
+    sql(`INSERT INTO request_priority_criteria(organization_id,unit,priority,description,sla_minutes) VALUES('${ORG}',${lit(unit)},'routine','Critério demonstrativo: avaliação durante o serviço',60) ON CONFLICT DO NOTHING;
+      UPDATE memberships SET display_name='Dra. Sofia (conta sintética)',professional_registration='CRF-SINT-001' WHERE organization_id='${ORG}' AND oidc_sub='${sub('farmaceutico')}' AND role='pharmacist';
+      UPDATE memberships SET display_name='Dr. Miguel (conta sintética)',professional_registration='CRM-SINT-001' WHERE organization_id='${ORG}' AND oidc_sub='${sub('medico')}' AND role='physician'`);
+    await farm.page.goto(`${CLIN}/clinical/pacientes/${PAT_A}`);
+    await farm.page.getByRole('tab',{name:'Solicitações médicas'}).click();
+    await farm.page.getByRole('button',{name:'Nova solicitação ao médico'}).click();
+    await farm.page.getByLabel('Destinatário',{exact:true}).selectOption(`${sub('medico')}|${STATE.issuer}`);
+    await farm.page.locator('fieldset input[type=checkbox]').first().check();
+    await farm.page.getByLabel('Justificativa para avaliação médica').fill(`Solicito avaliação humana das evidências vinculadas ${RUN}`);
+    await farm.page.getByRole('button',{name:'Salvar rascunho',exact:true}).click();
+    await farm.page.getByRole('link',{name:'Abrir rascunho para revisar e enviar'}).click();
+    await expect(farm.page.getByRole('heading',{name:'Rascunho',exact:true})).toBeVisible();
+    const id=farm.page.url().split('/').at(-1);
+    const post=(ctx,path,data,origin=CLIN)=>ctx.request.post(`${CLIN}/api/work/${path}`,{headers:{origin,'content-type':'application/json'},data});
+    expect((await post(farm.context,`medical-requests/${id}/transition`,{revision:1,to:'sent'})).status()).toBe(400);
+    expect((await post(farm.context,`medical-requests/${id}/transition`,{revision:1,to:'sent',confirmed:true},'https://invalid.example')).status()).toBe(403);
+    await farm.page.getByRole('button',{name:'Editar justificativa e prioridade'}).click();
+    await farm.page.getByLabel('Justificativa revisada').fill(`Justificativa revisada pelo farmacêutico ${RUN}`);
+    await farm.page.getByRole('button',{name:'Salvar revisão',exact:true}).click();
+    await expect(farm.page.getByRole('status')).toContainText('Rascunho atualizado');
+    await expect(farm.page.getByRole('button',{name:'Enviar ao médico'})).toBeDisabled();
+    await farm.page.getByLabel(/Revisei as evidências/).focus(); await farm.page.keyboard.press('Space');
+    await shot(farm.page,'m155-draft-reviewed');
+    evidence.a11y.m155Draft=a11yMap(await new AxeBuilder({page:farm.page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze());
+    await farm.page.getByRole('button',{name:'Enviar ao médico'}).click();
+    await expect(farm.page.getByRole('heading',{name:'Enviada',exact:true})).toBeVisible();
+    await expect(farm.page.getByText(/60 minutos; sem escalonamento/)).toBeVisible();
+    await expect(farm.page.getByText(/CRF-SINT-001/).first()).toBeVisible();
+    expect((await post(farm.context,`medical-requests/${id}/transition`,{revision:2,to:'sent',confirmed:true})).status()).toBe(409);
+    await doc.page.goto(`${CLIN}/clinical/solicitacoes`);
+    await doc.page.locator(`a[href='/clinical/solicitacoes/${id}']`).click();
+    await doc.page.getByRole('button',{name:'Iniciar revisão médica'}).click();
+    await doc.page.getByLabel('Resposta médica obrigatória').fill(`Ajustada após avaliação no sistema oficial sintético ${RUN}`);
+    await doc.page.getByRole('button',{name:'Ajustada',exact:true}).click();
+    await expect(doc.page.getByRole('heading',{name:'Ajustada',exact:true})).toBeVisible();
+    await expect(doc.page.getByRole('button',{name:'Registrar conclusão'})).toHaveCount(0);
+    await expect(doc.page.getByText('CRM-SINT-001',{exact:false}).first()).toBeVisible();
+    await expect(doc.page.getByText(/Não há aviso nem acompanhamento de prazo/)).toBeVisible();
+    await shot(doc.page,'m155-physician-adjusted');
+    await farm.page.reload();
+    await farm.page.getByLabel('Desfecho',{exact:true}).fill('Resposta médica conferida no sistema oficial sintético');
+    await farm.page.getByLabel('Referência do registro no sistema oficial').fill(`SINT-OFICIAL-${RUN}`);
+    await farm.page.getByRole('button',{name:'Registrar conclusão'}).click();
+    await expect(farm.page.getByRole('heading',{name:'Concluída',exact:true})).toBeVisible();
+    for(const width of [390,768,1440]) {await farm.page.setViewportSize({width,height:1000});expect(await farm.page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await shot(farm.page,`m155-completed-${width}`);}
+    await farm.page.evaluate(()=>document.documentElement.style.zoom='2');expect(await farm.page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await shot(farm.page,'m155-zoom200');
+    evidence.a11y.m155Completed=a11yMap(await new AxeBuilder({page:farm.page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze());
+    const actions=sql(`SELECT string_agg(action,',' ORDER BY id) FROM medical_request_events WHERE request_id='${id}' AND action<>'read'`);
+    expect(actions).toBe('created,edited,sent,in_review,adjusted,completed');
+    expect(sql(`SELECT count(*) FROM audit_events WHERE metadata->>'request_id'='${id}' AND action='medical_request.completed'`)).toBe('1');
+    expect((await apiGet(request,`clinical/medical-requests/${id}`,token,'99999999-9999-4999-8999-999999999999')).status()).toBe(403);
+    // Consulta sem nome cadastrado continua auditada; nenhuma transição pode ser feita sem identificação nominal.
+    sql(`UPDATE memberships SET display_name=NULL WHERE organization_id='${ORG}' AND oidc_sub='${sub('farmaceutico')}' AND role='pharmacist'`);
+    await farm.page.reload();await expect(farm.page.getByRole('heading',{name:'Concluída',exact:true})).toBeVisible();
+    await expect(farm.page.getByRole('alert').filter({hasText:'Seu nome profissional não está cadastrado'})).toBeVisible();
+    await shot(farm.page,'m155-missing-name-readable');
+    sql(`UPDATE memberships SET display_name='Dra. Sofia (conta sintética)' WHERE organization_id='${ORG}' AND oidc_sub='${sub('farmaceutico')}' AND role='pharmacist'`);
+    // Pedido órfão também quando o médico vinculado perde a atribuição (não apenas plantão).
+    const linkedDraft=await post(farm.context,`patients/${PAT_A}/medical-requests`,{justification:'Revisar evidência sintética antes da perda do vínculo',recipientMode:'specific',recipientIssuer:STATE.issuer,recipientSub:sub('medico'),priority:'routine',evidence:JSON.parse(sql(`SELECT jsonb_agg(jsonb_build_object('type',e->>'type','id',e->>'id')) FROM medical_requests r,jsonb_array_elements(r.evidence) e WHERE r.id='${id}'`))});
+    expect(linkedDraft.status()).toBe(201);const linkedOrphan=await linkedDraft.json();
+    expect((await post(farm.context,`medical-requests/${linkedOrphan.id}/transition`,{revision:1,to:'sent',confirmed:true})).status()).toBe(201);
+    sql(`UPDATE care_assignments SET active=false WHERE organization_id='${ORG}' AND patient_id='${PAT_A}' AND oidc_sub='${sub('medico')}'`);
+    expect(await(await farm.context.request.get(`${CLIN}/api/work/medical-requests/${linkedOrphan.id}`)).json()).toMatchObject({recipientActive:false,status:'sent'});
+    await farm.page.goto(`${CLIN}/clinical/solicitacoes/${linkedOrphan.id}`);
+    await expect(farm.page.getByRole('alert').filter({hasText:'Destinatário sem acesso ativo'})).toBeVisible();await shot(farm.page,'m155-linked-orphan');
+    expect((await doc.context.request.get(`${CLIN}/api/work/medical-requests/${linkedOrphan.id}`)).status()).toBe(403);
+    sql(`UPDATE care_assignments SET active=true WHERE organization_id='${ORG}' AND patient_id='${PAT_A}' AND oidc_sub='${sub('medico')}'`);
+    // Novas rotas não concedem permissões a outros perfis nem a vínculos inexistentes.
+    for(const user of ['admin.tecnico','enfermeira','farmaceutico.semmfa']){
+      const x=await staffLogin(browser,user);const t=(await sessionToken(x.context,CLIN)).token;
+      expect((await apiGet(request,`clinical/medical-requests/${id}`,t)).status()).toBe(403);await x.context.close();
+    }
+    evidence.db.m155Linked={requestId:id,actions,orphanRequestId:linkedOrphan.id};saveEvidence();await farm.context.close();await doc.context.close();
+  });
+
+  test('08c (M15.5) plantonista sem vínculo: evidências limitadas, escala ausente bloqueia, aceita/recusa, descarta e nega prontuário', async ({ browser, request }) => {
+    const farm=await staffLogin(browser,'farmaceutico'),doc=await staffLogin(browser,'medico');
+    const token=(await sessionToken(doc.context,CLIN)).token;
+    const pat=randomUUID(),lab=randomUUID(),otherLab=randomUUID(),shift=randomUUID(),unit=`Unidade SAM ${RUN}`;
+    sql(`INSERT INTO patients(id,organization_id,external_reference,synthetic,display_name,hospital_record) VALUES('${pat}','${ORG}','SAM-${RUN}',true,'Paciente SAM ${RUN}','SAM-${RUN}');
+      INSERT INTO care_assignments(organization_id,patient_id,oidc_issuer,oidc_sub) VALUES('${ORG}','${pat}','${STATE.issuer}','${sub('farmaceutico')}');
+      INSERT INTO patient_allocations(organization_id,patient_id,unit,source,recorded_by_issuer,recorded_by_sub,recorded_by_role) VALUES('${ORG}','${pat}','${unit}','manual','${STATE.issuer}','${sub('farmaceutico')}','pharmacist');
+      INSERT INTO clinical_labs(id,organization_id,patient_id,analyte_code,analyte_label,result_value,unit,collected_at,source_reference) VALUES('${lab}','${ORG}','${pat}','SINT','Exame selecionado',1,'x',now(),'SAM-selected'),('${otherLab}','${ORG}','${pat}','SINT2','Exame não selecionado',2,'x',now(),'SAM-hidden');
+      INSERT INTO request_priority_criteria(organization_id,unit,priority,description) VALUES('${ORG}','${unit}','routine','Critério demonstrativo da unidade SAM')`);
+    const post=(ctx,path,data)=>ctx.request.post(`${CLIN}/api/work/${path}`,{headers:{origin:CLIN,'content-type':'application/json'},data});
+    const draft=async()=>{const r=await post(farm.context,`patients/${pat}/medical-requests`,{justification:`Avaliar evidência sintética selecionada ${RUN}`,recipientMode:'on_call',priority:'routine',evidence:[{type:'lab',id:lab}]});expect(r.status()).toBe(201);return r.json();};
+    const r=await draft();
+    await farm.page.goto(`${CLIN}/clinical/solicitacoes/${r.id}`);await farm.page.getByLabel(/Revisei as evidências/).check();await farm.page.getByRole('button',{name:'Enviar ao médico'}).click();
+    await expect(farm.page.getByRole('alert').filter({hasText:'Sem médico de plantão'})).toBeVisible();await shot(farm.page,'m155-error-no-oncall');
+    sql(`INSERT INTO on_call_shifts(id,organization_id,unit,physician_issuer,physician_sub,starts_at,ends_at) VALUES('${shift}','${ORG}','${unit}','${STATE.issuer}','${sub('medico')}',now()-interval '1 hour',now()+interval '1 hour')`);
+    await farm.page.getByLabel(/Revisei as evidências/).check();await farm.page.getByRole('button',{name:'Enviar ao médico'}).click();await expect(farm.page.getByRole('heading',{name:'Enviada',exact:true})).toBeVisible();
+    expect((await apiGet(request,`clinical/patients/${pat}`,token)).status()).toBe(403);
+    expect((await apiGet(request,`clinical/patients/${pat}/medical-request-options`,token)).status()).toBe(403);
+    await doc.page.goto(`${CLIN}/clinical/solicitacoes/${r.id}`);
+    await expect(doc.page.getByText('SAM-selected',{exact:false})).toBeVisible();await expect(doc.page.getByText('SAM-hidden',{exact:false})).toHaveCount(0);
+    await expect(doc.page.getByRole('tab',{name:'Prontuário'})).toHaveCount(0);
+    await doc.page.getByRole('button',{name:'Iniciar revisão médica'}).click();await doc.page.getByLabel('Resposta médica obrigatória').fill('Solicitação aceita após avaliação humana');await doc.page.getByRole('button',{name:'Aceita',exact:true}).click();await expect(doc.page.getByRole('heading',{name:'Aceita',exact:true})).toBeVisible();await shot(doc.page,'m155-oncall-limited');
+    const rd=await(await farm.context.request.get(`${CLIN}/api/work/medical-requests/${r.id}`)).json();
+    expect((await post(farm.context,`medical-requests/${r.id}/transition`,{revision:rd.revision,to:'completed',outcome:'Confirmado pelo autor',officialReference:`SINT-SAM-${RUN}`})).status()).toBe(201);
+    const rejected=await draft();expect((await post(farm.context,`medical-requests/${rejected.id}/transition`,{revision:1,to:'sent',confirmed:true})).status()).toBe(201);
+    await doc.page.goto(`${CLIN}/clinical/solicitacoes/${rejected.id}`);await doc.page.getByRole('button',{name:'Iniciar revisão médica'}).click();await doc.page.getByLabel('Resposta médica obrigatória').fill('Recusada com justificativa médica sintética');await doc.page.getByRole('button',{name:'Recusada',exact:true}).click();await expect(doc.page.getByRole('heading',{name:'Recusada',exact:true})).toBeVisible();
+    const discarded=await draft();await farm.page.goto(`${CLIN}/clinical/solicitacoes/${discarded.id}`);await farm.page.getByRole('button',{name:'Descartar rascunho'}).click();await expect(farm.page.getByRole('heading',{name:'Descartada',exact:true})).toBeVisible();
+    const orphan=await draft();expect((await post(farm.context,`medical-requests/${orphan.id}/transition`,{revision:1,to:'sent',confirmed:true})).status()).toBe(201);
+    sql(`UPDATE on_call_shifts SET ends_at=now()-interval '1 second' WHERE id='${shift}'`);
+    const orphanResponse=await farm.context.request.get(`${CLIN}/api/work/medical-requests/${orphan.id}`);
+    expect(await orphanResponse.json()).toMatchObject({status:'sent',recipientActive:false});
+    await farm.page.goto(`${CLIN}/clinical/solicitacoes/${orphan.id}`);
+    await expect(farm.page.getByRole('alert').filter({hasText:'Destinatário sem acesso ativo'})).toBeVisible();
+    await shot(farm.page,'m155-orphan-author-warning');
+    expect((await apiGet(request,`clinical/medical-requests/${orphan.id}`,token)).status()).toBe(403);
+    expect((await apiGet(request,`clinical/medical-requests/${r.id}`,token)).status()).toBe(403);
+    expect(sql(`SELECT count(*) FROM audit_events WHERE metadata->>'request_id'='${r.id}' AND metadata->>'access_reason'='on_call'`)).not.toBe('0');
+    evidence.a11y.m155Oncall=a11yMap(await new AxeBuilder({page:doc.page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze());
+    saveEvidence();await farm.context.close();await doc.context.close();
   });
 
   test('09 resultado axe (WCAG 2.x A/AA): nenhuma violação séria/crítica em Care, Clinical e Admin', async () => {

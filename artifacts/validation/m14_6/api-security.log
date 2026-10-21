@@ -1,0 +1,290 @@
+
+> oncopharma@0.15.4-dev test:api:security
+> node --test tests/m145-api.security.mjs tests/m15-oidc-providers.mjs tests/m151-synthetic-mode.mjs tests/m152-care.mjs tests/m153-caregiver.mjs tests/m154-clinical.mjs tests/m154b-allocation.mjs tests/m154c-pdf-import.mjs tests/m155-medical-requests.mjs
+
+TAP version 13
+# (node:1549) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: DatabaseService refuses superuser, BYPASSRLS and unexpected role before transaction
+ok 1 - DatabaseService refuses superuser, BYPASSRLS and unexpected role before transaction
+  ---
+  duration_ms: 1.72935
+  type: 'test'
+  ...
+# Subtest: staff assignments are checked inside tenant context, with MFA and active membership
+ok 2 - staff assignments are checked inside tenant context, with MFA and active membership
+  ---
+  duration_ms: 0.605723
+  type: 'test'
+  ...
+# (node:1550) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: padrão (IdP de teste Keycloak): otp/mfa aceitos; pwd sozinho recusado
+ok 3 - padrão (IdP de teste Keycloak): otp/mfa aceitos; pwd sozinho recusado
+  ---
+  duration_ms: 1.928674
+  type: 'test'
+  ...
+# Subtest: Entra ID: OIDC_MFA_AMR=mfa não aceita "otp" (no Entra significa SMS/e-mail)
+ok 4 - Entra ID: OIDC_MFA_AMR=mfa não aceita "otp" (no Entra significa SMS/e-mail)
+  ---
+  duration_ms: 0.286142
+  type: 'test'
+  ...
+# Subtest: Entra ID com Authentication Context: exige acrs=c1 além de amr=mfa
+ok 5 - Entra ID com Authentication Context: exige acrs=c1 além de amr=mfa
+  ---
+  duration_ms: 0.270799
+  type: 'test'
+  ...
+# Subtest: Google Workspace direto (sem amr): MFA nunca é inferido — fail closed
+ok 6 - Google Workspace direto (sem amr): MFA nunca é inferido — fail closed
+  ---
+  duration_ms: 0.241005
+  type: 'test'
+  ...
+# Subtest: AuthGuard: assinatura real; OIDC_SUBJECT_CLAIM=oid usa oid como identificador; ausência do claim => 401
+ok 7 - AuthGuard: assinatura real; OIDC_SUBJECT_CLAIM=oid usa oid como identificador; ausência do claim => 401
+  ---
+  duration_ms: 78.256693
+  type: 'test'
+  ...
+# (node:1551) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: modo sintético por ambiente explícito
+ok 8 - modo sintético por ambiente explícito
+  ---
+  duration_ms: 1.116006
+  type: 'test'
+  ...
+# (node:1557) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: relato estruturado: validação fecha entradas desconhecidas
+ok 9 - relato estruturado: validação fecha entradas desconhecidas
+  ---
+  duration_ms: 2.475611
+  type: 'test'
+  ...
+# Subtest: sinais de alerta, febre ou intensidade forte => prioridade + orientação de procurar atendimento (nunca conduta/dose)
+ok 10 - sinais de alerta, febre ou intensidade forte => prioridade + orientação de procurar atendimento (nunca conduta/dose)
+  ---
+  duration_ms: 0.921899
+  type: 'test'
+  ...
+# Subtest: R3: API do Care não aceita identificador de paciente; rota antiga removida
+ok 11 - R3: API do Care não aceita identificador de paciente; rota antiga removida
+  ---
+  duration_ms: 0.384417
+  type: 'test'
+  ...
+# Subtest: BFF do Care: somente rotas /me permitidas, CSRF por origem e JSON
+ok 12 - BFF do Care: somente rotas /me permitidas, CSRF por origem e JSON
+  ---
+  duration_ms: 0.188418
+  type: 'test'
+  ...
+# Subtest: interface do Care: sem campo de UUID, sem rótulos de teste/fictício, sem dose
+ok 13 - interface do Care: sem campo de UUID, sem rótulos de teste/fictício, sem dose
+  ---
+  duration_ms: 1.861685
+  type: 'test'
+  ...
+# (node:1563) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: código: 12 símbolos sem ambíguos (60 bits), normalização e hash estável sem guardar o código
+ok 14 - código: 12 símbolos sem ambíguos (60 bits), normalização e hash estável sem guardar o código
+  ---
+  duration_ms: 6.514226
+  type: 'test'
+  ...
+# Subtest: escopos: paciente tem tudo; cuidador só o concedido; ações do paciente negadas ao cuidador
+ok 15 - escopos: paciente tem tudo; cuidador só o concedido; ações do paciente negadas ao cuidador
+  ---
+  duration_ms: 0.775403
+  type: 'test'
+  ...
+# Subtest: controlador: gestão de cuidadores exige paciente; aceite com recusa auditada em transação própria; adesão só do paciente
+ok 16 - controlador: gestão de cuidadores exige paciente; aceite com recusa auditada em transação própria; adesão só do paciente
+  ---
+  duration_ms: 0.480829
+  type: 'test'
+  ...
+# Subtest: BFF permite só as rotas do cuidador previstas
+ok 17 - BFF permite só as rotas do cuidador previstas
+  ---
+  duration_ms: 0.260114
+  type: 'test'
+  ...
+# Subtest: histórico do cuidador: ação sempre no padrão care.* aceito pelo CHECK da 0010
+ok 18 - histórico do cuidador: ação sempre no padrão care.* aceito pelo CHECK da 0010
+  ---
+  duration_ms: 0.261095
+  type: 'test'
+  ...
+# (node:1566) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: estados §5.1: grafo idêntico ao trigger da 0011; finais sem saída; sem fechamento por tempo
+ok 19 - estados §5.1: grafo idêntico ao trigger da 0011; finais sem saída; sem fechamento por tempo
+  ---
+  duration_ms: 2.185954
+  type: 'test'
+  ...
+# Subtest: papéis (P-CLIN-1): resolver/descartar/duplicar só farmácia ou medicina; enfermagem avalia, acompanha, encaminha
+ok 20 - papéis (P-CLIN-1): resolver/descartar/duplicar só farmácia ou medicina; enfermagem avalia, acompanha, encaminha
+  ---
+  duration_ms: 0.286382
+  type: 'test'
+  ...
+# Subtest: busca: normaliza acento/caixa, remove curingas, limita tamanho
+ok 21 - busca: normaliza acento/caixa, remove curingas, limita tamanho
+  ---
+  duration_ms: 0.315044
+  type: 'test'
+  ...
+# Subtest: pré-ciclo: só disponibilidade; qualquer ausência => "Não é possível concluir"; nunca declara aptidão
+ok 22 - pré-ciclo: só disponibilidade; qualquer ausência => "Não é possível concluir"; nunca declara aptidão
+  ---
+  duration_ms: 0.751389
+  type: 'test'
+  ...
+# Subtest: lista mínima: SELECT da worklist não traz campos clínicos; intervenção só farmácia; lista sem vínculo vazia
+ok 23 - lista mínima: SELECT da worklist não traz campos clínicos; intervenção só farmácia; lista sem vínculo vazia
+  ---
+  duration_ms: 1.406334
+  type: 'test'
+  ...
+# Subtest: BFF do Clinical: lista fechada de rotas, CSRF por origem, só "q" repassado
+ok 24 - BFF do Clinical: lista fechada de rotas, CSRF por origem, só "q" repassado
+  ---
+  duration_ms: 0.256529
+  type: 'test'
+  ...
+# Subtest: interface do Clinical: sem rótulos de teste/fictício e sem versões antigas
+ok 25 - interface do Clinical: sem rótulos de teste/fictício e sem versões antigas
+  ---
+  duration_ms: 0.606464
+  type: 'test'
+  ...
+# Subtest: IdP de teste: referência AMR válida durante a sessão (regressão maxAge=0)
+ok 26 - IdP de teste: referência AMR válida durante a sessão (regressão maxAge=0)
+  ---
+  duration_ms: 0.586886
+  type: 'test'
+  ...
+# (node:1570) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: FHIR R4: só Encounter em andamento com unidade; Location por physicalType; sem dado clínico
+ok 27 - FHIR R4: só Encounter em andamento com unidade; Location por physicalType; sem dado clínico
+  ---
+  duration_ms: 2.987175
+  type: 'test'
+  ...
+# Subtest: HL7 v2 ADT A02: PID-3 + PV1-3 (unidade^quarto^leito^…^andar); rejeita origem não sintética e eventos não suportados
+ok 28 - HL7 v2 ADT A02: PID-3 + PV1-3 (unidade^quarto^leito^…^andar); rejeita origem não sintética e eventos não suportados
+  ---
+  duration_ms: 1.128184
+  type: 'test'
+  ...
+# Subtest: gateway: exige token de serviço (comparação constante), fail-closed sem token, controla fases do simulador
+ok 29 - gateway: exige token de serviço (comparação constante), fail-closed sem token, controla fases do simulador
+  ---
+  duration_ms: 42.464271
+  type: 'test'
+  ...
+# Subtest: regras: validação do feed na API, comparação tolerante a caixa/espaço, manual divergente nunca sobrescrito
+ok 30 - regras: validação do feed na API, comparação tolerante a caixa/espaço, manual divergente nunca sobrescrito
+  ---
+  duration_ms: 1.183074
+  type: 'test'
+  ...
+# Subtest: API/BFF: sincronização devolve só contagens; manual bloqueado quando o hospital informa; rotas fechadas no BFF
+ok 31 - API/BFF: sincronização devolve só contagens; manual bloqueado quando o hospital informa; rotas fechadas no BFF
+  ---
+  duration_ms: 0.655597
+  type: 'test'
+  ...
+# (node:1605) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Tasy (colunas): linhas, normalização e linha inválida sinalizada
+ok 32 - Tasy (colunas): linhas, normalização e linha inválida sinalizada
+  ---
+  duration_ms: 366.71882
+  type: 'test'
+  ...
+# Subtest: MV (linhas por regex): setor/andar/leito e nome
+ok 33 - MV (linhas por regex): setor/andar/leito e nome
+  ---
+  duration_ms: 12.356272
+  type: 'test'
+  ...
+# Subtest: fail-closed: sem marcação sintética, não PDF, vazio, grande demais
+ok 34 - fail-closed: sem marcação sintética, não PDF, vazio, grande demais
+  ---
+  duration_ms: 9.978424
+  type: 'test'
+  ...
+# Subtest: prévia: criar / atualizar / sem alteração / divergência com hospital / sem vínculo / inválida
+ok 35 - prévia: criar / atualizar / sem alteração / divergência com hospital / sem vínculo / inválida
+  ---
+  duration_ms: 0.398888
+  type: 'test'
+  ...
+# Subtest: cifra: AES-256-GCM, chave obrigatória de 32 bytes, adulteração detectada
+ok 36 - cifra: AES-256-GCM, chave obrigatória de 32 bytes, adulteração detectada
+  ---
+  duration_ms: 0.991211
+  type: 'test'
+  ...
+# Subtest: API/BFF: prévia não grava paciente/alocação; confirmação reavalia; conflitos só marcados; rotas e limites fechados
+ok 37 - API/BFF: prévia não grava paciente/alocação; confirmação reavalia; conflitos só marcados; rotas e limites fechados
+  ---
+  duration_ms: 0.783715
+  type: 'test'
+  ...
+# (node:1612) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: grafo de estados: ator correto, sem atalhos/reabertura
+ok 38 - grafo de estados: ator correto, sem atalhos/reabertura
+  ---
+  duration_ms: 0.750817
+  type: 'test'
+  ...
+# Subtest: evidências: quantidade, UUID, tipo fechado e duplicatas
+ok 39 - evidências: quantidade, UUID, tipo fechado e duplicatas
+  ---
+  duration_ms: 0.834601
+  type: 'test'
+  ...
+# Subtest: MFA, papéis, vínculo e contexto somente derivado do principal
+ok 40 - MFA, papéis, vínculo e contexto somente derivado do principal
+  ---
+  duration_ms: 1.291815
+  type: 'test'
+  ...
+# Subtest: envio exige confirmação explícita, versão e autoria; nunca escreve prescrição
+ok 41 - envio exige confirmação explícita, versão e autoria; nunca escreve prescrição
+  ---
+  duration_ms: 0.853489
+  type: 'test'
+  ...
+# Subtest: resposta só destinatário e conclusão só autor com referência; rascunho pode ser descartado
+ok 42 - resposta só destinatário e conclusão só autor com referência; rascunho pode ser descartado
+  ---
+  duration_ms: 0.623279
+  type: 'test'
+  ...
+1..42
+# tests 42
+# suites 0
+# pass 42
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 563.911386
+
+(node:1529) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+(node:1542) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
