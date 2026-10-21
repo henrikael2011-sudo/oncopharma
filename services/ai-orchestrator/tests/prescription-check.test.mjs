@@ -12,8 +12,8 @@ test('sem chave usa mock determinístico com disclaimer', async () => {
 });
 test('Gemini: endpoint, header, schema JSON e parsing', async () => {
   const calls = []; const r = await checkPrescription(D, { env: { GEMINI_API_KEY: KEY }, fetchImpl: fakeFetch({ status: 200, body: okBody(aiItems) }, calls) });
-  assert.equal(r.provider, 'gemini'); assert.equal(r.model, 'gemini-2.5-flash-lite');
-  assert.match(calls[0].url, /^https:\/\/generativelanguage\.googleapis\.com\/v1beta\/models\/gemini-2\.5-flash-lite:generateContent$/);
+  assert.equal(r.provider, 'gemini'); assert.equal(r.model, 'gemini-3.5-flash-lite');
+  assert.match(calls[0].url, /^https:\/\/generativelanguage\.googleapis\.com\/v1beta\/models\/gemini-3\.5-flash-lite:generateContent$/);
   assert.equal(calls[0].init.headers['x-goog-api-key'], KEY); assert.ok(!calls[0].url.includes(KEY));
   const b = JSON.parse(calls[0].init.body); assert.equal(b.generationConfig.responseMimeType, 'application/json'); assert.deepEqual(b.generationConfig.responseSchema, RESPONSE_SCHEMA);
   assert.match(b.contents[0].parts[0].text, /NUNCA decide/); assert.ok(!b.contents[0].parts[0].text.includes(KEY));
@@ -52,4 +52,9 @@ test('guarda: exige fictional=true e rejeita real/CPF/CNS', async () => {
 });
 test('chave nunca fica exposta no objeto do provedor', () => {
   const p = new GeminiProvider({ apiKey: KEY }); assert.ok(!JSON.stringify(p).includes(KEY)); assert.throws(() => new GeminiProvider({}));
+});
+test('404 no modelo padrão tenta gemini-flash-lite-latest', async () => {
+  const calls = []; const f = async (url, init) => { calls.push(url); return url.includes('3.5') ? { ok: false, status: 404, json: async () => ({}) } : { ok: true, status: 200, json: async () => okBody(aiItems) }; };
+  const r = await checkPrescription(D, { env: { GEMINI_API_KEY: KEY }, fetchImpl: f });
+  assert.equal(r.provider, 'gemini'); assert.equal(r.model, 'gemini-flash-lite-latest'); assert.equal(calls.length, 2);
 });

@@ -15,17 +15,17 @@
 - Testes (sem rede, `fetch` simulado): `services/ai-orchestrator/tests/prescription-check.test.mjs` (`npm run test:extended`).
 
 ## Seleção de provedor (em tempo de execução)
-1. `GEMINI_API_KEY` definida → Gemini (REST `v1beta/models/<modelo>:generateContent`, header `x-goog-api-key`, `responseMimeType: application/json` + `responseSchema`). Modelo padrão `gemini-2.5-flash-lite`, sobrescrevível por `GEMINI_MODEL`.
+1. `GEMINI_API_KEY` definida → Gemini (REST `v1beta/models/<modelo>:generateContent`, header `x-goog-api-key`, `responseMimeType: application/json` + `responseSchema`). Modelo padrão `gemini-3.5-flash-lite` (sobrescrevível por `GEMINI_MODEL`); se o modelo responder 404, tenta uma vez `gemini-flash-lite-latest`.
 2. Senão `GROQ_API_KEY` → Groq (endpoint OpenAI-compatível `https://api.groq.com/openai/v1/chat/completions`, `GROQ_MODEL` opcional).
 3. Senão → mock determinístico local (referência didática FOLFOX).
 
 Falha do provedor real (rede, HTTP 4xx/5xx, 429, JSON inválido) → cai para o mock e a tela informa `fallbackFrom`.
 
-> Observação (21/10/2026): para chaves novas o Google retorna 404 "no longer available to new users" para `gemini-2.5-flash-lite`. Defina `GEMINI_MODEL=gemini-flash-lite-latest` (testado com sucesso).
+> Observação (21/10/2026): em chaves novas do nível gratuito, `gemini-2.5-flash-lite` e `gemini-2.5-flash` retornam 404 ("no longer available to new users"); `gemini-3.5-flash-lite` e `gemini-flash-lite-latest` respondem 200.
 
 ## Como configurar
 1. Gere a chave em https://aistudio.google.com/apikey (conta 18+).
-2. No servidor do Clinical (nunca no navegador, nunca `NEXT_PUBLIC_*`): `GEMINI_API_KEY=...` e, se necessário, `GEMINI_MODEL=gemini-flash-lite-latest`.
+2. No servidor do Clinical (nunca no navegador, nunca `NEXT_PUBLIC_*`): `GEMINI_API_KEY=...` e, opcionalmente, `GEMINI_MODEL`.
 3. `.env` é ignorado pelo git; `.env.example` contém só placeholder vazio. Nunca commitar chaves.
 4. Alternativa: `GROQ_API_KEY` (https://console.groq.com).
 

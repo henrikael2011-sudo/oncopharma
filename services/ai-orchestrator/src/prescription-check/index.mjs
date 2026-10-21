@@ -4,6 +4,8 @@
 export const DISCLAIMER = 'IA não decide. Rascunho de apoio para demonstração com dados fictícios; a validação é sempre do farmacêutico. Proibido uso clínico ou com dados reais de pacientes.';
 export const STATUSES = ['ok', 'divergente', 'incerto'];
 export const CHECKS = ['dose_vs_bsa', 'protocol', 'dilution', 'infusion_order'];
+export const DEFAULT_GEMINI_MODEL = 'gemini-3.5-flash-lite';
+export const FALLBACK_GEMINI_MODEL = 'gemini-flash-lite-latest';
 const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
@@ -88,16 +90,23 @@ export class MockProvider {
 
 export class GeminiProvider {
   name = 'gemini';
-  constructor({ apiKey, model, fetchImpl = globalThis.fetch, timeoutMs = 20000 } = {}) { if (!apiKey) throw new Error('GEMINI_API_KEY ausente'); this.#key = apiKey; this.model = model || 'gemini-2.5-flash-lite'; this.fetch = fetchImpl; this.timeoutMs = timeoutMs; }
+  constructor({ apiKey, model, fetchImpl = globalThis.fetch, timeoutMs = 20000 } = {}) { if (!apiKey) throw new Error('GEMINI_API_KEY ausente'); this.#key = apiKey; this.model = model || DEFAULT_GEMINI_MODEL; this.fallbackModel = FALLBACK_GEMINI_MODEL; this.fetch = fetchImpl; this.timeoutMs = timeoutMs; }
   #key;
   async check(input) {
+    try { return await this.#call(this.model, input); }
+    catch (e) { // modelo indisponível para a chave (404) → tenta o modelo reserva uma vez
+      if (e instanceof ProviderError && e.httpStatus === 404 && this.fallbackModel && this.fallbackModel !== this.model) { this.model = this.fallbackModel; return this.#call(this.model, input); }
+      throw e;
+    }
+  }
+  async #call(model, input) {
     let r;
     try {
-      r = await this.fetch(`${GEMINI_BASE}/${encodeURIComponent(this.model)}:generateContent`, { method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': this.#key },
+      r = await this.fetch(`${GEMINI_BASE}/${encodeURIComponent(model)}:generateContent`, { method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': this.#key },
         body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: buildPrompt(input) }] }], generationConfig: { temperature: 0, responseMimeType: 'application/json', responseSchema: RESPONSE_SCHEMA } }),
         signal: AbortSignal.timeout(this.timeoutMs) });
     } catch { throw new ProviderError('Falha de rede ao consultar o Gemini.', 503); }
-    if (!r.ok) throw new ProviderError(`Gemini respondeu HTTP ${r.status}.`, r.status === 429 ? 429 : 502);
+    if (!r.ok) { const e = new ProviderError(`Gemini respondeu HTTP ${r.status}.`, r.status === 429 ? 429 : 502); e.httpStatus = r.status; throw e; }
     const j = await r.json().catch(() => null);
     const text = j?.candidates?.[0]?.content?.parts?.map((x) => x.text ?? '').join('');
     if (!text) throw new ProviderError('Gemini não retornou conteúdo.', 502);
@@ -135,7 +144,7 @@ export async function checkPrescription(input, { env = process.env, fetchImpl, p
   guardInput(input);
   const prov = provider ?? selectProvider(env, fetchImpl);
   const base = { synthetic: true, decision: 'PENDING_PHARMACIST_VALIDATION', bsaM2: input.patient.bsaM2 ?? mostellerBsa(input.patient.weightKg, input.patient.heightCm) };
-  try { return { ...base, provider: prov.name, model: prov.model ?? null, ...(await prov.check(input)) }; }
+  try { const out = await prov.check(input); return { ...base, provider: prov.name, model: prov.model ?? null, ...out }; }
   catch (e) {
     if (prov.name === 'mock' || e instanceof GuardError) throw e;
     const m = new MockProvider();
