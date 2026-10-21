@@ -187,3 +187,4 @@
 @media(max-width:640px){.vg-stats{grid-template-columns:repeat(2,1fr)}.vg-short{flex-wrap:wrap;gap:12px}.vg-go{margin-left:0}.vg-sync{text-align:left}.clin-nav{border-left:0;padding-left:0;flex:1 1 100%}}
 .vg{position:relative;isolation:isolate}.vg>*:not(.vg-watermark){position:relative;z-index:1}
 .vg-watermark{position:fixed;right:-4vw;bottom:-6vh;width:min(62vw,820px);height:auto;opacity:.05;pointer-events:none;user-select:none;z-index:0}
+.clinical-header.clinical-header--overview{background:linear-gradient(90deg,var(--teal),var(--emerald))}

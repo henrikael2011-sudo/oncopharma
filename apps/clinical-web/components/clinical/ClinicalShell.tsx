@@ -37,7 +37,7 @@ export function ClinicalShell({ children, testEnv = false }: { children: React.R
   else content = <Ctx.Provider value={state.me}>{children}</Ctx.Provider>;
   return <div className="clinical-page">
     {testEnv && <TestEnvBanner />}
-    <header className="clinical-header"><Brand variant="clinical" />
+    <header className={`clinical-header${me?.role === 'pharmacist' && path === '/clinical' ? ' clinical-header--overview' : ''}`}><Brand variant="clinical" />
       {me && <nav className="clin-nav" aria-label="Seções do Clinical">{[
         ...(me.role === 'pharmacist' ? [['/clinical', 'Visão geral']] : []), ['/clinical/pacientes', 'Pacientes'],
         ...(me.role !== 'physician' ? [['/clinical/conferencia-ia', 'Conferência com IA']] : []),

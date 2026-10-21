@@ -42,7 +42,8 @@ test('tela: farmacêutico cai na Visão geral; atalho IA; febre; vencimentos ilu
   assert.match(v, /className="vg-watermark" src="\/brand\/clinical.svg" alt="" aria-hidden="true"/);
   assert.match(v, /work<Overview>\('overview'\)/); assert.doesNotMatch(v, /fetch\(/);
   const shell = r('apps/clinical-web/components/clinical/ClinicalShell.tsx');
-  assert.match(shell, /<DemoTag \/>/); assert.match(r('apps/clinical-web/components/clinical/DemoTag.tsx'), /⚠ Dados fictícios · demonstração não clínica/); assert.match(shell, /'Visão geral'/);
+  assert.match(shell, /<DemoTag \/>/); assert.match(r('apps/clinical-web/components/clinical/DemoTag.tsx'), /⚠ Dados fictícios · demonstração não clínica/); assert.match(shell, /'Visão geral'/); assert.match(shell, /path === '\/clinical' \? ' clinical-header--overview'/);
+  assert.match(r('packages/design-system/app/globals.css'), /\.clinical-header\.clinical-header--overview\{background:linear-gradient\(90deg,var\(--teal\),var\(--emerald\)\)\}/);
   assert.match(shell, /href="\/api\/auth\/login">Entrar com identidade institucional/); // login segue no Keycloak (OIDC)
 });
 test('migração 0015 e seed: somente DEV, RLS, leitura para o app, prazos ilustrativos', () => {
