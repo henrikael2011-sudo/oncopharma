@@ -1,8 +1,10 @@
 'use client';
 // M15.4 — estrutura do Clinical: sessão institucional, MFA e vínculo profissional antes de qualquer dado de paciente.
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { Brand } from '../Brand';
+import { DemoTag } from './DemoTag';
 import { TestEnvBanner } from '../TestEnvBanner';
 import { work, WorkError, type StaffMe } from '../../lib/work-client';
 
@@ -12,6 +14,7 @@ export const useStaff = () => { const v = useContext(Ctx); if (!v) throw Error('
 
 export function ClinicalShell({ children, testEnv = false }: { children: React.ReactNode; testEnv?: boolean }) {
   const [state, setState] = useState<State>({ kind: 'loading' });
+  const path = usePathname() || '/clinical';
   const load = useCallback(async () => {
     try { setState({ kind: 'ready', me: await work<StaffMe>('me') }); }
     catch (e) {
@@ -35,6 +38,13 @@ export function ClinicalShell({ children, testEnv = false }: { children: React.R
   return <div className="clinical-page">
     {testEnv && <TestEnvBanner />}
     <header className="clinical-header"><Brand variant="clinical" />
+      {me && <nav className="clin-nav" aria-label="Seções do Clinical">{[
+        ...(me.role === 'pharmacist' ? [['/clinical', 'Visão geral']] : []), ['/clinical/pacientes', 'Pacientes'],
+        ...(me.role !== 'physician' ? [['/clinical/conferencia-ia', 'Conferência com IA']] : []),
+        ...(me.roles?.includes('physician') ? [['/clinical/solicitacoes', 'Pedidos ao médico']] : [])].map(([href, label]) => {
+        const on = href === '/clinical' ? path === '/clinical' : path.startsWith(href) || (href === '/clinical/pacientes' && me.role !== 'pharmacist' && path === '/clinical');
+        return <Link key={href} href={href} aria-current={on ? 'page' : undefined}>{label}</Link>; })}</nav>}
+      <DemoTag />
       {loggedIn && <div className="clin-user">{me && <span>{me.name ? `${me.name} · ` : ''}{me.roleLabel} · MFA confirmado</span>}<form action="/api/auth/logout" method="post"><button type="submit" className="btn-on-dark">Sair</button></form></div>}
     </header>
     <main id="conteudo" className="clinical-main">{me?.roles?.includes('physician') && <nav aria-label="Solicitações médicas"><Link href="/clinical/solicitacoes">Solicitações recebidas</Link></nav>}{content}</main>

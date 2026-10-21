@@ -39,7 +39,7 @@ export function PrescriptionCheck() {
           <td><input aria-label={`Diluente de ${it.drug}`} value={it.diluent} onChange={(e) => setItem(i, 'diluent', e.target.value)} /></td>
           <td>{it.volumeMl}</td></tr>)}</tbody></table>
       <div className="clin-actions"><button type="submit" className="btn-primary" disabled={busy}>{busy ? 'Conferindo…' : 'Gerar resumo com IA'}</button>
-        <Link className="btn-secondary" href="/clinical">Voltar para pacientes</Link></div>
+        <Link className="btn-secondary" href="/clinical">Voltar para a visão geral</Link></div>
     </form>}
     {err && <p role="alert" className="clin-error">{err}</p>}
     <div aria-live="polite">{res && <section aria-labelledby="ia-res" className="clin-card">

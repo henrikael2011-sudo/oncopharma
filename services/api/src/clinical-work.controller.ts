@@ -9,6 +9,7 @@ import { DatabaseService } from './database.service';
 import { syntheticApiEnabled } from './synthetic-mode';
 import { encryptFile, importKey, MAX_PDF_BYTES, previewAction, readHospitalPdf, sameName, type PdfRow } from './pdf-import';
 import { type Allocation, allocationLabel, FORMAT_LABEL, normalizeAllocation, syncOutcome, validateFeed } from './allocation-rules';
+import { FEVER_THRESHOLD_C, EXPIRING_SOON_HOURS, STABILITY_NOTICE, feverPriority, isFever, remainingLabel, stability } from './overview-rules';
 import { ALERT_LABEL, ALERT_STATES, type AlertState, allowedTransitions, canTransition, FINAL_STATES, normalizeSearch, preCycleChecklist, primaryRole, ROLE_LABEL, SQL_FOLD, STAFF_ROLES, type StaffRole } from './clinical-work-rules';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -53,6 +54,46 @@ export class ClinicalWorkController {
   me(@Req() req: AuthenticatedRequest, @Headers('x-organization-id') org: string) {
     return this.run(req, org, async (_c, s) => ({ role: s.role, roleLabel: ROLE_LABEL[s.role], roles: s.roles.filter((r) => (STAFF_ROLES as readonly string[]).includes(r)), mfa: true,
       name: typeof req.principal.claims.given_name === 'string' ? req.principal.claims.given_name.slice(0, 60) : null }));
+  }
+
+  /** M20 — Visão geral do farmacêutico: contagens do dia, febre (>= 38,0 °C) e prazos de estabilidade, SOMENTE dos pacientes vinculados. */
+  @Get('overview')
+  overview(@Req() req: AuthenticatedRequest, @Headers('x-organization-id') org: string) {
+    return this.run(req, org, async (c, s) => {
+      const p = [org, req.principal.issuer, req.principal.sub];
+      const LINKED = `SELECT p.id FROM patients p JOIN care_assignments ca ON ca.patient_id=p.id AND ca.organization_id=p.organization_id
+        WHERE p.organization_id=$1 AND p.synthetic=true AND ca.oidc_issuer=$2 AND ca.oidc_sub=$3 AND ca.active=true`;
+      const fever = (await c.query(`SELECT DISTINCT ON (m.patient_id) m.patient_id,p.display_name,p.hospital_record,m.value::float AS value,m.measured_at,pa.unit,pa.floor,pa.room,pa.bed
+        FROM clinical_measurements m JOIN patients p ON p.id=m.patient_id AND p.organization_id=m.organization_id
+        LEFT JOIN patient_allocations pa ON pa.organization_id=m.organization_id AND pa.patient_id=m.patient_id AND pa.superseded_at IS NULL
+        WHERE m.organization_id=$1 AND m.kind='temperature' AND m.patient_id IN (${LINKED}) ORDER BY m.patient_id, m.measured_at DESC`, p)).rows
+        .filter((r) => isFever(Number(r.value))).sort((a, b) => b.value - a.value);
+      const preps = (await c.query(`SELECT s.id,s.medication,s.container,s.prepared_at,s.stability_hours::float AS hours,s.stability_source,p.display_name,pa.floor,pa.room,pa.bed
+        FROM preparation_stability s JOIN patients p ON p.id=s.patient_id AND p.organization_id=s.organization_id
+        LEFT JOIN patient_allocations pa ON pa.organization_id=s.organization_id AND pa.patient_id=s.patient_id AND pa.superseded_at IS NULL
+        WHERE s.organization_id=$1 AND s.status='pending_release' AND s.patient_id IN (${LINKED}) LIMIT 50`, p)).rows
+        .map((r) => ({ r, st: stability(new Date(r.prepared_at), Number(r.hours)) })).filter((x) => !x.st.expired).sort((a, b) => a.st.remainingMinutes - b.st.remainingMinutes);
+      const n = async (sql: string) => Number((await c.query(sql, p)).rows[0]?.n ?? 0);
+      const checks = await n(`SELECT count(*)::int AS n FROM treatment_cycles t WHERE t.organization_id=$1 AND t.status IN ('planned','under_review') AND t.patient_id IN (${LINKED})`);
+      const alerts = await n(`SELECT count(*)::int AS n FROM clinical_alerts a WHERE a.organization_id=$1 AND a.${OPEN} AND a.patient_id IN (${LINKED})`);
+      const requests = await n(`SELECT count(*)::int AS n FROM medical_requests r WHERE r.organization_id=$1 AND r.status IN ('sent','in_review') AND r.patient_id IN (${LINKED})`);
+      const tasks = (await c.query(`SELECT count(*)::int AS n FROM clinical_tasks t WHERE t.organization_id=$1 AND t.status IN ('open','received') AND t.assignee_role=$4 AND t.patient_id IN (${LINKED})`, [...p, s.role])).rows[0].n as number;
+      const soon = preps.filter((x) => x.st.remainingMinutes <= EXPIRING_SOON_HOURS * 60).length;
+      const last = (await c.query(`SELECT source_system,at FROM allocation_sync_runs WHERE organization_id=$1 ORDER BY at DESC LIMIT 1`, [org])).rows[0];
+      await this.audit(c, org, req, 'clinical.overview.read', s, 'overview', { fever: fever.length, preparations: preps.length });
+      const place = (r: { floor: string | null; room: string | null; bed: string | null }) => [r.floor, [r.room, r.bed].filter(Boolean).join('-') || null].filter(Boolean).join(' · ') || 'Sem alocação';
+      return {
+        role: s.role, fictional: true, generatedAt: new Date().toISOString(), lastSync: last ? { at: iso(last.at), source: last.source_system } : null,
+        pending: { prescriptionChecks: checks, openAlerts: alerts, awaitingPhysician: requests, openTasks: tasks, fever: fever.length, expiringSoon: soon,
+          total: checks + alerts + requests + tasks + fever.length + soon },
+        feverThresholdC: FEVER_THRESHOLD_C,
+        fever: fever.map((r) => ({ patientId: r.patient_id, name: r.display_name ?? 'Sem nome registrado', record: r.hospital_record, place: place(r), celsius: Number(r.value), measuredAt: iso(r.measured_at), priority: feverPriority(Number(r.value)) })),
+        stabilityNotice: STABILITY_NOTICE,
+        expiring: preps.map(({ r, st }) => ({ id: r.id, medication: r.medication, container: r.container, patient: r.display_name ?? 'Sem nome registrado', place: place(r),
+          usedPercent: st.usedPercent, remainingMinutes: st.remainingMinutes, remaining: remainingLabel(st.remainingMinutes), level: st.level, source: r.stability_source })),
+        aiConference: { href: '/clinical/conferencia-ia', pending: checks },
+      };
+    });
   }
 
   /** Lista mínima (identificação segura + gravidade + pendências). Busca restrita ao vínculo: sem vínculo => lista vazia. */

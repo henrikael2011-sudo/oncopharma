@@ -949,6 +949,32 @@
         }
       }
     },
+    "/clinical/overview": {
+      "get": {
+        "summary": "M20 — Visão geral do farmacêutico: contagens do dia, febre (última temperatura >= 38,0 °C) e prazos de estabilidade (ilustrativos) somente dos pacientes vinculados; dados sintéticos",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem MFA ou sem vínculo profissional"
+          }
+        }
+      }
+    },
     "/clinical/patients/{patientId}": {
       "get": {
         "summary": "Paciente aberto: alertas com transições permitidas ao papel e tarefas (auditado)",
