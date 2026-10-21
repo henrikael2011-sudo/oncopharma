@@ -2,7 +2,7 @@
 // vira o pedido ativo que o Care mostra (nome, horários, orientações; dose NUNCA ao paciente). Sem IA/decisão automática.
 // Regras: MFA + vínculo profissional + vínculo assistencial por paciente (mesmo padrão do ClinicalWorkController);
 // RLS por organização; dose e orientações cifradas (CARE_ENCRYPTION_KEY); toda leitura/escrita auditada.
-import { BadRequestException, Body, ConflictException, Controller, ForbiddenException, Get, Headers, Param, Post, Req, ServiceUnavailableException, UseGuards } from '@nestjs/common';
+import { BadGatewayException, BadRequestException, Body, ConflictException, Controller, ForbiddenException, Get, Headers, Param, Post, Req, ServiceUnavailableException, UseGuards } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import type { PoolClient } from 'pg';
 import { AuthGuard, AuthenticatedRequest } from './auth.guard';
@@ -10,13 +10,13 @@ import { DatabaseService } from './database.service';
 import { syntheticApiEnabled } from './synthetic-mode';
 import { careKey, openText, sealText } from './care-crypto';
 import { primaryRole, ROLE_LABEL, type StaffRole } from './clinical-work-rules';
-import { canEnter, canRelease, isUuid, KIND_LABEL, parseDiscontinue, parseTranscription, ROUTES, STATUS_LABEL, type TranscriptionInput } from './med-transcription-rules';
+import { canEnter, canRelease, ENTRY_SOURCES, isUuid, KIND_LABEL, parseDiscontinue, parseSource, parseTranscription, ROUTES, STATUS_LABEL, validateHospitalMeds, type EntrySource, type TranscriptionInput } from './med-transcription-rules';
 
 type Staff = { role: StaffRole };
 const iso = (v: unknown) => (v instanceof Date ? v.toISOString() : v == null ? null : String(v));
 const day = (v: unknown) => (v instanceof Date ? v.toISOString().slice(0, 10) : v == null ? null : String(v).slice(0, 10));
 const id = (v: string, what: string) => { if (!isUuid(v)) throw new BadRequestException(`${what} inválido`); return v; };
-const COLS = `id,lineage_id,version,kind,medication,dose_encrypted,dose_iv,dose_tag,route,times,frequency_text,start_date,end_date,instructions_encrypted,instructions_iv,instructions_tag,key_id,prescription_reference,status,entered_by_role,entered_by_sub,entered_at,reviewed_by_sub,reviewed_at,review_note,order_id`;
+const COLS = `id,lineage_id,version,kind,medication,dose_encrypted,dose_iv,dose_tag,route,times,frequency_text,start_date,end_date,instructions_encrypted,instructions_iv,instructions_tag,key_id,prescription_reference,status,entered_by_role,entered_by_sub,entered_at,reviewed_by_sub,reviewed_at,review_note,order_id,entry_source,source_detail`;
 
 @Controller('clinical')
 @UseGuards(AuthGuard)
@@ -41,18 +41,19 @@ export class MedTranscriptionController {
     return c.query(`INSERT INTO audit_events(organization_id,actor_issuer,actor_sub,action,resource_type,metadata) VALUES($1,$2,$3,$4,'medication_transcription',$5::jsonb)`,
       [org, req.principal.issuer, req.principal.sub, action, JSON.stringify({ ...meta, actor_role: s.role, channel: 'clinical' })]);
   }
-  private async insertVersion(c: PoolClient, org: string, req: AuthenticatedRequest, s: Staff, patientId: string, lineage: string, version: number, kind: 'new' | 'update' | 'discontinue', t: TranscriptionInput, orderId: string | null) {
+  private async insertVersion(c: PoolClient, org: string, req: AuthenticatedRequest, s: Staff, patientId: string, lineage: string, version: number, kind: 'new' | 'update' | 'discontinue', t: TranscriptionInput, orderId: string | null, src: { entrySource: EntrySource; sourceDetail: string | null } = { entrySource: 'manual', sourceDetail: null }) {
     const k = this.key(), dose = sealText(t.dose, k.key), ins = sealText(t.instructions, k.key);
-    const r = await c.query(`INSERT INTO clinical_med_transcriptions(organization_id,patient_id,lineage_id,version,kind,medication,dose_encrypted,dose_iv,dose_tag,route,times,frequency_text,start_date,end_date,instructions_encrypted,instructions_iv,instructions_tag,key_id,prescription_reference,status,entered_by_issuer,entered_by_sub,entered_by_role,order_id)
-      VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,'pending_release',$20,$21,$22,$23) RETURNING id`,
-      [org, patientId, lineage, version, kind, t.medication, dose.ciphertext, dose.iv, dose.tag, t.route, t.times, t.frequency, t.startDate, t.endDate, ins.ciphertext, ins.iv, ins.tag, k.id, t.prescriptionRef, req.principal.issuer, req.principal.sub, s.role, orderId]);
+    const r = await c.query(`INSERT INTO clinical_med_transcriptions(organization_id,patient_id,lineage_id,version,kind,medication,dose_encrypted,dose_iv,dose_tag,route,times,frequency_text,start_date,end_date,instructions_encrypted,instructions_iv,instructions_tag,key_id,prescription_reference,status,entered_by_issuer,entered_by_sub,entered_by_role,order_id,entry_source,source_detail)
+      VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,'pending_release',$20,$21,$22,$23,$24,$25) RETURNING id`,
+      [org, patientId, lineage, version, kind, t.medication, dose.ciphertext, dose.iv, dose.tag, t.route, t.times, t.frequency, t.startDate, t.endDate, ins.ciphertext, ins.iv, ins.tag, k.id, t.prescriptionRef, req.principal.issuer, req.principal.sub, s.role, orderId, src.entrySource, src.sourceDetail]);
     return r.rows[0].id as string;
   }
   private view(row: Record<string, any>, key: Buffer) {
     const open = (p: string) => openText({ ciphertext: row[`${p}_encrypted`], iv: row[`${p}_iv`], tag: row[`${p}_tag`] }, key);
     return { id: row.id, lineageId: row.lineage_id, version: row.version, kind: row.kind, kindLabel: KIND_LABEL[row.kind as keyof typeof KIND_LABEL], medication: row.medication, dose: open('dose'), route: row.route, routeLabel: ROUTES[row.route as keyof typeof ROUTES],
       times: row.times as string[], frequency: row.frequency_text, startDate: day(row.start_date), endDate: day(row.end_date), instructions: open('instructions'), prescriptionRef: row.prescription_reference,
-      status: row.status, statusLabel: STATUS_LABEL[row.status as keyof typeof STATUS_LABEL], enteredBy: ROLE_LABEL[row.entered_by_role as StaffRole] ?? row.entered_by_role, enteredAt: iso(row.entered_at), reviewedAt: iso(row.reviewed_at), reviewNote: row.review_note };
+      status: row.status, statusLabel: STATUS_LABEL[row.status as keyof typeof STATUS_LABEL], enteredBy: ROLE_LABEL[row.entered_by_role as StaffRole] ?? row.entered_by_role, enteredAt: iso(row.entered_at), reviewedAt: iso(row.reviewed_at), reviewNote: row.review_note,
+      entrySource: row.entry_source ?? 'manual', entrySourceLabel: ENTRY_SOURCES[(row.entry_source ?? 'manual') as EntrySource], sourceDetail: row.source_detail ?? null };
   }
 
   /** Lista as linhagens do paciente com o histórico de versões (trilha de auditoria visível à equipe). */
@@ -68,9 +69,33 @@ export class MedTranscriptionController {
     });
   }
 
+  /** Importar ORAIS do sistema do hospital (gateway simulado, FHIR R4). Só devolve RASCUNHOS: nada é gravado; a equipe revisa e registra. */
+  @Get('patients/:patientId/med-transcriptions/hospital-oral')
+  async hospitalOral(@Req() req: AuthenticatedRequest, @Headers('x-organization-id') org: string, @Param('patientId') patientId: string) {
+    id(patientId, 'Paciente');
+    const record = await this.run(req, org, async (c, s) => {
+      if (!canEnter(s.role)) throw new ForbiddenException('Somente farmácia, enfermagem ou medicina transcrevem a prescrição');
+      await this.linked(c, org, req, patientId);
+      return (await c.query<{ hospital_record: string | null }>(`SELECT hospital_record FROM patients WHERE id=$1 AND organization_id=$2`, [patientId, org])).rows[0]?.hospital_record ?? null;
+    });
+    if (!record) throw new ConflictException('Paciente sem prontuário hospitalar vinculado');
+    const base = process.env.INTEGRATION_GATEWAY_URL, token = process.env.INTEGRATION_GATEWAY_TOKEN;
+    if (!base || !token) throw new ServiceUnavailableException('Integração hospitalar não configurada');
+    let feed: ReturnType<typeof validateHospitalMeds>;
+    try {
+      const r = await fetch(`${base.replace(/\/$/, '')}/v1/medications?record=${encodeURIComponent(record)}`, { headers: { authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(10_000) });
+      if (!r.ok) throw new Error(`gateway ${r.status}`);
+      feed = validateHospitalMeds(await r.json());
+    } catch { throw new BadGatewayException('Não foi possível consultar o sistema do hospital agora. Tente novamente.'); }
+    return this.run(req, org, async (c, s) => {
+      await this.audit(c, org, req, 'clinical.med_transcription.hospital_fetched', s, { patient_id: patientId, received: feed.items.length, skipped_non_oral: feed.skippedNonOral, adapter: feed.adapterVersion });
+      return { source: feed.source, decision: 'PENDING_REVIEW', items: feed.items, skippedNonOral: feed.skippedNonOral };
+    });
+  }
+
   @Post('patients/:patientId/med-transcriptions')
   create(@Req() req: AuthenticatedRequest, @Headers('x-organization-id') org: string, @Param('patientId') patientId: string, @Body() body: Record<string, unknown>) {
-    id(patientId, 'Paciente'); const t = parseTranscription(body); const lineageIn = body?.lineageId;
+    id(patientId, 'Paciente'); const t = parseTranscription(body); const src = parseSource(body); const lineageIn = body?.lineageId;
     if (lineageIn !== undefined && !isUuid(lineageIn)) throw new BadRequestException('Linhagem inválida');
     return this.run(req, org, async (c, s) => {
       if (!canEnter(s.role)) throw new ForbiddenException('Somente farmácia, enfermagem ou medicina transcrevem a prescrição');
@@ -84,8 +109,8 @@ export class MedTranscriptionController {
         const released = (await c.query(`SELECT order_id FROM clinical_med_transcriptions WHERE organization_id=$1 AND lineage_id=$2 AND status='released' LIMIT 1`, [org, lineageIn])).rows[0];
         lineage = lineageIn; version = cur.version + 1; kind = released ? 'update' : 'new'; orderId = released?.order_id ?? null;
       }
-      const newId = await this.insertVersion(c, org, req, s, patientId, lineage, version, kind, t, orderId);
-      await this.audit(c, org, req, `clinical.med_transcription.${kind === 'new' ? 'entered' : 'updated'}`, s, { patient_id: patientId, transcription_id: newId, lineage_id: lineage, version });
+      const newId = await this.insertVersion(c, org, req, s, patientId, lineage, version, kind, t, orderId, src);
+      await this.audit(c, org, req, `clinical.med_transcription.${kind === 'new' ? 'entered' : 'updated'}`, s, { patient_id: patientId, transcription_id: newId, lineage_id: lineage, version, entry_source: src.entrySource });
       return { id: newId, lineageId: lineage, version, status: 'pending_release' };
     });
   }

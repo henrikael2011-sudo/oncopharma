@@ -32,6 +32,26 @@ export function parseTranscription(b: Record<string, unknown>): TranscriptionInp
 export function parseDiscontinue(b: Record<string, unknown>) {
   return { prescriptionRef: str(b?.prescriptionRef, 3, 160, 'Referência da prescrição médica'), reason: str(b?.reason, 3, 500, 'Motivo (conforme prescrição)') };
 }
+/** Origem do rascunho. Foto (IA ou extrator simulado) e hospital (simulado) só PRÉ-PREENCHEM: a equipe revisa e a farmácia libera. */
+export const ENTRY_SOURCES = { manual: 'Manual', foto_ia: 'Foto da prescrição (rascunho por IA)', hospital: 'Sistema do hospital (orais)' } as const;
+export type EntrySource = keyof typeof ENTRY_SOURCES;
+export function parseSource(b: Record<string, unknown>): { entrySource: EntrySource; sourceDetail: string | null } {
+  const e = b?.entrySource === undefined ? 'manual' : String(b.entrySource);
+  if (!(e in ENTRY_SOURCES)) throw new BadRequestException('Origem inválida');
+  const d = typeof b?.sourceDetail === 'string' && b.sourceDetail.trim() ? b.sourceDetail.trim().slice(0, 160) : null;
+  return { entrySource: e as EntrySource, sourceDetail: e === 'manual' ? null : d };
+}
+const HOSP_TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
+/** Valida o feed do gateway (hospital simulado): somente sintético, somente via oral, campos limitados. */
+export function validateHospitalMeds(j: any) {
+  if (!j || j.syntheticOnly !== true || j.format !== 'fhir_r4' || !Array.isArray(j.items) || j.items.length > 50) throw new Error('feed inválido');
+  return { source: String(j.source).slice(0, 80), adapterVersion: String(j.adapterVersion).slice(0, 60), skippedNonOral: Number(j.skippedNonOral) || 0,
+    items: j.items.filter((i: any) => i && i.route === 'VO' && typeof i.medication === 'string' && i.medication.trim().length >= 2).map((i: any) => ({
+      ref: String(i.ref).slice(0, 80), medication: String(i.medication).slice(0, 120), dose: String(i.dose ?? '').slice(0, 80), route: 'VO',
+      times: (Array.isArray(i.times) ? i.times : []).map(String).filter((t: string) => HOSP_TIME.test(t)).slice(0, 8), frequency: String(i.frequency ?? '').slice(0, 120),
+      startDate: /^\d{4}-\d{2}-\d{2}$/.test(String(i.startDate)) ? String(i.startDate) : '', endDate: /^\d{4}-\d{2}-\d{2}$/.test(String(i.endDate)) ? String(i.endDate) : '',
+      instructions: PATIENT_DOSE_PATTERN.test(String(i.instructions ?? '')) ? '' : String(i.instructions ?? '').slice(0, 500) })) };
+}
 export const canEnter = (role: string) => (ENTRY_ROLES as readonly string[]).includes(role);
 export const canRelease = (role: string) => (RELEASE_ROLES as readonly string[]).includes(role);
 export const isUuid = (v: unknown) => typeof v === 'string' && UUID.test(v);

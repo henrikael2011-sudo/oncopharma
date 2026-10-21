@@ -57,7 +57,36 @@ test('adesão por horário: só o paciente; horário precisa constar na versão 
   assert.doesNotMatch(ui, /\bmg\b|dose_value|dose_unit|\.dose\b/); assert.match(ui, /scheduledTime/);
 });
 test('BFF: allowlists da Clinical e do Care; OpenAPI documenta as rotas', () => {
-  const p = r('apps/clinical-web/lib/work-proxy.ts'); assert.match(p, /med-transcriptions\$/); assert.match(p, /\(release\|reject\)/);
+  const p = r('apps/clinical-web/lib/work-proxy.ts'); assert.match(p, /med-transcriptions\(\/hospital-oral\)\?\$/); assert.match(p, /\(release\|reject\)/);
   const o = JSON.parse(r('services/api/openapi.json')); for (const k of ['/clinical/patients/{patientId}/med-transcriptions', '/clinical/med-transcriptions/{id}/release', '/clinical/med-transcriptions/{id}/reject']) assert.ok(Object.keys(o.paths).some((x) => x === k), k);
   const tab = r('apps/clinical-web/components/clinical/MedTranscriptionTab.tsx'); assert.match(tab, /Conferi esta transcrição com a prescrição médica/); assert.match(tab, /Liberar para o paciente/);
+});
+// ---------- M22.1 — três formas de entrada (foto/IA, hospital, manual): todas viram RASCUNHO pendente ----------
+test('origem: manual (padrão), foto_ia e hospital; inválida recusada; detalhe só fora do manual', () => {
+  assert.deepEqual(R.parseSource({}), { entrySource: 'manual', sourceDetail: null });
+  assert.deepEqual(R.parseSource({ entrySource: 'foto_ia', sourceDetail: 'extrator simulado' }), { entrySource: 'foto_ia', sourceDetail: 'extrator simulado' });
+  assert.equal(R.parseSource({ entrySource: 'manual', sourceDetail: 'x' }).sourceDetail, null);
+  assert.throws(() => R.parseSource({ entrySource: 'ia_auto' }), /Origem inválida/);
+  const ins = seg('private async insertVersion', 'private view'); assert.match(ins, /'pending_release'/); assert.match(ins, /entry_source,source_detail/);
+  const m = r('infra/migrations/0018_med_transcription_source.sql'); assert.match(m, /entry_source IN \('manual','foto_ia','hospital'\)/);
+});
+test('hospital: só orais, sintético, autorizado (papel + vínculo) e sem gravar; BFF permite a rota', () => {
+  const ok = R.validateHospitalMeds({ syntheticOnly: true, format: 'fhir_r4', source: 'Hospital simulado', adapterVersion: 'v', items: [{ ref: 'syn-1', medication: 'Loperamida (fictício)', route: 'VO', times: ['09:00', '9h'], instructions: 'Tomar 2 comprimidos' }, { ref: 'syn-2', medication: 'Oxaliplatina', route: 'IV', times: [] }] });
+  assert.equal(ok.items.length, 1); assert.deepEqual(ok.items[0].times, ['09:00']); assert.equal(ok.items[0].instructions, '', 'orientação com dose descartada');
+  assert.throws(() => R.validateHospitalMeds({ syntheticOnly: false, format: 'fhir_r4', items: [] }));
+  const h = seg("@Get('patients/:patientId/med-transcriptions/hospital-oral')", "@Post('patients/:patientId/med-transcriptions')");
+  assert.match(h, /canEnter\(s\.role\)/); assert.match(h, /await this\.linked\(c, org, req, patientId\)/); assert.match(h, /INTEGRATION_GATEWAY_TOKEN/);
+  assert.doesNotMatch(h, /INSERT INTO clinical_med|INSERT INTO clinical_medication_orders/); assert.match(h, /decision: 'PENDING_REVIEW'/); assert.match(h, /hospital_fetched/);
+  assert.match(r('apps/clinical-web/lib/work-proxy.ts'), /med-transcriptions\(\/hospital-oral\)\?\$/);
+});
+test('foto: rota só servidor, sessão + origem + papel/vínculo pela API, guarda fictícia; IA não grava nem libera', () => {
+  const rt = r('apps/clinical-web/app/api/ia/extrair-prescricao/route.ts');
+  assert.match(rt, /syntheticUiEnabled\(\)/); assert.match(rt, /await session\(\)/); assert.match(rt, /Origem não autorizada/); assert.match(rt, /canEnter !== true/);
+  assert.doesNotMatch(rt, /NEXT_PUBLIC|GEMINI_API_KEY|med-transcriptions\/[^`]*release|method: 'POST'/);
+  const tab = r('apps/clinical-web/components/clinical/MedTranscriptionTab.tsx');
+  for (const l of ['Foto da prescrição', 'Importar do hospital (orais)', 'Adicionar manualmente', 'Revisar e usar', 'A imagem é fictícia', 'revise todos os campos']) assert.ok(tab.includes(l), l);
+  assert.match(tab, /fromDraft\(x, 'foto_ia'/); assert.match(tab, /fromDraft\(x, 'hospital'/);
+});
+test('Care: contador conta só doses com horário quando houver; opções compactas', () => {
+  const ui = r('apps/care-web/components/care/Medications.tsx'); assert.match(ui, /timed\.length \? timed\.flatMap/); assert.match(ui, /cm-choices/);
 });

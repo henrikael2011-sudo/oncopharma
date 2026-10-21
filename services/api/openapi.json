@@ -2726,6 +2726,41 @@
           }
         }
       }
+    },
+    "/clinical/patients/{patientId}/med-transcriptions/hospital-oral": {
+      "get": {
+        "summary": "M22: medicações ORAIS ativas do sistema do hospital (gateway simulado, FHIR R4) como rascunhos para revisão; nada é gravado",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem MFA, sem vínculo profissional ou paciente não atribuído"
+          }
+        }
+      }
     }
   }
 }

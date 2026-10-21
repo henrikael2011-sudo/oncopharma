@@ -44,3 +44,10 @@ test('adesão: scheduled_time só HH:MM válido', () => {
   assert.match(cons, /scheduled_time/);
   for (const [v, good] of [['08:00', true], ['23:59', true], ['24:00', false], ['8:00', false], ['manhã', false]]) assert.equal(must(ADMIN, `SELECT ${lit(v)} ~ '^([01][0-9]|2[0-3]):[0-5][0-9]$'`), good ? 't' : 'f', v);
 });
+test('0018: origem da entrada validada (manual/foto_ia/hospital); padrão manual', () => {
+  const l = randomUUID(); must(APP, tx(F.orgA, ins(F.orgA, F.patA, l, 1)));
+  assert.equal(must(APP, tx(F.orgA, `SELECT entry_source FROM clinical_med_transcriptions WHERE lineage_id=${lit(l)}`)), 'manual');
+  must(APP, tx(F.orgA, ins(F.orgA, F.patA, randomUUID(), 1).replace(',synthetic)', ',synthetic,entry_source,source_detail)').replace(/,(true|false)\)$/, ",$1,'foto_ia','extrator simulado')")));
+  denied(APP, tx(F.orgA, ins(F.orgA, F.patA, randomUUID(), 1).replace(',synthetic)', ',synthetic,entry_source)').replace(/,(true|false)\)$/, ",$1,'ia_auto')")), /check constraint/i);
+  denied(APP, tx(F.orgA, `UPDATE clinical_med_transcriptions SET entry_source='hospital' WHERE lineage_id=${lit(l)}`));
+});
