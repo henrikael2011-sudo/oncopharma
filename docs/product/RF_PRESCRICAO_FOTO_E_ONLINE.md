@@ -71,6 +71,8 @@ Marco: fase A em **M18 (PR #15)**; itens 2 e 3 em fase B, bloqueada (`FASE_B_HAB
   - **Frasco/seringa:** 50 × 25 mm (QR ≥ 15 mm, texto mínimo 6 pt).
   - **Bolsa de infusão:** 100 × 50 mm (QR ≥ 20 mm; paciente, ≥ 2 identificadores, fármaco, dose mg/mL, diluente, volume final, via, tempo de infusão, estabilidade/validade, ordem de infusão).
 - **Alternativa:** folha A4 com marcas de corte (grade de etiquetas nos mesmos tamanhos).
+- **Dois tipos de etiqueta:** (A) **etiqueta de frasco** (preparo): QR, fármaco, dose em mL a puxar e a conta da regra de três; (B) **etiqueta de bolsa final** (colada na bolsa pronta, não no frasco): nome do paciente + identificadores, protocolo, doses totais, diluente/volume, data/hora do preparo, validade, quem preparou/validou e QR de rastreabilidade.
+- **Botão "Imprimir"** em cada etiqueta; reimpressão registrada na auditoria; etiqueta de bolsa só imprime após validação do farmacêutico (Rótulo bloqueado). Dados fictícios na demonstração.
 - A impressão só é liberada depois de sair do **Rótulo bloqueado** (validação do farmacêutico).
 
 ### 5e. Fontes
