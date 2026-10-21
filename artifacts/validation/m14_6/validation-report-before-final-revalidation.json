@@ -1,0 +1,100 @@
+{
+  "release": "M14.6 / M15.5",
+  "validatedCommit": "164135c0175bc0c96f33f03a2b86ae20523e78f8",
+  "runId": 39187685667,
+  "runUrl": "https://github.com/henrikael2011-sudo/oncopharma/actions/runs/39187685667",
+  "jobs": {
+    "integration": {
+      "id": 117853464279,
+      "conclusion": "success"
+    },
+    "unit-and-structure": {
+      "id": 117853464102,
+      "conclusion": "success"
+    }
+  },
+  "checks": [
+    {
+      "command": "npm run build",
+      "status": "PASS",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run test:api:security",
+      "status": "PASS",
+      "passed": 42,
+      "failed": 0,
+      "exitCode": 0
+    },
+    {
+      "command": "npm run test:db:required",
+      "status": "PASS",
+      "passed": 40,
+      "failed": 0,
+      "exitCode": 0,
+      "includes": [
+        "event forgery denied",
+        "read function authorization",
+        "recipient inactive after shift",
+        "allowlist",
+        "immutable actor identity",
+        "non-destructive disable rehearsal",
+        "missing actor name denied atomically"
+      ]
+    },
+    {
+      "command": "bash tests/e2e/run-e2e.sh",
+      "status": "PASS",
+      "passed": 19,
+      "failed": 0,
+      "skipped": 0,
+      "exitCode": 0,
+      "includes": [
+        "08c",
+        "09 axe",
+        "actor name and registration",
+        "reference deadline disclaimer"
+      ]
+    },
+    {
+      "command": "npm run check:design; npm run check:brand; npm run check:governance",
+      "status": "PASS",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run validate:evidence",
+      "status": "PASS",
+      "exitCode": 0,
+      "note": "Unit runner reports integration prerequisites BLOCKED; real integration result is the separate job above."
+    },
+    {
+      "command": "npm run quality:gate",
+      "status": "BLOCKED",
+      "exitCode": 1,
+      "reason": "G01–G09 sem aprovações; comportamento esperado."
+    }
+  ],
+  "counts": {
+    "PASS": 6,
+    "FAIL": 0,
+    "BLOCKED": 1
+  },
+  "readyForClinicalUse": false,
+  "clinicalApproval": false,
+  "history": [
+    {
+      "runId": 39168363344,
+      "e2e": {
+        "passed": 17,
+        "failed": 1,
+        "notRun": 1
+      },
+      "reason": "08c strict selector; corrected in validated commit"
+    },
+    {
+      "runId": 39186760947,
+      "status": "PASS",
+      "note": "Antes da exigência de nome cadastrado; relatório preservado."
+    }
+  ]
+}

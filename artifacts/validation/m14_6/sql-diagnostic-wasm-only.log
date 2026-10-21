@@ -1,0 +1,17 @@
+(node:6) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+SQL compile (WASM only): 0001_foundation.sql
+SQL compile (WASM only): 0002_identity_and_audit.sql
+SQL compile (WASM only): 0003_runtime_permissions.sql
+SQL compile (WASM only): 0004_oncology_record.sql
+SQL compile (WASM only): 0005_structured_record.sql
+SQL compile (WASM only): 0006_clinical_workflow.sql
+SQL compile (WASM only): 0007_m10_patient_links.sql
+SQL compile (WASM only): 0008_tenant_setting_nullif.sql
+SQL compile (WASM only): 0009_care_patient.sql
+SQL compile (WASM only): 0010_caregiver.sql
+SQL compile (WASM only): 0011_clinical_worklist.sql
+SQL compile (WASM only): 0012_patient_allocation.sql
+SQL compile (WASM only): 0013_pdf_import.sql
+SQL compile (WASM only): 0014_medical_requests.sql
+SQL diagnostic ONLY (WASM, not PG17): {"rows":[{"status":"completed","revision":5}],"fields":[{"name":"status","dataTypeID":25},{"name":"revision","dataTypeID":23}],"command":"SELECT","affectedRows":0,"rowCount":1}
