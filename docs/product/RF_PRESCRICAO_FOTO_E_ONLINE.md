@@ -66,6 +66,12 @@ Marco: fase A em **M18 (PR #15)**; itens 2 e 3 em fase B, bloqueada (`FASE_B_HAB
 
 ### 5i. (Novo) Etiqueta por medicação com dose em mL
 - Prévia da etiqueta de cada medicação com a dose em mg **e o volume em mL** (5d-bis), diluente e volume final; continua como **Rótulo bloqueado** até a validação do farmacêutico (ver CHECKLIST C5).
+- **Impressão, alvo principal:** impressora **térmica** com rolo de etiquetas autoadesivas (padrão de farmácia), com impressão direta de ZPL/EPL ou PDF no tamanho exato.
+- **Tamanhos propostos (a validar por Henrikael/fornecedor do rolo):**
+  - **Frasco/seringa:** 50 × 25 mm (QR ≥ 15 mm, texto mínimo 6 pt).
+  - **Bolsa de infusão:** 100 × 50 mm (QR ≥ 20 mm; paciente, ≥ 2 identificadores, fármaco, dose mg/mL, diluente, volume final, via, tempo de infusão, estabilidade/validade, ordem de infusão).
+- **Alternativa:** folha A4 com marcas de corte (grade de etiquetas nos mesmos tamanhos).
+- A impressão só é liberada depois de sair do **Rótulo bloqueado** (validação do farmacêutico).
 
 ### 5e. Fontes
 - **Primária (alinhada à Anvisa):** bulas registradas na Anvisa (Bulário Eletrônico) e protocolos oncológicos de alto nível adotados no Brasil (normas Anvisa/MS, DDT/PCDT de oncologia do Ministério da Saúde).
@@ -114,6 +120,8 @@ Checklist mestre: [`CHECKLIST_PLANEJAMENTO_COMPLETO.md`](CHECKLIST_PLANEJAMENTO_
   - [ ] 5g. (Novo) Tela por fármaco: validação, tempo de infusão, ordem
   - [ ] 5h. (Novo) Botão "Próximo passo" (sem validação automática)
   - [ ] 5i. (Novo) Etiqueta por medicação com dose em mL; Rótulo bloqueado até a validação
+  - [ ] 5i. Impressão térmica (rolo autoadesivo) como alvo principal; A4 com marcas de corte como alternativa
+  - [ ] 5i. Tamanhos de etiqueta definidos: frasco 50×25 mm, bolsa 100×50 mm (propostos; validar com Henrikael/fornecedor)
   - [ ] 5e. Fontes: Anvisa (bulas) + protocolos adotados no Brasil; complementar NCCN/ESMO/institucional; `REFERENCIA_BULAS_ANVISA_QUIMIOTERAPICOS.md`
   - [ ] 5e. Pendências: fontes e licenciamento (NCCN/ESMO exigem licença), carga versionada, validação farmacêutica do Henrikael
   - [ ] Liberação final sempre do farmacêutico/médico; fase B bloqueada até protocolos carregados e validados
@@ -151,7 +159,7 @@ Código conferido no branch `m18-prescricao-foto-provisoria`: `apps/clinical-web
 | 5f | Estabilidade da bolsa e overfill | 5f | Inexistente | M19 | Sim |
 | 5g | (Novo) Tela por fármaco com validação, tempo de infusão e ordem | 5g | Validação existe só por campo genérico; sem tempo de infusão/ordem | M19 | Não (UI fictícia possível) |
 | 5h | (Novo) Botão "Próximo passo" | 5h | Inexistente | M18 (continuação do PR #15) | Não |
-| 5i | (Novo) Etiqueta por medicação com dose em mL | 5i | Inexistente | M19 | Sim (critérios de conferência) |
+| 5i | (Novo) Etiqueta por medicação com dose em mL; impressão térmica (frasco 50×25 mm, bolsa 100×50 mm), A4 como alternativa | 5i | Inexistente: layout de etiqueta, geração ZPL/PDF, integração com impressora | M19 | Sim (critérios de conferência) |
 | 5d-bis | Regra de três (mL a aspirar) | 5d-bis | Inexistente | M19 | Sim (concentrações validadas) |
 | 6 | Caneta/dedo | §6 | Inexistente: sem canvas/Pointer Events, sem tabela/RLS | M18 (continuação do PR #15) | Não |
 | — | Fase B bloqueada | §2, §4 | Cumprido: `FASE_B_HABILITADA=false`, `readyForClinicalUse=false` | — | Sim |

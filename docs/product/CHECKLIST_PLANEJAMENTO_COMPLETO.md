@@ -1,7 +1,7 @@
 # Checklist do planejamento completo (documento vivo)
 
 > Gerado em 21/10/2026 a partir de `main` @ `9d7da01`. `[x]` = coberto (com evidência), `[ ]` = pendente (marco + o que falta). Coberto **não** significa liberação clínica.
-> **Totais (inclui subitens):** 51 cobertos · 159 pendentes (dos quais 67 parciais).
+> **Totais (inclui subitens):** 51 cobertos · 161 pendentes (dos quais 67 parciais).
 > Detalhe: `RF_PRESCRICAO_FOTO_E_ONLINE.md`, `LACUNAS_PLANO_DIRETOR_M15.md`, `DECISOES_M15.md`.
 
 ## 114 itens do protótipo (comparacao-plano)
@@ -206,6 +206,8 @@
   - [ ] 5g. (Novo) Tela por fármaco: validação, tempo de infusão, ordem
   - [ ] 5h. (Novo) Botão "Próximo passo" (sem validação automática)
   - [ ] 5i. (Novo) Etiqueta por medicação com dose em mL; Rótulo bloqueado até a validação
+  - [ ] 5i. Impressão térmica (rolo autoadesivo) como alvo principal; A4 com marcas de corte como alternativa
+  - [ ] 5i. Tamanhos de etiqueta definidos: frasco 50×25 mm, bolsa 100×50 mm (propostos; validar com Henrikael/fornecedor)
   - [ ] 5e. Fontes: Anvisa (bulas) + protocolos adotados no Brasil; complementar NCCN/ESMO/institucional; `REFERENCIA_BULAS_ANVISA_QUIMIOTERAPICOS.md`
   - [ ] 5e. Pendências: fontes e licenciamento (NCCN/ESMO exigem licença), carga versionada, validação farmacêutica do Henrikael
   - [ ] Liberação final sempre do farmacêutico/médico; fase B bloqueada até protocolos carregados e validados
