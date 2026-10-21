@@ -80,6 +80,15 @@ Marco: fase A em **M18 (PR #15)**; itens 2 e 3 em fase B, bloqueada (`FASE_B_HAB
 - **Complementar:** NCCN, ESMO e protocolos institucionais.
 - Referência de bulas: [`REFERENCIA_BULAS_ANVISA_QUIMIOTERAPICOS.md`](REFERENCIA_BULAS_ANVISA_QUIMIOTERAPICOS.md) (em elaboração por outro trabalho).
 
+### 5j. (Aprovado em 21/10/2026) Dupla checagem por dois modelos de IA
+
+- Cada conferência roda **duas vezes, com modelos diferentes**: o 1º é o **Gemini Flash-Lite**, e o 2º é um **validador independente** (outro modelo Gemini ou o Groq gratuito).
+- **Os dois concordam:** mostra verde, ainda como rascunho e aguardando a validação do farmacêutico.
+- **Os dois divergem:** mostra alerta, aponta o item e a regra em que discordaram e exige **revisão manual do farmacêutico**. Nunca fica verde.
+- **Só um modelo respondeu:** fica "incerto", sem verde.
+- **Por quê:** é uma camada extra de proteção. Numa rodada de teste (PR 17) o Flash-Lite aprovou uma dose errada de fluoruracila (4.400 mg).
+- A IA não decide. A liberação final continua sendo do farmacêutico, e o registro guarda os dois modelos e as duas respostas.
+
 ## 6. (Proposto) Anotação com caneta/dedo na foto e na tela de conferência
 - Camada de anotação sobre a foto da prescrição e sobre a tela de conferência (5c).
 - Técnica: sobreposição HTML canvas/SVG com **Pointer Events API** (`pointerType` `pen`, `pressure`); rejeição da palma ignorando `touch` enquanto a caneta estiver ativa. Alvos: **Safari iPadOS + Apple Pencil** e **Chrome Android + stylus**.
@@ -124,6 +133,7 @@ Checklist mestre: [`CHECKLIST_PLANEJAMENTO_COMPLETO.md`](CHECKLIST_PLANEJAMENTO_
   - [ ] 5i. (Novo) Etiqueta por medicação com dose em mL; Rótulo bloqueado até a validação
   - [ ] 5i. Impressão térmica (rolo autoadesivo) como alvo principal; A4 com marcas de corte como alternativa
   - [ ] 5i. Tamanhos de etiqueta definidos: frasco 50×25 mm, bolsa 100×50 mm (propostos; validar com Henrikael/fornecedor)
+  - [ ] 5j. Dupla checagem: Gemini Flash-Lite + 2º modelo independente (Gemini ou Groq); verde só se concordarem; divergência = alerta + revisão manual do farmacêutico
   - [ ] 5e. Fontes: Anvisa (bulas) + protocolos adotados no Brasil; complementar NCCN/ESMO/institucional; `REFERENCIA_BULAS_ANVISA_QUIMIOTERAPICOS.md`
   - [ ] 5e. Pendências: fontes e licenciamento (NCCN/ESMO exigem licença), carga versionada, validação farmacêutica do Henrikael
   - [ ] Liberação final sempre do farmacêutico/médico; fase B bloqueada até protocolos carregados e validados
