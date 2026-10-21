@@ -24,6 +24,7 @@ export function PharmacistOverview() {
     [p?.awaitingPhysician, 'pedidos aguardando médico', 'n-warn'], [p?.openTasks, 'tarefas abertas da farmácia', ''],
     [p?.fever, 'alertas de febre', 'n-err'], [p?.expiringSoon, 'preparos vencendo < 6 h', 'n-warn']];
   return <section className="vg" aria-labelledby="vg-titulo">
+    <img className="vg-watermark" src="/brand/clinical.svg" alt="" aria-hidden="true" />
     <div className="vg-sub">
       <div><p className="vg-crumb">Clinical › Visão geral do farmacêutico</p>
         <h1 id="vg-titulo">{greet()}, {me.name ?? me.roleLabel} — {today()}</h1></div>

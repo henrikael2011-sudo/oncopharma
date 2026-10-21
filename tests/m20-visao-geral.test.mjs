@@ -39,6 +39,7 @@ test('tela: farmacêutico cai na Visão geral; atalho IA; febre; vencimentos ilu
   const v = r('apps/clinical-web/components/clinical/PharmacistOverview.tsx');
   for (const t of ['Pendências do dia', 'Alertas de febre', 'O que vence', 'Abrir conferência com IA', 'href="/clinical/conferencia-ia"', 'IA não decide', 'Prazos ilustrativos — conferir na bula do fabricante', 'Dados fictícios · demonstração não clínica', 'Conduta clínica definida pela equipe médica'])
     assert.ok(v.includes(t), t);
+  assert.match(v, /className="vg-watermark" src="\/brand\/clinical.svg" alt="" aria-hidden="true"/);
   assert.match(v, /work<Overview>\('overview'\)/); assert.doesNotMatch(v, /fetch\(/);
   const shell = r('apps/clinical-web/components/clinical/ClinicalShell.tsx');
   assert.match(shell, /<DemoTag \/>/); assert.match(r('apps/clinical-web/components/clinical/DemoTag.tsx'), /⚠ Dados fictícios · demonstração não clínica/); assert.match(shell, /'Visão geral'/);
