@@ -162,7 +162,7 @@ test.describe.serial('M14.5 E2E sintético', () => {
     await expect(page.getByLabel('Resumo do relato')).toContainText('Enjoo ou vômito');
     const a11yForm = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze(); evidence.a11y.careSymptomForm = a11yForm.violations.map((v) => ({ id: v.id, impact: v.impact, nodes: v.nodes.length }));
     await page.getByRole('button', { name: 'Enviar para a equipe' }).click();
-    const status = page.getByRole('status'); await expect(status).toContainText('Relato enviado');
+    const status = page.getByRole('status'); await expect(status).toContainText('Relato registrado'); await expect(status).not.toContainText('avisad');
     await expect(status).toContainText('ligue 192');
     const shortId = await page.locator('[data-report-id]').getAttribute('data-report-id'); reportId = shortId; await shot(page, 'care-symptom-registered');
     // R3: o relato foi gravado para o paciente da identidade (A), sem identificador vindo do cliente.
@@ -174,13 +174,22 @@ test.describe.serial('M14.5 E2E sintético', () => {
     await page.getByLabel('Cansaço').check(); await page.getByRole('button', { name: 'Continuar' }).click();
     await page.getByLabel(/Moderada —/).check(); await page.getByRole('button', { name: 'Continuar' }).click();
     await page.getByLabel('De 1 a 3 dias').check(); await page.getByRole('button', { name: 'Continuar' }).click();
-    await page.getByLabel('Falta de ar').check(); await page.getByRole('button', { name: 'Continuar' }).click();
+    await page.getByLabel('Falta de ar').check();
+    // M16 (P1-2): orientação urgente aparece no cliente ANTES do envio, sem depender da API.
+    await expect(page.locator('[data-local-urgent]')).toContainText('Ligue 192'); await expect(page.locator('[data-local-urgent]').getByRole('link', { name: 'Ligar 192' })).toHaveAttribute('href', 'tel:192');
+    await page.getByRole('button', { name: 'Continuar' }).click();
+    // M16 (P1-2): servidor fora do ar => orientação urgente continua visível e o app diz que NÃO registrou; reenvio idempotente.
+    await page.route('**/api/care/me/symptoms', (route) => route.abort('internetdisconnected'));
+    await page.getByRole('button', { name: 'Enviar para a equipe' }).click();
+    await expect(page.getByRole('alert').filter({ hasText: 'NÃO foi registrado' })).toBeVisible();
+    await expect(page.locator('[data-local-urgent]')).toContainText('Procure atendimento agora'); await shot(page, 'care-symptom-urgent-offline');
+    await page.unroute('**/api/care/me/symptoms');
     await page.getByRole('button', { name: 'Enviar para a equipe' }).click();
     await expect(page.getByRole('alert').filter({ hasText: 'Procure atendimento agora' })).toBeVisible(); await shot(page, 'care-symptom-urgent');
     const urgentId = await page.locator('[data-report-id]').getAttribute('data-report-id');
     expect(sql(`SELECT r.triage_status||'|'||a.level FROM patient_symptom_reports r JOIN clinical_alerts a ON a.source_report_id=r.id WHERE r.id='${urgentId}'`)).toBe('urgent_review|urgent_review');
     // Minha jornada, Meus medicamentos (sem dose; adesão relatada), Ajuda, Preferências.
-    await page.getByRole('link', { name: 'Minha jornada' }).click(); await expect(page.getByText(/Ciclo 1/)).toBeVisible(); await expect(page.getByText(/Enjoo ou vômito · Recebido pela equipe/).first()).toBeVisible(); await shot(page, 'care-journey');
+    await page.getByRole('link', { name: 'Minha jornada' }).click(); await expect(page.getByText(/Ciclo 1/)).toBeVisible(); await expect(page.getByText(/Enjoo ou vômito · Registrado — aguardando avaliação da equipe/).first()).toBeVisible(); await shot(page, 'care-journey');
     await page.getByRole('link', { name: 'Meus medicamentos' }).click(); await expect(page.getByRole('heading', { name: 'Ondansetrona (comprimido)' })).toBeVisible();
     await expect(page.getByText(/\b8 ?mg\b/)).toHaveCount(0);
     await page.getByRole('group', { name: /Ondansetrona \(comprimido\)/ }).getByRole('button', { name: 'Tomei', exact: true }).click();

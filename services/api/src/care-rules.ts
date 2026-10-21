@@ -26,8 +26,20 @@ export function parseSymptomAnswers(b: Record<string, unknown>): SymptomAnswers 
   if (!UUID.test(requestId)) throw new BadRequestException('requestId deve ser UUID');
   return { symptomCode, intensity, onset, redFlags: redFlags as SymptomAnswers['redFlags'], description, requestId };
 }
-export const URGENT_MESSAGE = 'Seu relato tem um sinal que precisa de atenção rápida. Procure atendimento agora: ligue 192 (SAMU) ou vá ao pronto-atendimento mais próximo. Sua equipe também foi avisada, mas pode não ver o aviso imediatamente.';
-export const ROUTINE_MESSAGE = 'Seu relato foi enviado à sua equipe. Se piorar ou surgir febre, falta de ar ou sangramento, procure atendimento ou ligue 192.';
+// M16 (P1): sem fila monitorada (D-008), a mensagem NUNCA afirma que a equipe foi avisada; diz que foi registrado
+// e manda procurar atendimento/192 explicitamente, sem esperar resposta pelo app.
+export const URGENT_MESSAGE = 'Seu relato foi registrado no sistema, mas este aplicativo não é acompanhado em tempo real e não gera aviso imediato para a equipe. Não espere resposta pelo app: procure atendimento agora — ligue 192 (SAMU), vá ao pronto-atendimento mais próximo ou ligue para o seu hospital.';
+export const ROUTINE_MESSAGE = 'Seu relato foi registrado no sistema e ficará disponível para a sua equipe avaliar. Este aplicativo não é acompanhado em tempo real. Se piorar ou surgir febre, falta de ar ou sangramento, não espere resposta pelo app: ligue 192 (SAMU) ou para o seu hospital.';
+/** M16 (P1): estado do relato no histórico do paciente derivado do estado REAL do alerta (clinical_alerts.status). */
+export function reportStatusLabel(alertStatus: string | null | undefined, urgent: boolean): string {
+  switch (alertStatus) {
+    case 'detected': case 'awaiting_review': return urgent ? 'Registrado — prioridade, aguardando avaliação da equipe' : 'Registrado — aguardando avaliação da equipe';
+    case 'in_evaluation': case 'referred': case 'monitoring': return 'Em avaliação pela equipe';
+    case 'resolved': case 'dismissed': return 'Avaliado pela equipe';
+    case 'duplicate': return 'Avaliado pela equipe (registro repetido)';
+    default: return 'Registrado';
+  }
+}
 export function assessSymptom(a: SymptomAnswers) {
   const urgent = a.symptomCode === 'fever' || a.redFlags.length > 0 || a.intensity === 'forte';
   const reasons = [...(a.symptomCode === 'fever' ? ['sintoma febre'] : []), ...a.redFlags.map((f) => `sinal de alerta: ${RED_FLAGS[f]}`), ...(a.intensity === 'forte' ? ['intensidade forte'] : [])];

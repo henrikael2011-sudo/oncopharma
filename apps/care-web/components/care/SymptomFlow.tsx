@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { care } from '../../lib/care-client';
 import { useMe } from './CareShell';
+import { isUrgentLocal, LOCAL_URGENT_TEXT, LOCAL_URGENT_TITLE, SEND_FAILED_TEXT } from '../../lib/care-urgency';
 const SYMPTOMS: [string, string][] = [['nausea', 'Enjoo ou vômito'], ['neuropathy', 'Formigamento'], ['fever', 'Febre'], ['diarrhea', 'Diarreia'], ['fatigue', 'Cansaço'], ['pain', 'Dor'], ['mouth', 'Feridas na boca'], ['other', 'Outro']];
 const INTENSITY: [string, string][] = [['leve', 'Leve — consigo fazer minhas atividades'], ['moderada', 'Moderada — atrapalha um pouco'], ['forte', 'Forte — não consigo fazer minhas atividades']];
 const ONSET: [string, string][] = [['hoje', 'Hoje'], ['1-3-dias', 'De 1 a 3 dias'], ['mais-3-dias', 'Há mais de 3 dias']];
@@ -20,16 +21,19 @@ export function SymptomFlow() {
   const [step, setStep] = useState(0), [symptomCode, setSymptom] = useState(''), [intensity, setIntensity] = useState(''), [onset, setOnset] = useState('');
   const [flags, setFlags] = useState<string[]>([]), [description, setDescription] = useState(''), [busy, setBusy] = useState(false), [err, setErr] = useState(''), [result, setResult] = useState<Result | null>(null);
   const requestId = useMemo(() => crypto.randomUUID(), []); // idempotência: repetir o envio não duplica
+  const urgentNow = isUrgentLocal({ symptomCode, intensity, redFlags: flags }); // M16: sem depender da API
   const steps = 5; const canNext = [symptomCode, intensity, onset, 'ok', 'ok'][step];
-  async function send() { setBusy(true); setErr(''); try { setResult(await care<Result>('me/symptoms', { method: 'POST', body: { symptomCode, intensity, onset, redFlags: flags, description, requestId } })); } catch (e) { setErr(e instanceof Error ? e.message : 'Erro'); } finally { setBusy(false); } }
-  if (result) return <section className={result.urgent ? 'care-panel care-urgent' : 'care-panel'} role={result.urgent ? 'alert' : 'status'} aria-labelledby="sym-done">
-    <h1 id="sym-done">{result.urgent ? 'Procure atendimento agora' : 'Relato enviado'}</h1>
+  async function send() { setBusy(true); setErr(''); try { setResult(await care<Result>('me/symptoms', { method: 'POST', body: { symptomCode, intensity, onset, redFlags: flags, description, requestId } })); } catch (e) { setErr(`${SEND_FAILED_TEXT}${e instanceof Error && e.message ? ` (${e.message})` : ''}`); } finally { setBusy(false); } }
+  if (result) { const urgent = result.urgent || urgentNow; return <section className={urgent ? 'care-panel care-urgent' : 'care-panel'} role={urgent ? 'alert' : 'status'} aria-labelledby="sym-done">
+    <h1 id="sym-done">{urgent ? LOCAL_URGENT_TITLE : 'Relato registrado'}</h1>
     <p className="care-lead">{result.message}</p>
     <p className="care-note">Número do registro: <span data-report-id={result.reportId}>{result.reportId.slice(0, 8)}</span></p>
+    {urgent && <p><a className="btn-primary" href="tel:192">Ligar 192</a></p>}
     <Link className="btn-primary" href="/care">Voltar ao início</Link>
-  </section>;
+  </section>; }
   return <section aria-labelledby="sym-title">
     <h1 id="sym-title">{who ? `Como ${who} está hoje` : 'Como estou hoje'}</h1>
+    {urgentNow && <div className="care-panel care-urgent" role="alert" data-local-urgent><h2>{LOCAL_URGENT_TITLE}</h2><p className="care-lead">{LOCAL_URGENT_TEXT}</p><p><a className="btn-primary" href="tel:192">Ligar 192</a></p></div>}
     <p className="care-note" aria-live="polite">Passo {step + 1} de {steps}</p>
     <form className="workflow-form" onSubmit={(e) => { e.preventDefault(); if (step < steps - 1) { if (canNext) setStep(step + 1); } else void send(); }}>
       {step === 0 && <Radio name="symptom" legend="O que você está sentindo?" options={SYMPTOMS} value={symptomCode} onChange={setSymptom} />}

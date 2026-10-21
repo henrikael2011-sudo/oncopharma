@@ -61,3 +61,12 @@ test('contatos de ajuda: leitura no tenant; aplicação não escreve', () => {
   assert.equal(must(APP, tx(F.orgB, `SELECT count(*) FROM organization_help_contacts WHERE organization_id=${lit(F.orgA)}`)), '0');
   denied(APP, tx(F.orgA, `INSERT INTO organization_help_contacts(organization_id,label) VALUES (${lit(F.orgA)},'x')`));
 });
+
+test('M16 (P1): histórico do paciente lê o estado REAL do alerta (subconsulta de me/journey) sob RLS, isolado por organização', () => {
+  const rep = randomUUID(), al = randomUUID(), rq = randomUUID();
+  must(APP, tx(F.orgA, `INSERT INTO patient_symptom_reports(id,organization_id,patient_id,symptom_code,description,source,source_reference,triage_status,details,actor_issuer,actor_sub) VALUES (${lit(rep)},${lit(F.orgA)},${lit(F.patA)},'fatigue','Relato M16','care-portal',${lit(rq)},'pending','{}'::jsonb,${lit(ISS)},${lit(F.subA)});
+    INSERT INTO clinical_alerts(id,organization_id,patient_id,source_report_id,code,level,status,rule_version,explanation) VALUES (${lit(al)},${lit(F.orgA)},${lit(F.patA)},${lit(rep)},'symptom.fatigue','needs_review','awaiting_review','care-demo-v1','M16')`));
+  const q = (org) => tx(org, `SELECT r.id||'|'||coalesce((SELECT a.status FROM clinical_alerts a WHERE a.organization_id=r.organization_id AND a.source_report_id=r.id ORDER BY a.created_at DESC LIMIT 1),'-') FROM patient_symptom_reports r WHERE r.organization_id=${lit(org)} AND r.id=${lit(rep)}`);
+  assert.equal(must(APP, q(F.orgA)), `${rep}|awaiting_review`, 'recém-criado => aguardando avaliação, nunca "recebido/avaliado"');
+  assert.equal(must(APP, q(F.orgB)), '', 'outra organização não vê o relato nem o alerta');
+});
