@@ -47,3 +47,5 @@ export function assessSymptom(a: SymptomAnswers) {
     explanation: urgent ? `Regra demonstrativa: prioridade por ${reasons.join(', ')}. Exige avaliação profissional; não representa diagnóstico ou conduta.` : 'Regra demonstrativa: exige avaliação profissional. Não representa diagnóstico ou conduta.',
     details: { intensity: a.intensity, onset: a.onset, redFlags: a.redFlags, questionnaire: 'care-demo-v1' } };
 }
+// Limiar de febre aprovado (RED_FLAGS.febre: 37,8 °C ou mais). Fonte única para Care e Clinical.
+export const FEVER_THRESHOLD_C = 37.8;

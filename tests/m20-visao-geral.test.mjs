@@ -1,11 +1,12 @@
-// M20 — Visão geral do farmacêutico: regras (febre >= 38,0 °C, estabilidade), rota da API restrita a vínculos, BFF, tela e migração.
+// M20 — Visão geral do farmacêutico: regras (febre >= 37,8 °C — regra aprovada de care-rules, estabilidade), rota da API restrita a vínculos, BFF, tela e migração.
 import test from 'node:test'; import assert from 'node:assert/strict'; import fs from 'node:fs'; import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 const r = (p) => fs.readFileSync(new URL('../' + p, import.meta.url), 'utf8');
 const rules = require('../services/api/dist/overview-rules.js');
-test('febre: limiar 38,0 °C inclusivo; prioridade só ordena', () => {
-  assert.equal(rules.FEVER_THRESHOLD_C, 38.0);
-  assert.equal(rules.isFever(38.0), true); assert.equal(rules.isFever(37.9), false); assert.equal(rules.isFever(NaN), false);
+test('febre: limiar aprovado 37,8 °C inclusivo (mesma constante de care-rules); prioridade só ordena', () => {
+  assert.equal(rules.FEVER_THRESHOLD_C, 37.8); assert.equal(rules.FEVER_THRESHOLD_C, require('../services/api/dist/care-rules.js').FEVER_THRESHOLD_C);
+  assert.match(fs.readFileSync('services/api/src/overview-rules.ts', 'utf8'), /import \{ FEVER_THRESHOLD_C \} from '\.\/care-rules'/);
+  assert.equal(rules.isFever(37.8), true); assert.equal(rules.isFever(37.7), false); assert.equal(rules.isFever(38.0), true); assert.equal(rules.isFever(NaN), false);
   assert.equal(rules.feverPriority(38.6), 'alta'); assert.equal(rules.feverPriority(38.1), 'media');
 });
 test('estabilidade: restante, % usado, nível e rótulo', () => {

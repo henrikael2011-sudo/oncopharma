@@ -56,7 +56,7 @@ export class ClinicalWorkController {
       name: typeof req.principal.claims.given_name === 'string' ? req.principal.claims.given_name.slice(0, 60) : null }));
   }
 
-  /** M20 — Visão geral do farmacêutico: contagens do dia, febre (>= 38,0 °C) e prazos de estabilidade, SOMENTE dos pacientes vinculados. */
+  /** M20 — Visão geral do farmacêutico: contagens do dia, febre (>= 37,8 °C) e prazos de estabilidade, SOMENTE dos pacientes vinculados. */
   @Get('overview')
   overview(@Req() req: AuthenticatedRequest, @Headers('x-organization-id') org: string) {
     return this.run(req, org, async (c, s) => {

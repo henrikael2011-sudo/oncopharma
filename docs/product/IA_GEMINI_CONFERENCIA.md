@@ -11,7 +11,7 @@
 ## Onde está
 - Módulo (somente servidor): `services/ai-orchestrator/src/prescription-check/index.mjs` (`GeminiProvider`, `GroqProvider`, `MockProvider`, guarda, schema, prompt pt-BR).
 - Endpoint: `apps/clinical-web/app/api/ia/conferencia/route.ts` (exige sessão e ambiente sintético `dev/hml/test`; em `prod` responde 503).
-- Tela: `/clinical/conferencia-ia` (link "Conferência com IA (teste)" na lista de pacientes). Mostra "Resumo com IA · rascunho", o selo **IA não decide** e **qual provedor respondeu**.
+- Tela: `/clinical/conferencia-ia` (link "Conferência com IA" na lista de pacientes). Mostra "Resumo com IA · rascunho", o selo **IA não decide** e **qual provedor respondeu**.
 - Testes (sem rede, `fetch` simulado): `services/ai-orchestrator/tests/prescription-check.test.mjs` (`npm run test:extended`).
 
 ## Seleção de provedor (em tempo de execução)

@@ -951,7 +951,7 @@
     },
     "/clinical/overview": {
       "get": {
-        "summary": "M20 — Visão geral do farmacêutico: contagens do dia, febre (última temperatura >= 38,0 °C) e prazos de estabilidade (ilustrativos) somente dos pacientes vinculados; dados sintéticos",
+        "summary": "M20 — Visão geral do farmacêutico: contagens do dia, febre (última temperatura >= 37,8 °C) e prazos de estabilidade (ilustrativos) somente dos pacientes vinculados; dados sintéticos",
         "security": [
           {
             "oidc": []
