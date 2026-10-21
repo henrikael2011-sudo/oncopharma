@@ -9,6 +9,7 @@ import { TestEnvBanner } from '../TestEnvBanner';
 import { care, CareError, type Me } from '../../lib/care-client';
 import { Consent } from './Consent';
 import { AcceptInvite } from './AcceptInvite';
+import { RoleSelector, useRoleIntent } from './RoleSelector';
 
 type State = { kind: 'loading' } | { kind: 'anon' } | { kind: 'nolink' } | { kind: 'error'; message: string } | { kind: 'ready'; me: Me };
 const Ctx = createContext<{ me: Me; reload: () => Promise<void> } | null>(null);
@@ -37,7 +38,7 @@ export function CareShell({ children, testEnv = false }: { children: React.React
   let content: React.ReactNode;
   if (state.kind === 'loading') content = <p role="status" className="care-lead">Carregando…</p>;
   else if (state.kind === 'anon') content = <Welcome />;
-  else if (state.kind === 'nolink') content = <section className="care-panel"><h1>Seu acesso ainda não foi liberado</h1><p className="care-lead">Sua conta ainda não está ligada a um acompanhamento. Se você é paciente, fale com a equipe do hospital para liberar o acesso.</p><AcceptInvite onDone={load} /></section>;
+  else if (state.kind === 'nolink') content = <NoLink onDone={load} />;
   else if (state.kind === 'error') content = <section className="care-panel" role="alert"><h1>Não foi possível abrir agora</h1><p className="care-lead">{state.message}</p><button className="btn-primary" onClick={() => void load()}>Tentar de novo</button></section>;
   else if (!state.me.consent.accepted) content = <Consent version={state.me.consent.required} onDone={load} />;
   else content = <Ctx.Provider value={{ me: state.me, reload: load }}>{children}</Ctx.Provider>;
@@ -49,12 +50,23 @@ export function CareShell({ children, testEnv = false }: { children: React.React
   </div>;
 }
 
+function NoLink({ onDone }: { onDone: () => Promise<void> }) {
+  const [role, setRole] = useRoleIntent('caregiver');
+  return <section className="care-panel"><h1>Seu acesso ainda não foi liberado</h1><p className="care-lead">Sua conta ainda não está ligada a um acompanhamento.</p>
+    <RoleSelector role={role} onChange={setRole} />
+    {role === 'patient' ? <p className="care-lead">Se você é paciente, fale com a equipe do hospital para liberar o acesso.</p> : <AcceptInvite onDone={onDone} />}</section>;
+}
+
 function Welcome() {
+  const [role, setRole] = useRoleIntent(null);
   return <section>
     <p className="kicker">ONCOPHARMA Care</p>
     <h1>Seu cuidado, no seu ritmo.</h1>
     <p className="care-signature">{SIGNATURE}</p>
     <p className="care-lead">Registre como você está, acompanhe sua jornada e veja as orientações da sua equipe.</p>
+    <RoleSelector role={role} onChange={setRole} />
+    {role === 'patient' && <p className="care-lead">Entre com a conta liberada pela equipe do hospital.</p>}
+    {role === 'caregiver' && <p className="care-lead">Entre com a sua conta e informe o código de convite que o paciente gerou. Você verá apenas o que ele liberar.</p>}
     <a className="btn-primary btn-large" href="/api/auth/login">Entrar</a>
     <p className="care-note">Em uma emergência, ligue 192 (SAMU).</p>
   </section>;

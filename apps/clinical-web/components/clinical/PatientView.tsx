@@ -7,11 +7,11 @@ import { AlertsTab } from './AlertsTab';
 import { TasksTab } from './TasksTab';
 import { PreCycleTab } from './PreCycleTab';
 import { TimelineTab } from './TimelineTab';
-import { RecordTab } from './RecordTab';
+import { RecordTab, MEDICATION_KEYS, LAB_KEYS } from './RecordTab';
 import { MedicalRequestList } from './MedicalRequests';
 import { AllocationPanel } from './AllocationPanel';
 
-const TABS = [['alertas', 'Alertas'], ['tarefas', 'Tarefas'], ['preciclo', 'Pré-ciclo'], ['linha', 'Linha do tempo'], ['prontuario', 'Prontuário'], ['solicitacoes', 'Solicitações médicas']] as const;
+const TABS = [['visao', 'Visão geral'], ['alertas', 'Alertas'], ['tarefas', 'Tarefas'], ['preciclo', 'Pré-ciclo'], ['linha', 'Linha do tempo'], ['prontuario', 'Prontuário'], ['medicamentos', 'Medicamentos'], ['exame', 'Exame'], ['solicitacoes', 'Solicitações médicas']] as const;
 type Tab = (typeof TABS)[number][0];
 export function PatientView({ id }: { id: string }) {
   const [d, setD] = useState<PatientData | null>(null), [err, setErr] = useState(''), [tab, setTab] = useState<Tab>('alertas');
@@ -38,6 +38,14 @@ export function PatientView({ id }: { id: string }) {
       {tab === 'linha' && <TimelineTab id={id} />}
       {tab === 'solicitacoes' && <MedicalRequestList patientId={id} />}
       {tab === 'prontuario' && <RecordTab id={id} />}
+      {tab === 'medicamentos' && <RecordTab id={id} only={MEDICATION_KEYS} />}
+      {tab === 'exame' && <RecordTab id={id} only={LAB_KEYS} />}
+      {tab === 'visao' && <div className="clin-overview">
+        <section className="clin-card" aria-labelledby="vg-pend"><h2 id="vg-pend">Pendências</h2><p>{openAlerts} {openAlerts === 1 ? 'alerta aberto' : 'alertas abertos'} · {openTasks} {openTasks === 1 ? 'tarefa aberta' : 'tarefas abertas'}</p>
+          {d.alerts.filter((a) => !a.final).slice(0, 3).map((a) => <p key={a.id}><span className={a.level === 'urgent_review' ? 'sev sev-urgent' : 'sev sev-review'}>{a.level === 'urgent_review' ? 'Urgente' : 'Revisão'}</span> {a.description ?? a.code} · {a.statusLabel}</p>)}
+          <button type="button" className="btn-secondary" onClick={() => setTab('alertas')}>Ver alertas</button></section>
+        <section className="clin-card" aria-labelledby="vg-pront"><h2 id="vg-pront">Prontuário (resumo)</h2><RecordTab id={id} summary /></section>
+      </div>}
     </section>
   </article>;
 }
