@@ -9,3 +9,7 @@
 .tr-x{border:0;background:none;color:var(--ink-muted);font-size:20px;min-width:44px;min-height:44px;cursor:pointer}
 .clin-trail{margin:8px 0 0;padding-left:20px;line-height:1.6;font-size:14px}
 @media(max-width:640px){.tr-grid{grid-template-columns:1fr}}
+/* O seletor canônico ".workflow-form .btn-secondary)" tem um parêntese a mais e não se aplica: aqui, botão secundário legível no formulário. */
+.clin-transcr .workflow-form .btn-secondary{background:#fff;color:var(--navy);border:2px solid var(--navy)}
+.clin-transcr .workflow-form .tr-x{background:none;color:var(--ink-muted);margin:0;padding:0 6px}
+.clin-transcr .clin-times .btn-secondary{margin:0}
