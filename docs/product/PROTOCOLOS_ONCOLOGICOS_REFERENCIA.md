@@ -199,6 +199,17 @@ Estabilidade de bolsa **nunca** consta em protocolo; só em bula (§4).
 
 ## 4. Cruzamento protocolo × bula (por fármaco)
 
+> **Estabilidade depende do fabricante (observação de Henrikael, 21/10/2026).** A estabilidade, a diluição compatível e o overfill indicados vêm da bula **do fabricante consultado**. Bulas de outros fabricantes do mesmo fármaco podem trazer valores diferentes. Toda divergência de estabilidade abaixo deve ser **confirmada na bula do fabricante usado na clínica** antes de qualquer conclusão. O sistema deve registrar o fabricante e o lote do frasco lido (código GS1/EAN, item 7) e conferir a estabilidade pela bula desse fabricante.
+
+| Fármaco | Fabricante da bula consultada | Observação |
+|---|---|---|
+| Fluoruracila | Laboratório Químico Farmacêutico Bergamo Ltda. | Estabilidade pode variar entre fabricantes |
+| Oxaliplatina | Eurofarma Laboratórios S.A. | Estabilidade pode variar entre fabricantes |
+| Irinotecano | Eurofarma Laboratórios S.A. | Estabilidade pode variar entre fabricantes |
+| Capecitabina | Sun Farmacêutica do Brasil Ltda. | Oral; a orientação de partir/triturar pode variar entre fabricantes |
+
+> **Fluoruracila, 46 h × 8 h:** os 8 h de estabilidade em SF 0,9% são da bula Bergamo. A divergência é **provisória** até a conferência com a bula do fabricante usado na clínica, já que infusores elastoméricos de 46 h costumam usar outro diluente e outra concentração.
+
 ✅ confere · ⚠️ diverge · ⛔ ausente (bula ou protocolo sem o dado / bula não disponível).
 
 ### 4.1 Oxaliplatina [B-OXA]
