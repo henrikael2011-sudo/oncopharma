@@ -1,0 +1,183 @@
+# Checklist do planejamento completo (documento vivo)
+
+> Gerado em 21/10/2026 a partir de `main` @ `9d7da01`. `[x]` = coberto (com evidência), `[ ]` = pendente (marco + o que falta). Coberto **não** significa liberação clínica.
+> Detalhe: `RF_PRESCRICAO_FOTO_E_ONLINE.md`, `LACUNAS_PLANO_DIRETOR_M15.md`, `DECISOES_M15.md`.
+
+## 114 itens do protótipo (comparacao-plano)
+- [ ] **1** 3 ações principais (Como estou hoje? / Meus medicamentos / Preciso de ajuda) — *PARCIAL* · marco M15.2 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [x] **2** Próxima consulta — `CareHome.tsx` "Próxima sessão" ← `GET /v1/care/me/home` (`treatment_cycles`)
+- [x] **3** Lembretes na tela inicial — `CareHome.tsx` cartão "Lembretes" (ciclo + medicamentos domiciliares, `care.controller.ts` `home()`)
+- [x] **4** Acesso ao histórico — menu "Minha jornada" → `/care/jornada` (`Journey.tsx`, "Meus relatos")
+- [ ] **5** Rótulo de demonstração — *PARCIAL* · marco M15.2 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [ ] **6** Check-in em 1 toque — *FALTA* · marco M15.2 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [ ] **7** Náusea, vômito, diarreia, dor, cansaço, febre/calafrios, falta de ar — *PARCIAL* · marco M15.2 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [x] **8** Leve / Moderada / Forte com explicação — `SymptomFlow.tsx` INTENSITY (3 opções com explicação); validado em `parseSymptomAnswers`
+- [x] **9** Sem conversão para CTCAE — nenhuma ocorrência de CTCAE em `apps/`, `services/`, `packages/` (rg)
+- [ ] **10** Trocar para 3 níveis (equivalência clínica) — *BLOQUEADO-DECISÃO* · marco M15.2 · falta:  · bloqueio: Sim
+- [ ] **11** Opções começou agora / hoje / 1–2 dias / >2 dias / não sei — *PARCIAL* · marco M15.2 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [ ] **12** Horário de início — *FALTA* · marco M15.2 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [ ] **13** Efeito de "não sei"/"começou agora" nas regras — *BLOQUEADO-DECISÃO* · marco M15.2 · falta:  · bloqueio: Sim
+- [ ] **14** Perguntas específicas por sintoma, uma por tela — *FALTA* · marco M15.2 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [ ] **15** "Não sei / Não medi" disponível — *FALTA* · marco M15.2 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [ ] **16** Nível para os novos "Não sei" — *BLOQUEADO-DECISÃO* · marco M15.2 · falta:  · bloqueio: Sim
+- [x] **17** Tela de revisão com todas as respostas — passo 5 "Confira antes de enviar" (`SymptomFlow.tsx`)
+- [ ] **18** Editar uma resposta sem recomeçar — *PARCIAL* · marco M15.2 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [ ] **19** "Quem registrou" na revisão — *PARCIAL* · marco M15.2 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [ ] **20** Separar salvo / onde / enviado / orientação — *PARCIAL* · marco M15.2 · falta: bloco padronizado "salvo / onde / enviado ou não / orientação" em 4 linhas
+- [x] **21** Nunca dizer "Equipe avisada" — PR #12: `care-rules.ts:31-32` sem "avisada"; teste `tests/m152-care.mjs` (M16 P1-1)
+- [x] **22** Orientação educativa só se aprovada — `me/home` filtra `patient_guidance` approved/delivered com `approved_by`; CHECK `guidance_approval` (0006); asserção no E2E `m145-flow.spec.mjs:321`
+- [ ] **23** Alerta na primeira resposta relevante, com 192 e "Salvar agora" — *PARCIAL* · marco M15.2 · falta: botão "Salvar agora" (salvar sem concluir o fluxo)
+- [x] **24** Não atrasar o alerta por causa do servidor — PR #12: `apps/care-web/lib/care-urgency.ts` (regra espelho, 96 combinações testadas); `SEND_FAILED_TEXT`
+- [ ] **25** Regras fixas, sem IA, módulo único app + servidor — *PARCIAL* · marco M15.2/M15.7 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [ ] **26** Ficha de cada regra (id, critério, fonte, versão, aprovador, revisão) — *PARCIAL* · marco M15.2/M15.7 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10 · bloqueio: Parcial (aprovador/conteúdo)
+- [ ] **27** Valores de fonte / aprovador / revisão — *BLOQUEADO-DECISÃO* · marco M15.2/M15.7 · falta:  · bloqueio: Sim
+- [ ] **28** Configuração de contatos e horários do serviço — *PARCIAL* · marco M15.2/M15.7 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10 · bloqueio: Parcial (aprovador/conteúdo)
+- [ ] **29** Contatos e horários reais — *BLOQUEADO-DECISÃO* · marco M15.2/M15.7 · falta:  · bloqueio: Sim
+- [ ] **30** Fluxo rascunho → aprovado — *PARCIAL* · marco M15.7 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10 · bloqueio: Parcial (aprovador/conteúdo)
+- [ ] **31** Etapas revisão → publicação → revisão periódica — *FALTA* · marco M15.7 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10 · bloqueio: Parcial (aprovador/conteúdo)
+- [ ] **32** Autor, revisor, versão, público, fontes, datas — *PARCIAL* · marco M15.7 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10 · bloqueio: Parcial (aprovador/conteúdo)
+- [ ] **33** Quem pode aprovar e intervalo — *BLOQUEADO-DECISÃO* · marco M15.7 · falta:  · bloqueio: Sim
+- [x] **34** Rotina do dia com marcação — `Medications.tsx` + `GET /v1/care/me/medications` (status de hoje)
+- [x] **35** Tomado / Não tomado — "Tomei / Tomei só parte / Não tomei"; `POST me/medications/:orderId/adherence`
+- [ ] **36** Não lembro / Tenho dúvida — *FALTA* · marco M15.2 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [x] **37** Cada registro com data/hora — `patient_adherence_reports` (reported_on, created_at; sem UPDATE/DELETE)
+- [ ] **38** Uso relatado × confirmado — *PARCIAL* · marco M15.2 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [x] **39** Não usar "adesão comprovada" — sem percentual nem "adesão" na UI (`Medications.tsx`); confirmação "registrado 'Tomei' hoje"
+- [ ] **40** Rotina prescrita e conferida pela equipe — *BLOQUEADO-DECISÃO* · marco M15.2 · falta:  · bloqueio: Sim
+- [ ] **41** Lista + gráfico + filtro por sintoma — *PARCIAL* · marco M15.2 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [ ] **42** Autor do registro — *PARCIAL* · marco M15.2 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [ ] **43** Respostas originais — *PARCIAL* · marco M15.2 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [x] **44** Alerta e estado de revisão — PR #12: `reportStatusLabel` `care-rules.ts:34-41` a partir de `clinical_alerts.status`; `care.controller.ts` subconsulta
+- [ ] **45** Correção sem apagar o original — *FALTA* · marco M15.2 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [ ] **46** Estados salvo / enviado / recebido / revisado — *PARCIAL* · marco M15.2 · falta: estado distinto "enviado ≠ recebido" e confirmação explícita de leitura pela equipe (depende de fila monitorada D-008) · bloqueio: Parcial (D-008 fila monitorada)
+- [ ] **47** Filtros Todos / Sintomas / Ajuda — *FALTA* · marco M15.2 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [ ] **48** Configurar horário — *FALTA* · marco M15.6 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [ ] **49** Desativar — *FALTA* · marco M15.6 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [ ] **50** Pausar por um período — *FALTA* · marco M15.6 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [ ] **51** Fuso horário — *PARCIAL* · marco M15.6 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [ ] **52** Lembrete com app fechado (push) — *FALTA* · marco M15.6 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [x] **53** Conta própria — conta OIDC própria + `POST /v1/care/caregiver/accept` (`AcceptInvite.tsx`)
+- [x] **54** Permissões por escopo — `CAREGIVER_SCOPES`, `PUT me/caregivers/:linkId/scopes`, todos desligados por padrão
+- [x] **55** Registrar em nome do paciente — escopo `registrar_sintoma`; `details.reported_by='caregiver'`
+- [x] **56** Auditoria — `audit_events` + `caregiver_access_events` (0010)
+- [x] **57** Revogar (efeito imediato) — `POST me/caregivers/:linkId/revoke`; trigger impede reativar (0010); E2E 07d
+- [x] **58** Paciente vê os acessos — `Caregivers.tsx` "Histórico de acessos do cuidador"
+- [x] **59** Validade do acesso — 30/60/90 dias (`TERM_OPTIONS`, CHECK ≤ 90 na 0010); `expires_at` checado em `CareController.subject()`; `tests/m153-*`
+- [x] **60** Sem mudar prescrição — sem rota de prescrição; adesão exige `need(s,'patient')`
+- [ ] **61** Não tratar como representante legal — *PARCIAL* · marco M15.3 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [ ] **62** Regras para representante legal / termo — *BLOQUEADO-DECISÃO* · marco M15.3 · falta:  · bloqueio: Sim
+- [x] **63** Um único lugar "Sou paciente / Sou cuidador" — `RoleSelector.tsx` (PR #14) + `AcceptInvite.tsx`; teste `m17-celular-mfa-abas`
+- [x] **64** Versão/URL separada do app do paciente — `apps/clinical-web` (`/clinical`, porta 3002) separado de `apps/care-web` (D-002, ADR-004)
+- [x] **65** Pacientes vinculados — `care_assignments` em `GET /v1/clinical/worklist`; sem vínculo ⇒ lista vazia (UI-04; `tests/m154-*`)
+- [x] **66** Último relato e pendências — lista com gravidade + nº de pendências (alertas + tarefas); relato sob demanda ao abrir (UI-03)
+- [x] **67** Detalhe do alerta com regra + versão — `AlertsTab.tsx`: explicação + "regra {ruleVersion}" + origem
+- [ ] **68** Estado de entrega — *PARCIAL* · marco M15.4/M15.7 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10 · bloqueio: Parcial (D-008 fila monitorada)
+- [ ] **69** Revisor — *PARCIAL* · marco M15.4/M15.7 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [ ] **70** Registro de contato / avaliação / encaminhamento — *PARCIAL* · marco M15.4/M15.7 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [x] **71** "Revisado ≠ resolvido" — 8 estados §5.1 (`clinical-work-rules.ts` + trigger na 0011); `tests/m154-*`
+- [ ] **72** Resumo pré-ciclo imprimível — *PARCIAL* · marco M15.4/M15.7 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [x] **73** Itens indisponíveis no resumo — "Ausente" + "Não é possível concluir" (`preCycleChecklist`)
+- [ ] **74** Relatado × confirmado no resumo — *FALTA* · marco M15.4/M15.7 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [ ] **75** Dashboard (KPIs, barras, tendência, menu lateral) — *FALTA* · marco M15.4/M15.7 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [ ] **76** Fila monitorada / envio real — *BLOQUEADO-DECISÃO* · marco M15.4/M15.7 · falta:  · bloqueio: Sim
+- [ ] **77** PWA — *PARCIAL* · marco M15.6/infra · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [ ] **78** Módulo de regras compartilhado — *PARCIAL* · marco M15.6/infra · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [x] **79** Camada de armazenamento — PostgreSQL 17, migrações 0001–0013, RLS FORCE; `database.service.ts`
+- [x] **80** Revalidação no servidor — `parseSymptomAnswers` + `assessSymptom`; `tests/m152-care.mjs`
+- [ ] **81** Retenção — *PARCIAL* · marco M15.6/infra · falta: ver evidência (lacuna descrita); sem mudança desde 18/10 · bloqueio: Parcial (política de retenção/LGPD)
+- [ ] **82** Backup / restauração — *PARCIAL* · marco M15.6/infra · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [ ] **83** Monitoramento — *PARCIAL* · marco M15.6/infra · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [ ] **84** Plano de incidentes — *PARCIAL* · marco M15.6/infra · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [ ] **85** Postgres gerenciado — *BLOQUEADO-DECISÃO* · marco M15.6/infra · falta:  · bloqueio: Sim
+- [x] **86** Consentimento com versão e data — `Consent.tsx`, `PUT me/consent`, `CONSENT_TERMS_VERSION`, `consent_accepted_at`, auditoria
+- [ ] **87** Exportar e apagar dados — *FALTA* · marco M15.6/LGPD · falta: ver evidência (lacuna descrita); sem mudança desde 18/10 · bloqueio: Parcial (política de retenção/LGPD)
+- [x] **88** Criptografia e auditoria — `audit_events` em leituras e escritas; AES-256-GCM no PDF original (0013); KMS no Terraform (não aplicado)
+- [ ] **89** Textos legais, base legal, RIPD, DPO, retenção — *BLOQUEADO-DECISÃO* · marco M15.6/LGPD · falta:  · bloqueio: Sim
+- [ ] **90** Bundle FHIR R4 simulado (Patient, RelatedPerson, …, AuditEvent) — *PARCIAL* · marco M15.4/D-007 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [ ] **91** QuestionnaireResponse — *FALTA* · marco M15.4/D-007 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [ ] **92** MedicationRequest — *PARCIAL* · marco M15.4/D-007 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [x] **93** Adaptadores Tasy/MV simulados + HL7 v2 — HL7 ADT A01/A02 (`location-feed.mjs`, `fixtures/hospital-sim-transfers.hl7`), `simulator/hospital-sim.mjs`, layouts PDF Tasy/MV (`pdf-layouts.ts`)
+- [ ] **94** Integração real — *BLOQUEADO-DECISÃO* · marco M15.4/D-007 · falta:  · bloqueio: Sim
+- [x] **95** Sem decisões por IA — `packages/clinical-rules` (`aiUsed:false`, `automaticTreatmentAuthorization:false`), pré-ciclo `automaticDecision:false`; D-013 bloqueado
+- [x] **96** Testes automatizados (UI, API, axe, 360/390 px) — `.github/workflows/quality.yml` (unit, `test:api:security`, `test:db:required`, Playwright + axe); 390 px em E2E 06; 17/17 E2E em `f64870b` (`artifacts/validation/m14_5/e2e-results.json`); CI de `main` verde
+- [ ] **97** Teste com leitor de tela (manual) — *FALTA* · marco M15.6 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [ ] **98** Teste de restauração de backup — *FALTA* · marco M15.6 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [ ] **99** Testes de usabilidade com idosos — *BLOQUEADO-DECISÃO* · marco M15.6 · falta:  · bloqueio: Sim
+- [ ] **100** Identidade visual (fundo claro, verde-escuro, cartões com ícone) — *PARCIAL* · marco M15.6 · falta: arte final vetorial/manual de marca (BLOQUEADO-DECISÃO designer); barra inferior com ícones
+- [ ] **101** Barra inferior Início / Histórico / Conteúdos / Ajuda — *PARCIAL* · marco M15.6 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [x] **102** Abrir → paciente ou cuidador autorizado — OIDC + R3/R4 (`CareController.subject`); consentimento antes do conteúdo
+- [x] **103** Tela inicial com 4 caminhos — Registrar / Minha jornada / Meus medicamentos / Preciso de ajuda (início + menu)
+- [ ] **104** Ajuda: sinais e contatos; urgência × dúvida — *PARCIAL* · marco M15.2/M15.4 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [x] **105** Histórico: relatos e estado de revisão — PR #12: histórico deriva do estado real (E2E "Registrado — aguardando avaliação")
+- [ ] **106** Sintoma → alerta? → intensidade/duração → perguntas → alerta? — *PARCIAL* · marco M15.2/M15.4 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [x] **107** Urgente: orientação imediata, não esperar o app, salvar sem atrasar — PR #12: alerta local antes do envio e mantido se a API cair (E2E m145-flow)
+- [ ] **108** Conferir e corrigir respostas — *PARCIAL* · marco M15.2/M15.4 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [ ] **109** Salvar → histórico → orientação aprovada → informar salvo/enviado/não enviado — *PARCIAL* · marco M15.2/M15.4 · falta: orientação educativa aprovada não exibida (sem conteúdo aprovado); histórico não mostra tentativas não enviadas
+- [ ] **110** Remédios: rotina conferida, uso relatado ou dificuldade, lembretes — *PARCIAL* · marco M15.2/M15.4 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [x] **111** Painel: revisar relatos e alertas — `AlertsTab.tsx` + `POST /v1/clinical/alerts/:id/transition`
+- [ ] **112** Registrar contato, avaliação e encaminhamento — *PARCIAL* · marco M15.2/M15.4 · falta: ver evidência (lacuna descrita); sem mudança desde 18/10
+- [x] **113** Preparar resumo pré-ciclo — `PreCycleTab.tsx` + `POST patients/:id/precycle/reviews`
+- [ ] **114** Envio real / equipe define conduta — *BLOQUEADO-DECISÃO* · marco M15.2/M15.4 · falta:  · bloqueio: Sim
+
+## Plano Diretor v3, decisões, design, segurança/LGPD, testes
+- [ ] **D1** PWA instalável + service worker seguro — *PARCIAL* · marco M15.6 · falta: SW sem cache de dado clínico, ícones maskable
+- [x] **D2** Care e Clinical separados — `apps/care-web`, `apps/clinical-web`; e2e 01/04/06
+- [ ] **D3** Identidade M14.4 (tokens, DM Sans, sub-marcas) — *PARCIAL* · marco — · falta: vetores finais/manual de marca; modo claro/escuro testado · bloqueio: Sim (designer/aprovação)
+- [x] **D4** IA só apoia; decisão humana — `services/ai-orchestrator/src/evidence-gate.mjs`; nenhum LLM ativo
+- [ ] **D5** Somente dados sintéticos; reset com trilha — *PARCIAL* · marco M15.4 · falta: registro/auditoria do reset
+- [ ] **D6** Simulador hospitalar conectado — *PARCIAL* · marco M15.4/M19 · falta: prontuário, prescrição, exames, agenda, estoque no simulador (ver C1)
+- [ ] **D7** Instituição-piloto, SLA de alertas, G01–G09 — *BLOQUEADO-DECISÃO* · marco piloto · falta: decisões institucionais · bloqueio: Sim
+- [ ] **D8** IdP institucional Entra/Google, MFA sem SMS — *PARCIAL* · marco piloto · falta: IdP real da instituição · bloqueio: Sim (instituição)
+- [ ] **D9** AWS sa-east-1 aplicada — *PARCIAL* · marco infra · falta: contas AWS + apply + DR · bloqueio: Sim (contas/contrato)
+- [ ] **D10** Repo volta a privado antes de dado real — *PARCIAL* · marco antes da fase B · falta: tornar privado antes de qualquer dado real · bloqueio: Não (regra já decidida)
+- [x] **D11** Solicitação de alteração ao médico — PR #11: `MedicalRequests.tsx`, `medical-requests.controller.ts`, migração 0014, `tests/m155-*`
+- [ ] **D12** Rascunho de prescrição assistido por IA — *BLOQUEADO-DECISÃO* · marco fase posterior · falta: enquadramento Anvisa, validação clínica, prontuário oficial · bloqueio: Sim
+- [ ] **D13** Care simples: letra grande, contraste, um passo por tela — *PARCIAL* · marco M15.6 · falta: alto contraste, zoom 200% verificado
+- [ ] **D14** Leitor de tela real, zoom 200% — *FALTA* · marco M15.6 · falta: teste manual NVDA/VoiceOver, zoom 200%
+- [ ] **D15** Estados loading/vazio/erro padronizados — *PARCIAL* · marco DoD · falta: padronizar + testar
+- [ ] **D16** Gestor clínico (filas, indicadores, auditoria) — *PARCIAL* · marco M15.7 · falta: telas de gestão; regra P-CLIN-1 (sem abrir paciente)
+- [ ] **D17** Quebra de vidro auditada — *FALTA* · marco M15.7 · falta: fluxo de acesso emergencial com motivo + auditoria + revisão posterior · bloqueio: Sim (política)
+- [ ] **D18** Unidade/equipe/finalidade — *PARCIAL* · marco M15.7 · falta: CareTeam/Facility, finalidade
+- [ ] **D19** Protocolos versionados + papel aprovador — *PARCIAL* · marco M15.7 · falta: tela somente leitura; papel designado para aprovar · bloqueio: Sim (quem aprova)
+- [ ] **D20** Indicadores (tempo até revisão, intervenções, resolutividade) — *FALTA* · marco M15.7 · falta: consultas + painel sintético
+- [ ] **D21** Admin: login, profissionais, equipes, conectores, trilhas — *FALTA* · marco M15.7 · falta: tudo
+- [ ] **D22** Diagnóstico/estadiamento/biomarcadores — *FALTA* · marco M15.4+ · falta: modelo + UI
+- [ ] **D23** Inteligência clínica (RAG/LLM) — *BLOQUEADO-DECISÃO* · marco fase posterior · falta: biblioteca aprovada · bloqueio: Sim
+- [ ] **D24** Mensagens/canal institucional — *BLOQUEADO-DECISÃO* · marco piloto · falta: canal real · bloqueio: Sim
+- [x] **D25** Estados de alerta completos — `infra/migrations/0011_clinical_worklist.sql:15-29`
+- [ ] **D26** Facility, CareTeam, Notification, IntegrationJob/Provenance — *PARCIAL* · marco M15.7 · falta: entidades restantes
+- [ ] **D27** Backups restauráveis testados / DR — *FALTA* · marco infra · falta: teste de restauração
+- [ ] **D28** Observabilidade / plano de incidentes — *FALTA* · marco infra · falta: métricas, alertas, runbook
+- [ ] **D29** OpenAPI / Dockerfiles / deploy — *PARCIAL* · marco M15.1 · falta: Dockerfiles + deploy hml oficial
+- [ ] **D30** RIPD, DPO, base legal, retenção, textos legais — *BLOQUEADO-DECISÃO* · marco piloto · falta: jurídico/DPO · bloqueio: Sim
+- [ ] **D31** Exportar/apagar dados do titular — *FALTA* · marco M15.6 · falta: rotas + UI + auditoria · bloqueio: Parcial (retenção)
+- [ ] **D32** Rede lenta/offline — *FALTA* · marco M15.6 · falta: teste Playwright throttling + mensagens
+- [ ] **D33** Cenários Paciente A FOLFOX / B AC-T E2E dedicados — *PARCIAL* · marco M15.4 · falta: E2E dedicado
+- [x] **D34** Alocação Sincronizar/manual + PDF sintético — M15.4b/4c: `AllocationPanel.tsx`, `PdfImport.tsx`, `pdf-layouts.ts`
+- [ ] **D35** Termo `care-termos-2026-10` revisado — *PARCIAL* · marco M18 · falta: validação Henrikael + jurídico; decidir nova versão · bloqueio: Sim
+- [ ] **D36** Validação profissional dos textos de segurança — *PARCIAL* · marco M18 · falta: checar cada item · bloqueio: Sim
+- [ ] **D37** Roteiro de teste portado para o produto — *PARCIAL* · marco M15.6 · falta: guia COMO-TESTAR do monorepo (hml/celular)
+- [ ] **D38** Login via URL pública — *PARCIAL* · marco M17/M18 · falta: concluir/validar
+
+## Compromissos de conversa e PRs
+- [ ] **C1** Conector hospitalar fictício (prontuário, prescrição, exames, agenda, estoque) — *PARCIAL* · marco M19 (proposto) · falta: portar recursos prontuário/prescrição/exames/agenda/estoque ao gateway + Provenance
+- [ ] **C2** 'O que mudou desde a última revisão?' por paciente — *FALTA* · marco M19 · falta: diff desde a última `clinical_reviews` na Visão geral
+- [ ] **C3** Protocolo lado a lado com evolução de sintomas — *FALTA* · marco M19 · falta: visão comparativa protocolo × relatos · bloqueio: Parcial (protocolos aprovados)
+- [x] **C4** Estados de pendência — `Worklist.tsx:18`, tarefas `0011` (open/received/done/cancelled)
+- [ ] **C5** 'Programação de amanhã' + checklist de conferência + 'Rótulo bloqueado' — *FALTA* · marco M19 · falta: tela + checklist + bloqueio de rótulo até conferência dupla · bloqueio: Sim (critérios de conferência)
+- [ ] **C6** Agenda do paciente 'Posso comparecer / Preciso remarcar' — *FALTA* · marco M15.2+ · falta: resposta do paciente + aviso à equipe sem promessa · bloqueio: Parcial (canal real)
+- [x] **C7** Painel do farmacêutico separado com abas — PR #14 `PatientView.tsx` (Visão geral/Medicamentos/Exame + abas existentes)
+- [x] **C8** Alternância paciente/cuidador — PR #14 `RoleSelector.tsx`
+- [ ] **C9** Desenho de conector por fornecedor — *PARCIAL* · marco M19 · falta: adapters por fornecedor (Tasy/MV/outro) no gateway · bloqueio: Sim (D-007)
+- [ ] **C10** Rótulo 'Resumo com IA · rascunho' no Clinical — *PARCIAL* · marco M18 · falta: merge do PR #15; aplicar ao resumo pré-ciclo se/quando houver IA
+- [x] **C11** Solicitação ao médico — ver D11
+- [ ] **C12** PWA / a11y / rede lenta — *PARCIAL* · marco M15.6 · falta: SW, zoom 200%, leitor de tela, offline
+- [ ] **C13** Admin — *FALTA* · marco M15.7 · falta: tudo
+- [ ] **C14** Prescrição por foto fase A (provisória) — *PARCIAL* · marco M18 · falta: respostas Q1–Q4 do Henrikael; merge · bloqueio: Sim
+- [ ] **C15** Termo + validação PR #12 — *PARCIAL* · marco M18 · falta: validação · bloqueio: Sim
+- [ ] **C16** Gestor clínico / quebra de vidro / aprovação de protocolo / indicadores — *PARCIAL/FALTA* · marco M15.7 · falta: ver linhas · bloqueio: Parcial
+
+## Prescrição por foto / online (RF_PRESCRICAO_FOTO_E_ONLINE)
+- [ ] **N1** Criação automática da prescrição online só pela foto (OCR/transcrição → rascunho) — *FALTA* · marco Fase B (M20 proposto) · falta: OCR/transcrição, mapeamento para itens, confiança por campo, 100% rascunho validado item a item pelo farmacêutico, IA nunca decide; dados reais só com HNSG/contrato/AWS SP/repo privado; enquadramento SaMD RDC 657/2022 (provável classe que exige registro/notificação) · bloqueio: Sim (fase B, Anvisa)
+- [ ] **N2** Prescrição existente abre como documento editável (estilo Word) com versões/auditoria — *FALTA* · marco M19 (proposto) · falta: página documento; versões imutáveis com autor/hora/diff; RBAC: conteúdo da prescrição só pelo **prescritor** (CFM/autoria médica); farmacêutico edita apenas validação/observações/intervenções → mudança de conduta via M15.5; RLS; assinatura (ICP-Brasil) se virar documento oficial · bloqueio: Sim (quem edita; regulatório)
+- [ ] **N3** Biblioteca de referência para sugestões — *FALTA* · marco M18/M19 (biblioteca mínima, etapa 2 da spec) · falta: PRIMÁRIA: bulas registradas na Anvisa (Bulário Eletrônico) + protocolos oncológicos adotados no Brasil (normas Anvisa/MS, DDT/PCDT de oncologia do MS); COMPLEMENTAR: NCCN, ESMO, protocolos institucionais. Pendências: fontes/licenciamento, carga, validação · bloqueio: Sim
