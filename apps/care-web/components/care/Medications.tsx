@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { care } from '../../lib/care-client';
 import { Skeleton, TEAM_DECIDES } from './CareShell';
 import { Icon, Tile } from './Icons';
+import { MEDICATION_RULE } from '../../lib/care-guidance';
 type M = { id: string; name: string; schedule: string; atHome: boolean; today: 'taken' | 'missed' | 'partial' | null };
 const LABEL = { taken: 'Tomei', partial: 'Tomei só parte', missed: 'Não tomei' } as const;
 // M21 — exemplo estático (sem backend) exibido só quando a equipe ainda não registrou medicamentos.
@@ -23,7 +24,7 @@ export function Medications() {
     </li>)}</ul> : <><p>Nenhum medicamento registrado pela sua equipe.</p>
       <section className="care-card" aria-labelledby="m-demo" data-static-demo><span className="cm-static">Exemplo estático · fictício</span><h2 id="m-demo"><Tile name="pill" />Lista do dia (exemplo)</h2>
         {DEMO.map(([n, t, ok], i) => <div className="cm-row" key={i}><span className={ok ? 'cm-chk on' : 'cm-chk'} aria-hidden="true">{ok && <Icon name="check" size={18} />}</span><div><b>{n}</b><div className="cm-sub">{t} · nome fictício</div></div><span className={ok ? 'cm-pill' : 'cm-pill g'}>{ok ? 'Tomado' : 'Depois'}</span></div>)}</section></>)}
-    <section className="cm-alert" aria-labelledby="m-dose"><h2 id="m-dose"><Tile name="warn" gold />Não mude a dose sozinho(a)</h2><p>Siga sempre a orientação da sua equipe. Se tiver dúvida ou esquecer uma dose, fale com a farmacêutica antes.</p>
+    <section className="cm-alert" aria-labelledby="m-dose"><h2 id="m-dose"><Tile name="warn" gold />Orientação</h2><p>{MEDICATION_RULE}</p>
       <a className="btn-secondary" href="/care/equipe"><Icon name="message" />Falar com a equipe</a></section>
     <p className="cm-note">{TEAM_DECIDES}</p>
   </section>;

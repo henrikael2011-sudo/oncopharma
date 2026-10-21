@@ -27,7 +27,7 @@ export function Caregivers() {
       {d.links.filter((l) => l.active).length === 0 ? <p>Ninguém por enquanto.</p> : d.links.filter((l) => l.active).map((l) => <article key={l.id} className="care-review" aria-label={`Cuidador ${l.name ?? ''}`}>
         <h3>{l.name ?? 'Cuidador'}</h3><p>Acesso até {dateBR(l.expiresAt)}.</p>
         <fieldset className="choices"><legend>O que {l.name ?? 'essa pessoa'} pode fazer</legend>{SCOPES.map(([k, t]) => <label key={k} className="choice"><input type="checkbox" checked={l.scopes.includes(k)} onChange={(e) => void toggle(l, k, e.target.checked)} /> {t}</label>)}</fieldset>
-        <button type="button" className="btn-danger" onClick={() => void act(() => care(`me/caregivers/${l.id}/revoke`, { method: 'POST', body: {} }), 'Acesso encerrado.')}>Encerrar acesso agora</button>
+        <button type="button" className="btn-secondary" onClick={() => void act(() => care(`me/caregivers/${l.id}/revoke`, { method: 'POST', body: {} }), 'Acesso encerrado.')}>Encerrar acesso agora</button>
       </article>)}
       {d.links.some((l) => !l.active) && <p className="care-note">Acessos encerrados: {d.links.filter((l) => !l.active).map((l) => `${l.name ?? 'Cuidador'} (${l.revokedAt ? 'encerrado' : 'prazo vencido'})`).join(', ')}.</p>}
     </section>}

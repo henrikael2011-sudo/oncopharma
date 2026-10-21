@@ -5,7 +5,7 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { care } from '../../lib/care-client';
 import { useMe } from './CareShell';
-import { Tile } from './Icons';
+import { TempChart } from './TempChart';
 import { isUrgentLocal, LOCAL_URGENT_TEXT, LOCAL_URGENT_TITLE, SEND_FAILED_TEXT } from '../../lib/care-urgency';
 const SYMPTOMS: [string, string][] = [['nausea', 'Enjoo ou vômito'], ['neuropathy', 'Formigamento'], ['fever', 'Febre'], ['diarrhea', 'Diarreia'], ['fatigue', 'Cansaço'], ['pain', 'Dor'], ['mouth', 'Feridas na boca'], ['other', 'Outro']];
 const INTENSITY: [string, string][] = [['leve', 'Leve — consigo fazer minhas atividades'], ['moderada', 'Moderada — atrapalha um pouco'], ['forte', 'Forte — não consigo fazer minhas atividades']];
@@ -34,7 +34,7 @@ export function SymptomFlow() {
   </section>; }
   return <section aria-labelledby="sym-title">
     <div><h1 id="sym-title">{who ? `Como ${who} está hoje` : 'Como estou hoje'}</h1><p className="care-lead">Registre como você está. A equipe acompanha.</p></div>
-    <section className="cm-alert" aria-labelledby="sym-fever"><h2 id="sym-fever"><Tile name="thermo" gold />Atenção à temperatura</h2><p>Se a temperatura for <span className="cm-fever">37,8 °C ou mais</span>: não tome remédio por conta própria e ligue para a equipe.</p></section>
+    <TempChart />
     {urgentNow && <div className="care-panel care-urgent" role="alert" data-local-urgent><h2>{LOCAL_URGENT_TITLE}</h2><p className="care-lead">{LOCAL_URGENT_TEXT}</p><p><a className="btn-primary" href="tel:192">Ligar 192</a></p></div>}
     <p className="care-note" aria-live="polite">Passo {step + 1} de {steps}</p>
     <form className="workflow-form" onSubmit={(e) => { e.preventDefault(); if (step < steps - 1) { if (canNext) setStep(step + 1); } else void send(); }}>

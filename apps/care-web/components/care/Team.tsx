@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { care } from '../../lib/care-client';
 import { Skeleton, TEAM_DECIDES } from './CareShell';
 import { Icon, Tile } from './Icons';
+import { EMERGENCY_TEXT, WARNING_SIGNS, WARNING_TITLE } from '../../lib/care-guidance';
 type H = { emergency: string; contacts: { label: string; phone: string | null; hours: string | null }[]; contactsConfigured: boolean };
 const tel = (p: string) => `tel:${p.replace(/[^0-9+]/g, '')}`;
 export function Team() {
@@ -23,10 +24,9 @@ export function Team() {
     <section className="care-card" aria-labelledby="t-farm" data-static-demo><span className="cm-static">Exemplo estático · fictício</span>
       <h2 id="t-farm"><Tile name="pill" />Farmacêutica</h2><p className="cm-sub">Farm. Ana Demo · dúvidas sobre remédios</p>
       <div className="care-actions"><button type="button" className="btn-secondary" disabled aria-disabled="true"><Icon name="message" />Enviar mensagem (em breve)</button></div></section>
-    <section className="care-card" aria-labelledby="t-when"><h2 id="t-when"><Tile name="warn" gold />Quando ligar para a equipe</h2>
-      <ul className="care-list"><li>Febre de <span className="cm-fever">37,8 °C ou mais</span></li><li>Vômito que não para</li><li>Dor forte ou sangramento</li><li>Qualquer dúvida importante</li></ul></section>
-    <section className="care-card" aria-labelledby="t-em"><h2 id="t-em"><Tile name="siren" />Emergência</h2><p>Falta de ar, desmaio ou confusão: ligue agora ou vá ao pronto-socorro.</p>
-      <a className="btn-danger" href="tel:192"><Icon name="phone" />Ligar 192 (SAMU)</a></section>
+    <section className="care-card" aria-labelledby="t-when"><h2 id="t-when"><Tile name="warn" gold />{WARNING_TITLE}</h2>
+      <ul className="care-list">{WARNING_SIGNS.map((w) => <li key={w}>{w.startsWith('Febre') ? <>Febre (<span className="cm-fever">37,8 °C ou mais</span>)</> : w}</li>)}</ul>
+      <p><strong>{EMERGENCY_TEXT}</strong></p><a className="btn-danger" href="tel:192"><Icon name="phone" />Ligar 192</a></section>
     <p className="cm-note">{TEAM_DECIDES}</p>
   </section>;
 }
