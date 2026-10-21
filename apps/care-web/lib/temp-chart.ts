@@ -3,7 +3,7 @@ export const W = 340, H = 170, L = 34, R = 18, T = 12, B = 26;
 export const CHART_FEVER_C = 37.8; // = FEVER_THRESHOLD_C (care-guidance.ts / care-rules.ts); verificado em teste
 export type ChartReading = { celsius: number; measuredAt: string };
 /** Escala fixa 35–40 °C (alargada se houver leitura fora dela); eixo x = últimos 7 dias até "agora". */
-export function chartGeometry(readings: ChartReading[], now = Date.now()) {
+export function chartGeometry<T extends ChartReading>(readings: T[], now = Date.now()) {
   const min = Math.min(35, ...readings.map((r) => Math.floor(r.celsius))), max = Math.max(40, ...readings.map((r) => Math.ceil(r.celsius)));
   const t0 = now - 7 * 86_400_000;
   const x = (iso: string) => L + Math.max(0, Math.min(1, (new Date(iso).getTime() - t0) / (now - t0))) * (W - L - R);
