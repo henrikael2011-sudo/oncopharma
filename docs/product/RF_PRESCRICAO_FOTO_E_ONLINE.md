@@ -81,7 +81,10 @@ Marco: fase A em **M18 (PR #15)**; itens 2 e 3 em fase B, bloqueada (`FASE_B_HAB
 - Marco: junto da UI da fase A (continuação do PR #15), com dados fictícios.
 
 ## 7. (Aprovado) Código de barras/QR na etiqueta e leitura do frasco/bolsa no preparo
-- Cada etiqueta de medicação (5i) traz código de barras/QR.
+- **Duas fontes de leitura, com o mesmo fluxo de conferência:**
+  1. **QR gerado pelo sistema** na etiqueta do frasco (5i).
+  2. **Código de barras ORIGINAL do fabricante** na embalagem/frasco (EAN-13 / GS1 DataMatrix com GTIN, lote, validade).
+  - Nas duas: GTIN → registro Anvisa na base → comparação com a prescrição e com a etapa do protocolo.
 - No preparo, o farmacêutico lê o frasco/bolsa físico: **GS1 DataMatrix/EAN** (GTIN, lote, validade; **SNCM/IUM** quando aplicável), pela câmera (**BarcodeDetector API**, com fallback **zxing**) ou por leitor USB/Bluetooth.
 - O sistema mapeia **GTIN → registro Anvisa** do produto cuja bula está na base e compara com a prescrição e com a etapa do protocolo.
 - Se bater, a etapa é liberada para continuar (a liberação final segue humana). Produto diferente, validade vencida ou lote errado ⇒ **alerta imediato**, registrado na auditoria.
@@ -123,6 +126,7 @@ Checklist mestre: [`CHECKLIST_PLANEJAMENTO_COMPLETO.md`](CHECKLIST_PLANEJAMENTO_
 - [ ] **7. (Aprovado) Código de barras/QR + leitura do frasco/bolsa:** *FALTA*, M19 (fictício na demonstração). Ref.: 5i, C5 (Rótulo bloqueado), 5e (bulas na base).
   - [ ] Geração de QR/código na etiqueta
   - [ ] Componente de leitura (BarcodeDetector + zxing; leitor USB/BT)
+  - [ ] Leitura do código ORIGINAL do fabricante (EAN-13/GS1 DataMatrix: GTIN, lote, validade) → registro Anvisa → mesmo fluxo de conferência
   - [ ] Tabela GTIN ↔ registro Anvisa (produto com bula na base)
   - [ ] Lógica de conferência da etapa (prescrição + etapa do protocolo; GTIN/lote/validade/SNCM-IUM)
   - [ ] Alerta imediato + auditoria de cada leitura
@@ -152,4 +156,4 @@ Código conferido no branch `m18-prescricao-foto-provisoria`: `apps/clinical-web
 | 6 | Caneta/dedo | §6 | Inexistente: sem canvas/Pointer Events, sem tabela/RLS | M18 (continuação do PR #15) | Não |
 | — | Fase B bloqueada | §2, §4 | Cumprido: `FASE_B_HABILITADA=false`, `readyForClinicalUse=false` | — | Sim |
 | 5e | Pendências: fontes, carregar protocolos, validar | 5e, checklist | Nenhuma carga/validação; nenhum dado em `clinical_protocol_versions` para esses esquemas | M18/M19 | Sim (Henrikael) |
-| 7 | (Aprovado) Código de barras/QR na etiqueta + leitura GS1 do frasco/bolsa | §7 | Inexistente: geração de QR, componente de leitura, tabela GTIN↔registro, lógica de conferência da etapa, auditoria, testes | M19 | Não (fictício); dados reais = fase B |
+| 7 | (Aprovado) Duas fontes de leitura (QR do sistema na etiqueta + código original do fabricante EAN-13/GS1), mesmo fluxo de conferência | §7 | Inexistente: geração de QR, componente de leitura, tabela GTIN↔registro, lógica de conferência da etapa, auditoria, testes | M19 | Não (fictício); dados reais = fase B |
