@@ -46,8 +46,8 @@ export function PrescriptionCheck() {
       <h2 id="ia-res">Resumo com IA · rascunho</h2>
       <p className="clin-src" data-provider={res.provider}>Respondido por: <strong>{PROV[res.provider] ?? res.provider}</strong>{res.model ? ` (${res.model})` : ''} · SC {res.bsaM2} m²{res.fallbackFrom && ` · ${PROV[res.fallbackFrom] ?? res.fallbackFrom} indisponível (${res.fallbackReason}); usado mock`}</p>
       {res.items.map((it) => <details key={it.drug} open className="imp-row"><summary><strong>{it.drug}</strong></summary>
-        <dl className="imp-detail">{Object.entries(it.checks).map(([k, c]) => <div key={k}><dt>{LABEL[k] ?? k} <span className={ST[c.status][0]} style={{ padding: '2px 8px', marginLeft: 6 }}>{ST[c.status][1]}</span></dt>
-          <dd>Regra: {c.rule}<br />Sugestão: {c.suggestion}</dd></div>)}</dl></details>)}
+        <ul style={{ listStyle: 'none', padding: 0, display: 'grid', gap: 12 }}>{Object.entries(it.checks).map(([k, c]) => <li key={k}><strong>{LABEL[k] ?? k} <span className={ST[c.status][0]} style={{ padding: '2px 8px', marginLeft: 6 }}>{ST[c.status][1]}</span></strong>
+          <p style={{ margin: '4px 0 0' }}>Regra: {c.rule}<br />Sugestão: {c.suggestion}</p></li>)}</ul></details>)}
       <p className="clin-warn" role="note">{res.disclaimer}</p>
     </section>}</div>
   </section>;
