@@ -89,6 +89,15 @@ Marco: fase A em **M18 (PR #15)**; itens 2 e 3 em fase B, bloqueada (`FASE_B_HAB
 - **Por quê:** é uma camada extra de proteção. Numa rodada de teste (PR 17) o Flash-Lite aprovou uma dose errada de fluoruracila (4.400 mg).
 - A IA não decide. A liberação final continua sendo do farmacêutico, e o registro guarda os dois modelos e as duas respostas.
 
+### 5k. (Aprovado em 21/10/2026) Dados de diluição/estabilidade na tela de conferência
+
+- **Opção B (PADRÃO):** botão **"Ver diluição"** dentro de cada card de item da prescrição, abrindo ali mesmo os dados do fármaco: reconstituição, diluente, concentração, estabilidade e overfill. Sempre mostra o **fabricante da bula** e o aviso fixo **"verificar sempre o fabricante"**.
+- **Opção A (ACESSÓRIA/secundária):** aba separada com a tabela completa, busca e filtros, para pesquisar sem abrir card por card.
+- As duas seguem a identidade visual e a paleta aprovadas no M14.4.
+- A IA não decide. Dados fictícios na demonstração.
+- Mockups: `opcao-B-ver-diluicao.png` (padrão) e `opcao-A-aba-diluicao.png` (acessória).
+- Decisão do Henrikael em 21/10/2026.
+
 ## 6. (Proposto) Anotação com caneta/dedo na foto e na tela de conferência
 - Camada de anotação sobre a foto da prescrição e sobre a tela de conferência (5c).
 - Técnica: sobreposição HTML canvas/SVG com **Pointer Events API** (`pointerType` `pen`, `pressure`); rejeição da palma ignorando `touch` enquanto a caneta estiver ativa. Alvos: **Safari iPadOS + Apple Pencil** e **Chrome Android + stylus**.
@@ -134,6 +143,7 @@ Checklist mestre: [`CHECKLIST_PLANEJAMENTO_COMPLETO.md`](CHECKLIST_PLANEJAMENTO_
   - [ ] 5i. Impressão térmica (rolo autoadesivo) como alvo principal; A4 com marcas de corte como alternativa
   - [ ] 5i. Tamanhos de etiqueta definidos: frasco 50×25 mm, bolsa 100×50 mm (propostos; validar com Henrikael/fornecedor)
   - [ ] 5j. Dupla checagem: Gemini Flash-Lite + 2º modelo independente (Gemini ou Groq); verde só se concordarem; divergência = alerta + revisão manual do farmacêutico
+  - [ ] 5k. Diluição/estabilidade: botão "Ver diluição" no card (padrão, opção B) + aba com tabela, busca e filtros (acessória, opção A); fabricante da bula + aviso "verificar sempre o fabricante"; identidade M14.4
   - [ ] 5e. Fontes: Anvisa (bulas) + protocolos adotados no Brasil; complementar NCCN/ESMO/institucional; `REFERENCIA_BULAS_ANVISA_QUIMIOTERAPICOS.md`
   - [ ] 5e. Pendências: fontes e licenciamento (NCCN/ESMO exigem licença), carga versionada, validação farmacêutica do Henrikael
   - [ ] Liberação final sempre do farmacêutico/médico; fase B bloqueada até protocolos carregados e validados
