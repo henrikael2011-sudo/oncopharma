@@ -57,7 +57,7 @@ export function Worklist() {
     <div className="clin-syncbar">
       <p id="sync-info">{data?.lastSync ? <>Última sincronização: {when(data.lastSync.at)} · Origem: {data.lastSync.source}</> : 'Alocação ainda não sincronizada com o hospital.'}</p>
       <button type="button" className="btn-secondary" onClick={() => void sync()} disabled={syncing} aria-describedby="sync-info">{syncing ? 'Sincronizando…' : 'Sincronizar'}</button>
-      {me.role !== 'physician' && <Link className="btn-secondary" href="/clinical/importar">Importar lista (PDF)</Link>}
+      {me.role !== 'physician' && <Link className="btn-secondary" href="/clinical/importar">Importar lista (PDF)</Link>}{me.role !== 'physician' && <Link className="btn-secondary" href="/clinical/conferencia-ia">Conferência com IA (teste)</Link>}
       <label className="clin-toggle"><input type="checkbox" checked={byLocation} onChange={(e) => setByLocation(e.target.checked)} /> Agrupar por unidade e andar</label>
     </div>
     <div aria-live="polite">{syncMsg && <p role="status" className="clin-ok">{syncMsg}</p>}</div>
