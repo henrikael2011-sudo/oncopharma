@@ -8,13 +8,12 @@ import type { PoolClient } from 'pg';
 import { AuthGuard, AuthenticatedRequest } from './auth.guard';
 import { DatabaseService } from './database.service';
 import { syntheticApiEnabled } from './synthetic-mode';
-import { assessSymptom, SYMPTOMS, CONSENT_TERMS_VERSION, parseSymptomAnswers } from './care-rules';
+import { assessSymptom, SYMPTOMS, CONSENT_TERMS_VERSION, parseSymptomAnswers, reportStatusLabel } from './care-rules';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 function syntheticOnly() { if (!syntheticApiEnabled()) throw new ServiceUnavailableException('Care disponível somente em ambiente não produtivo com dados sintéticos'); }
 function tenant(id?: string) { if (!id || !UUID.test(id)) throw new BadRequestException('Organização inválida'); return id; }
 const CYCLE_LABEL: Record<string, string> = { planned: 'Agendado', under_review: 'Em preparação pela equipe', completed: 'Realizado', cancelled: 'Cancelado' };
-const REPORT_LABEL: Record<string, string> = { pending: 'Recebido pela equipe', urgent_review: 'Recebido — prioridade', reviewed: 'Avaliado pela equipe' };
 
 export type CareSubject = { patientId: string; actor: 'patient' | 'caregiver'; scopes: CaregiverScope[]; linkId?: string };
 
@@ -117,10 +116,10 @@ export class CareController {
     return this.run(req, org, async (c, s) => {
       CareController.need(s, 'ver_jornada');
       const cycles = (await c.query(`SELECT cycle_number,planned_on::text AS planned_on,status FROM treatment_cycles WHERE organization_id=$1 AND patient_id=$2 AND status<>'cancelled' ORDER BY cycle_number`, [org, s.patientId])).rows;
-      const reports = (await c.query(`SELECT id,symptom_code,triage_status,reported_at FROM patient_symptom_reports WHERE organization_id=$1 AND patient_id=$2 ORDER BY reported_at DESC LIMIT 20`, [org, s.patientId])).rows;
+      const reports = (await c.query(`SELECT r.id,r.symptom_code,r.triage_status,r.reported_at,(SELECT a.status FROM clinical_alerts a WHERE a.organization_id=r.organization_id AND a.source_report_id=r.id ORDER BY a.created_at DESC LIMIT 1) AS alert_status FROM patient_symptom_reports r WHERE r.organization_id=$1 AND r.patient_id=$2 ORDER BY r.reported_at DESC LIMIT 20`, [org, s.patientId])).rows;
       await this.audit(c, org, req, 'care.journey.read', s);
       return { cycles: cycles.map((x) => ({ number: x.cycle_number, date: x.planned_on, status: CYCLE_LABEL[x.status] })),
-        reports: reports.map((r) => ({ id: r.id, symptom: SYMPTOMS[r.symptom_code as keyof typeof SYMPTOMS] ?? 'Outro', status: REPORT_LABEL[r.triage_status] ?? 'Recebido pela equipe', at: r.reported_at })) };
+        reports: reports.map((r) => ({ id: r.id, symptom: SYMPTOMS[r.symptom_code as keyof typeof SYMPTOMS] ?? 'Outro', status: reportStatusLabel(r.alert_status, r.triage_status === 'urgent_review'), at: r.reported_at })) };
     });
   }
 
