@@ -1,7 +1,7 @@
 # Checklist do planejamento completo (documento vivo)
 
 > Gerado em 21/10/2026 a partir de `main` @ `9d7da01`. `[x]` = coberto (com evidência), `[ ]` = pendente (marco + o que falta). Coberto **não** significa liberação clínica.
-> **Totais (inclui subitens):** 51 cobertos · 151 pendentes (dos quais 67 parciais).
+> **Totais (inclui subitens):** 51 cobertos · 158 pendentes (dos quais 67 parciais).
 > Detalhe: `RF_PRESCRICAO_FOTO_E_ONLINE.md`, `LACUNAS_PLANO_DIRETOR_M15.md`, `DECISOES_M15.md`.
 
 ## 114 itens do protótipo (comparacao-plano)
@@ -215,3 +215,10 @@
   - [ ] RLS por organização + trilha de auditoria
   - [ ] Anotação nunca altera a prescrição; exportação de imagem achatada
   - [ ] Testes em iPad real (Safari + Apple Pencil) e Android real (Chrome + stylus)
+- [ ] **7. (Aprovado) Código de barras/QR + leitura do frasco/bolsa:** *FALTA*, M19 (fictício na demonstração). Ref.: 5i, C5 (Rótulo bloqueado), 5e (bulas na base).
+  - [ ] Geração de QR/código na etiqueta
+  - [ ] Componente de leitura (BarcodeDetector + zxing; leitor USB/BT)
+  - [ ] Tabela GTIN ↔ registro Anvisa (produto com bula na base)
+  - [ ] Lógica de conferência da etapa (prescrição + etapa do protocolo; GTIN/lote/validade/SNCM-IUM)
+  - [ ] Alerta imediato + auditoria de cada leitura
+  - [ ] Testes (unit, E2E com códigos fictícios, aparelho real)

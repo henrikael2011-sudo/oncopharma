@@ -80,6 +80,13 @@ Marco: fase A em **M18 (PR #15)**; itens 2 e 3 em fase B, bloqueada (`FASE_B_HAB
 - Hoje: a página é responsiva (alvos ≥ 44 px), mas **não tem desenho**.
 - Marco: junto da UI da fase A (continuação do PR #15), com dados fictícios.
 
+## 7. (Aprovado) Código de barras/QR na etiqueta e leitura do frasco/bolsa no preparo
+- Cada etiqueta de medicação (5i) traz código de barras/QR.
+- No preparo, o farmacêutico lê o frasco/bolsa físico: **GS1 DataMatrix/EAN** (GTIN, lote, validade; **SNCM/IUM** quando aplicável), pela câmera (**BarcodeDetector API**, com fallback **zxing**) ou por leitor USB/Bluetooth.
+- O sistema mapeia **GTIN → registro Anvisa** do produto cuja bula está na base e compara com a prescrição e com a etapa do protocolo.
+- Se bater, a etapa é liberada para continuar (a liberação final segue humana). Produto diferente, validade vencida ou lote errado ⇒ **alerta imediato**, registrado na auditoria.
+- Na demonstração, só dados fictícios.
+
 ## Checklist (vivo)
 Checklist mestre: [`CHECKLIST_PLANEJAMENTO_COMPLETO.md`](CHECKLIST_PLANEJAMENTO_COMPLETO.md).
 - [ ] **1. Foto → versão online editável (fase A):** *PARCIAL*. PR #15 (rascunho), `/clinical/prescricao-foto`, dados fictícios. Falta: respostas Q1–Q4 (`docs/decisoes-provisorias-prescricao-foto.md`) e merge. Ref.: `spec-validacao-prescricao` etapa 1, Plano Diretor v3 §4.2 #6.
@@ -113,6 +120,13 @@ Checklist mestre: [`CHECKLIST_PLANEJAMENTO_COMPLETO.md`](CHECKLIST_PLANEJAMENTO_
   - [ ] RLS por organização + trilha de auditoria
   - [ ] Anotação nunca altera a prescrição; exportação de imagem achatada
   - [ ] Testes em iPad real (Safari + Apple Pencil) e Android real (Chrome + stylus)
+- [ ] **7. (Aprovado) Código de barras/QR + leitura do frasco/bolsa:** *FALTA*, M19 (fictício na demonstração). Ref.: 5i, C5 (Rótulo bloqueado), 5e (bulas na base).
+  - [ ] Geração de QR/código na etiqueta
+  - [ ] Componente de leitura (BarcodeDetector + zxing; leitor USB/BT)
+  - [ ] Tabela GTIN ↔ registro Anvisa (produto com bula na base)
+  - [ ] Lógica de conferência da etapa (prescrição + etapa do protocolo; GTIN/lote/validade/SNCM-IUM)
+  - [ ] Alerta imediato + auditoria de cada leitura
+  - [ ] Testes (unit, E2E com códigos fictícios, aparelho real)
 
 ## Consolidação validada em 21/10/2026
 Código conferido no branch `m18-prescricao-foto-provisoria`: `apps/clinical-web/app/clinical/prescricao-foto/page.tsx`, `components/clinical/PrescricaoFoto.tsx`, `lib/prescricao-ficticia.ts`; **sem API nem migração** de prescrição por foto (só `medical-requests` do M15.5). Não liberado para uso clínico.
@@ -138,3 +152,4 @@ Código conferido no branch `m18-prescricao-foto-provisoria`: `apps/clinical-web
 | 6 | Caneta/dedo | §6 | Inexistente: sem canvas/Pointer Events, sem tabela/RLS | M18 (continuação do PR #15) | Não |
 | — | Fase B bloqueada | §2, §4 | Cumprido: `FASE_B_HABILITADA=false`, `readyForClinicalUse=false` | — | Sim |
 | 5e | Pendências: fontes, carregar protocolos, validar | 5e, checklist | Nenhuma carga/validação; nenhum dado em `clinical_protocol_versions` para esses esquemas | M18/M19 | Sim (Henrikael) |
+| 7 | (Aprovado) Código de barras/QR na etiqueta + leitura GS1 do frasco/bolsa | §7 | Inexistente: geração de QR, componente de leitura, tabela GTIN↔registro, lógica de conferência da etapa, auditoria, testes | M19 | Não (fictício); dados reais = fase B |
