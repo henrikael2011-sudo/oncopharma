@@ -5,6 +5,7 @@ import { createContext, useCallback, useContext, useEffect, useState } from 'rea
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Brand } from '../Brand';
+import { TestEnvBanner } from '../TestEnvBanner';
 import { care, CareError, type Me } from '../../lib/care-client';
 import { Consent } from './Consent';
 import { AcceptInvite } from './AcceptInvite';
@@ -23,7 +24,7 @@ const NAV: [string, string, (m: Me) => boolean][] = [
   ['/care/preferencias', 'Preferências', (m) => m.actor === 'patient'],
 ];
 
-export function CareShell({ children }: { children: React.ReactNode }) {
+export function CareShell({ children, testEnv = false }: { children: React.ReactNode; testEnv?: boolean }) {
   const [state, setState] = useState<State>({ kind: 'loading' });
   const path = usePathname();
   const load = useCallback(async () => {
@@ -41,6 +42,7 @@ export function CareShell({ children }: { children: React.ReactNode }) {
   else if (!state.me.consent.accepted) content = <Consent version={state.me.consent.required} onDone={load} />;
   else content = <Ctx.Provider value={{ me: state.me, reload: load }}>{children}</Ctx.Provider>;
   return <div className="care-page" data-font={me?.preferences.fontScale ?? 'normal'} data-contrast={me?.preferences.highContrast ? 'high' : 'normal'}>
+    {testEnv && <TestEnvBanner />}
     <header className="care-header"><Brand variant="care" />{loggedIn && <form action="/api/auth/logout" method="post"><button type="submit" className="btn-on-dark">Sair</button></form>}</header>
     {me?.consent.accepted && <nav className="care-nav" aria-label="Menu principal"><ul>{NAV.filter(([, , ok]) => ok(me)).map(([href, label]) => <li key={href}><Link href={href} aria-current={path === href ? 'page' : undefined}>{label}</Link></li>)}</ul></nav>}
     <main id="conteudo" className="care-main">{content}</main>

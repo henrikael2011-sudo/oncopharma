@@ -3,13 +3,14 @@
 import Link from 'next/link';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { Brand } from '../Brand';
+import { TestEnvBanner } from '../TestEnvBanner';
 import { work, WorkError, type StaffMe } from '../../lib/work-client';
 
 type State = { kind: 'loading' } | { kind: 'anon' } | { kind: 'nomfa' } | { kind: 'norole' } | { kind: 'error'; message: string } | { kind: 'ready'; me: StaffMe };
 const Ctx = createContext<StaffMe | null>(null);
 export const useStaff = () => { const v = useContext(Ctx); if (!v) throw Error('ClinicalShell ausente'); return v; };
 
-export function ClinicalShell({ children }: { children: React.ReactNode }) {
+export function ClinicalShell({ children, testEnv = false }: { children: React.ReactNode; testEnv?: boolean }) {
   const [state, setState] = useState<State>({ kind: 'loading' });
   const load = useCallback(async () => {
     try { setState({ kind: 'ready', me: await work<StaffMe>('me') }); }
@@ -32,6 +33,7 @@ export function ClinicalShell({ children }: { children: React.ReactNode }) {
   else if (state.kind === 'error') content = <section className="clin-card" role="alert"><h1>Não foi possível abrir agora</h1><p>{state.message}</p><button className="btn-primary" onClick={() => void load()}>Tentar de novo</button></section>;
   else content = <Ctx.Provider value={state.me}>{children}</Ctx.Provider>;
   return <div className="clinical-page">
+    {testEnv && <TestEnvBanner />}
     <header className="clinical-header"><Brand variant="clinical" />
       {loggedIn && <div className="clin-user">{me && <span>{me.name ? `${me.name} · ` : ''}{me.roleLabel} · MFA confirmado</span>}<form action="/api/auth/logout" method="post"><button type="submit" className="btn-on-dark">Sair</button></form></div>}
     </header>

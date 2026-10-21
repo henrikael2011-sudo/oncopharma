@@ -39,6 +39,8 @@ test('BFF do Care: somente rotas /me permitidas, CSRF por origem e JSON', async 
 function files(dir, out = []) { for (const e of readdirSync(join(root, dir))) { if (['node_modules', '.next', 'api'].includes(e)) continue; const p = join(dir, e); if (statSync(join(root, p)).isDirectory()) files(p, out); else if (e.endsWith('.tsx')) out.push(p); } return out; }
 test('interface do Care: sem campo de UUID, sem rótulos de teste/fictício, sem dose', () => {
   for (const f of files('apps/care-web')) {
+    // M16: a faixa de ambiente autorizado só renderiza com ONCO_ENVIRONMENT=test|hml (coberta por tests/m16-test-env-banner.test.mjs).
+    if (f.endsWith('components/TestEnvBanner.tsx')) continue;
     const s = read(f).replace(/\/\/.*$/gm, '').replace(/\{\/\*[\s\S]*?\*\/\}/g, '');
     assert.doesNotMatch(s, /(?<!random)UUID|fictíci|sintétic|de teste|\(teste\)|demonstraç/i, f);
     assert.doesNotMatch(s, /dose_value|dose_unit|\bmg\b/, f);

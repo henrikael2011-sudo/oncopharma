@@ -145,7 +145,7 @@ test.describe.serial('M14.5 E2E sintético', () => {
     await page.getByLabel('Li e concordo').check(); await page.getByRole('button', { name: 'Continuar' }).click();
     await expect(page.getByRole('heading', { level: 1 })).toContainText('Olá, Ana. Como você está hoje?');
     await expect(page.getByText('Um passo de cada vez. Juntos no cuidado.')).toBeVisible();
-    await expect(page.locator('input#care-patient')).toHaveCount(0); await expect(page.getByText(/UUID|fictíci|de teste/i)).toHaveCount(0);
+    await expect(page.locator('input#care-patient')).toHaveCount(0); await expect(page.locator('main').getByText(/UUID|fictíci|de teste/i)).toHaveCount(0); // a faixa do ambiente de teste (M16) fica fora do conteúdo
     await expect(page.getByRole('heading', { name: 'Próxima sessão' })).toBeVisible(); await expect(page.getByText('Ciclo 3 ·')).toBeVisible();
     await expect(page.getByText('Evite bebidas e alimentos muito gelados')).toBeVisible(); // orientação approved
     await expect(page.getByText('Rascunho não aprovado')).toHaveCount(0); // draft nunca aparece
