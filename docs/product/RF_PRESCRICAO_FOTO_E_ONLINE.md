@@ -98,6 +98,16 @@ Marco: fase A em **M18 (PR #15)**; itens 2 e 3 em fase B, bloqueada (`FASE_B_HAB
 - Mockups: `opcao-B-ver-diluicao.png` (padrão) e `opcao-A-aba-diluicao.png` (acessória).
 - Decisão do Henrikael em 21/10/2026.
 
+### 5l. (Novo item, 21/10/2026 — somente documentação, sem código ainda) Busca por paciente e impressão direta na conferência por IA
+
+- Tela: `/clinical/conferencia-ia` (conferência da prescrição por IA).
+- **Área de busca por paciente:** campo de busca na própria tela para localizar a prescrição/conferência pelo paciente. Na demonstração, somente **dados fictícios**.
+- **Opção de impressão direta:** botão de imprimir na própria tela, sem navegar para outra página.
+- Mesmo estilo eficiente aprovado para a diluição (5k): inline, acesso rápido, identidade visual e paleta do M14.4.
+- A IA não decide. A liberação final continua sendo do farmacêutico.
+- **Status:** item novo, apenas documentado; **não implementado (sem código ainda)**.
+- Decisão do Henrikael em 21/10/2026.
+
 ## 6. (Proposto) Anotação com caneta/dedo na foto e na tela de conferência
 - Camada de anotação sobre a foto da prescrição e sobre a tela de conferência (5c).
 - Técnica: sobreposição HTML canvas/SVG com **Pointer Events API** (`pointerType` `pen`, `pressure`); rejeição da palma ignorando `touch` enquanto a caneta estiver ativa. Alvos: **Safari iPadOS + Apple Pencil** e **Chrome Android + stylus**.
@@ -144,6 +154,7 @@ Checklist mestre: [`CHECKLIST_PLANEJAMENTO_COMPLETO.md`](CHECKLIST_PLANEJAMENTO_
   - [ ] 5i. Tamanhos de etiqueta definidos: frasco 50×25 mm, bolsa 100×50 mm (propostos; validar com Henrikael/fornecedor)
   - [ ] 5j. Dupla checagem: Gemini Flash-Lite + 2º modelo independente (Gemini ou Groq); verde só se concordarem; divergência = alerta + revisão manual do farmacêutico
   - [ ] 5k. Diluição/estabilidade: botão "Ver diluição" no card (padrão, opção B) + aba com tabela, busca e filtros (acessória, opção A); fabricante da bula + aviso "verificar sempre o fabricante"; identidade M14.4
+  - [ ] 5l. Conferência por IA (`/clinical/conferencia-ia`): área de busca por paciente (dados fictícios na demo) + impressão direta; inline, acesso rápido, identidade M14.4; IA não decide — novo item, só documentação (sem código ainda)
   - [ ] 5e. Fontes: Anvisa (bulas) + protocolos adotados no Brasil; complementar NCCN/ESMO/institucional; `REFERENCIA_BULAS_ANVISA_QUIMIOTERAPICOS.md`
   - [ ] 5e. Pendências: fontes e licenciamento (NCCN/ESMO exigem licença), carga versionada, validação farmacêutica do Henrikael
   - [ ] Liberação final sempre do farmacêutico/médico; fase B bloqueada até protocolos carregados e validados
