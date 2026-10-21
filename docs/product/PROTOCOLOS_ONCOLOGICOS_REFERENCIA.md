@@ -1,5 +1,8 @@
 # Protocolos oncológicos — referência (ONCOPHARMA)
 
+> ⚠️ **AVISO FIXO: verifique sempre o fabricante antes de usar os dados de estabilidade e diluição.** A validação deve ser feita com a bula do **fabricante específico usado na clínica**. Se for outro fabricante, os valores de estabilidade, diluição compatível e overfill podem mudar. Isso vale para **todas** as bulas deste documento, inclusive a fluoruracila (divergência 46 h × 8 h).
+
+
 > ⚠️ **REFERÊNCIA PARA DEMONSTRAÇÃO — NÃO É LIBERAÇÃO CLÍNICA.** Este documento organiza o que fontes públicas dizem sobre esquemas quimioterápicos, para demonstrar a conferência automática do produto. **Não substitui prescrição médica, bula vigente nem protocolo institucional. Toda informação exige validação pelo farmacêutico responsável (Henrikael Walisson) antes de qualquer uso.** Nada foi inferido: campo sem dado na fonte = **"não consta na fonte"**.
 >
 > **Premissa do produto:** a clínica usa o **protocolo completo da fonte, sem customização local** — o produto compara a prescrição contra o protocolo tal como publicado na fonte citada.
