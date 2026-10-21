@@ -236,6 +236,17 @@ test.describe.serial('M14.5 E2E sintético', () => {
     for (const user of ['farmaceutico', 'enfermeira', 'admin.tecnico']) {
       const { context, page } = await staffLogin(browser, user, { enroll: true });
       // Sessão do cadastro não executou o formulário OTP; MFA só é reconhecido em login com OTP.
+      // M17: o Clinical oferece confirmação imediata (prompt=login, max_age=0) e o IdP executa o OTP — sem afrouxar a exigência.
+      if (user === 'farmaceutico') {
+        await expect(page.getByRole('heading', { name: 'Confirme o login com o aplicativo autenticador' })).toBeVisible();
+        const authReq = page.waitForRequest((r) => r.url().startsWith(`${STATE.issuer}/protocol/openid-connect/auth`));
+        await page.getByRole('link', { name: 'Confirmar com o código do aplicativo' }).click();
+        const u = new URL((await authReq).url()); expect(u.searchParams.get('prompt')).toBe('login'); expect(u.searchParams.get('max_age')).toBe('0');
+        await page.waitForURL(/localhost:8080\/realms\//); await expect(page.getByText('Por favor, reautentique-se para continuar')).toBeVisible(); // usuário já identificado
+        await page.fill('#password', PW); await page.click('#kc-login'); await page.waitForSelector('#otp'); await page.fill('#otp', await freshCode(user)); await page.click('#kc-login');
+        await page.waitForURL(`${CLIN}/clinical`);
+        await expect(page.getByText(/Farmácia · MFA confirmado/)).toBeVisible(); await shot(page, 'clinical-mfa-confirmed-after-enrollment');
+      }
       await context.close(); expect(secrets[user]).toMatch(/^[A-Z2-7 ]+$/);
     }
   });
