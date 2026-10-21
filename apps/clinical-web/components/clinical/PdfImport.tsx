@@ -66,6 +66,6 @@ export function PdfImport() {
     </section>}
     <div aria-live="polite">{done && <p role="status" className="clin-ok">{done.status === 'discarded' ? 'Importação descartada. Nada foi alterado.'
       : `Importação confirmada: ${done.created ?? 0} novos, ${done.updated ?? 0} atualizados, ${done.conflicts ?? 0} divergências aplicadas, ${done.skipped ?? 0} não aplicados.`}</p>}</div>
-    {done && <p><Link href="/clinical">Ver lista de pacientes</Link></p>}
+    {done && <p><Link href="/clinical" className="clin-back">Ver lista de pacientes</Link></p>}
   </section>;
 }
