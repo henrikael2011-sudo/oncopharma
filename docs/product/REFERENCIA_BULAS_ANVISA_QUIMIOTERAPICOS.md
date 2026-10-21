@@ -4,7 +4,7 @@
 
 ## 1. Bulas Anvisa — em coleta
 
-Placeholder: coleta das bulas profissionais (Bulário Eletrônico Anvisa) em andamento por outro fluxo. PDFs já disponíveis no momento deste commit: fluoruracila (Bergamo), oxaliplatina (Eurofarma) — usados na Seção 3.
+Placeholder: coleta das bulas profissionais (Bulário Eletrônico Anvisa) em andamento por outro fluxo. PDFs já disponíveis no momento deste commit: fluoruracila (Bergamo), oxaliplatina, irinotecano e capecitabina (Eurofarma) — usados na Seção 3. Protocolos por esquema: ver `PROTOCOLOS_ONCOLOGICOS_REFERENCIA.md`.
 
 ## 2. Protocolos brasileiros de referência (fontes públicas)
 
@@ -79,6 +79,8 @@ Coluna **Guia Farmacêutico Einstein**: fonte **inacessível** nesta coleta (HTT
 Bulas usadas (PDFs em `/workspace/audit-oncopharma/bulas/`, extraídos com `pdftotext`):
 - **[B-5FU]** Fluoruracila 500 mg/20 mL, Lab. Químico Farmacêutico Bergamo Ltda., bula profissional, Bula Padrão aprovada pela Anvisa em 24/06/2014.
 - **[B-OXA]** Oxaliplatina 50 e 100 mg pó liofilizado, Eurofarma Laboratórios S.A., bula profissional, Bula Padrão aprovada pela Anvisa em 07/04/2026.
+- **[B-IRI]** Cloridrato de irinotecano tri-hidratado 20 mg/mL (genérico), Eurofarma Laboratórios S.A., bula profissional, Bula Padrão aprovada pela Anvisa em 13/11/2025.
+- **[B-CAP]** Capecitabina 150/500 mg comprimidos revestidos, Eurofarma Laboratórios S.A., bula profissional, Bula Padrão aprovada pela Anvisa em 13/11/2025.
 
 ### 3.1 Fluoruracila (5-FU)
 
@@ -106,14 +108,36 @@ Bulas usadas (PDFs em `/workspace/audit-oncopharma/bulas/`, extraídos com `pdft
 | Protocolo MS | PCDT CCR 2025 cita FOLFOX/CAPOX/IROX/FOLFIRINOX **sem doses** [p.12–14] | — |
 | **Divergência** | — sem dado (PCDT sem dose; Einstein pendente) | — |
 
-### 3.3 Demais fármacos em escopo — cards pendentes
+### 3.3 Irinotecano
 
-Para cada um: Bula Anvisa = **pendente** (PDF ainda não presente em `bulas/`); Einstein = **pendente — consultar diretamente**; dose MS disponível na seção 2.2 quando houver.
+| Campo | Bula Anvisa | Guia Farmacêutico Einstein |
+|---|---|---|
+| Dose | Agente único semanal 125 mg/m² (100 mg/m² em condições de risco), 4 semanas + 2 de descanso, ajuste 50–150 mg/m²; a cada 2 semanas 250 mg/m² (200 mg/m² em risco) [B-IRI p.14]. Combinação c/ 5-FU/folinato: 125 mg/m² + 5-FU 500 mg/m² + folinato 20 mg/m² semanal ×4, ciclo 6 semanas; c/ cisplatina 65 mg/m² + cisplatina 30 mg/m² [B-IRI p.15] | consultar diretamente |
+| Diluição | SG 5% (preferência) ou SF 0,9%, concentração final 0,12–2,8 mg/mL; não adicionar outros fármacos [B-IRI p.14] | consultar diretamente |
+| Via | Infusão IV [B-IRI p.14] | consultar diretamente |
+| Estabilidade da bolsa | 24 h a 15–30 °C sob luz fluorescente (SF ou SG); SG 5% refrigerado 2–8 °C protegido da luz: 48 h; SF não deve ser refrigerado; por risco microbiológico usar em 24 h refrigerado ou 6 h em temperatura ambiente [B-IRI p.13–14] | consultar diretamente |
+| Estabilidade do frasco após aberto / overfill residual | Não consta na bula (frasco fechado: 15–30 °C, proteger da luz, não congelar) [B-IRI p.13] | consultar diretamente |
+| Ordem / tempo de infusão | 30–90 min [B-IRI p.14]; folinato imediatamente após irinotecano, 5-FU imediatamente após folinato [B-IRI p.15] | consultar diretamente |
+| Protocolo | PCDT CCR 2025 sem dose; FOLFIRI 180 mg/m² em fonte alternativa — ver `PROTOCOLOS_ONCOLOGICOS_REFERENCIA.md` §4.3 | — |
+| **Divergência** | ⚠️ FOLFIRI 180 mg/m² q14d (fonte alternativa) ≠ esquema de combinação da bula (125 mg/m² semanal) | — |
+
+### 3.4 Capecitabina
+
+| Campo | Bula Anvisa | Guia Farmacêutico Einstein |
+|---|---|---|
+| Dose | Monoterapia (mama, colorretal) 1.250 mg/m² 2×/dia ×14 dias + 7 dias de pausa; combinação 800–1.000 mg/m² 2×/dia ×2 semanas + 7 dias pausa, ou 625 mg/m² 2×/dia contínuo; c/ docetaxel 1.250 mg/m² 2×/dia [B-CAP p.16] | consultar diretamente |
+| Diluição | Não se aplica (VO) | — |
+| Via | Oral, comprimidos inteiros com água, até 30 min após refeições; não partir, abrir ou mastigar [B-CAP p.16] | consultar diretamente |
+| Estabilidade | Temperatura ambiente 15–30 °C; validade 24 meses [B-CAP p.16] | consultar diretamente |
+| Protocolo MS | Mama: 1.000–1.250 mg/m² 2×/dia D1–D14 q21d ×6–8 [PCDT Mama 2024 Ap.2] | — |
+| **Divergência** | ✅ confere com PCDT Mama e CAPOX (2.000 mg/m²/dia); ⚠️ trituração por sonda (fonte alternativa) vs "não partir" da bula | — |
+
+### 3.5 Demais fármacos em escopo — cards pendentes
+
+Para cada um: Bula Anvisa = **pendente** (PDF ainda não presente em `bulas/` em 21/10/2026); Einstein = **consultar diretamente**; dose MS disponível na seção 2.2 quando houver.
 
 | Fármaco | Dose MS na seção 2 | Bula | Einstein | Divergência |
 |---|---|---|---|---|
-| Irinotecano | não consta (CCR sem dose) | pendente | pendente | — |
-| Capecitabina | #15 | pendente | pendente | — |
 | Ácido folínico | não consta | pendente | pendente | — |
 | Doxorrubicina | #4–8, 11, 17–21 | pendente | pendente | — |
 | Epirrubicina | #9, 10 | pendente | pendente | — |
