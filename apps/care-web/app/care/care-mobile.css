@@ -86,3 +86,11 @@
 .cm-chart-dot{fill:var(--cm-white);stroke:var(--cm-green-900);stroke-width:2}
 .cm-chart-fever{stroke:var(--cm-gold);stroke-width:2;stroke-dasharray:6 5}
 .cm-chart-fever-label{fill:var(--cm-gold-ink);font-size:10px;font-weight:800}
+/* M21.2 — entrada de temperatura grande (alvos ≥56px) */
+.cm-temp{display:grid;grid-template-columns:64px 1fr 64px;gap:10px;align-items:center;margin:6px 0 10px}
+.cm-temp-btn{min-height:64px!important;border-radius:16px;border:2px solid var(--cm-green-800);background:var(--cm-white);color:var(--cm-green-800);font:inherit;font-size:30px;font-weight:800;cursor:pointer}
+.cm-temp-val{display:flex;align-items:baseline;justify-content:center;gap:4px;font-size:40px;font-weight:800;color:var(--cm-green-900)}
+.cm-temp-val input{width:3.4ch;min-height:64px;border:0;border-bottom:2px solid var(--cm-line);background:transparent;font:inherit;color:inherit;text-align:center}
+.cm-visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.cm-chart-dot-fever{stroke:var(--cm-gold-deep);fill:var(--cm-gold-light)}
+.cm-temp-list{font-size:14px}

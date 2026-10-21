@@ -10,9 +10,11 @@ import { Consent } from './Consent';
 import { AcceptInvite } from './AcceptInvite';
 import { RoleSelector, useRoleIntent } from './RoleSelector';
 import { Tile, type IconName } from './Icons';
+import { DEMO_TAG } from '../DemoLabels';
+export { DEMO_TAG };
 
 type State = { kind: 'loading' } | { kind: 'anon' } | { kind: 'nolink' } | { kind: 'error'; message: string } | { kind: 'ready'; me: Me };
-const Ctx = createContext<{ me: Me; reload: () => Promise<void> } | null>(null);
+const Ctx = createContext<{ me: Me; reload: () => Promise<void>; testEnv: boolean } | null>(null);
 export const useMe = () => { const v = useContext(Ctx); if (!v) throw Error('CareShell ausente'); return v; };
 export const SIGNATURE = 'Um passo de cada vez. Juntos no cuidado.';
 // Cuidador vê só o que o paciente liberou (P-R4); gestão de cuidadores e preferências são do paciente.
@@ -33,7 +35,6 @@ export const TABS: [string, string, IconName, (m: Me) => boolean][] = [
   ['/care/equipe', 'Equipe', 'doctor', () => true],
   ['/care/alertas', 'Alertas', 'bell', () => true],
 ];
-export const DEMO_TAG = 'Dados fictícios · demonstração não clínica';
 export const TEAM_DECIDES = 'O app só organiza e registra. Sua equipe de saúde avalia e decide.';
 export function Skeleton({ label = 'Carregando…' }: { label?: string }) {
   return <div className="cm-sk" role="status" aria-live="polite"><div className="cm-skl"><i />{label}</div><div className="cm-sb h" /><div className="cm-sb w8" /><div className="cm-sb w6" /></div>;
@@ -55,10 +56,10 @@ export function CareShell({ children, testEnv = false }: { children: React.React
   else if (state.kind === 'nolink') content = <NoLink onDone={load} />;
   else if (state.kind === 'error') content = <section className="care-panel" role="alert"><h1>Não foi possível abrir agora</h1><p className="care-lead">{state.message}</p><button className="btn-primary" onClick={() => void load()}>Tentar de novo</button></section>;
   else if (!state.me.consent.accepted) content = <Consent version={state.me.consent.required} onDone={load} />;
-  else content = <Ctx.Provider value={{ me: state.me, reload: load }}>{children}</Ctx.Provider>;
+  else content = <Ctx.Provider value={{ me: state.me, reload: load, testEnv }}>{children}</Ctx.Provider>;
   return <div className="care-page" data-font={me?.preferences.fontScale ?? 'normal'} data-contrast={me?.preferences.highContrast ? 'high' : 'normal'}>
     {testEnv && <TestEnvBanner />}
-    <header className="care-header"><div className="cm-head-row"><CareLogo />{me && <p className="cm-who"><b>{me.actor === 'caregiver' ? (me.patientName ?? 'Paciente') : (me.displayName ?? 'Você')}</b>{me.actor === 'caregiver' ? `Cuidador(a): ${me.displayName ?? 'você'}` : 'Paciente'}</p>}{loggedIn && <form action="/api/auth/logout" method="post"><button type="submit" className="btn-on-dark">Sair</button></form>}</div><span className="cm-demo">{DEMO_TAG}</span></header>
+    <header className="care-header"><div className="cm-head-row"><CareLogo />{me && <p className="cm-who"><b>{me.actor === 'caregiver' ? (me.patientName ?? 'Paciente') : (me.displayName ?? 'Você')}</b>{me.actor === 'caregiver' ? `Cuidador(a): ${me.displayName ?? 'você'}` : 'Paciente'}</p>}{loggedIn && <form action="/api/auth/logout" method="post"><button type="submit" className="btn-on-dark">Sair</button></form>}</div>{testEnv && <span className="cm-demo">{DEMO_TAG}</span>}</header>
     {me?.consent.accepted && <nav className="care-nav" aria-label="Menu principal"><ul>{NAV.filter(([, , ok]) => ok(me)).map(([href, label]) => <li key={href}><Link href={href} aria-current={path === href ? 'page' : undefined}>{label}</Link></li>)}</ul></nav>}
     <main id="conteudo" className="care-main">{content}</main>
     {me?.consent.accepted && <TabBar me={me} path={path} />}

@@ -8,7 +8,8 @@ import type { PoolClient } from 'pg';
 import { AuthGuard, AuthenticatedRequest } from './auth.guard';
 import { DatabaseService } from './database.service';
 import { syntheticApiEnabled } from './synthetic-mode';
-import { assessSymptom, SYMPTOMS, CONSENT_TERMS_VERSION, parseSymptomAnswers, reportStatusLabel } from './care-rules';
+import { assessSymptom, SYMPTOMS, CONSENT_TERMS_VERSION, parseSymptomAnswers, reportStatusLabel, parseTemperature, isFever, temperatureAsSymptom, FEVER_THRESHOLD_C, ROUTINE_MESSAGE } from './care-rules';
+import { careKey, openText, sealText } from './care-crypto';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 function syntheticOnly() { if (!syntheticApiEnabled()) throw new ServiceUnavailableException('Care disponível somente em ambiente não produtivo com dados sintéticos'); }
@@ -168,6 +169,44 @@ export class CareController {
         [alertId, org, s.patientId, reportId, `symptom.${answers.symptomCode}`, a.urgent ? 'urgent_review' : 'needs_review', a.ruleVersion, a.explanation]);
       await this.audit(c, org, req, 'symptom.created', s, { report_id: reportId, urgent: String(a.urgent) });
       return { reportId, urgent: a.urgent, message: a.patientMessage, clinicalAdvice: false };
+    });
+  }
+
+  // ---------- M21.2: temperatura (°C). Paciente ou cuidador com registrar_sintoma. Valor cifrado em repouso. ----------
+  @Post('me/temperatures')
+  temperature(@Req() req: AuthenticatedRequest, @Headers('x-organization-id') org: string, @Body() body: Record<string, unknown>) {
+    const t = parseTemperature(body); // lança BadRequest com mensagem pt-BR
+    let key: ReturnType<typeof careKey>; try { key = careKey(); } catch { throw new ServiceUnavailableException('Registro de temperatura indisponível: chave de cifra não configurada'); }
+    return this.run(req, org, async (c, s) => {
+      CareController.need(s, 'registrar_sintoma');
+      const existing = await c.query(`SELECT id,symptom_report_id FROM patient_temperature_readings WHERE organization_id=$1 AND source_reference=$2`, [org, t.requestId]);
+      const fever = isFever(t.celsius);
+      const a = fever ? assessSymptom(temperatureAsSymptom(t)) : null;
+      if (existing.rowCount) return { readingId: existing.rows[0].id, duplicate: true, urgent: fever, message: a ? a.patientMessage : ROUTINE_MESSAGE, clinicalAdvice: false };
+      let reportId: string | null = null;
+      if (a) { // mesmo caminho do relato de sintoma com sinal de alerta "febre" (regra care-demo-v1)
+        const ans = temperatureAsSymptom(t); reportId = randomUUID();
+        await c.query(`INSERT INTO patient_symptom_reports(id,organization_id,patient_id,symptom_code,description,source,source_reference,triage_status,details,actor_issuer,actor_sub) VALUES($1,$2,$3,$4,$5,'care-portal',$6,$7,$8::jsonb,$9,$10)`,
+          [reportId, org, s.patientId, ans.symptomCode, ans.description, `temp:${t.requestId}`, 'urgent_review', JSON.stringify({ ...a.details, reported_by: s.actor, source: 'temperature' }), req.principal.issuer, req.principal.sub]);
+        await c.query(`INSERT INTO clinical_alerts(id,organization_id,patient_id,source_report_id,code,level,status,rule_version,explanation) VALUES($1,$2,$3,$4,$5,'urgent_review','awaiting_review',$6,$7)`,
+          [randomUUID(), org, s.patientId, reportId, 'symptom.fever', a.ruleVersion, a.explanation]);
+      }
+      const enc = sealText(t.celsius.toFixed(1), key.key);
+      const r = await c.query(`INSERT INTO patient_temperature_readings(organization_id,patient_id,value_encrypted,value_iv,value_tag,key_id,measured_at,recorded_by,actor_issuer,actor_sub,source_reference,symptom_report_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id`,
+        [org, s.patientId, enc.ciphertext, enc.iv, enc.tag, key.id, t.measuredAt, s.actor, req.principal.issuer, req.principal.sub, t.requestId, reportId]);
+      await this.audit(c, org, req, 'care.temperature.created', s, { reading_id: r.rows[0].id, urgent: String(fever) }); // valor não vai para a auditoria
+      return { readingId: r.rows[0].id, reportId, urgent: fever, message: a ? a.patientMessage : ROUTINE_MESSAGE, clinicalAdvice: false };
+    });
+  }
+
+  @Get('me/temperatures')
+  temperatures(@Req() req: AuthenticatedRequest, @Headers('x-organization-id') org: string) {
+    let key: ReturnType<typeof careKey>; try { key = careKey(); } catch { throw new ServiceUnavailableException('Leitura de temperatura indisponível: chave de cifra não configurada'); }
+    return this.run(req, org, async (c, s) => {
+      if (s.actor === 'caregiver' && !s.scopes.includes('registrar_sintoma') && !s.scopes.includes('ver_jornada')) CareController.need(s, 'ver_jornada');
+      const rows = (await c.query(`SELECT id,value_encrypted,value_iv,value_tag,measured_at,recorded_by FROM patient_temperature_readings WHERE organization_id=$1 AND patient_id=$2 AND measured_at >= now() - interval '7 days' ORDER BY measured_at ASC LIMIT 200`, [org, s.patientId])).rows;
+      await this.audit(c, org, req, 'care.temperature.read', s);
+      return { thresholdC: FEVER_THRESHOLD_C, readings: rows.map((x) => { const celsius = Number(openText({ ciphertext: x.value_encrypted, iv: x.value_iv, tag: x.value_tag }, key.key)); return { id: x.id, celsius, measuredAt: x.measured_at, recordedBy: x.recorded_by, fever: isFever(celsius) }; }) };
     });
   }
 

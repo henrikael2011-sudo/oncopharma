@@ -9,6 +9,8 @@ const json = (error: string, status: number) => NextResponse.json({ error }, { s
 const ALLOW: [string, RegExp][] = [
   ['GET', /^me$/], ['GET', /^me\/(home|journey|medications|help)$/],
   ['PUT', /^me\/(consent|preferences)$/], ['POST', /^me\/symptoms$/],
+  // M21.2: temperatura (criar + últimos 7 dias).
+  ['GET', /^me\/temperatures$/], ['POST', /^me\/temperatures$/],
   ['POST', /^me\/medications\/[0-9a-f-]{36}\/adherence$/],
   // M15.3 (R4): gestão do cuidador pelo paciente + aceite do convite pelo cuidador.
   ['GET', /^me\/caregivers$/], ['POST', /^me\/caregivers\/invites$/], ['POST', /^me\/caregivers\/invites\/[0-9a-f-]{36}\/cancel$/],

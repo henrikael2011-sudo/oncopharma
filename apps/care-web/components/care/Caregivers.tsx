@@ -6,7 +6,7 @@ import { care, dateBR, type Scope } from '../../lib/care-client';
 type Link = { id: string; name: string | null; scopes: Scope[]; createdAt: string; expiresAt: string; active: boolean; revokedAt: string | null };
 type Data = { links: Link[]; invites: { id: string; termDays: number; expiresAt: string }[]; accessLog: { action: string; at: string; name: string | null }[] };
 const SCOPES: [Scope, string][] = [['ver_jornada', 'Ver minha jornada (sessões e relatos)'], ['ver_medicamentos', 'Ver meus medicamentos'], ['registrar_sintoma', 'Registrar sintomas por mim']];
-const ACTION: Record<string, string> = { 'care.me.read': 'Entrou no aplicativo', 'care.home.read': 'Abriu o início', 'care.journey.read': 'Viu a jornada', 'care.medications.read': 'Viu os medicamentos', 'care.symptom.created': 'Registrou um sintoma' };
+const ACTION: Record<string, string> = { 'care.me.read': 'Entrou no aplicativo', 'care.home.read': 'Abriu o início', 'care.journey.read': 'Viu a jornada', 'care.medications.read': 'Viu os medicamentos', 'care.symptom.created': 'Registrou um sintoma', 'care.temperature.created': 'Registrou uma temperatura', 'care.temperature.read': 'Viu as temperaturas' };
 const when = (d: string) => new Date(d).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
 export function Caregivers() {
   const [d, setD] = useState<Data | null>(null), [term, setTerm] = useState(30), [code, setCode] = useState<{ code: string; expiresAt: string } | null>(null), [msg, setMsg] = useState(''), [err, setErr] = useState('');
