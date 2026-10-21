@@ -54,6 +54,19 @@ Marco: fase A em **M18 (PR #15)**; itens 2 e 3 em fase B, bloqueada (`FASE_B_HAB
 - Sinaliza quando o volume passa do frasco e informa **quantos frascos/apresentações** são necessários.
 - **Exibição só auxiliar**: nada é aplicado automaticamente; a validação final é do farmacêutico.
 
+### 5f. Card bula Anvisa × guia Einstein, estabilidade da bolsa e overfill
+- Por fármaco, um card cruza a bula Anvisa e o guia Einstein com estado **bate / diverge / falta**, citando a fonte de cada campo (ver `REFERENCIA_BULAS_ANVISA_QUIMIOTERAPICOS.md` §3).
+- Estabilidade da bolsa (temperatura, luz, tempo) e **overfill** da bolsa/diluente considerados no volume final e na concentração.
+
+### 5g. (Novo) Tela por fármaco
+- Uma tela por fármaco com validação (Validar/Desvalidar), **tempo de infusão** e **ordem** (manipulação e infusão) sugeridos pela IA como rascunho.
+
+### 5h. (Novo) Botão "Próximo passo"
+- Avança para o próximo fármaco/conferência pendente; diante de divergência, leva ao próximo passo indicado (ex.: solicitação ao médico, M15.5). Nunca valida sozinho.
+
+### 5i. (Novo) Etiqueta por medicação com dose em mL
+- Prévia da etiqueta de cada medicação com a dose em mg **e o volume em mL** (5d-bis), diluente e volume final; continua como **Rótulo bloqueado** até a validação do farmacêutico (ver CHECKLIST C5).
+
 ### 5e. Fontes
 - **Primária (alinhada à Anvisa):** bulas registradas na Anvisa (Bulário Eletrônico) e protocolos oncológicos de alto nível adotados no Brasil (normas Anvisa/MS, DDT/PCDT de oncologia do Ministério da Saúde).
 - **Complementar:** NCCN, ESMO e protocolos institucionais.
@@ -86,6 +99,11 @@ Checklist mestre: [`CHECKLIST_PLANEJAMENTO_COMPLETO.md`](CHECKLIST_PLANEJAMENTO_
   - [ ] 5d-bis. Concentração da bula do produto registrado/apresentação selecionada; entradas e fonte exibidas
   - [ ] 5d-bis. Regra de arredondamento explícita (valor antes e depois)
   - [ ] 5d-bis. Alerta de volume acima do frasco + nº de frascos/apresentações; só auxiliar, validação final do farmacêutico
+  - [ ] 5f. Card bula Anvisa × guia Einstein (bate/diverge/falta) por fármaco
+  - [ ] 5f. Estabilidade da bolsa e overfill no volume/concentração final
+  - [ ] 5g. (Novo) Tela por fármaco: validação, tempo de infusão, ordem
+  - [ ] 5h. (Novo) Botão "Próximo passo" (sem validação automática)
+  - [ ] 5i. (Novo) Etiqueta por medicação com dose em mL; Rótulo bloqueado até a validação
   - [ ] 5e. Fontes: Anvisa (bulas) + protocolos adotados no Brasil; complementar NCCN/ESMO/institucional; `REFERENCIA_BULAS_ANVISA_QUIMIOTERAPICOS.md`
   - [ ] 5e. Pendências: fontes e licenciamento (NCCN/ESMO exigem licença), carga versionada, validação farmacêutica do Henrikael
   - [ ] Liberação final sempre do farmacêutico/médico; fase B bloqueada até protocolos carregados e validados
@@ -95,3 +113,28 @@ Checklist mestre: [`CHECKLIST_PLANEJAMENTO_COMPLETO.md`](CHECKLIST_PLANEJAMENTO_
   - [ ] RLS por organização + trilha de auditoria
   - [ ] Anotação nunca altera a prescrição; exportação de imagem achatada
   - [ ] Testes em iPad real (Safari + Apple Pencil) e Android real (Chrome + stylus)
+
+## Consolidação validada em 21/10/2026
+Código conferido no branch `m18-prescricao-foto-provisoria`: `apps/clinical-web/app/clinical/prescricao-foto/page.tsx`, `components/clinical/PrescricaoFoto.tsx`, `lib/prescricao-ficticia.ts`; **sem API nem migração** de prescrição por foto (só `medical-requests` do M15.5). Não liberado para uso clínico.
+
+| Item | Descrição | Onde está no doc | O que falta no código | Marco | Bloqueado? |
+|---|---|---|---|---|---|
+| 1 | Foto → versão online editável | §1, 5a | Página `/clinical/prescricao-foto` só com dados fictícios fixos (`lib/prescricao-ficticia.ts`); itens **não editáveis**; sem upload de foto, API ou tabela | M18 (PR #15) | Q1–Q4 provisórias |
+| 2 | Criação automática, sempre rascunho | §2 | Inexistente: sem OCR/transcrição, sem modelo de rascunho | Fase B (M20) | Sim (fase B, Anvisa) |
+| 3 | Prescrição existente como documento com histórico | §3 | Inexistente: `clinical_medication_orders` só leitura (`RecordTab.tsx`); sem versões/diff | M19 | Sim (quem edita) |
+| 4 | Alterar a prescrição é do médico | §4 | Regra documentada; o fluxo de solicitação existe (M15.5 `medical-requests.controller.ts`) mas não está ligado à página | M19 | Sim (regulatório) |
+| 5b | Identificação por ≥ 2 identificadores, sem criar cadastro | 5b | Inexistente: nome fixo fictício, sem busca/correspondência de paciente | M18/M19 | Não |
+| 5a | IA confere protocolo e dose × massa corpórea (verde/divergência) | 5a, 5b | Só estados manuais verde/âmbar/riscado; sem cálculo de SC, dose ou protocolo | M19 | Sim (protocolos validados) |
+| 5c | Sugere ordem de manipulação e infusão | 5c, 5g | Inexistente (só texto fixo de sugestão) | M19 | Sim |
+| 5c | Aponta problema concreto + regra e sugere correção | 5c | Inexistente; sem motor de regras de dose | M19 | Sim |
+| 5d | Confere diluição | 5d | Inexistente | M19 | Sim |
+| 5e | Base Anvisa prioritária (bulas + MS); internacionais como complemento | 5e | Só documental (`REFERENCIA_BULAS_ANVISA_QUIMIOTERAPICOS.md`, bulas em coleta); nada carregado no código | M18/M19 | Sim |
+| 5f | Card bula Anvisa × guia Einstein (bate/diverge/falta) | 5f | Cards 5-FU/oxaliplatina só no documento de referência §3; nenhuma UI | M19 | Sim (Einstein inacessível; licença) |
+| 5f | Estabilidade da bolsa e overfill | 5f | Inexistente | M19 | Sim |
+| 5g | (Novo) Tela por fármaco com validação, tempo de infusão e ordem | 5g | Validação existe só por campo genérico; sem tempo de infusão/ordem | M19 | Não (UI fictícia possível) |
+| 5h | (Novo) Botão "Próximo passo" | 5h | Inexistente | M18 (continuação do PR #15) | Não |
+| 5i | (Novo) Etiqueta por medicação com dose em mL | 5i | Inexistente | M19 | Sim (critérios de conferência) |
+| 5d-bis | Regra de três (mL a aspirar) | 5d-bis | Inexistente | M19 | Sim (concentrações validadas) |
+| 6 | Caneta/dedo | §6 | Inexistente: sem canvas/Pointer Events, sem tabela/RLS | M18 (continuação do PR #15) | Não |
+| — | Fase B bloqueada | §2, §4 | Cumprido: `FASE_B_HABILITADA=false`, `readyForClinicalUse=false` | — | Sim |
+| 5e | Pendências: fontes, carregar protocolos, validar | 5e, checklist | Nenhuma carga/validação; nenhum dado em `clinical_protocol_versions` para esses esquemas | M18/M19 | Sim (Henrikael) |

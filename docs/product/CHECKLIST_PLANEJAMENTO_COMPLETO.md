@@ -1,6 +1,7 @@
 # Checklist do planejamento completo (documento vivo)
 
 > Gerado em 21/10/2026 a partir de `main` @ `9d7da01`. `[x]` = coberto (com evidência), `[ ]` = pendente (marco + o que falta). Coberto **não** significa liberação clínica.
+> **Totais (inclui subitens):** 51 cobertos · 151 pendentes (dos quais 66 parciais).
 > Detalhe: `RF_PRESCRICAO_FOTO_E_ONLINE.md`, `LACUNAS_PLANO_DIRETOR_M15.md`, `DECISOES_M15.md`.
 
 ## 114 itens do protótipo (comparacao-plano)
@@ -181,3 +182,36 @@
 - [ ] **N1** Criação automática da prescrição online só pela foto (OCR/transcrição → rascunho) — *FALTA* · marco Fase B (M20 proposto) · falta: OCR/transcrição, mapeamento para itens, confiança por campo, 100% rascunho validado item a item pelo farmacêutico, IA nunca decide; dados reais só com HNSG/contrato/AWS SP/repo privado; enquadramento SaMD RDC 657/2022 (provável classe que exige registro/notificação) · bloqueio: Sim (fase B, Anvisa)
 - [ ] **N2** Prescrição existente abre como documento editável (estilo Word) com versões/auditoria — *FALTA* · marco M19 (proposto) · falta: página documento; versões imutáveis com autor/hora/diff; RBAC: conteúdo da prescrição só pelo **prescritor** (CFM/autoria médica); farmacêutico edita apenas validação/observações/intervenções → mudança de conduta via M15.5; RLS; assinatura (ICP-Brasil) se virar documento oficial · bloqueio: Sim (quem edita; regulatório)
 - [ ] **N3** Biblioteca de referência para sugestões — *FALTA* · marco M18/M19 (biblioteca mínima, etapa 2 da spec) · falta: PRIMÁRIA: bulas registradas na Anvisa (Bulário Eletrônico) + protocolos oncológicos adotados no Brasil (normas Anvisa/MS, DDT/PCDT de oncologia do MS); COMPLEMENTAR: NCCN, ESMO, protocolos institucionais. Pendências: fontes/licenciamento, carga, validação · bloqueio: Sim
+
+### Itens do RF (espelho de `RF_PRESCRICAO_FOTO_E_ONLINE.md`)
+- [ ] **1. Foto → versão online editável (fase A):** *PARCIAL*. PR #15 (rascunho), `/clinical/prescricao-foto`, dados fictícios. Falta: respostas Q1–Q4 (`docs/decisoes-provisorias-prescricao-foto.md`) e merge. Ref.: `spec-validacao-prescricao` etapa 1, Plano Diretor v3 §4.2 #6.
+- [ ] **2. Criação automática só pela foto:** *FALTA*, fase B (M20 proposto). Falta: OCR/transcrição com confiança por campo, sempre rascunho validado item a item, a IA não decide. Bloqueado: fase B (HNSG/contrato/AWS SP/repositório privado, D-010/D-011) e RDC 657/2022. Ref.: D-005, D-013, `RF_PRESCRICAO_ASSISTIDA_IA.md`.
+- [ ] **3. Prescrição existente como documento editável:** *FALTA*, M19 (proposto). Falta: página documento, versões imutáveis (autor/hora/diff), RBAC/ABAC + RLS. Bloqueado: quem edita o quê. Ref.: §3 papéis, D-012 (M15.5).
+- [ ] **4. Cuidado regulatório:** *PENDENTE*. A autoria do conteúdo é do prescritor; o farmacêutico só valida, observa e intervém via M15.5. Falta: enquadramento SaMD (RDC 657/2022), assinatura ICP-Brasil se o documento for oficial, LGPD/RIPD. Ref.: D-013, LACUNAS §8–9.
+- [ ] **5. Conferência assistida e biblioteca:** *FALTA*, M18/M19 (biblioteca mínima); com dado real, só na fase B. Ref.: spec etapas 2–3, CHECKLIST C5/N3, D-005.
+  - [ ] 5a. Lado a lado com a foto + conferência de dose × peso/SC × protocolo
+  - [ ] 5a. Prontidão para amanhã ligada à Programação de amanhã / Rótulo bloqueado (C5)
+  - [ ] 5b. Fluxo fictício "Maria": identificar paciente pela foto, ≥ 2 identificadores, nunca criar automaticamente
+  - [ ] 5b. Identificar protocolo; conferir massa corporal/SC; "conferido" verde por conferência; divergências sinalizadas
+  - [ ] 5c. Tela: dados do paciente, protocolo (FOLFOX), dose de ataque por medicamento (5-FU) ok/divergente
+  - [ ] 5c. IA sugere ordem de manipulação e de infusão (rascunho)
+  - [ ] 5c. Divergência = valor concreto + regra/fonte + correção sugerida/próximo passo (M15.5); nunca correção automática
+  - [ ] 5d. Diluição por medicamento: diluente, volume, concentração final, estabilidade
+  - [ ] 5d-bis. Volume em mL por medicamento/rótulo, com a regra de três visível (dose ÷ concentração = mL)
+  - [ ] 5d-bis. Concentração da bula do produto registrado/apresentação selecionada; entradas e fonte exibidas
+  - [ ] 5d-bis. Regra de arredondamento explícita (valor antes e depois)
+  - [ ] 5d-bis. Alerta de volume acima do frasco + nº de frascos/apresentações; só auxiliar, validação final do farmacêutico
+  - [ ] 5f. Card bula Anvisa × guia Einstein (bate/diverge/falta) por fármaco
+  - [ ] 5f. Estabilidade da bolsa e overfill no volume/concentração final
+  - [ ] 5g. (Novo) Tela por fármaco: validação, tempo de infusão, ordem
+  - [ ] 5h. (Novo) Botão "Próximo passo" (sem validação automática)
+  - [ ] 5i. (Novo) Etiqueta por medicação com dose em mL; Rótulo bloqueado até a validação
+  - [ ] 5e. Fontes: Anvisa (bulas) + protocolos adotados no Brasil; complementar NCCN/ESMO/institucional; `REFERENCIA_BULAS_ANVISA_QUIMIOTERAPICOS.md`
+  - [ ] 5e. Pendências: fontes e licenciamento (NCCN/ESMO exigem licença), carga versionada, validação farmacêutica do Henrikael
+  - [ ] Liberação final sempre do farmacêutico/médico; fase B bloqueada até protocolos carregados e validados
+- [ ] **6. (Proposto) Anotação caneta/dedo:** *FALTA*, continuação do PR #15 (fase A, fictícia). Ref.: Q4 iPad/Safari (`docs/decisoes-provisorias-prescricao-foto.md`), D-005.
+  - [ ] Componente de sobreposição canvas/SVG com Pointer Events (pen/pressure, rejeição da palma)
+  - [ ] Esquema de armazenamento + migração (traços JSON vetorial por versão do rascunho, autor/horário)
+  - [ ] RLS por organização + trilha de auditoria
+  - [ ] Anotação nunca altera a prescrição; exportação de imagem achatada
+  - [ ] Testes em iPad real (Safari + Apple Pencil) e Android real (Chrome + stylus)
