@@ -94,3 +94,6 @@
 .cm-visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .cm-chart-dot-fever{stroke:var(--cm-gold-deep);fill:var(--cm-gold-light)}
 .cm-temp-list{font-size:14px}
+/* M22 — doses por horário */
+.cm-dose{border-top:1px solid var(--cm-line-soft);padding-top:6px;display:grid;gap:8px}.cm-dose:first-of-type{border-top:0}
+.cm-dose-time{font-size:22px;font-weight:800;color:var(--cm-green-900)}

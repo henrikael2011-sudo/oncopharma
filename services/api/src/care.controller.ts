@@ -128,11 +128,23 @@ export class CareController {
   medications(@Req() req: AuthenticatedRequest, @Headers('x-organization-id') org: string) {
     return this.run(req, org, async (c, s) => {
       CareController.need(s, 'ver_medicamentos');
-      // Sem dose/via ao paciente (Plano v3: Care não exibe dose nem sugere ajuste); somente nome e horário em linguagem simples.
-      const rows = (await c.query(`SELECT o.id,o.medication,o.frequency_text,o.route,(SELECT a.status FROM patient_adherence_reports a WHERE a.organization_id=o.organization_id AND a.order_id=o.id AND a.reported_on=current_date ORDER BY a.created_at DESC LIMIT 1) AS today
-        FROM clinical_medication_orders o WHERE o.organization_id=$1 AND o.patient_id=$2 AND o.status='active' ORDER BY o.medication`, [org, s.patientId])).rows;
+      // Sem dose/via ao paciente (Plano v3: Care não exibe dose nem sugere ajuste); somente nome, horários e orientações aprovadas.
+      // M22: pedidos vindos de transcrição só aparecem DEPOIS da liberação farmacêutica (status released) e dentro do período.
+      const rows = (await c.query(`SELECT o.id,o.medication,o.frequency_text,o.route,t.times,t.instructions_encrypted,t.instructions_iv,t.instructions_tag,
+          (SELECT a.status FROM patient_adherence_reports a WHERE a.organization_id=o.organization_id AND a.order_id=o.id AND a.reported_on=current_date AND a.scheduled_time IS NULL ORDER BY a.created_at DESC LIMIT 1) AS today,
+          (SELECT json_object_agg(x.scheduled_time,x.status) FROM (SELECT DISTINCT ON (a.scheduled_time) a.scheduled_time,a.status FROM patient_adherence_reports a WHERE a.organization_id=o.organization_id AND a.order_id=o.id AND a.reported_on=current_date AND a.scheduled_time IS NOT NULL ORDER BY a.scheduled_time,a.created_at DESC) x) AS doses
+        FROM clinical_medication_orders o
+        LEFT JOIN LATERAL (SELECT tr.times,tr.instructions_encrypted,tr.instructions_iv,tr.instructions_tag,tr.start_date,tr.end_date FROM clinical_med_transcriptions tr WHERE tr.organization_id=o.organization_id AND tr.order_id=o.id AND tr.status='released' ORDER BY tr.version DESC LIMIT 1) t ON true
+        WHERE o.organization_id=$1 AND o.patient_id=$2 AND o.status='active'
+          AND (o.source_reference NOT LIKE 'transcr:%' OR (t.times IS NOT NULL AND t.start_date<=current_date AND (t.end_date IS NULL OR t.end_date>=current_date)))
+        ORDER BY (t.times)[1] NULLS LAST, o.medication`, [org, s.patientId])).rows;
+      let key: Buffer | null = null; if (rows.some((r) => r.instructions_encrypted)) { try { key = careKey().key; } catch { throw new ServiceUnavailableException('Medicamentos indisponíveis: chave de cifra não configurada'); } }
       await this.audit(c, org, req, 'care.medications.read', s);
-      return { medications: rows.map((m) => ({ id: m.id, name: m.medication, schedule: m.frequency_text ?? 'Conforme orientação da equipe', atHome: ['VO', 'oral', 'SC-casa'].includes(m.route) && s.actor === 'patient', today: m.today ?? null })) };
+      return { medications: rows.map((m) => ({ id: m.id, name: m.medication,
+        schedule: m.times ? (m.times as string[]).join(' · ') : (m.frequency_text ?? 'Conforme orientação da equipe'),
+        times: m.times ? (m.times as string[]).map((t) => ({ time: t, today: (m.doses ?? {})[t] ?? null })) : null,
+        instructions: m.instructions_encrypted && key ? openText({ ciphertext: m.instructions_encrypted, iv: m.instructions_iv, tag: m.instructions_tag }, key) : null,
+        atHome: ['VO', 'oral', 'SC-casa', 'topica'].includes(m.route), canReport: s.actor === 'patient', today: m.today ?? null })) };
     });
   }
 
@@ -141,16 +153,19 @@ export class CareController {
     if (!UUID.test(orderId)) throw new BadRequestException('Medicamento inválido');
     const status = String(body?.status), requestId = String(body?.requestId);
     if (!['taken', 'missed', 'partial'].includes(status) || !UUID.test(requestId)) throw new BadRequestException('Relato de uso inválido');
+    const scheduledTime = body?.scheduledTime === undefined ? null : String(body.scheduledTime);
+    if (scheduledTime !== null && !/^([01]\d|2[0-3]):[0-5]\d$/.test(scheduledTime)) throw new BadRequestException('Horário inválido');
     return this.run(req, org, async (c, s) => {
       CareController.need(s, 'patient'); // adesão é relato do próprio paciente
-      const o = await c.query(`SELECT 1 FROM clinical_medication_orders WHERE id=$1 AND organization_id=$2 AND patient_id=$3 AND status='active'`, [orderId, org, s.patientId]);
+      const o = await c.query(`SELECT (SELECT tr.times FROM clinical_med_transcriptions tr WHERE tr.organization_id=o.organization_id AND tr.order_id=o.id AND tr.status='released' ORDER BY tr.version DESC LIMIT 1) AS times FROM clinical_medication_orders o WHERE o.id=$1 AND o.organization_id=$2 AND o.patient_id=$3 AND o.status='active'`, [orderId, org, s.patientId]);
       if (!o.rowCount) throw new ForbiddenException('Medicamento não localizado');
+      if (scheduledTime !== null && !((o.rows[0].times as string[] | null) ?? []).includes(scheduledTime)) throw new BadRequestException('Horário não consta na orientação liberada');
       const dup = await c.query(`SELECT id FROM patient_adherence_reports WHERE organization_id=$1 AND source_reference=$2`, [org, requestId]);
       if (dup.rowCount) return { id: dup.rows[0].id, duplicate: true };
       const id = randomUUID();
-      await c.query(`INSERT INTO patient_adherence_reports(id,organization_id,patient_id,order_id,status,source_reference,actor_issuer,actor_sub) VALUES($1,$2,$3,$4,$5,$6,$7,$8)`, [id, org, s.patientId, orderId, status, requestId, req.principal.issuer, req.principal.sub]);
-      await this.audit(c, org, req, 'care.adherence.reported', s, { order_id: orderId, status });
-      return { id, status };
+      await c.query(`INSERT INTO patient_adherence_reports(id,organization_id,patient_id,order_id,status,source_reference,actor_issuer,actor_sub,scheduled_time) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)`, [id, org, s.patientId, orderId, status, requestId, req.principal.issuer, req.principal.sub, scheduledTime]);
+      await this.audit(c, org, req, 'care.adherence.reported', s, { order_id: orderId, status, ...(scheduledTime ? { scheduled_time: scheduledTime } : {}) });
+      return { id, status, scheduledTime };
     });
   }
 

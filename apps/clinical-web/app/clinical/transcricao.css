@@ -1,0 +1,9 @@
+/* M22 — tela de transcrição/liberação (somente tokens e derivados aprovados via var()). */
+.clin-transcr{display:grid;gap:16px}
+.clin-notice{border-left:4px solid var(--gold-600);background:var(--gold-50);color:var(--gold-ink);padding:12px 14px;border-radius:12px;line-height:1.5;margin:0}
+.clin-dl{display:grid;grid-template-columns:max-content 1fr;gap:4px 14px;margin:8px 0}.clin-dl dt{font-weight:700;color:var(--navy-text)}.clin-dl dd{margin:0}
+.clin-meta{color:var(--ink-muted);font-size:14px}
+.clin-times{border:1px solid var(--navy-150);border-radius:12px;padding:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}.clin-times span{display:inline-flex;gap:6px;align-items:center}
+.clin-trail{margin:8px 0 0;padding-left:20px;line-height:1.6;font-size:14px}
+.clin-release{border-color:var(--gold-300)}
+@media(max-width:540px){.clin-dl{grid-template-columns:1fr}}
