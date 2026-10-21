@@ -208,7 +208,7 @@ Estabilidade de bolsa **nunca** consta em protocolo; só em bula (§4).
 | Irinotecano | Eurofarma Laboratórios S.A. | Estabilidade pode variar entre fabricantes |
 | Capecitabina | Sun Farmacêutica do Brasil Ltda. | Oral; a orientação de partir/triturar pode variar entre fabricantes |
 
-> **Fluoruracila, 46 h × 8 h:** os 8 h de estabilidade em SF 0,9% são da bula Bergamo. A divergência é **provisória** até a conferência com a bula do fabricante usado na clínica, já que infusores elastoméricos de 46 h costumam usar outro diluente e outra concentração.
+> **Fluoruracila, 46 h × 8 h:** os 8 h de estabilidade em SF 0,9% são da bula Bergamo. A divergência é **provisória** até a conferência com a bula do fabricante usado na clínica.
 
 ✅ confere · ⚠️ diverge · ⛔ ausente (bula ou protocolo sem o dado / bula não disponível).
 
