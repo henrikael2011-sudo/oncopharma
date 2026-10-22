@@ -73,7 +73,7 @@
 .cm-tabs a{display:grid;justify-items:center;align-content:center;gap:3px;min-height:64px;min-width:56px;border-radius:14px;text-decoration:none;font-size:12px;font-weight:800;color:var(--cm-mint-ink)}
 .cm-tabs a .cm-tile{width:38px;height:38px}
 .cm-tabs a[aria-current=page]{color:var(--cm-gold-ink)}
-.care-page .care-nav{display:none}@media(min-width:900px){.care-page .care-nav{display:block}}
+.care-page .care-nav{display:none}@media(min-width:900px){.care-page .care-nav{display:block}.care-page .cm-more{display:none}}
 .care-page[data-contrast=high]{--cm-sub:var(--ink-teal);--cm-mint-ink:var(--cm-green-900)}
 .care-page[data-font=large]{font-size:20px}.care-page[data-font=xlarge]{font-size:23px}
 @media(min-width:900px){.care-page .care-main{max-width:760px}}
