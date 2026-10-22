@@ -42,3 +42,19 @@ test('DemoLabels.tsx: só constantes de texto (isenção restrita do teste M15.2
   const d = r('apps/care-web/components/DemoLabels.tsx').replace(/\/\/.*$/gm, '').trim().split('\n');
   for (const l of d) assert.match(l, /^export const [A-Z_]+ = '[^']+';$/, l);
 });
+test('mockups oficiais 21/10: fontes Bricolage/Manrope locais, menu lateral desktop, faixa superior e rodapé "equipe decide"', () => {
+  const f = r('apps/care-web/app/care/care-fonts.ts'); assert.match(f, /BricolageGrotesque-Variable\.ttf/); assert.match(f, /Manrope-Variable\.ttf/); assert.doesNotMatch(f, /googleapis|https?:/);
+  for (const t of ['BricolageGrotesque-Variable.ttf', 'Manrope-Variable.ttf', 'LICENSE-OFL.txt']) assert.ok(fs.existsSync(`apps/care-web/app/care/fonts/${t}`), t);
+  assert.match(css, /font-family:var\(--cm-font-title\)/); assert.match(css, /font-family:var\(--cm-font-body\)/);
+  const s = r('apps/care-web/components/care/CareShell.tsx');
+  for (const [h, l] of [['/care', 'Início'], ['/care/sintoma', 'Sintomas e febre'], ['/care/medicamentos', 'Medicação do dia'], ['/care/equipe', 'Falar com a equipe'], ['/care/alertas', 'Alertas']]) assert.ok(s.includes(`['${h}', '${l}'`), l);
+  assert.match(s, /className="cm-side"/); assert.match(s, /className="cm-top"/); assert.match(s, /Quem avalia e decide é a sua equipe de saúde\./);
+  assert.match(css, /@media\(min-width:1024px\)\{\n  \.care-page\.cm-app\{display:grid;grid-template-columns:240px/);
+});
+test('sem botão morto: ações sem backend ficam desabilitadas ou mostram "Em breve"; ligações só com tel:', () => {
+  const team = r('apps/care-web/components/care/Team.tsx'), home = r('apps/care-web/components/care/CareHome.tsx'), al = r('apps/care-web/components/care/Alerts.tsx');
+  assert.match(team, /disabled aria-disabled="true" title="Em breve: mensagens pelo app ainda não disponíveis"/);
+  assert.match(team, /href=\{tel\(phone\)\}/); assert.match(al, /href=\{tel\(phone\)\}/); assert.match(al, /Em breve: o telefone do seu serviço/);
+  assert.match(home, /data-soon="checkin"/); assert.match(home, /me\/medications\/\$\{nd\.med\.id\}\/adherence/);
+  for (const x of [team, home, al]) for (const m of x.matchAll(/<button(?![^>]*\b(onClick|disabled|type="submit")\b)[^>]*>/g)) assert.fail('botão sem ação: ' + m[0]);
+});
