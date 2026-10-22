@@ -5,11 +5,10 @@ import Link from 'next/link';
 import { care, dateBR } from '../../lib/care-client';
 import { SIGNATURE, Skeleton, TEAM_DECIDES, useMe } from './CareShell';
 import { Icon, Tile } from './Icons';
-import { FICTIONAL_DATA } from '../DemoLabels';
 type Home = { sections: { journey: boolean; medications: boolean; symptoms: boolean }; nextCycle: { number: number; date: string; status: string } | null; reminders: { kind: string; text: string; date?: string }[]; guidance: { id: string; text: string }[] };
 const today = () => new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'America/Sao_Paulo' });
 export function CareHome() {
-  const { me, testEnv } = useMe(); const [h, setH] = useState<Home | null>(null); const [err, setErr] = useState('');
+  const { me } = useMe(); const [h, setH] = useState<Home | null>(null); const [err, setErr] = useState('');
   useEffect(() => { care<Home>('me/home').then(setH).catch((e) => setErr(e.message)); }, []);
   const first = me.displayName?.split(' ')[0];
   const canSymptom = me.actor === 'patient' || !!h?.sections.symptoms;
@@ -19,7 +18,7 @@ export function CareHome() {
       {me.actor === 'caregiver'
         ? <h1>{first ? `Olá, ${first}.` : 'Olá.'} Você acompanha {me.patientName ?? 'um paciente'}.</h1>
         : <h1>{first ? `Olá, ${first}.` : 'Olá.'} Como você está hoje?</h1>}
-      <p className="care-lead">{today()}{testEnv ? ` · ${FICTIONAL_DATA}` : ''}</p>
+      <p className="care-lead">{today()}</p>
       <p className="care-signature">{SIGNATURE}</p>
     </div>
     {err && <p role="alert">{err}</p>}
