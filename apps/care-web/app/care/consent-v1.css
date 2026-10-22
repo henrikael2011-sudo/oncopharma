@@ -1,0 +1,17 @@
+/* M18 — termo de consentimento (sem mockup próprio) na identidade Care v1 (mockups oficiais 21/10): títulos Bricolage 800,
+   corpo Manrope, ladrilhos Lucide elevados, fundo menta com marca d'água dourada (~9%), botão no gradiente verde→azul.
+   Somente tokens aprovados de globals.css (var(--…)); escopo .cm-consent. */
+.care-page:has(.cm-consent){font-family:var(--cm-font-body),system-ui,sans-serif;background:var(--mint-50)}
+.cm-consent{position:relative;isolation:isolate;max-width:760px;margin:12px auto;padding:clamp(20px,3vw,34px);background:#fff;border:1px solid var(--mint-200);border-radius:20px;box-shadow:0 2px 4px color-mix(in srgb,var(--teal) 6%,transparent),0 22px 44px -22px color-mix(in srgb,var(--teal) 35%,transparent);overflow:hidden}
+.cm-consent::after{content:"";position:absolute;right:-90px;bottom:-90px;width:320px;height:320px;background:url(/brand/care-gold-deep.svg) no-repeat center/contain;opacity:.09;pointer-events:none;z-index:-1}
+.cm-consent h1{font-family:var(--cm-font-title),system-ui,sans-serif;font-weight:800;letter-spacing:-.035em;font-size:clamp(32px,5vw,48px);line-height:1.02;color:var(--teal);margin:6px 0 16px}
+.cm-consent-kicker{margin:0;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-ink)}
+.cm-consent-list{list-style:none;padding:0;margin:0 0 18px;display:grid;gap:12px}
+.cm-consent-list li{display:flex;gap:14px;align-items:flex-start;padding:12px 14px;border-radius:14px;background:var(--mint-50);border:1px solid var(--mint-200);line-height:1.5;color:var(--ink-teal);font-size:17px}
+.cm-tile{display:inline-grid;place-items:center;flex:none;width:42px;height:42px;border-radius:12px;color:var(--emerald);background:linear-gradient(180deg,#fff,var(--mint-100));box-shadow:inset 0 1px 0 #fff,inset 0 -2px 0 var(--mint-200),0 6px 12px -6px color-mix(in srgb,var(--teal) 45%,transparent)}
+.cm-tile-gold{color:var(--gold-ink);background:linear-gradient(180deg,var(--gold-50),var(--gold-300) 60%,var(--gold));box-shadow:inset 0 1px 0 #fff,0 6px 12px -6px color-mix(in srgb,var(--gold-700) 60%,transparent)}
+.cm-consent .choice{display:flex;align-items:center;gap:12px;min-height:48px;font-weight:700;color:var(--teal)}
+.cm-consent .choice input{width:24px;height:24px;accent-color:var(--emerald)}
+.cm-consent .btn-primary{width:100%;min-height:56px;border:0;border-radius:14px;color:#fff;background:linear-gradient(100deg,var(--teal-800),var(--navy));font-family:var(--cm-font-title),system-ui,sans-serif;font-weight:800;font-size:19px}
+.cm-consent .btn-primary:disabled{opacity:.55}
+.cm-consent-err{color:var(--gold-ink-strong);background:var(--gold-50);border-left:4px solid var(--gold-700);padding:10px 12px;border-radius:10px;font-weight:700}
