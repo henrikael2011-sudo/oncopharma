@@ -121,3 +121,29 @@
 .cv-app .cv-flag{border:2px solid #C8304A}
 @media(min-width:1024px){.cv-app .cv-req-grid{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);align-items:start}}
 .cv-app .workflow-form .btn-secondary{background:#fff;color:#0B5A43;border:2px solid #15805F}
+/* M20c — telas sem mockup próprio (importar, solicitações, transcrição, prescrição por foto, painel, cadastros): mesma identidade v3h —
+   títulos Bricolage 800 no fundo menta, cartões brancos elevados, botões verde-petróleo→azul e secundários contornados em esmeralda. */
+.cv-app .clinical-main h1{font-size:clamp(32px,4.2vw,58px);line-height:1.02;color:#08402F;letter-spacing:-.04em}
+.cv-app .kicker{color:#15805F;font-weight:800;font-size:13px;letter-spacing:.12em;text-transform:uppercase}
+.cv-app .btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#0B5A43,#0E3A5C 70%,#1B4F72);color:#fff;border:0;border-radius:12px;font-weight:800;box-shadow:0 12px 24px -12px #0E3A5Ccc}
+.cv-app .btn-secondary{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:#fff;color:#0B5A43;border:2px solid #15805F;border-radius:12px;font-weight:800}
+.cv-app .btn-primary:disabled,.cv-app .btn-secondary:disabled{opacity:.5}
+.cv-app .clin-card,.cv-app .hp-queue,.cv-app .hp-detail,.cv-app .rg-card,.cv-app .rg-invite,.cv-app .imp-card{background:#fff;border:1px solid #E3F4EA;border-radius:16px;box-shadow:0 1px 0 #fff inset,0 2px 4px #08402f0d,0 18px 40px -18px #0b5a4340}
+.cv-app .clinical-main h2{font-family:var(--cv-font-title),system-ui,sans-serif;font-weight:800;color:#08402F}
+.cv-app h2 .cv-li,.cv-app h1 .cv-li{width:40px;height:40px;vertical-align:middle;margin-right:10px}
+.cv-app .clinical-main h3{font-family:var(--cv-font-title),system-ui,sans-serif;font-weight:800;color:#08402F}
+.cv-app .hp-head{background:none;color:#08402F;padding:0;border-radius:0}
+.cv-app .hp-head .kicker{color:#15805F}
+.cv-app .hp-live{color:#5B7083}.cv-app .hp-live::before{background:#D7A858}
+.cv-app .hp-team{border-left-color:#D7A858;border-radius:14px;box-shadow:0 12px 30px -22px #0b5a4366}
+.cv-app .hp-item{border-radius:14px;border-color:#DCEFE4;background:#F9FDFB}
+.cv-app .hp-item.is-urgent{background:#FFF5F6;border:2px solid #C8304A}
+.cv-app .hp-item.is-review{background:#FFFBF1;border:2px solid #E5B04A}
+.cv-app .hp-item.is-selected{outline:3px solid #15805F;outline-offset:2px}
+.cv-app .hp-pos{background:#F2C46D;color:#3D2500;font-family:var(--cv-font-title),system-ui,sans-serif}
+.cv-app .hp-detail h3{border-bottom-color:#E3F4EA}
+.cv-app .hp-ai{border-radius:16px;padding:20px 24px;border:2px solid transparent;background:linear-gradient(#FFFBF1,#FFFBF1) padding-box,linear-gradient(135deg,#0B5A43,#1B4F72) border-box;box-shadow:0 18px 40px -20px #C9962Eaa}
+.cv-app .hp-ai-label{color:#6E4A0E}
+.cv-app .hp-ai-notice{background:linear-gradient(135deg,#08402F 0%,#0B5A43 40%,#0E3A5C 75%,#1B4F72 100%)}
+.cv-app .rg-qr{border-color:#D7A858;border-radius:16px}
+.cv-app table th{font-size:11px;color:#5B7083;text-transform:uppercase;letter-spacing:.1em;font-weight:800}
