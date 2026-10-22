@@ -1,0 +1,24 @@
+/* M24 — formulário público de autocadastro. Usa somente a paleta Care mobile (var(--cm-…)) declarada em care-mobile.css.
+   Texto em verde-escuro; dourado apenas em detalhes (rótulo, foco, marcador); gradiente verde→azul no cabeçalho e botão. */
+.reg-page{padding-bottom:40px}
+.reg-main{max-width:640px;margin:0 auto;padding:18px 16px 40px}
+.reg-card{padding:20px}
+.reg-card h1{font-size:clamp(26px,6vw,34px);line-height:1.15;letter-spacing:-.03em;margin:4px 0 10px;color:var(--cm-green-900)}
+.reg-kicker{margin:0;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--cm-gold-ink)}
+.reg-lead{font-size:17px;line-height:1.5;color:var(--cm-green-800);margin:0 0 8px}
+.reg-form{display:grid;gap:14px}
+.reg-form fieldset{border:1px solid var(--cm-line);border-radius:14px;padding:12px 14px 16px;margin:0;display:grid;gap:6px}
+.reg-form legend{font-weight:800;color:var(--cm-green-900);padding:0 6px;border-left:3px solid var(--cm-gold);margin-left:-4px}
+.reg-form label{font-weight:700;color:var(--cm-green-800);margin-top:6px}
+.reg-form input[type=text],.reg-form input:not([type]),.reg-form input[type=tel],.reg-form input[type=email],.reg-form input[type=date]{width:100%;min-height:48px;padding:10px 12px;font:inherit;font-size:18px;color:var(--cm-green-900);background:var(--cm-white);border:1.5px solid var(--cm-sub);border-radius:12px}
+.reg-form input:focus-visible{outline:3px solid var(--cm-gold);outline-offset:2px}
+.reg-opt{font-weight:500;color:var(--cm-sub)}
+.reg-who{grid-template-columns:1fr}
+.reg-choice{display:flex;align-items:center;gap:10px;min-height:48px;margin:0!important;padding:6px 10px;border:1.5px solid var(--cm-line);border-radius:12px;background:var(--cm-mint-50)}
+.reg-choice input,.reg-consent input{width:24px;height:24px;accent-color:var(--cm-green-800);flex-shrink:0}
+.reg-consent{display:flex;gap:12px;align-items:flex-start;font-weight:600!important;line-height:1.45;padding:12px;border-radius:12px;background:var(--cm-gold-bg);border:1px solid var(--cm-gold)}
+.reg-submit{width:100%;min-height:56px;border:0;border-radius:14px;background:var(--cm-grad-btn);color:var(--cm-white);font:inherit;font-size:19px;font-weight:800;cursor:pointer}
+.reg-submit:disabled{opacity:.55;cursor:not-allowed}
+.reg-error{color:var(--cm-gold-ink-strong);background:var(--cm-gold-bg);border-left:4px solid var(--cm-gold-deep);padding:10px 12px;border-radius:10px;font-weight:700;margin:0}
+.reg-done h1::before{content:'';display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--cm-gold);margin-right:10px;vertical-align:middle}
+@media(min-width:900px){.reg-main{padding-top:40px}}

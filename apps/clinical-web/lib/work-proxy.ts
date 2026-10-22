@@ -17,6 +17,9 @@ const ALLOW: [string, RegExp][] = [
   // M22: transcrição da prescrição + liberação farmacêutica.
   ['GET', new RegExp(`^patients/${ID}/med-transcriptions(/hospital-oral)?$`)], ['POST', new RegExp(`^patients/${ID}/med-transcriptions(/${ID}/discontinue)?$`)],
   ['POST', new RegExp(`^med-transcriptions/${ID}/(release|reject)$`)],
+  // M24: painel do farmacêutico hospitalar (leitura) + convites/cadastros pendentes de conferência.
+  ['GET', /^panel\/queue$/], ['GET', new RegExp(`^panel/patients/${ID}$`)],
+  ['POST', /^registration-invites$/], ['GET', /^registrations$/], ['POST', new RegExp(`^registrations/${ID}/(confirm|reject)$`)],
   ['POST', /^allocations\/sync$/], ['POST', /^imports\/pdf$/], ['POST', new RegExp(`^imports/${ID}/(confirm|discard)$`)], ['POST', new RegExp(`^patients/${ID}/allocation(/conflict)?$`)],
 ];
 export function allowed(method: string, path: string) {

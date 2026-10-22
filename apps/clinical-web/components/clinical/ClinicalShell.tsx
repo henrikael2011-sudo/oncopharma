@@ -37,6 +37,6 @@ export function ClinicalShell({ children, testEnv = false }: { children: React.R
     <header className="clinical-header"><Brand variant="clinical" />
       {loggedIn && <div className="clin-user">{me && <span>{me.name ? `${me.name} · ` : ''}{me.roleLabel} · MFA confirmado</span>}<form action="/api/auth/logout" method="post"><button type="submit" className="btn-on-dark">Sair</button></form></div>}
     </header>
-    <main id="conteudo" className="clinical-main">{me?.roles?.includes('physician') && <nav aria-label="Solicitações médicas"><Link href="/clinical/solicitacoes">Solicitações recebidas</Link></nav>}{content}</main>
+    <main id="conteudo" className="clinical-main">{me && <nav aria-label="Áreas do Clinical" className="clin-areas"><Link href="/clinical">Pacientes</Link><Link href="/clinical/painel">Painel hospitalar</Link>{me.role !== 'clinical_manager' && <Link href="/clinical/cadastros">Cadastros por convite</Link>}{me.roles?.includes('physician') && <Link href="/clinical/solicitacoes">Solicitações recebidas</Link>}</nav>}{content}</main>
   </div>;
 }
