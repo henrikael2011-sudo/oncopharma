@@ -3,11 +3,14 @@ import test from 'node:test'; import assert from 'node:assert/strict'; import fs
 const require = createRequire(import.meta.url);
 const r = (p) => fs.readFileSync(new URL('../' + p, import.meta.url), 'utf8');
 const rules = require('../services/api/dist/overview-rules.js');
-test('febre: limiar aprovado 37,8 °C inclusivo (mesma constante de care-rules); prioridade só ordena', () => {
+test('febre: limiar aprovado 37,8 °C inclusivo (mesma constante de care-rules); sem nível de prioridade fora das regras aprovadas', () => {
   assert.equal(rules.FEVER_THRESHOLD_C, 37.8); assert.equal(rules.FEVER_THRESHOLD_C, require('../services/api/dist/care-rules.js').FEVER_THRESHOLD_C);
   assert.match(fs.readFileSync('services/api/src/overview-rules.ts', 'utf8'), /import \{ FEVER_THRESHOLD_C \} from '\.\/care-rules'/);
   assert.equal(rules.isFever(37.8), true); assert.equal(rules.isFever(37.7), false); assert.equal(rules.isFever(38.0), true); assert.equal(rules.isFever(NaN), false);
-  assert.equal(rules.feverPriority(38.6), 'alta'); assert.equal(rules.feverPriority(38.1), 'media');
+  // 38,5 °C (prioridade "alta") não vem das regras aprovadas: removido e não pode voltar.
+  assert.equal(rules.feverPriority, undefined);
+  for (const f of ['services/api/src/overview-rules.ts', 'services/api/src/clinical-work.controller.ts', 'apps/clinical-web/components/clinical/PharmacistOverview.tsx', 'apps/clinical-web/lib/work-client.ts'])
+    assert.doesNotMatch(r(f), /38[.,]5|feverPriority|priority: 'alta'|⚠ Alta/, f);
 });
 test('estabilidade: restante, % usado, nível e rótulo', () => {
   const now = new Date('2026-10-21T19:00:00Z');

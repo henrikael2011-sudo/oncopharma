@@ -46,11 +46,10 @@ export function PharmacistOverview() {
       <section className="vg-card vg-fever" aria-labelledby="vg-febre">
         <h2 id="vg-febre"><span aria-hidden="true">🌡</span> Alertas de febre <span className="tag t-err">{d ? `${d.fever.length} ${pl(d.fever.length, 'ativo', 'ativos')}` : '…'}</span></h2>
         {d && (d.fever.length === 0 ? <p className="clin-empty" role="status">Nenhum paciente vinculado com temperatura ≥ 37,8 °C na última medida.</p>
-          : <table className="vg-t"><thead><tr><th scope="col">Paciente</th><th scope="col">Leito</th><th scope="col">Temp.</th><th scope="col">Hora (BRT)</th><th scope="col">Prioridade</th></tr></thead>
+          : <table className="vg-t"><thead><tr><th scope="col">Paciente</th><th scope="col">Leito</th><th scope="col">Temp.</th><th scope="col">Hora (BRT)</th></tr></thead>
             <tbody>{d.fever.map((f) => <tr key={f.patientId}>
               <td><Link href={`/clinical/pacientes/${f.patientId}`}><b>{f.name}</b></Link><br /><small>{f.record ?? 'Sem prontuário'}</small></td>
-              <td>{f.place}</td><td><b className="n-err">{celsius(f.celsius)}</b></td><td>{hour(f.measuredAt)}</td>
-              <td>{f.priority === 'alta' ? <span className="chip c-err">⚠ Alta</span> : <span className="chip c-warn">◐ Média · reavaliar</span>}</td></tr>)}</tbody></table>)}
+              <td>{f.place}</td><td><b className="n-err">{celsius(f.celsius)}</b></td><td>{hour(f.measuredAt)}</td></tr>)}</tbody></table>)}
         <p className="vg-note">Limiar de febre: {d ? celsius(d.feverThresholdC) : '37,8 °C'}. Conduta clínica definida pela equipe médica.</p>
       </section>
       <section className="vg-card" aria-labelledby="vg-vence">

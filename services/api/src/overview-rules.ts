@@ -1,13 +1,11 @@
-// M20 — Visão geral do farmacêutico: regras puras (limiar de febre, prioridade, prazos de estabilidade). Sem I/O.
+// M20 — Visão geral do farmacêutico: regras puras (limiar de febre, prazos de estabilidade). Sem I/O.
 // A tela apenas organiza dados já registrados; a conduta clínica é da equipe (IA e sistema não decidem).
 import { FEVER_THRESHOLD_C } from './care-rules';
 export { FEVER_THRESHOLD_C }; // limiar aprovado 37,8 °C (care-rules.ts, RED_FLAGS.febre)
 export const EXPIRING_SOON_HOURS = 6;
 export const STABILITY_NOTICE = 'Prazos ilustrativos — conferir na bula do fabricante';
-export type FeverPriority = 'alta' | 'media';
-/** Febre = temperatura >= 37,8 °C (regra aprovada) (mais recente do paciente). Prioridade só ordena a lista; não é conduta. */
+/** Febre = temperatura >= 37,8 °C (regra aprovada) (mais recente do paciente). Sem níveis de prioridade próprios: só o limiar aprovado. */
 export const isFever = (celsius: number) => Number.isFinite(celsius) && celsius >= FEVER_THRESHOLD_C;
-export const feverPriority = (celsius: number): FeverPriority => (celsius >= 38.5 ? 'alta' : 'media');
 export type Stability = { remainingMinutes: number; usedPercent: number; expired: boolean; level: 'critico' | 'atencao' | 'ok' };
 export function stability(preparedAt: Date, hours: number, now: Date = new Date()): Stability {
   const total = hours * 60, used = (now.getTime() - preparedAt.getTime()) / 60000;

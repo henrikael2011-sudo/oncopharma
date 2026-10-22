@@ -9,7 +9,7 @@ import { DatabaseService } from './database.service';
 import { syntheticApiEnabled } from './synthetic-mode';
 import { encryptFile, importKey, MAX_PDF_BYTES, previewAction, readHospitalPdf, sameName, type PdfRow } from './pdf-import';
 import { type Allocation, allocationLabel, FORMAT_LABEL, normalizeAllocation, syncOutcome, validateFeed } from './allocation-rules';
-import { FEVER_THRESHOLD_C, EXPIRING_SOON_HOURS, STABILITY_NOTICE, feverPriority, isFever, remainingLabel, stability } from './overview-rules';
+import { FEVER_THRESHOLD_C, EXPIRING_SOON_HOURS, STABILITY_NOTICE, isFever, remainingLabel, stability } from './overview-rules';
 import { ALERT_LABEL, ALERT_STATES, type AlertState, allowedTransitions, canTransition, FINAL_STATES, normalizeSearch, preCycleChecklist, primaryRole, ROLE_LABEL, SQL_FOLD, STAFF_ROLES, type StaffRole } from './clinical-work-rules';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -87,7 +87,7 @@ export class ClinicalWorkController {
         pending: { prescriptionChecks: checks, openAlerts: alerts, awaitingPhysician: requests, openTasks: tasks, fever: fever.length, expiringSoon: soon,
           total: checks + alerts + requests + tasks + fever.length + soon },
         feverThresholdC: FEVER_THRESHOLD_C,
-        fever: fever.map((r) => ({ patientId: r.patient_id, name: r.display_name ?? 'Sem nome registrado', record: r.hospital_record, place: place(r), celsius: Number(r.value), measuredAt: iso(r.measured_at), priority: feverPriority(Number(r.value)) })),
+        fever: fever.map((r) => ({ patientId: r.patient_id, name: r.display_name ?? 'Sem nome registrado', record: r.hospital_record, place: place(r), celsius: Number(r.value), measuredAt: iso(r.measured_at) })),
         stabilityNotice: STABILITY_NOTICE,
         expiring: preps.map(({ r, st }) => ({ id: r.id, medication: r.medication, container: r.container, patient: r.display_name ?? 'Sem nome registrado', place: place(r),
           usedPercent: st.usedPercent, remainingMinutes: st.remainingMinutes, remaining: remainingLabel(st.remainingMinutes), level: st.level, source: r.stability_source })),

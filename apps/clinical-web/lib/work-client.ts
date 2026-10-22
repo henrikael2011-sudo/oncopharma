@@ -29,7 +29,7 @@ export type ImportResult = { importId: string; status: 'confirmed' | 'discarded'
 // M20 — Visão geral do farmacêutico (dados fictícios; somente pacientes vinculados).
 export type Overview = { role: Role; fictional: true; generatedAt: string; lastSync: { at: string; source: string } | null;
   pending: { prescriptionChecks: number; openAlerts: number; awaitingPhysician: number; openTasks: number; fever: number; expiringSoon: number; total: number };
-  feverThresholdC: number; fever: { patientId: string; name: string; record: string | null; place: string; celsius: number; measuredAt: string; priority: 'alta' | 'media' }[];
+  feverThresholdC: number; fever: { patientId: string; name: string; record: string | null; place: string; celsius: number; measuredAt: string }[];
   stabilityNotice: string; expiring: { id: string; medication: string; container: string; patient: string; place: string; usedPercent: number; remainingMinutes: number; remaining: string; level: 'critico' | 'atencao' | 'ok'; source: string }[];
   aiConference: { href: string; pending: number } };
 export const celsius = (v: number) => `${v.toFixed(1).replace('.', ',')} °C`;
