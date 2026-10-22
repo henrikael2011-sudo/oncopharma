@@ -8,6 +8,7 @@ import { useMe } from './CareShell';
 import { TemperatureSection } from './TempChart';
 import { AlertGuidanceList } from './AlertGuidanceList';
 import { alertKeys, ROUTINE_GUIDANCE } from '../../lib/care-guidance';
+import { Tile } from './Icons';
 import { isUrgentLocal, LOCAL_URGENT_TEXT, LOCAL_URGENT_TITLE, SEND_FAILED_TEXT } from '../../lib/care-urgency';
 const SYMPTOMS: [string, string][] = [['nausea', 'Enjoo ou vômito'], ['neuropathy', 'Formigamento'], ['fever', 'Febre'], ['diarrhea', 'Diarreia'], ['fatigue', 'Cansaço'], ['pain', 'Dor'], ['mouth', 'Feridas na boca'], ['other', 'Outro']];
 const INTENSITY: [string, string][] = [['leve', 'Leve — consigo fazer minhas atividades'], ['moderada', 'Moderada — atrapalha um pouco'], ['forte', 'Forte — não consigo fazer minhas atividades']];
@@ -37,9 +38,10 @@ export function SymptomFlow() {
     <Link className="btn-primary" href="/care">Voltar ao início</Link>
   </section>; }
   return <section aria-labelledby="sym-title">
-    <div><h1 id="sym-title">{who ? `Como ${who} está hoje` : 'Como estou hoje'}</h1><p className="care-lead">Registre como você está. A equipe acompanha.</p></div>
+    <div><h1 id="sym-title">{who ? `Como ${who} se sente agora?` : 'Como você se sente agora?'}</h1><p className="care-lead">Registre como você está. A equipe acompanha.</p></div>
     <TemperatureSection />
     {urgentNow && <div className="care-panel care-urgent" role="alert" data-local-urgent><h2>{LOCAL_URGENT_TITLE}</h2><p className="care-lead">{LOCAL_URGENT_TEXT}</p><AlertGuidanceList keys={keys} caregiver={!!who} /><p><a className="btn-primary" href="tel:192">Ligar 192</a></p></div>}
+    <section className="care-card cm-sym-card" aria-labelledby="sym-today"><h2 id="sym-today"><Tile name="notebook" />Sintomas de hoje</h2>
     <p className="care-note" aria-live="polite">Passo {step + 1} de {steps}</p>
     <form className="workflow-form" onSubmit={(e) => { e.preventDefault(); if (step < steps - 1) { if (canNext) setStep(step + 1); } else void send(); }}>
       {step === 0 && <Radio name="symptom" legend="O que você está sentindo?" options={SYMPTOMS} value={symptomCode} onChange={setSymptom} />}
@@ -53,6 +55,7 @@ export function SymptomFlow() {
         <button type="submit" className="btn-primary" disabled={!canNext || busy}>{step < steps - 1 ? 'Continuar' : 'Enviar para a equipe'}</button>
       </div>
     </form>
+    </section>
     {err && <p role="alert">{err}</p>}
     <p className="care-note">Em uma emergência, ligue 192 (SAMU).</p>
     <p className="cm-note">O app só organiza e registra. Sua equipe de saúde avalia e decide.</p>
