@@ -10,7 +10,7 @@ const ALLOW: [string, RegExp][] = [
   ['GET', /^medical-requests\/inbox$/], ['GET', new RegExp(`^medical-requests/${ID}$`)],
   ['POST', new RegExp(`^medical-requests/${ID}/(edit|transition)$`)],
   ['GET', new RegExp(`^patients/${ID}/(medical-requests|medical-request-options)$`)], ['POST', new RegExp(`^patients/${ID}/medical-requests$`)],
-  ['GET', /^me$/], ['GET', /^worklist$/],
+  ['GET', /^me$/], ['GET', /^worklist$/], ['GET', /^overview$/],
   ['GET', new RegExp(`^patients/${ID}$`)], ['GET', new RegExp(`^patients/${ID}/(precycle|timeline)$`)],
   ['POST', new RegExp(`^alerts/${ID}/transition$`)], ['POST', new RegExp(`^patients/${ID}/tasks$`)],
   ['POST', new RegExp(`^tasks/${ID}/(receive|complete|cancel)$`)], ['POST', new RegExp(`^patients/${ID}/precycle/reviews$`)],
