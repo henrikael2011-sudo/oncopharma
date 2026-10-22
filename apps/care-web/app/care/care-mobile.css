@@ -75,7 +75,7 @@
 .cm-tabs a[aria-current=page]{color:var(--cm-gold-ink)}
 .care-page .care-nav{display:none}@media(min-width:900px){.care-page .care-nav{display:block}}
 .care-page[data-contrast=high]{--cm-sub:var(--ink-teal);--cm-mint-ink:var(--cm-green-900)}
-.care-page[data-font=large]{font-size:19px}.care-page[data-font=xlarge]{font-size:21px}
+.care-page[data-font=large]{font-size:20px}.care-page[data-font=xlarge]{font-size:23px}
 @media(min-width:900px){.care-page .care-main{max-width:760px}}
 /* M21 — gráfico de temperatura: grade clara, linha verde-escura com preenchimento suave, limiar 37,8 °C dourado tracejado */
 .cm-chart{width:100%;height:auto;display:block}
