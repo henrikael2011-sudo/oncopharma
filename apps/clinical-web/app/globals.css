@@ -188,3 +188,6 @@
 .vg{position:relative;isolation:isolate}.vg>*:not(.vg-watermark){position:relative;z-index:1}
 .vg-watermark{position:fixed;right:-4vw;bottom:-6vh;width:min(62vw,820px);height:auto;opacity:.05;pointer-events:none;user-select:none;z-index:0}
 .clinical-header.clinical-header--overview{background:linear-gradient(90deg,var(--teal),var(--emerald))}
+/* M20 — cabeçalho com menu + selo: quebra linha em larguras intermediárias (sem rolagem horizontal em 768/1440/zoom 200%) */
+.clinical-header{flex-wrap:wrap;row-gap:10px}.clin-nav{min-width:0}.clin-demo{white-space:normal;max-width:100%}
+@media(max-width:1100px){.clin-nav{flex:1 1 100%;border-left:0;padding-left:0;order:3}}
