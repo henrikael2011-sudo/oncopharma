@@ -2,12 +2,12 @@
 // M24 — painel base do farmacêutico hospitalar. Atualização quase em tempo real por consulta periódica (intervalo da API,
 // pausa com a aba oculta). Fila: gravidade e depois tempo de espera. Somente leitura e priorização visual:
 // o ONCOPHARMA não decide conduta — a equipe avalia. Integração hospitalar SIMULADA, rotulada em toda a tela.
-// Mockup aprovado clinical-visao-geral-farmaceutico-marca-v3h: menu lateral verde-petróleo com logo dourado e bloco
+// Sem mockup próprio: identidade v3h (menu lateral do Clinical, ladrilhos Lucide, títulos Bricolage) e bloco
 // 'Resumo com IA · rascunho' (IA SIMULADA: texto montado no navegador a partir dos dados fictícios; a IA não decide).
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { when, work } from '../../lib/work-client';
-import { useStaff } from './ClinicalShell';
+import { ClinTile } from './ClinIcons';
 
 type Meta = { simulated: true; integrationNotice: string; teamNotice: string; feverThresholdC: number; pollSeconds: number; lastSync: { source: string; at: string } | null; generatedAt: string };
 type QItem = { id: string; patientId: string; patientName: string; record: string | null; location: string | null; locationSource: string | null; code: string; level: string; levelLabel: string; status: string; statusLabel: string; explanation: string; description: string | null; reportedBy: string | null; createdAt: string; waitingMinutes: number };
@@ -48,30 +48,9 @@ function aiDraft(d: Detail, ch: Change[]): string {
   return parts.join(' ');
 }
 
-function SideNav({ open, setOpen }: { open: boolean; setOpen: (v: boolean) => void }) {
-  const me = useStaff();
-  return <aside className={`hp-nav${open ? ' is-open' : ''}`} aria-label="Menu do painel">
-    <div className="hp-nav-top">
-      <Link href="/clinical" className="hp-nav-brand"><img src="/brand/mark.svg" width={40} height={40} alt="" /><span><strong>ONCOPHARMA</strong><small>Farmácia hospitalar</small></span></Link>
-      <button type="button" className="hp-nav-toggle" aria-expanded={open} aria-controls="hp-nav-links" onClick={() => setOpen(!open)}>{open ? 'Fechar menu' : 'Menu'}</button>
-    </div>
-    <nav id="hp-nav-links" className="hp-nav-links" aria-label="Áreas do Clinical">
-      <p className="hp-nav-sec">Neste painel</p>
-      <a href="#hp-q-title" onClick={() => setOpen(false)}>Fila priorizada</a>
-      <a href="#hp-ia" onClick={() => setOpen(false)}>Resumo com IA</a>
-      <p className="hp-nav-sec">Clinical</p>
-      <Link href="/clinical/painel" aria-current="page">Painel hospitalar</Link>
-      <Link href="/clinical">Pacientes</Link>
-      {me.role !== 'clinical_manager' && <Link href="/clinical/cadastros">Cadastros por convite</Link>}
-      {me.roles?.includes('physician') && <Link href="/clinical/solicitacoes">Solicitações recebidas</Link>}
-      <p className="hp-nav-foot">Dados fictícios · integração simulada</p>
-    </nav>
-  </aside>;
-}
-
 export function HospitalPanel() {
   const [q, setQ] = useState<Queue | null>(null), [err, setErr] = useState(''), [sel, setSel] = useState<string | null>(null);
-  const [d, setD] = useState<Detail | null>(null), [dErr, setDErr] = useState(''), [menu, setMenu] = useState(false);
+  const [d, setD] = useState<Detail | null>(null), [dErr, setDErr] = useState('');
   const selRef = useRef<string | null>(null); selRef.current = sel;
   
   const loadQueue = useCallback(async () => { try { setQ(await work<Queue>('panel/queue')); setErr(''); } catch (e) { setErr(e instanceof Error ? e.message : 'Erro'); } }, []);
@@ -87,8 +66,7 @@ export function HospitalPanel() {
   }, [loadDetail]);
   // Primeiro paciente da fila selecionado por padrão.
   useEffect(() => { if (!selRef.current && q?.items.length) open(q.items[0].patientId); }, [q, open]);
-  return <div className={`hp-shell${menu ? ' menu-open' : ''}`}>
-    <SideNav open={menu} setOpen={setMenu} />
+  return <div className="hp-shell cv-hp">
     <section aria-labelledby="hp-title" className="hp">
     <div className="hp-head">
       <div><p className="kicker">ONCOPHARMA Clinical · Farmácia hospitalar</p><h1 id="hp-title">Painel de alertas</h1></div>
@@ -99,7 +77,7 @@ export function HospitalPanel() {
     {err && <p className="clin-error" role="alert">{err}</p>}
     <div className="hp-grid">
       <div className="hp-queue" aria-labelledby="hp-q-title">
-        <h2 id="hp-q-title">Fila priorizada {q && <span className="hp-counts">{q.counts.urgent} urgente{q.counts.urgent === 1 ? '' : 's'} · {q.counts.review} em revisão</span>}</h2>
+        <h2 id="hp-q-title"><ClinTile name="siren" gold />Fila priorizada {q && <span className="hp-counts">{q.counts.urgent} urgente{q.counts.urgent === 1 ? '' : 's'} · {q.counts.review} em revisão</span>}</h2>
         {q && !q.items.length && <p className="hp-empty">Nenhum alerta aberto nos pacientes vinculados a você.</p>}
         <ol className="hp-list">{q?.items.map((a, i) => <li key={a.id}>
           <button type="button" className={`hp-item ${a.level === 'urgent_review' ? 'is-urgent' : 'is-review'}${sel === a.patientId ? ' is-selected' : ''}`} aria-pressed={sel === a.patientId} onClick={() => open(a.patientId)}>
@@ -112,7 +90,7 @@ export function HospitalPanel() {
       </div>
       <div className="hp-col">
       {d && <section id="hp-ia" className="hp-ai" aria-labelledby="hp-ia-title">
-        <h2 id="hp-ia-title" className="hp-ai-label">Resumo com IA · rascunho <span className="hp-sim-tag">rascunho</span></h2>
+        <h2 id="hp-ia-title" className="hp-ai-label"><ClinTile name="spark" gold />Resumo com IA · rascunho <span className="hp-sim-tag">rascunho</span></h2>
         <p className="hp-ai-text">{aiDraft(d, changes(d, Date.now()))}</p>
         <p className="hp-ai-notice">IA não decide — revisão e decisão são do farmacêutico e da equipe médica. IA simulada na demonstração (dados fictícios).</p>
       </section>}
@@ -121,7 +99,7 @@ export function HospitalPanel() {
         {sel && dErr && <p className="clin-error" role="alert">{dErr}</p>}
         {sel && !d && !dErr && <p role="status">Carregando paciente…</p>}
         {d && <article aria-labelledby="hp-d-title">
-          <header className="hp-d-head"><h2 id="hp-d-title">{d.patient.name}</h2><p>{d.patient.record ? `Prontuário ${d.patient.record}` : 'Sem prontuário'}{d.patient.location ? ` · ${d.patient.location}` : ''}{d.patient.locationSource === 'hospital' ? ' · alocação do hospital simulado' : ''}</p>
+          <header className="hp-d-head"><h2 id="hp-d-title"><ClinTile name="bed" />{d.patient.name}</h2><p>{d.patient.record ? `Prontuário ${d.patient.record}` : 'Sem prontuário'}{d.patient.location ? ` · ${d.patient.location}` : ''}{d.patient.locationSource === 'hospital' ? ' · alocação do hospital simulado' : ''}</p>
             <Link href={`/clinical/pacientes/${d.patient.id}`} className="btn-secondary">Abrir paciente (registrar avaliação)</Link></header>
           <section><h3>Alertas</h3>{!d.alerts.length ? <p className="hp-empty">Sem alertas.</p> : <ul className="hp-rows">{d.alerts.map((a) => <li key={a.id} className={a.open ? '' : 'is-closed'}><span className={a.level === 'urgent_review' ? 'sev sev-urgent' : 'sev sev-review'}>{a.levelLabel}</span> <b>{a.statusLabel}</b> · {when(a.createdAt)}<br />{a.explanation}</li>)}</ul>}</section>
           <section><h3>Check-ins recentes (14 dias)</h3>{!d.checkins.length ? <p className="hp-empty">Nenhum check-in no período.</p> : <ul className="hp-rows">{d.checkins.map((c) => <li key={`${c.kind}-${c.id}`} className={c.flagged ? 'is-flagged' : ''}><b>{c.label}</b> · {when(c.at)}{c.by ? ` · ${c.by === 'caregiver' ? 'cuidador' : 'paciente'}` : ''}<br />{c.detail}{c.flagged && c.kind === 'temperature' ? ` — igual ou acima de ${celsius(d.feverThresholdC)} (para avaliação da equipe)` : ''}</li>)}</ul>}</section>

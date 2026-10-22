@@ -4,6 +4,7 @@
 // (sem redigitação) e o prontuário informado pela equipe.
 import { useCallback, useEffect, useState } from 'react';
 import { when, work } from '../../lib/work-client';
+import { ClinTile } from './ClinIcons';
 
 type Invite = { inviteId: string; expiresAt: string; link: string; qrSvg: string; singleUse: true };
 type Reg = { id: string; name: string; birthDate: string; age: number; phone: string; email: string | null; submittedByLabel: string; caregiver: { name: string; relationship: string; phone: string } | null;
@@ -49,7 +50,7 @@ export function Registrations() {
     <div className="hp-head"><div><p className="kicker">ONCOPHARMA Clinical · Cadastro</p><h1 id="rg-title">Cadastros por convite</h1></div></div>
     <p className="hp-team" role="note">O paciente ou cuidador preenche pelo link ou QR. O cadastro chega <b>pendente de conferência</b>: a equipe confere e confirma. Dados fictícios neste ambiente.</p>
     <div className="rg-invite">
-      <div><h2>Novo convite</h2><p>Uso único. Expira no prazo escolhido.</p>
+      <div><h2><ClinTile name="qr" gold />Novo convite</h2><p>Uso único. Expira no prazo escolhido.</p>
         <label htmlFor="rg-hours">Validade</label>
         <select id="rg-hours" value={hours} onChange={(e) => setHours(Number(e.target.value))}><option value={24}>24 horas</option><option value={72}>72 horas</option><option value={168}>7 dias</option></select>
         <button type="button" className="btn-primary" onClick={() => void issue()} disabled={busy}>{busy ? 'Gerando…' : 'Gerar convite (link + QR)'}</button>
@@ -63,9 +64,9 @@ export function Registrations() {
       </div>}
     </div>
     {err && <p className="clin-error" role="alert">{err}</p>}
-    <h2>Pendentes de conferência ({pending.length})</h2>
+    <h2><ClinTile name="clip" />Pendentes de conferência ({pending.length})</h2>
     {list && !pending.length && <p className="hp-empty">Nenhum cadastro aguardando conferência.</p>}
     <div className="rg-cards">{pending.map((r) => <RegCard key={r.id} r={r} onDone={load} />)}</div>
-    {!!done.length && <><h2>Conferidos recentemente</h2><div className="rg-cards">{done.slice(0, 20).map((r) => <RegCard key={r.id} r={r} onDone={load} />)}</div></>}
+    {!!done.length && <><h2><ClinTile name="shield" />Conferidos recentemente</h2><div className="rg-cards">{done.slice(0, 20).map((r) => <RegCard key={r.id} r={r} onDone={load} />)}</div></>}
   </section>;
 }

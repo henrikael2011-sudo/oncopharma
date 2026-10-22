@@ -22,3 +22,7 @@
 .reg-error{color:var(--cm-gold-ink-strong);background:var(--cm-gold-bg);border-left:4px solid var(--cm-gold-deep);padding:10px 12px;border-radius:10px;font-weight:700;margin:0}
 .reg-done h1::before{content:'';display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--cm-gold);margin-right:10px;vertical-align:middle}
 @media(min-width:900px){.reg-main{padding-top:40px}}
+/* Identidade Care v1 (mesma das telas com mockup): títulos Bricolage 800, corpo Manrope, ladrilhos Lucide nas seções. */
+.reg-card h1{font-weight:800}
+.reg-form legend{display:inline-flex;align-items:center;gap:10px;border-left:0;font-family:var(--cm-font-title),system-ui,sans-serif;font-size:18px}
+.reg-form legend .cm-tile{width:36px;height:36px}

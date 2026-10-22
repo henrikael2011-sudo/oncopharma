@@ -4,6 +4,7 @@
 // Os campos de diagnóstico/tratamento só registram o que o paciente sabe — o app não avalia nem decide nada.
 import { useEffect, useState } from 'react';
 import { DEMO_TAG } from '../DemoLabels';
+import { Tile } from './Icons';
 
 type Check = { valid: true; expiresAt: string; consentVersion: string };
 type Form = { submittedBy: '' | 'patient' | 'caregiver'; fullName: string; birthDate: string; phone: string; email: string; cgName: string; cgRelationship: string; cgPhone: string; diagnosis: string; regimen: string; treatmentStart: string; hospitalName: string; consent: boolean };
@@ -44,22 +45,22 @@ export function SelfRegistration({ token, testEnv }: { token: string; testEnv: b
         <p className="reg-kicker">Cadastro por convite da equipe</p>
         <h1>Seus dados para o acompanhamento</h1>
         <p className="reg-lead">Preencha uma vez. A equipe confere tudo antes de usar — você não precisa repetir na consulta. Convite válido até {when(check.expiresAt)}, uso único.</p>
-        <fieldset className="reg-who"><legend>Quem está preenchendo?</legend>
+        <fieldset className="reg-who"><legend><Tile name="user" />Quem está preenchendo?</legend>
           <label className="reg-choice"><input type="radio" name="who" value="patient" required checked={f.submittedBy === 'patient'} onChange={() => set('submittedBy', 'patient')} /> Sou o paciente</label>
           <label className="reg-choice"><input type="radio" name="who" value="caregiver" checked={f.submittedBy === 'caregiver'} onChange={() => set('submittedBy', 'caregiver')} /> Sou cuidador(a) do paciente</label>
         </fieldset>
-        <fieldset><legend>Paciente</legend>
+        <fieldset><legend><Tile name="heartPulse" />Paciente</legend>
           <label htmlFor="r-name">Nome completo</label><input id="r-name" autoComplete={caregiverFilling ? 'off' : 'name'} required minLength={3} maxLength={80} value={f.fullName} onChange={(e) => set('fullName', e.target.value)} />
           <label htmlFor="r-birth">Data de nascimento</label><input id="r-birth" type="date" required autoComplete={caregiverFilling ? 'off' : 'bday'} value={f.birthDate} onChange={(e) => set('birthDate', e.target.value)} />
           <label htmlFor="r-phone">Telefone (com DDD)</label><input id="r-phone" type="tel" inputMode="tel" required autoComplete={caregiverFilling ? 'off' : 'tel'} placeholder="(11) 91234-5678" maxLength={20} value={f.phone} onChange={(e) => set('phone', e.target.value)} />
           <label htmlFor="r-email">E-mail <span className="reg-opt">(opcional)</span></label><input id="r-email" type="email" autoComplete={caregiverFilling ? 'off' : 'email'} maxLength={120} value={f.email} onChange={(e) => set('email', e.target.value)} />
         </fieldset>
-        <fieldset><legend>Cuidador(a) {caregiverFilling ? '' : <span className="reg-opt">(opcional)</span>}</legend>
+        <fieldset><legend><Tile name="family" />Cuidador(a) {caregiverFilling ? '' : <span className="reg-opt">(opcional)</span>}</legend>
           <label htmlFor="r-cg-name">Nome do cuidador(a)</label><input id="r-cg-name" required={caregiverFilling} maxLength={80} value={f.cgName} onChange={(e) => set('cgName', e.target.value)} />
           <label htmlFor="r-cg-rel">Parentesco ou relação</label><input id="r-cg-rel" required={caregiverFilling} maxLength={40} placeholder="Filha, esposo, amiga…" value={f.cgRelationship} onChange={(e) => set('cgRelationship', e.target.value)} />
           <label htmlFor="r-cg-phone">Telefone do cuidador(a)</label><input id="r-cg-phone" type="tel" inputMode="tel" required={caregiverFilling} maxLength={20} value={f.cgPhone} onChange={(e) => set('cgPhone', e.target.value)} />
         </fieldset>
-        <fieldset><legend>Tratamento (como a equipe médica informou)</legend>
+        <fieldset><legend><Tile name="pill" gold />Tratamento (como a equipe médica informou)</legend>
           <label htmlFor="r-dx">Diagnóstico</label><input id="r-dx" required minLength={2} maxLength={120} placeholder="Ex.: câncer de mama" value={f.diagnosis} onChange={(e) => set('diagnosis', e.target.value)} />
           <label htmlFor="r-reg">Tratamento ou protocolo <span className="reg-opt">(se souber)</span></label><input id="r-reg" maxLength={120} placeholder="Ex.: quimioterapia a cada 21 dias" value={f.regimen} onChange={(e) => set('regimen', e.target.value)} />
           <label htmlFor="r-start">Início do tratamento <span className="reg-opt">(se souber)</span></label><input id="r-start" type="date" value={f.treatmentStart} onChange={(e) => set('treatmentStart', e.target.value)} />

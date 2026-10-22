@@ -87,4 +87,4 @@
 .hp-ai-label{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0;font-size:19px;color:var(--teal)}
 .hp-ai-text{margin:10px 0!important;line-height:1.55;color:var(--ink-teal)}
 .hp-ai-notice{display:inline-block;font-size:13px;font-weight:700;color:#fff;background:linear-gradient(90deg,var(--teal),var(--navy));border-radius:999px;padding:8px 14px}
-@media(max-width:900px){.hp-shell{grid-template-columns:1fr;gap:14px}.hp-nav{position:static;padding:12px 14px;border-radius:16px}.hp-nav-toggle{display:inline-flex;align-items:center}.hp-nav-links{display:none;margin-top:10px}.hp-nav.is-open .hp-nav-links{display:grid}}
+@media(max-width:900px){.hp-shell{grid-template-columns:1fr;gap:14px}.hp-nav{position:static;padding:12px 14px;border-radius:16px}.hp-nav-toggle{display:inline-flex;align-items:center}.hp-nav-links{display:none;margin-top:10px}.hp-nav.is-open .hp-nav-links{display:grid}}.cv-app .hp-shell.cv-hp{display:block}
