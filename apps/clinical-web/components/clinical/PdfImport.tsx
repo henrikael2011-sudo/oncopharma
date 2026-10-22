@@ -31,7 +31,7 @@ export function PdfImport() {
     } catch (e) { setErr(e instanceof Error ? e.message : 'Erro'); } finally { setBusy(false); }
   };
   if (!allowed) return <section aria-labelledby="imp-titulo"><h1 id="imp-titulo">Importar lista do hospital</h1>
-    <p role="note">A importação está disponível para Farmácia, Enfermagem e Gestão clínica.</p><Link href="/clinical">Voltar para pacientes</Link></section>;
+    <p role="note">A importação está disponível para Farmácia, Enfermagem e Gestão clínica.</p><Link href="/clinical/pacientes">Voltar para pacientes</Link></section>;
   const c = prev?.counts;
   return <section aria-labelledby="imp-titulo">
     <p className="kicker">ONCOPHARMA Clinical · {me.roleLabel}</p>
@@ -41,7 +41,7 @@ export function PdfImport() {
       <label htmlFor="imp-file">Arquivo PDF (até 2 MB)</label>
       <input id="imp-file" type="file" accept="application/pdf,.pdf" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
       <div className="clin-actions"><button type="submit" className="btn-primary" disabled={!file || busy}>{busy ? 'Lendo arquivo…' : 'Gerar prévia'}</button>
-        <Link className="btn-secondary" href="/clinical">Voltar para pacientes</Link></div>
+        <Link className="btn-secondary" href="/clinical/pacientes">Voltar para pacientes</Link></div>
     </form>}
     {err && <p role="alert" className="clin-error">{err}</p>}
     {prev && c && <section aria-labelledby="prev-titulo" className="imp-preview">
@@ -66,6 +66,6 @@ export function PdfImport() {
     </section>}
     <div aria-live="polite">{done && <p role="status" className="clin-ok">{done.status === 'discarded' ? 'Importação descartada. Nada foi alterado.'
       : `Importação confirmada: ${done.created ?? 0} novos, ${done.updated ?? 0} atualizados, ${done.conflicts ?? 0} divergências aplicadas, ${done.skipped ?? 0} não aplicados.`}</p>}</div>
-    {done && <p><Link href="/clinical" className="clin-back">Ver lista de pacientes</Link></p>}
+    {done && <p><Link href="/clinical/pacientes" className="clin-back">Ver lista de pacientes</Link></p>}
   </section>;
 }

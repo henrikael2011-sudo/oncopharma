@@ -9,6 +9,7 @@ export function createHospitalSimulator() {
     reset() { phase = 0; },
     advance() { phase = Math.min(phase + 1, 1); return phase; },
     get phase() { return phase; },
+    medications() { return JSON.parse(readFileSync(new URL('hospital-sim-medications.fhir.json', dir), 'utf8')); },
     feed() {
       return phase === 0
         ? { format: 'fhir_r4', payload: JSON.parse(readFileSync(new URL('hospital-sim-census.fhir.json', dir), 'utf8')) }
