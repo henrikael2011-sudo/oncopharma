@@ -90,3 +90,7 @@ test('foto: rota só servidor, sessão + origem + papel/vínculo pela API, guard
 test('Care: contador conta só doses com horário quando houver; opções compactas', () => {
   const ui = r('apps/care-web/components/care/Medications.tsx'); assert.match(ui, /timed\.length \? timed\.flatMap/); assert.match(ui, /cm-choices/);
 });
+test('CI: bootstrap do banco efêmero aplica TODAS as migrações (evita testes de RLS contra tabela ausente)', () => {
+  const sh = r('infra/scripts/bootstrap-ci-db.sh');
+  for (const f of fs.readdirSync('infra/migrations').filter((x) => /^\d{4}_.*\.sql$/.test(x))) assert.ok(sh.includes(f) || f === '0003_runtime_permissions.sql', `bootstrap-ci-db.sh não aplica ${f}`);
+});
