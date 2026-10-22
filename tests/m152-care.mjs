@@ -41,6 +41,8 @@ test('interface do Care: sem campo de UUID, sem rótulos de teste/fictício, sem
   for (const f of files('apps/care-web')) {
     // M16: a faixa de ambiente autorizado só renderiza com ONCO_ENVIRONMENT=test|hml (coberta por tests/m16-test-env-banner.test.mjs).
     if (f.endsWith('components/TestEnvBanner.tsx')) continue;
+    // M21: rótulos de dados fictícios do Care reunidos num único arquivo só de constantes (verificado em tests/m21-care-mobile-identidade.test.mjs).
+    if (f.endsWith('components/DemoLabels.tsx')) continue;
     const s = read(f).replace(/\/\/.*$/gm, '').replace(/\{\/\*[\s\S]*?\*\/\}/g, '');
     assert.doesNotMatch(s, /(?<!random)UUID|fictíci|sintétic|de teste|\(teste\)|demonstraç/i, f);
     assert.doesNotMatch(s, /dose_value|dose_unit|\bmg\b/, f);
