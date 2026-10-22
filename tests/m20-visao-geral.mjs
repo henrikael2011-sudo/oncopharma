@@ -29,7 +29,7 @@ test('API: GET clinical/overview só lê pacientes vinculados, usa limiar das re
   assert.ok(ep.length > 500);
   assert.match(ep, /ca\.oidc_issuer=\$2 AND ca\.oidc_sub=\$3 AND ca\.active=true/);
   assert.match(ep, /kind='temperature'/); assert.match(ep, /isFever\(/); assert.match(ep, /preparation_stability/);
-  assert.match(ep, /'clinical\.overview\.read'/); assert.match(ep, /href: '\/clinical\/conferencia-ia'/);
+  assert.match(ep, /this\.audit\(c, org, req, 'patient\.worklist', s, 'overview', \{ view: 'pharmacist_overview'/); // leitura auditada com a ação existente da lista (catálogo de auditoria do E2E) assert.match(ep, /href: '\/clinical\/conferencia-ia'/);
   assert.doesNotMatch(ep, /INSERT INTO (?!audit)|UPDATE |DELETE /);
 });
 test('BFF: somente GET overview liberado', async () => {

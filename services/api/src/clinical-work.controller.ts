@@ -82,7 +82,7 @@ export class ClinicalWorkController {
       const tasks = (await c.query(`SELECT count(*)::int AS n FROM clinical_tasks t WHERE t.organization_id=$1 AND t.status IN ('open','received') AND t.assignee_role=$4 AND t.patient_id IN (${LINKED})`, [...p, s.role])).rows[0].n as number;
       const soon = preps.filter((x) => x.st.remainingMinutes <= EXPIRING_SOON_HOURS * 60).length;
       const last = (await c.query(`SELECT source_system,at FROM allocation_sync_runs WHERE organization_id=$1 ORDER BY at DESC LIMIT 1`, [org])).rows[0];
-      await this.audit(c, org, req, 'clinical.overview.read', s, 'overview', { fever: fever.length, preparations: preps.length });
+      await this.audit(c, org, req, 'patient.worklist', s, 'overview', { view: 'pharmacist_overview', fever: fever.length, preparations: preps.length });
       const place = (r: { floor: string | null; room: string | null; bed: string | null }) => [r.floor, [r.room, r.bed].filter(Boolean).join('-') || null].filter(Boolean).join(' · ') || 'Sem alocação';
       return {
         role: s.role, fictional: true, generatedAt: new Date().toISOString(), lastSync: last ? { at: iso(last.at), source: last.source_system } : null,
