@@ -9,7 +9,7 @@
   --cm-sk-dot:#7FD3AE;--cm-sk-alt:#EEF4F8;--cm-on-dark:#E3F4EA;--cm-demo-a:#FFB627;--cm-demo-b:#FFC54D;--cm-demo-ink:#3D2500;--cm-red:#C8102E;--cm-white:#fff;
   --cm-grad:linear-gradient(110deg,var(--cm-green-900),var(--cm-green-teal) 45%,var(--cm-blue-800) 80%,var(--cm-blue-700));
   --cm-grad-btn:linear-gradient(100deg,var(--cm-green-800),var(--cm-blue-800));
-  background:var(--cm-bg);color:var(--cm-green-800);font-size:17px;position:relative;overflow-x:hidden;padding-bottom:104px;isolation:isolate}
+  background:var(--cm-bg);color:var(--cm-green-800);font-size:18px;position:relative;overflow-x:hidden;padding-bottom:104px;isolation:isolate}
 /* marcas d'água: logotipo Care dourado (~9%) nos cantos superior direito e inferior esquerdo */
 .care-page::before,.care-page::after{content:"";position:fixed;width:330px;height:330px;background:url(/brand/care-gold-deep.svg) no-repeat center/contain;opacity:.09;mix-blend-mode:multiply;pointer-events:none;z-index:-1}
 .care-page::before{right:-120px;top:60px}.care-page::after{left:-130px;bottom:110px}
@@ -100,4 +100,4 @@
 /* M22 visual — opções de adesão compactas (3 colunas) e "Alterar" discreto depois do registro */
 .cm-choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .care-page .cm-choices .btn-primary,.care-page .cm-choices .btn-secondary{min-height:48px;padding:6px 4px;font-size:14px;line-height:1.15;border-radius:14px;width:100%;gap:0;text-align:center}
-.cm-link{justify-self:end;background:none;border:0;color:var(--cm-green-800);font-weight:700;font-size:14px;text-decoration:underline;min-height:44px;padding:0 4px;cursor:pointer}
+.cm-link{justify-self:end;background:none;border:0;color:var(--cm-green-800);font-weight:700;font-size:14px;text-decoration:underline;min-height:48px;padding:0 4px;cursor:pointer}
