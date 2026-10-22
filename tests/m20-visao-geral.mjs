@@ -38,7 +38,7 @@ test('BFF: somente GET overview liberado', async () => {
 });
 test('tela: farmacêutico cai na Visão geral; atalho IA; febre; vencimentos ilustrativos; tag fictícia; IA não decide', () => {
   const page = r('apps/clinical-web/app/clinical/page.tsx');
-  assert.match(page, /me\.role === 'pharmacist' \? <PharmacistOverview \/> : <Worklist \/>/);
+  assert.match(page, /me\.role === 'pharmacist' \? <><PharmacistOverview \/><Worklist embedded \/><\/> : <Worklist \/>/); // Visão geral primeiro; lista vinculada abaixo
   assert.match(r('apps/clinical-web/app/clinical/pacientes/page.tsx'), /<Worklist \/>/);
   const v = r('apps/clinical-web/components/clinical/PharmacistOverview.tsx');
   for (const t of ['Pendências do dia', 'Alertas de febre', 'O que vence', 'Abrir conferência com IA', 'href="/clinical/conferencia-ia"', 'IA não decide', 'Prazos ilustrativos — conferir na bula do fabricante', 'Dados fictícios · demonstração não clínica', 'Conduta clínica definida pela equipe médica'])
