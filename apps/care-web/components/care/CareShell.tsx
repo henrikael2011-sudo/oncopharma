@@ -36,6 +36,27 @@ export const TABS: [string, string, IconName, (m: Me) => boolean][] = [
   ['/care/alertas', 'Alertas', 'bell', () => true],
 ];
 export const TEAM_DECIDES = 'O app só organiza e registra. Sua equipe de saúde avalia e decide.';
+// Mockups oficiais (desktop, 21/10): menu lateral com logotipo dourado, os 5 itens principais e, abaixo, as demais
+// funções existentes (não somem no desktop). Ícone ativo em ladrilho dourado.
+const SIDE: [string, string, IconName, (m: Me) => boolean][] = [
+  ['/care', 'Início', 'house', () => true],
+  ['/care/sintoma', 'Sintomas e febre', 'thermo', (m) => m.actor === 'patient' || m.scopes.includes('registrar_sintoma')],
+  ['/care/medicamentos', 'Medicação do dia', 'pill', (m) => m.actor === 'patient' || m.scopes.includes('ver_medicamentos')],
+  ['/care/equipe', 'Falar com a equipe', 'phone', () => true],
+  ['/care/alertas', 'Alertas', 'bell', () => true],
+];
+const MORE_ICON: Record<string, IconName> = { '/care/jornada': 'heartPulse', '/care/ajuda': 'siren', '/care/cuidador': 'family', '/care/preferencias': 'user' };
+const CRUMB: Record<string, string> = { '/care': 'Início', '/care/sintoma': 'Sintomas e febre', '/care/medicamentos': 'Medicação do dia', '/care/equipe': 'Falar com a equipe', '/care/alertas': 'Alertas', '/care/jornada': 'Minha jornada', '/care/ajuda': 'Preciso de ajuda', '/care/cuidador': 'Cuidador e privacidade', '/care/preferencias': 'Preferências' };
+type TopInfo = { cycle: string | null; caregiver: string | null };
+function useTopInfo(me: Me | null): TopInfo {
+  const [t, setT] = useState<TopInfo>({ cycle: null, caregiver: null });
+  useEffect(() => {
+    if (!me?.consent.accepted) return;
+    care<{ nextCycle: { number: number } | null }>('me/home').then((h) => setT((x) => ({ ...x, cycle: h.nextCycle ? `Ciclo ${h.nextCycle.number}` : null }))).catch(() => undefined);
+    if (me.actor === 'patient') care<{ links: { name: string; active: boolean }[] }>('me/caregivers').then((c) => setT((x) => ({ ...x, caregiver: c.links.find((l) => l.active)?.name ?? null }))).catch(() => undefined);
+  }, [me]);
+  return t;
+}
 export function Skeleton({ label = 'Carregando…' }: { label?: string }) {
   return <div className="cm-sk" role="status" aria-live="polite"><div className="cm-skl"><i />{label}</div><div className="cm-sb h" /><div className="cm-sb w8" /><div className="cm-sb w6" /></div>;
 }
@@ -57,11 +78,20 @@ export function CareShell({ children, testEnv = false }: { children: React.React
   else if (state.kind === 'error') content = <section className="care-panel" role="alert"><h1>Não foi possível abrir agora</h1><p className="care-lead">{state.message}</p><button className="btn-primary" onClick={() => void load()}>Tentar de novo</button></section>;
   else if (!state.me.consent.accepted) content = <Consent version={state.me.consent.required} onDone={load} />;
   else content = <Ctx.Provider value={{ me: state.me, reload: load, testEnv }}>{children}</Ctx.Provider>;
-  return <div className="care-page" data-font={me?.preferences.fontScale ?? 'normal'} data-contrast={me?.preferences.highContrast ? 'high' : 'normal'}>
+  const top = useTopInfo(me);
+  const crumb = CRUMB[path] ?? CRUMB[Object.keys(CRUMB).filter((k) => k !== '/care' && path.startsWith(k))[0]];
+  return <div className={me?.consent.accepted ? 'care-page cm-app' : 'care-page'} data-font={me?.preferences.fontScale ?? 'normal'} data-contrast={me?.preferences.highContrast ? 'high' : 'normal'}>
     {testEnv && <TestEnvBanner />}
     <header className="care-header"><div className="cm-head-row"><CareLogo />{me && <p className="cm-who"><b>{me.actor === 'caregiver' ? (me.patientName ?? 'Paciente') : (me.displayName ?? 'Você')}</b>{me.actor === 'caregiver' ? `Cuidador(a): ${me.displayName ?? 'você'}` : 'Paciente'}</p>}{loggedIn && <form action="/api/auth/logout" method="post"><button type="submit" className="btn-on-dark">Sair</button></form>}</div>{testEnv && <span className="cm-demo">{DEMO_TAG}</span>}</header>
     {me?.consent.accepted && <nav className="care-nav" aria-label="Menu principal"><ul>{NAV.filter(([, , ok]) => ok(me)).map(([href, label]) => <li key={href}><Link href={href} aria-current={path === href ? 'page' : undefined}>{label}</Link></li>)}</ul></nav>}
-    <main id="conteudo" className="care-main">{content}</main>
+    {me?.consent.accepted && <SideNav me={me} path={path} />}
+    {me?.consent.accepted && <div className="cm-top" aria-label="Resumo do acompanhamento" role="region">
+      <dl><div><dt>Paciente</dt><dd>{me.actor === 'caregiver' ? (me.patientName ?? '—') : (me.displayName ?? '—')}</dd></div>
+        {top.cycle && <div><dt>Tratamento</dt><dd>{top.cycle}</dd></div>}
+        {me.actor === 'caregiver' ? <div><dt>Cuidador(a)</dt><dd>{me.displayName ?? 'você'}</dd></div> : top.caregiver && <div><dt>Cuidador(a)</dt><dd>{top.caregiver}</dd></div>}</dl>
+      {testEnv && <span className="cm-demo">{DEMO_TAG}</span>}
+      <form action="/api/auth/logout" method="post"><button type="submit" className="btn-on-dark">Sair</button></form></div>}
+    <main id="conteudo" className="care-main">{me?.consent.accepted && crumb && <p className="cm-crumb">Care › {crumb}</p>}{content}{me?.consent.accepted && <p className="cm-foot">O aplicativo só organiza e registra informações. <b>Quem avalia e decide é a sua equipe de saúde.</b> Em caso de dúvida, fale com a equipe.</p>}</main>
     {me?.consent.accepted && <TabBar me={me} path={path} />}
   </div>;
 }
@@ -91,6 +121,13 @@ function Welcome() {
 // Logotipo Care dourado (care-gold.svg, aprovado). Brand.tsx canônico segue intacto para os demais apps.
 function CareLogo() {
   return <Link href="/care" className="brand" aria-label="ONCOPHARMA Care — página inicial"><img src="/brand/care-gold.svg" width={40} height={40} alt="" /><span><strong>ONCO<span>PHARMA</span></strong><small>CARE</small></span></Link>;
+}
+function SideNav({ me, path }: { me: Me; path: string }) {
+  const on = (href: string) => (href === '/care' ? path === href : path.startsWith(href));
+  const more = NAV.filter(([h, , ok]) => MORE_ICON[h] && ok(me));
+  return <aside className="cm-side" aria-label="Menu lateral"><CareLogo />
+    <nav aria-label="Menu principal (lateral)"><ul>{SIDE.filter(([, , , ok]) => ok(me)).map(([href, label, icon]) => <li key={href}><Link href={href} aria-current={on(href) ? 'page' : undefined}><Tile name={icon} gold={on(href)} size={18} />{label}</Link></li>)}</ul>
+      {more.length > 0 && <><p className="cm-side-sec">Mais</p><ul>{more.map(([href, label]) => <li key={href}><Link href={href} aria-current={on(href) ? 'page' : undefined}><Tile name={MORE_ICON[href]} gold={on(href)} size={18} />{label}</Link></li>)}</ul></>}</nav></aside>;
 }
 function TabBar({ me, path }: { me: Me; path: string }) {
   const tabs = TABS.filter(([, , , ok]) => ok(me));

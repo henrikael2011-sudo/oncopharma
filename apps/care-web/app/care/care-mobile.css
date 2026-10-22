@@ -101,3 +101,87 @@
 .cm-choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .care-page .cm-choices .btn-primary,.care-page .cm-choices .btn-secondary{min-height:48px;padding:6px 4px;font-size:14px;line-height:1.15;border-radius:14px;width:100%;gap:0;text-align:center}
 .cm-link{justify-self:end;background:none;border:0;color:var(--cm-green-800);font-weight:700;font-size:14px;text-decoration:underline;min-height:48px;padding:0 4px;cursor:pointer}
+/* Mockups oficiais 21/10 — tipografia: títulos Bricolage Grotesque 800, corpo Manrope */
+.care-page{font-family:var(--cm-font-body),'Manrope',system-ui,sans-serif}
+.care-page h1,.care-page h2,.care-page h3,.care-page .cm-big,.care-page .brand strong,.cm-dose-time,.cm-temp-val{font-family:var(--cm-font-title),'Bricolage Grotesque',system-ui,sans-serif;font-weight:800}
+.care-page .btn-primary,.care-page .btn-secondary,.care-page .btn-danger{font-family:var(--cm-font-title),'Bricolage Grotesque',system-ui,sans-serif}
+.cm-side,.cm-top,.cm-crumb,.cm-foot{display:none}
+/* Desktop (≥1024px): menu lateral verde-escuro→azul com logotipo dourado, faixa superior com o resumo, conteúdo largo */
+@media(min-width:1024px){
+  .care-page.cm-app{display:grid;grid-template-columns:240px minmax(0,1fr);grid-template-rows:auto auto 1fr;padding-bottom:0;min-height:100vh}
+  .care-page.cm-app>[data-testid=test-env-banner]{grid-column:1/-1;grid-row:1}
+  .care-page.cm-app>.cm-top{grid-row:2}.care-page.cm-app>.care-main{grid-row:3}
+  .care-page.cm-app .care-header,.care-page.cm-app .care-nav,.care-page.cm-app .cm-tabs,.care-page.cm-app .cm-more{display:none}
+  .cm-side{display:block;grid-column:1;grid-row:2/4;align-self:stretch;background:linear-gradient(180deg,var(--cm-green-900),var(--cm-green-teal) 60%,var(--cm-green-800));color:var(--cm-white);padding:20px 14px;min-height:100vh}
+  .cm-side .brand{display:flex;gap:10px;align-items:center;color:var(--cm-white);text-decoration:none;margin:0 6px 30px}
+  .cm-side ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+  .cm-side a{display:flex;gap:12px;align-items:center;min-height:52px;padding:6px 10px;border-radius:14px;color:var(--cm-on-dark);text-decoration:none;font-weight:700;font-size:15px;border:1px solid transparent}
+  .cm-side a:hover{background:rgba(255,255,255,.06)}
+  .cm-side a[aria-current=page]{background:linear-gradient(90deg,rgba(255,255,255,.1),transparent);border-color:rgba(242,196,109,.35);color:var(--cm-white);box-shadow:inset 3px 0 0 var(--cm-gold)}
+  .cm-side .cm-tile{width:34px;height:34px;border-radius:10px;color:var(--cm-on-dark);background:rgba(255,255,255,.08);box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 4px 10px -4px rgba(0,0,0,.4)}
+  .cm-side .cm-tile-gold{color:var(--cm-gold-ink);background:linear-gradient(180deg,var(--cm-gold-tile),var(--cm-gold-light) 55%,var(--cm-gold-deep))}
+  .cm-side-sec{margin:22px 10px 6px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--cm-mint)}
+  .cm-top{display:flex;grid-column:2;align-items:center;gap:24px;padding:12px 32px;background:var(--cm-grad);color:var(--cm-white);border-bottom:2px solid var(--cm-gold)}
+  .cm-top dl{display:flex;gap:28px;margin:0;flex:1;flex-wrap:wrap}
+  .cm-top dt{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--cm-gold-light)}
+  .cm-top dd{margin:2px 0 0;font-weight:700;font-size:15px}.cm-top dl>div:first-child dd{font-size:18px;font-weight:800}
+  .care-page.cm-app .care-main{grid-column:2;max-width:1180px;width:100%;margin:0;padding:28px 40px 40px}
+  .cm-crumb{display:block;margin:0;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--cm-sub)}
+  .care-page.cm-app .care-main h1{font-size:clamp(40px,4vw,56px);letter-spacing:-.04em}
+  .care-page.cm-app .care-main .cm-note{display:none}
+  .cm-foot{display:block;margin:12px 0 0;padding:12px 16px;border-radius:12px;background:var(--cm-mint-50);border:1px solid var(--cm-line);font-size:14px;color:var(--cm-sub)}.cm-foot b{color:var(--cm-green-900)}
+  .care-page.cm-app::before{right:-60px;top:80px;width:520px;height:520px}.care-page.cm-app::after{left:180px;bottom:-60px;width:420px;height:420px}
+  .cm-grid2{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:18px;align-items:start}
+  .cm-grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;align-items:stretch}
+  .care-page .btn-primary,.care-page .btn-secondary,.care-page .btn-danger{min-height:56px}
+}
+/* botões grandes 76px (mockup) nas ações principais */
+.cm-btn-big{min-height:76px!important;font-size:20px!important}
+/* Início (mockups 21/10) */
+.care-page .care-main>.cm-hero,.care-page .cm-today{display:none}
+.cm-mob{display:inline}
+.cm-home-head{order:-3}.care-page .cm-home-alert{order:-2}
+.cm-home-cards{display:grid;gap:14px}
+.cm-name{margin:2px 0 0;font-weight:700;color:var(--cm-green-900)}
+.cm-today dl{margin:0;display:grid}.cm-today dl>div{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--cm-line-soft)}.cm-today dl>div:first-child{border-top:0}
+.cm-today dt{display:flex;gap:8px;align-items:center;color:var(--cm-sub);font-size:14px}.cm-today dd{margin:0;font-weight:800;color:var(--cm-green-900);font-size:14px}
+.cm-soon{margin:0;padding:10px 12px;border-radius:12px;background:var(--cm-gold-pill);color:var(--cm-gold-ink);border:1px dashed var(--cm-gold);font-size:14px;line-height:1.45}
+.cm-soon a{color:var(--cm-gold-ink-strong);font-weight:800}
+.care-page .cm-home-alert{display:grid;gap:8px}.care-page .cm-home-alert p{margin:0}
+.cm-desk{display:none}
+@media(min-width:1024px){
+  .cm-desk{display:inline}.cm-mobile-only{display:none!important}
+  .care-page .cm-today{display:grid}.care-page .cm-home-alert{order:0}
+  .cm-mob{display:none}
+  .care-page .care-main>.cm-hero{display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:center;padding:22px 24px;border-radius:18px;background:var(--cm-grad);color:var(--cm-white);border:2px solid var(--cm-gold);box-shadow:0 18px 40px -20px rgba(8,64,47,.6)}
+  .cm-hero .cm-tile{width:60px;height:60px;border-radius:16px}
+  .cm-hero h2{color:var(--cm-white);font-size:28px;margin:0}.cm-hero p{margin:4px 0 0;color:var(--cm-on-dark);font-size:14px}
+  .cm-hero .cm-soon{grid-column:1/-1}
+  .btn-hero{min-height:56px;padding:0 22px;border-radius:12px;border:0;background:var(--cm-white);color:var(--cm-green-900);font:inherit;font-family:var(--cm-font-title),system-ui,sans-serif;font-weight:800;font-size:18px;cursor:pointer;box-shadow:0 8px 20px -10px rgba(0,0,0,.5)}
+  .cm-home-cards{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .cm-home-cards .care-card{display:grid;gap:8px;align-content:start}
+  .cm-home-alert{max-width:none}
+  .care-page .cm-inline-btn{width:auto;justify-self:start;padding:0 22px}
+}
+/* Medicação do dia (mockups 21/10) */
+.cm-title-row{display:flex!important;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.cm-counter{display:none;margin:0;text-align:right}.cm-counter b{display:block;font-family:var(--cm-font-title),system-ui,sans-serif;font-size:32px;color:var(--cm-green-900)}.cm-counter span{font-size:13px;color:var(--cm-sub)}
+.cm-med-rows{list-style:none;margin:0;padding:0;display:grid}
+.cm-med-row{display:grid;grid-template-columns:64px minmax(0,1fr) auto 30px;gap:10px 12px;align-items:center;padding:12px 0;border-top:1px solid var(--cm-line-soft)}.cm-med-row:first-child{border-top:0}
+.cm-med-row .cm-dose-time{font-size:18px}
+.cm-med-main{display:grid;gap:2px}.cm-med-main b{color:var(--cm-green-900)}
+.cm-med-act{grid-column:1/-1;display:grid}
+.cm-side-col{display:grid;gap:14px;align-content:start}
+.care-page .cm-grid2{display:grid;gap:14px}
+@media(min-width:1024px){.cm-counter{display:block}.cm-mobile-lead{display:none}.care-page .cm-grid2{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:18px;align-items:start}.cm-med-act{grid-column:2/-1}}
+/* Sintomas e febre (mockups 21/10): gráfico à esquerda, registro de temperatura à direita; ±0,1 em dois botões */
+.cm-temp-grid{display:grid;gap:14px}
+.cm-temp{grid-template-columns:1fr 1fr!important;grid-template-areas:"v v" "a b"}
+.cm-temp .cm-temp-val{grid-area:v;justify-content:flex-start;font-size:48px}
+.cm-temp>button:first-of-type{grid-area:a}.cm-temp>button:last-of-type{grid-area:b}
+.care-page .cm-temp-btn{font-size:20px}
+.cm-sym-card{display:grid;gap:10px}
+@media(min-width:1024px){.cm-temp-grid{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:18px;align-items:start}}
+.cm-actions-row{display:grid;gap:10px}@media(min-width:1024px){.cm-actions-row{grid-template-columns:auto auto;justify-content:start}.cm-actions-row>*{padding:0 22px}.cm-alert-fever{background:var(--cm-gold-bg)}}
+.cm-emergency{display:grid;gap:10px}@media(min-width:1024px){.cm-cols2{columns:2;column-gap:40px}}
+@media(min-width:1024px){.cm-sym-card .choices{grid-template-columns:1fr 1fr}.cm-sym-card .choices legend{grid-column:1/-1}.cm-sym-card .choices>.care-note{grid-column:1/-1}}
