@@ -1,0 +1,15 @@
+/* M22 — transcrição: só tokens existentes (var()); dourado apenas via .sev-review/.clin-warn (pendência/alerta), como nas demais telas. */
+.clin-transcr{display:grid;gap:14px}.clin-transcr h2{margin:6px 0}
+.clin-meta{color:var(--ink-muted);font-size:14px;margin:2px 0}
+.tr-entry{display:flex;flex-wrap:wrap;gap:10px}
+.tr-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;justify-content:space-between}.tr-head h2{margin:0}
+.tr-sum p{margin:4px 0}.tr-times{color:var(--navy-text)}
+.tr-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 16px}.tr-grid>div{display:grid}
+.clin-times{border:1px solid var(--navy-150);border-radius:12px;padding:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}.clin-times span{display:inline-flex;gap:4px;align-items:center}
+.tr-x{border:0;background:none;color:var(--ink-muted);font-size:20px;min-width:44px;min-height:44px;cursor:pointer}
+.clin-trail{margin:8px 0 0;padding-left:20px;line-height:1.6;font-size:14px}
+@media(max-width:640px){.tr-grid{grid-template-columns:1fr}}
+/* O seletor canônico ".workflow-form .btn-secondary)" tem um parêntese a mais e não se aplica: aqui, botão secundário legível no formulário. */
+.clin-transcr .workflow-form .btn-secondary{background:#fff;color:var(--navy);border:2px solid var(--navy)}
+.clin-transcr .workflow-form .tr-x{background:none;color:var(--ink-muted);margin:0;padding:0 6px}
+.clin-transcr .clin-times .btn-secondary{margin:0}
