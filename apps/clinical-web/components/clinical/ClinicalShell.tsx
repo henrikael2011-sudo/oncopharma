@@ -37,12 +37,12 @@ export function ClinicalShell({ children, testEnv = false }: { children: React.R
   else content = <Ctx.Provider value={state.me}>{children}</Ctx.Provider>;
   return <div className="clinical-page">
     {testEnv && <TestEnvBanner />}
-    <header className={`clinical-header${me?.role === 'pharmacist' && path === '/clinical' ? ' clinical-header--overview' : ''}`}><Brand variant="clinical" />
+    <header className={`clinical-header${me?.role === 'pharmacist' && path === '/clinical/visao-geral' ? ' clinical-header--overview' : ''}`}><Brand variant="clinical" />
       {me && <nav className="clin-nav" aria-label="Seções do Clinical">{[
-        ...(me.role === 'pharmacist' ? [['/clinical', 'Visão geral']] : []), ['/clinical/pacientes', 'Pacientes'],
+        ...(me.role === 'pharmacist' ? [['/clinical/visao-geral', 'Visão geral']] : []), ['/clinical/pacientes', 'Pacientes'],
         ...(me.role !== 'physician' ? [['/clinical/conferencia-ia', 'Conferência com IA']] : []),
         ...(me.roles?.includes('physician') ? [['/clinical/solicitacoes', 'Pedidos ao médico']] : [])].map(([href, label]) => {
-        const on = href === '/clinical' ? path === '/clinical' : path.startsWith(href) || (href === '/clinical/pacientes' && me.role !== 'pharmacist' && path === '/clinical');
+        const on = path.startsWith(href) || (href === '/clinical/pacientes' && path === '/clinical');
         return <Link key={href} href={href} aria-current={on ? 'page' : undefined}>{label}</Link>; })}</nav>}
       <DemoTag />
       {loggedIn && <div className="clin-user">{me && <span>{me.name ? `${me.name} · ` : ''}{me.roleLabel} · MFA confirmado</span>}<form action="/api/auth/logout" method="post"><button type="submit" className="btn-on-dark">Sair</button></form></div>}

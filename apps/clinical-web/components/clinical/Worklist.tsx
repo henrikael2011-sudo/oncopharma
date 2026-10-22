@@ -18,7 +18,7 @@ function PatientRow({ p }: { p: Row }) {
     <span className="pr-pending">{p.pending === 0 ? 'Sem pendências' : p.pending === 1 ? '1 pendência' : `${p.pending} pendências`}</span>
   </Link></li>;
 }
-export function Worklist({ embedded = false }: { embedded?: boolean } = {}) {
+export function Worklist() {
   const me = useStaff();
   const [data, setData] = useState<WL | null>(null), [q, setQ] = useState(''), [err, setErr] = useState(''), [byLocation, setByLocation] = useState(true);
   const [syncing, setSyncing] = useState(false), [syncMsg, setSyncMsg] = useState('');
@@ -46,7 +46,7 @@ export function Worklist({ embedded = false }: { embedded?: boolean } = {}) {
   }, [rows]);
   return <section aria-labelledby="lista-titulo">
     <div className="clin-toolbar">
-      <div><p className="kicker">ONCOPHARMA Clinical · {me.roleLabel}</p>{embedded ? <h2 id="lista-titulo">Pacientes</h2> : <h1 id="lista-titulo">Pacientes</h1>}</div>
+      <div><p className="kicker">ONCOPHARMA Clinical · {me.roleLabel}</p><h1 id="lista-titulo">Pacientes</h1></div>
       <form role="search" className="clin-search" onSubmit={(e) => { e.preventDefault(); void load(q.trim()); }}>
         <label htmlFor="busca">Buscar paciente</label>
         <input id="busca" type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Nome ou prontuário" minLength={2} maxLength={60} autoComplete="off" />

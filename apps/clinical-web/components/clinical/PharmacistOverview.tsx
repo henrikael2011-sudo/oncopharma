@@ -28,7 +28,7 @@ export function PharmacistOverview() {
     <div className="vg-sub">
       <div><p className="vg-crumb">Clinical › Visão geral do farmacêutico</p>
         <h1 id="vg-titulo">{greet()}, {me.name ?? me.roleLabel} — {today()}</h1></div>
-      <p className="vg-sync">{d?.lastSync ? <>Última sincronização {d.lastSync.source} (fictício): <b>{hour(d.lastSync.at)} (BRT)</b></> : 'Sem sincronização hospitalar registrada ainda.'}<br />
+      <p className="vg-sync">{d?.lastSync ? <>Última sincronização {d.lastSync.source} (fictício): <b>{hour(d.lastSync.at)} (BRT)</b></> : 'Alocação ainda não sincronizada com o hospital.'}<br />
         <span className="vg-demo-inline">Dados fictícios · demonstração não clínica</span></p>
     </div>
     {err && <p role="alert" className="clin-error">{err} <button className="btn-secondary" onClick={() => void load()}>Tentar de novo</button></p>}

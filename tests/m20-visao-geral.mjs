@@ -36,9 +36,10 @@ test('BFF: somente GET overview liberado', async () => {
   const s = r('apps/clinical-web/lib/work-proxy.ts');
   assert.match(s, /\['GET', \/\^overview\$\/\]/); assert.doesNotMatch(s, /\['POST', \/\^overview/);
 });
-test('tela: farmacêutico cai na Visão geral; atalho IA; febre; vencimentos ilustrativos; tag fictícia; IA não decide', () => {
-  const page = r('apps/clinical-web/app/clinical/page.tsx');
-  assert.match(page, /me\.role === 'pharmacist' \? <><PharmacistOverview \/><Worklist embedded \/><\/> : <Worklist \/>/); // Visão geral primeiro; lista vinculada abaixo
+test('tela: Visão geral do farmacêutico em /clinical/visao-geral (1º item do menu); atalho IA; febre; vencimentos ilustrativos; tag fictícia; IA não decide', () => {
+  const page = r('apps/clinical-web/app/clinical/visao-geral/page.tsx');
+  assert.match(r('apps/clinical-web/app/clinical/page.tsx'), /return <Worklist \/>/); // entrada = lista (E2E 06)
+  assert.match(page, /me\.role === 'pharmacist' \? <PharmacistOverview \/> : <Worklist \/>/);
   assert.match(r('apps/clinical-web/app/clinical/pacientes/page.tsx'), /<Worklist \/>/);
   const v = r('apps/clinical-web/components/clinical/PharmacistOverview.tsx');
   for (const t of ['Pendências do dia', 'Alertas de febre', 'O que vence', 'Abrir conferência com IA', 'href="/clinical/conferencia-ia"', 'IA não decide', 'Prazos ilustrativos — conferir na bula do fabricante', 'Dados fictícios · demonstração não clínica', 'Conduta clínica definida pela equipe médica'])
@@ -46,7 +47,7 @@ test('tela: farmacêutico cai na Visão geral; atalho IA; febre; vencimentos ilu
   assert.match(v, /className="vg-watermark" src="\/brand\/clinical.svg" alt="" aria-hidden="true"/);
   assert.match(v, /work<Overview>\('overview'\)/); assert.doesNotMatch(v, /fetch\(/);
   const shell = r('apps/clinical-web/components/clinical/ClinicalShell.tsx');
-  assert.match(shell, /<DemoTag \/>/); assert.match(r('apps/clinical-web/components/clinical/DemoTag.tsx'), /⚠ Dados fictícios · demonstração não clínica/); assert.match(shell, /'Visão geral'/); assert.match(shell, /path === '\/clinical' \? ' clinical-header--overview'/);
+  assert.match(shell, /<DemoTag \/>/); assert.match(r('apps/clinical-web/components/clinical/DemoTag.tsx'), /⚠ Dados fictícios · demonstração não clínica/); assert.match(shell, /'Visão geral'/); assert.match(shell, /path === '\/clinical\/visao-geral' \? ' clinical-header--overview'/); assert.match(shell, /\['\/clinical\/visao-geral', 'Visão geral'\]/);
   assert.match(r('packages/design-system/app/globals.css'), /\.clinical-header\.clinical-header--overview\{background:linear-gradient\(90deg,var\(--teal\),var\(--emerald\)\)\}/);
   assert.match(shell, /href="\/api\/auth\/login">Entrar com identidade institucional/); // login segue no Keycloak (OIDC)
 });
