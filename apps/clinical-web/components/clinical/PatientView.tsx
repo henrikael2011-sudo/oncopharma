@@ -10,8 +10,9 @@ import { TimelineTab } from './TimelineTab';
 import { RecordTab, MEDICATION_KEYS, LAB_KEYS } from './RecordTab';
 import { MedicalRequestList } from './MedicalRequests';
 import { AllocationPanel } from './AllocationPanel';
+import { MedTranscriptionTab } from './MedTranscriptionTab';
 
-const TABS = [['visao', 'Visão geral'], ['alertas', 'Alertas'], ['tarefas', 'Tarefas'], ['preciclo', 'Pré-ciclo'], ['linha', 'Linha do tempo'], ['prontuario', 'Prontuário'], ['medicamentos', 'Medicamentos'], ['exame', 'Exame'], ['solicitacoes', 'Solicitações médicas']] as const;
+const TABS = [['visao', 'Visão geral'], ['alertas', 'Alertas'], ['tarefas', 'Tarefas'], ['preciclo', 'Pré-ciclo'], ['linha', 'Linha do tempo'], ['prontuario', 'Prontuário'], ['medicamentos', 'Medicamentos'], ['exame', 'Exame'], ['solicitacoes', 'Solicitações médicas'], ['transcricao', 'Transcrição de medicamentos']] as const;
 type Tab = (typeof TABS)[number][0];
 export function PatientView({ id }: { id: string }) {
   const [d, setD] = useState<PatientData | null>(null), [err, setErr] = useState(''), [tab, setTab] = useState<Tab>('alertas');
@@ -21,11 +22,11 @@ export function PatientView({ id }: { id: string }) {
     const n = e.key === 'ArrowRight' ? (i + 1) % TABS.length : e.key === 'ArrowLeft' ? (i + TABS.length - 1) % TABS.length : -1;
     if (n >= 0) { e.preventDefault(); setTab(TABS[n][0]); document.getElementById(`tab-${TABS[n][0]}`)?.focus(); }
   };
-  if (err) return <section className="clin-card" role="alert"><h1>Paciente indisponível</h1><p>{err}</p><Link href="/clinical">Voltar para a lista de pacientes</Link></section>;
+  if (err) return <section className="clin-card" role="alert"><h1>Paciente indisponível</h1><p>{err}</p><Link href="/clinical/pacientes">Voltar para a lista de pacientes</Link></section>;
   if (!d) return <p role="status">Carregando paciente…</p>;
   const openAlerts = d.alerts.filter((a) => !a.final).length, openTasks = d.tasks.filter((t) => t.status === 'open' || t.status === 'received').length;
   return <article aria-labelledby="pac-nome">
-    <nav aria-label="Navegação"><Link href="/clinical" className="clin-back">Lista de pacientes</Link></nav>
+    <nav aria-label="Navegação"><Link href="/clinical/pacientes" className="clin-back">Lista de pacientes</Link></nav>
     <header className="pac-header"><h1 id="pac-nome">{d.patient.name}</h1><p>{d.patient.record ? `Prontuário ${d.patient.record}` : 'Sem prontuário'} · {openAlerts} {openAlerts === 1 ? 'alerta aberto' : 'alertas abertos'} · {openTasks} {openTasks === 1 ? 'tarefa aberta' : 'tarefas abertas'}</p></header>
     <AllocationPanel id={id} data={d.allocation} onChange={load} />
     <div role="tablist" aria-label="Informações do paciente" className="tabs">
@@ -37,6 +38,7 @@ export function PatientView({ id }: { id: string }) {
       {tab === 'preciclo' && <PreCycleTab id={id} />}
       {tab === 'linha' && <TimelineTab id={id} />}
       {tab === 'solicitacoes' && <MedicalRequestList patientId={id} />}
+      {tab === 'transcricao' && <MedTranscriptionTab patientId={id} />}
       {tab === 'prontuario' && <RecordTab id={id} />}
       {tab === 'medicamentos' && <RecordTab id={id} only={MEDICATION_KEYS} />}
       {tab === 'exame' && <RecordTab id={id} only={LAB_KEYS} />}

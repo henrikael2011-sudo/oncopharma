@@ -1,0 +1,3 @@
+Bricolage Grotesque — Copyright 2022 The Bricolage Grotesque Project Authors (https://github.com/ateliertriay/bricolage). Arquivo: BricolageGrotesque-Variable.ttf.
+Manrope — Copyright 2018 The Manrope Project Authors (https://github.com/sharanda/manrope). Arquivo: Manrope-Variable.ttf.
+Ambas licenciadas sob a SIL Open Font License, Version 1.1 (https://openfontlicense.org).

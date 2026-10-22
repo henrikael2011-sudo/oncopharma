@@ -47,3 +47,25 @@ export function assessSymptom(a: SymptomAnswers) {
     explanation: urgent ? `Regra demonstrativa: prioridade por ${reasons.join(', ')}. Exige avaliação profissional; não representa diagnóstico ou conduta.` : 'Regra demonstrativa: exige avaliação profissional. Não representa diagnóstico ou conduta.',
     details: { intensity: a.intensity, onset: a.onset, redFlags: a.redFlags, questionnaire: 'care-demo-v1' } };
 }
+// M21.2 — temperatura registrada no Care. Limiar = regra aprovada care-demo-v1 (RED_FLAGS.febre: 37,8 °C ou mais).
+// Leitura >= limiar segue EXATAMENTE o caminho do relato com sinal de alerta "febre" (assessSymptom), sem texto novo.
+export const FEVER_THRESHOLD_C = 37.8;
+export const TEMPERATURE_RANGE = { min: 34.0, max: 43.0 } as const;
+export type TemperatureInput = { celsius: number; measuredAt: Date; requestId: string };
+export function parseTemperature(b: Record<string, unknown>, now = new Date()): TemperatureInput {
+  if (!b || typeof b !== 'object') throw new BadRequestException('Temperatura inválida');
+  const raw = typeof b.celsius === 'string' ? b.celsius.replace(',', '.') : b.celsius;
+  const n = typeof raw === 'number' ? raw : typeof raw === 'string' && /^\d{2}(\.\d)?$/.test(raw) ? Number(raw) : NaN;
+  if (!Number.isFinite(n) || Math.round(n * 10) !== n * 10) throw new BadRequestException('Informe a temperatura com até uma casa decimal');
+  if (n < TEMPERATURE_RANGE.min || n > TEMPERATURE_RANGE.max) throw new BadRequestException('Temperatura fora da faixa possível (34,0 a 43,0 °C). Confira a medição.');
+  let measuredAt = now;
+  if (b.measuredAt !== undefined) { measuredAt = new Date(String(b.measuredAt)); if (Number.isNaN(measuredAt.getTime()) || measuredAt.getTime() > now.getTime() + 5 * 60_000 || measuredAt.getTime() < now.getTime() - 7 * 86_400_000) throw new BadRequestException('Horário da medição inválido'); }
+  const requestId = String(b.requestId);
+  if (!UUID.test(requestId)) throw new BadRequestException('requestId deve ser UUID');
+  return { celsius: Math.round(n * 10) / 10, measuredAt, requestId };
+}
+export function isFever(celsius: number) { return Math.round(celsius * 10) >= Math.round(FEVER_THRESHOLD_C * 10); }
+/** Leitura febril => mesmas respostas de um relato com sinal de alerta "febre" (regra e mensagens existentes). */
+export function temperatureAsSymptom(t: TemperatureInput): SymptomAnswers {
+  return { symptomCode: 'fever', intensity: 'leve', onset: 'hoje', redFlags: ['febre'], description: RED_FLAGS.febre, requestId: t.requestId };
+}

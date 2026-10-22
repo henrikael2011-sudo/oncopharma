@@ -6,7 +6,7 @@ import { care, dateBR, type Scope } from '../../lib/care-client';
 type Link = { id: string; name: string | null; scopes: Scope[]; createdAt: string; expiresAt: string; active: boolean; revokedAt: string | null };
 type Data = { links: Link[]; invites: { id: string; termDays: number; expiresAt: string }[]; accessLog: { action: string; at: string; name: string | null }[] };
 const SCOPES: [Scope, string][] = [['ver_jornada', 'Ver minha jornada (sessões e relatos)'], ['ver_medicamentos', 'Ver meus medicamentos'], ['registrar_sintoma', 'Registrar sintomas por mim']];
-const ACTION: Record<string, string> = { 'care.me.read': 'Entrou no aplicativo', 'care.home.read': 'Abriu o início', 'care.journey.read': 'Viu a jornada', 'care.medications.read': 'Viu os medicamentos', 'care.symptom.created': 'Registrou um sintoma' };
+const ACTION: Record<string, string> = { 'care.me.read': 'Entrou no aplicativo', 'care.home.read': 'Abriu o início', 'care.journey.read': 'Viu a jornada', 'care.medications.read': 'Viu os medicamentos', 'care.symptom.created': 'Registrou um sintoma', 'care.temperature.created': 'Registrou uma temperatura', 'care.temperature.read': 'Viu as temperaturas' };
 const when = (d: string) => new Date(d).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
 export function Caregivers() {
   const [d, setD] = useState<Data | null>(null), [term, setTerm] = useState(30), [code, setCode] = useState<{ code: string; expiresAt: string } | null>(null), [msg, setMsg] = useState(''), [err, setErr] = useState('');
@@ -27,7 +27,7 @@ export function Caregivers() {
       {d.links.filter((l) => l.active).length === 0 ? <p>Ninguém por enquanto.</p> : d.links.filter((l) => l.active).map((l) => <article key={l.id} className="care-review" aria-label={`Cuidador ${l.name ?? ''}`}>
         <h3>{l.name ?? 'Cuidador'}</h3><p>Acesso até {dateBR(l.expiresAt)}.</p>
         <fieldset className="choices"><legend>O que {l.name ?? 'essa pessoa'} pode fazer</legend>{SCOPES.map(([k, t]) => <label key={k} className="choice"><input type="checkbox" checked={l.scopes.includes(k)} onChange={(e) => void toggle(l, k, e.target.checked)} /> {t}</label>)}</fieldset>
-        <button type="button" className="btn-danger" onClick={() => void act(() => care(`me/caregivers/${l.id}/revoke`, { method: 'POST', body: {} }), 'Acesso encerrado.')}>Encerrar acesso agora</button>
+        <button type="button" className="btn-secondary" onClick={() => void act(() => care(`me/caregivers/${l.id}/revoke`, { method: 'POST', body: {} }), 'Acesso encerrado.')}>Encerrar acesso agora</button>
       </article>)}
       {d.links.some((l) => !l.active) && <p className="care-note">Acessos encerrados: {d.links.filter((l) => !l.active).map((l) => `${l.name ?? 'Cuidador'} (${l.revokedAt ? 'encerrado' : 'prazo vencido'})`).join(', ')}.</p>}
     </section>}

@@ -64,7 +64,7 @@ export function MedicalRequestDetail({id}:{id:string}) {
  useEffect(()=>{load().catch(e=>setError(message(e)));},[load]);
  const move=async(to:Status)=>{if(!d)return;setBusy(true);setError('');setNotice('');try{await work(`medical-requests/${id}/transition`,{method:'POST',body:{revision:d.revision,to,confirmed,response,outcome,officialReference:reference}});await load();setNotice('Decisão registrada. Nenhuma prescrição foi alterada.');}catch(e){setError(message(e));await load().catch(()=>{});}finally{setBusy(false);}};
  return <article style={{overflowWrap:'anywhere',minWidth:0}}>
- <nav aria-label="Navegação"><Link href="/clinical">Lista de pacientes</Link> · <Link href="/clinical/solicitacoes">Solicitações recebidas</Link></nav>
+ <nav aria-label="Navegação"><Link href="/clinical/pacientes">Lista de pacientes</Link> · <Link href="/clinical/solicitacoes">Solicitações recebidas</Link></nav>
  <h1>Solicitação de alteração ao médico</h1>
  <p>O ONCOPHARMA registra a solicitação e a resposta. O médico realiza qualquer alteração no sistema oficial.</p>
  <p>O médico só vê o pedido ao abrir “Solicitações recebidas”. Não há aviso nem acompanhamento de prazo. Em urgência, fale diretamente com o médico.</p>
