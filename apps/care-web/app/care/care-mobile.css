@@ -1,0 +1,103 @@
+/* M21 — Identidade visual Care mobile aprovada (mockup care-mobile-v1). Escopo: somente .care-page do Care.
+   Paleta M21 declarada uma única vez abaixo e registrada em packages/design-system/care-mobile-palette.json;
+   o restante do arquivo usa apenas var(--cm-…). Gradientes: verde-escuro → azul-escuro. Dourado só em aba ativa,
+   alertas e limiar de febre. Vermelho somente para 192 (emergência). */
+.care-page{
+  --cm-green-900:#08402F;--cm-green-800:#0B5A43;--cm-green-teal:#0B4A4A;--cm-blue-800:#0E3A5C;--cm-blue-700:#1B4F72;
+  --cm-gold:#D7A858;--cm-gold-light:#F2C46D;--cm-gold-deep:#C9962E;--cm-gold-ink:#6E4A0E;--cm-gold-ink-strong:#5A3C0A;--cm-gold-bg:#FFF5DE;--cm-gold-pill:#FFF1D1;--cm-gold-tile:#FFF6DF;
+  --cm-sub:#5B7083;--cm-bg:#F6FBF7;--cm-line:#D6EBDD;--cm-line-soft:#E3F1EA;--cm-mint:#B9E1D0;--cm-mint-50:#F4FBF7;--cm-mint-100:#DCEFE5;--cm-mint-pill:#E3F4EA;--cm-mint-ink:#2F5B4C;--cm-check:#A9D4BC;
+  --cm-sk-dot:#7FD3AE;--cm-sk-alt:#EEF4F8;--cm-on-dark:#E3F4EA;--cm-demo-a:#FFB627;--cm-demo-b:#FFC54D;--cm-demo-ink:#3D2500;--cm-red:#C8102E;--cm-white:#fff;
+  --cm-grad:linear-gradient(110deg,var(--cm-green-900),var(--cm-green-teal) 45%,var(--cm-blue-800) 80%,var(--cm-blue-700));
+  --cm-grad-btn:linear-gradient(100deg,var(--cm-green-800),var(--cm-blue-800));
+  background:var(--cm-bg);color:var(--cm-green-800);font-size:18px;position:relative;overflow-x:hidden;padding-bottom:104px;isolation:isolate}
+/* marcas d'água: logotipo Care dourado (~9%) nos cantos superior direito e inferior esquerdo */
+.care-page::before,.care-page::after{content:"";position:fixed;width:330px;height:330px;background:url(/brand/care-gold-deep.svg) no-repeat center/contain;opacity:.09;mix-blend-mode:multiply;pointer-events:none;z-index:-1}
+.care-page::before{right:-120px;top:60px}.care-page::after{left:-130px;bottom:110px}
+.care-page .care-header{background:var(--cm-grad);color:var(--cm-white);padding:14px 18px 16px;border-radius:0 0 22px 22px;flex-wrap:wrap;align-items:flex-start;row-gap:8px}
+.care-page .brand img{width:40px;height:40px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.35))}
+.care-page .brand strong{font-size:18px}.care-page .brand strong span{color:var(--cm-white)}.care-page .brand small{color:var(--cm-gold-light);font-weight:800;letter-spacing:.3em;font-size:10px}
+.cm-who{margin-left:auto;text-align:right;font-size:12px;color:var(--cm-on-dark);line-height:1.3}.cm-who b{display:block;color:var(--cm-white);font-size:14px}
+.cm-head-row{display:flex;width:100%;align-items:center;justify-content:space-between;gap:10px}
+.cm-demo{display:inline-block;background:repeating-linear-gradient(135deg,var(--cm-demo-a) 0 8px,var(--cm-demo-b) 8px 16px);color:var(--cm-demo-ink);font-weight:800;padding:5px 10px;border-radius:999px;font-size:11px}
+.care-page .btn-on-dark{min-height:44px;background:transparent;color:var(--cm-white);border:1.5px solid rgba(255,255,255,.6);border-radius:12px;padding:0 14px;font:inherit;font-weight:700;font-size:14px}
+.care-page .care-main{max-width:640px;padding:18px 16px 24px;display:grid;gap:14px;align-content:start}
+.care-page .care-main>section,.care-page .care-main>div{display:grid;gap:14px;align-content:start}
+.care-page h1,.care-page .care-main h1{font-size:28px;font-weight:800;letter-spacing:-.035em;color:var(--cm-green-900);line-height:1.08;margin:4px 0 0}
+.care-page h2{font-size:18px;color:var(--cm-green-900);letter-spacing:-.02em;margin:0 0 8px;display:flex;gap:10px;align-items:center}
+.care-page .care-lead{font-size:15px;color:var(--cm-sub);line-height:1.5;margin:2px 0 0}
+.care-page .care-main .kicker{color:var(--cm-sub);letter-spacing:.12em;margin:0}
+.care-page .care-signature{color:var(--cm-green-800);font-size:15px;margin:0}
+.care-page .care-note,.cm-note{font-size:13px;color:var(--cm-sub);text-align:center;line-height:1.4;margin:4px 0}
+.care-page .care-card,.care-page .care-panel,.cm-card{background:var(--cm-white);border:1px solid var(--cm-line);border-radius:16px;padding:16px;box-shadow:0 6px 20px -12px rgba(8,64,47,.2);min-height:0;margin:0}
+.care-page .care-card h2{font-size:18px}.care-page .care-card p{font-size:15px}
+.care-page .care-cards{grid-template-columns:1fr;gap:14px;margin:0}
+.care-page .care-panel.care-urgent,.cm-alert{background:var(--cm-gold-bg);border:2px solid var(--cm-gold-light);border-radius:16px;padding:16px}
+.care-page .care-urgent h1,.care-page .care-urgent h2,.cm-alert h2{color:var(--cm-gold-ink-strong)}
+.cm-big{font-size:30px;font-weight:800;color:var(--cm-green-900);line-height:1.1}.cm-sub{color:var(--cm-sub);font-size:14px}
+/* ladrilhos 3D dos ícones */
+.cm-tile{display:inline-grid;place-items:center;width:42px;height:42px;border-radius:12px;color:var(--cm-green-800);background:linear-gradient(180deg,var(--cm-mint-50),var(--cm-mint-100));box-shadow:inset 0 1px 0 var(--cm-white),inset 0 -2px 0 rgba(11,90,67,.13),0 4px 10px -3px rgba(8,64,47,.27);flex:none}
+.cm-tile-gold{color:var(--cm-gold-ink);background:linear-gradient(180deg,var(--cm-gold-tile),var(--cm-gold-light) 55%,var(--cm-gold-deep));box-shadow:inset 0 1px 0 var(--cm-white),inset 0 -2px 0 rgba(139,100,45,.33),0 5px 12px -3px rgba(201,150,46,.6)}
+/* botões: ≥56px, gradiente verde→azul; vermelho só para 192 */
+.care-page .btn-primary,.care-page .workflow-form button.btn-primary,.care-page .btn-secondary,.care-page .btn-danger{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:58px;border-radius:16px;font:inherit;font-weight:800;font-size:17px;text-decoration:none;cursor:pointer;margin:0;padding:0 16px;text-align:center}
+.care-page .btn-primary,.care-page .workflow-form button.btn-primary{color:var(--cm-white);background:var(--cm-grad-btn);border:0;box-shadow:0 10px 24px -10px rgba(14,58,92,.66)}
+.care-page .btn-secondary,.care-page .workflow-form button.btn-secondary{background:var(--cm-white);color:var(--cm-green-800);border:2px solid var(--cm-green-800);box-shadow:none}
+.care-page .btn-danger,.cm-btn-192{color:var(--cm-white)!important;background:var(--cm-red)!important;border:0!important;box-shadow:0 10px 24px -10px rgba(200,16,46,.66)}
+.care-page .care-urgent a.btn-primary[href^="tel:192"]{background:var(--cm-red);box-shadow:0 10px 24px -10px rgba(200,16,46,.66)}
+.care-page .btn-primary:disabled,.care-page .workflow-form button:disabled{opacity:.5;cursor:not-allowed}
+.care-page .care-actions{display:grid;gap:10px;margin:0}
+.care-page .workflow-form{gap:14px;max-width:none}
+.care-page .choices{border:0;margin:0;padding:0;display:grid;gap:10px}
+.care-page .choices legend{font-size:20px;font-weight:800;color:var(--cm-green-900);margin-bottom:10px}
+.care-page .choice{display:flex;align-items:center;gap:12px;min-height:56px;padding:10px 14px;border:1.5px solid var(--cm-line);border-radius:14px;background:var(--cm-white);font-weight:700;color:var(--cm-green-800)}
+.care-page .choice:has(input:checked){border-color:var(--cm-green-800);background:var(--cm-mint-50);box-shadow:inset 0 0 0 1px var(--cm-green-800)}
+.care-page .choice input{width:22px;height:22px;accent-color:var(--cm-green-800)}
+.care-page textarea{border:1.5px solid var(--cm-line);border-radius:14px;padding:12px;font:inherit;width:100%}
+.care-page .care-list{margin:6px 0 0;padding-left:20px;line-height:1.55}
+.care-page .care-med-list{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.cm-row{display:flex;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--cm-line-soft)}.cm-row:first-of-type{border-top:0}.cm-row>div{flex:1;min-width:0}.cm-row b{color:var(--cm-green-900)}
+.cm-chk{width:30px;height:30px;border-radius:9px;border:2px solid var(--cm-check);flex:none;display:grid;place-items:center;color:var(--cm-white)}.cm-chk.on{background:var(--cm-grad-btn);border:0}
+.cm-pill{font-size:12px;font-weight:800;padding:4px 10px;border-radius:999px;background:var(--cm-mint-pill);color:var(--cm-green-800);white-space:nowrap}.cm-pill.g{background:var(--cm-gold-pill);color:var(--cm-gold-ink)}
+.cm-static{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--cm-gold-ink);background:var(--cm-gold-pill);border:1px dashed var(--cm-gold);padding:3px 8px;border-radius:8px}
+.cm-fever{color:var(--cm-gold-ink-strong);background:var(--cm-gold-pill);border-radius:6px;padding:0 4px;font-weight:800}
+/* carregamento: esqueleto verde-claro (sem spinner) */
+.cm-sk{border-radius:16px;border:1px dashed var(--cm-mint);background:var(--cm-mint-50);padding:16px}
+.cm-skl{display:flex;gap:8px;align-items:center;font-size:13px;font-weight:600;color:var(--cm-sub);margin-bottom:10px}.cm-skl i{width:8px;height:8px;border-radius:50%;background:var(--cm-sk-dot);box-shadow:0 0 0 4px rgba(127,211,174,.2)}
+.cm-sb{height:14px;border-radius:10px;margin:9px 0;background:linear-gradient(90deg,var(--cm-line-soft),var(--cm-sk-alt) 50%,var(--cm-line-soft));background-size:200% 100%;animation:cm-shine 1.4s linear infinite}.cm-sb.h{height:24px;width:55%}.cm-sb.w6{width:65%}.cm-sb.w8{width:85%}
+@keyframes cm-shine{from{background-position:200% 0}to{background-position:-200% 0}}
+/* atalhos "Mais" no início */
+.cm-more{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cm-more a{display:flex;align-items:center;gap:10px;min-height:64px;padding:10px 12px;border-radius:16px;background:var(--cm-white);border:1px solid var(--cm-line);text-decoration:none;font-weight:800;font-size:14px;color:var(--cm-green-900);box-shadow:0 6px 20px -14px rgba(8,64,47,.3)}
+/* barra inferior de abas (alvos ≥56px) */
+.cm-tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--cm-white);border-top:1px solid var(--cm-line);box-shadow:0 -8px 24px -14px rgba(8,64,47,.33);border-radius:22px 22px 0 0;padding:6px 6px calc(10px + env(safe-area-inset-bottom))}
+.cm-tabs ul{list-style:none;margin:0 auto;padding:0;max-width:640px;display:grid;grid-template-columns:repeat(var(--cm-n,5),1fr);gap:2px}
+.cm-tabs a{display:grid;justify-items:center;align-content:center;gap:3px;min-height:64px;min-width:56px;border-radius:14px;text-decoration:none;font-size:12px;font-weight:800;color:var(--cm-mint-ink)}
+.cm-tabs a .cm-tile{width:38px;height:38px}
+.cm-tabs a[aria-current=page]{color:var(--cm-gold-ink)}
+.care-page .care-nav{display:none}@media(min-width:900px){.care-page .care-nav{display:block}.care-page .cm-more{display:none}}
+.care-page[data-contrast=high]{--cm-sub:var(--ink-teal);--cm-mint-ink:var(--cm-green-900)}
+.care-page[data-font=large]{font-size:20px}.care-page[data-font=xlarge]{font-size:23px}
+@media(min-width:900px){.care-page .care-main{max-width:760px}}
+/* M21 — gráfico de temperatura: grade clara, linha verde-escura com preenchimento suave, limiar 37,8 °C dourado tracejado */
+.cm-chart{width:100%;height:auto;display:block}
+.cm-chart-grid{stroke:var(--cm-line-soft);stroke-width:1}
+.cm-chart-axis{fill:var(--cm-sub);font-size:10px;font-weight:600}
+.cm-chart-fill{fill:var(--cm-green-800);fill-opacity:.1}
+.cm-chart-line{fill:none;stroke:var(--cm-green-900);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
+.cm-chart-dot{fill:var(--cm-white);stroke:var(--cm-green-900);stroke-width:2}
+.cm-chart-fever{stroke:var(--cm-gold);stroke-width:2;stroke-dasharray:6 5}
+.cm-chart-fever-label{fill:var(--cm-gold-ink);font-size:10px;font-weight:800}
+/* M21.2 — entrada de temperatura grande (alvos ≥56px) */
+.cm-temp{display:grid;grid-template-columns:64px 1fr 64px;gap:10px;align-items:center;margin:6px 0 10px}
+.cm-temp-btn{min-height:64px!important;border-radius:16px;border:2px solid var(--cm-green-800);background:var(--cm-white);color:var(--cm-green-800);font:inherit;font-size:30px;font-weight:800;cursor:pointer}
+.cm-temp-val{display:flex;align-items:baseline;justify-content:center;gap:4px;font-size:40px;font-weight:800;color:var(--cm-green-900)}
+.cm-temp-val input{width:3.4ch;min-height:64px;border:0;border-bottom:2px solid var(--cm-line);background:transparent;font:inherit;color:inherit;text-align:center}
+.cm-visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.cm-chart-dot-fever{stroke:var(--cm-gold-deep);fill:var(--cm-gold-light)}
+.cm-temp-list{font-size:14px}
+/* M22 — doses por horário */
+.cm-dose{border-top:1px solid var(--cm-line-soft);padding-top:6px;display:grid;gap:8px}.cm-dose:first-of-type{border-top:0}
+.cm-dose-time{font-size:22px;font-weight:800;color:var(--cm-green-900)}
+/* M22 visual — opções de adesão compactas (3 colunas) e "Alterar" discreto depois do registro */
+.cm-choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.care-page .cm-choices .btn-primary,.care-page .cm-choices .btn-secondary{min-height:48px;padding:6px 4px;font-size:14px;line-height:1.15;border-radius:14px;width:100%;gap:0;text-align:center}
+.cm-link{justify-self:end;background:none;border:0;color:var(--cm-green-800);font-weight:700;font-size:14px;text-decoration:underline;min-height:48px;padding:0 4px;cursor:pointer}

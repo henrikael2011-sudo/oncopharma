@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { care } from '../../lib/care-client';
 import { useMe } from './CareShell';
+import { TemperatureSection } from './TempChart';
 import { isUrgentLocal, LOCAL_URGENT_TEXT, LOCAL_URGENT_TITLE, SEND_FAILED_TEXT } from '../../lib/care-urgency';
 const SYMPTOMS: [string, string][] = [['nausea', 'Enjoo ou vômito'], ['neuropathy', 'Formigamento'], ['fever', 'Febre'], ['diarrhea', 'Diarreia'], ['fatigue', 'Cansaço'], ['pain', 'Dor'], ['mouth', 'Feridas na boca'], ['other', 'Outro']];
 const INTENSITY: [string, string][] = [['leve', 'Leve — consigo fazer minhas atividades'], ['moderada', 'Moderada — atrapalha um pouco'], ['forte', 'Forte — não consigo fazer minhas atividades']];
@@ -32,7 +33,8 @@ export function SymptomFlow() {
     <Link className="btn-primary" href="/care">Voltar ao início</Link>
   </section>; }
   return <section aria-labelledby="sym-title">
-    <h1 id="sym-title">{who ? `Como ${who} está hoje` : 'Como estou hoje'}</h1>
+    <div><h1 id="sym-title">{who ? `Como ${who} está hoje` : 'Como estou hoje'}</h1><p className="care-lead">Registre como você está. A equipe acompanha.</p></div>
+    <TemperatureSection />
     {urgentNow && <div className="care-panel care-urgent" role="alert" data-local-urgent><h2>{LOCAL_URGENT_TITLE}</h2><p className="care-lead">{LOCAL_URGENT_TEXT}</p><p><a className="btn-primary" href="tel:192">Ligar 192</a></p></div>}
     <p className="care-note" aria-live="polite">Passo {step + 1} de {steps}</p>
     <form className="workflow-form" onSubmit={(e) => { e.preventDefault(); if (step < steps - 1) { if (canNext) setStep(step + 1); } else void send(); }}>
@@ -49,5 +51,6 @@ export function SymptomFlow() {
     </form>
     {err && <p role="alert">{err}</p>}
     <p className="care-note">Em uma emergência, ligue 192 (SAMU).</p>
+    <p className="cm-note">O app só organiza e registra. Sua equipe de saúde avalia e decide.</p>
   </section>;
 }

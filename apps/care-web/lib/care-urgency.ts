@@ -8,3 +8,5 @@ export function isUrgentLocal(a: UrgencyInput): boolean {
 export const LOCAL_URGENT_TITLE = 'Procure atendimento agora';
 export const LOCAL_URGENT_TEXT = 'Pelo que você marcou, não espere resposta pelo aplicativo: ele não é acompanhado em tempo real. Ligue 192 (SAMU), vá ao pronto-atendimento mais próximo ou ligue para o seu hospital. Você pode salvar o relato depois.';
 export const SEND_FAILED_TEXT = 'Não foi possível enviar: seu relato NÃO foi registrado. Tente enviar de novo (não haverá registro duplicado).';
+// M21.2: espelho da regra aprovada para temperatura (RED_FLAGS.febre: 37,8 °C ou mais; services/api/src/care-rules.ts isFever).
+export function isFeverLocal(celsius: number): boolean { return Math.round(celsius * 10) >= 378; }

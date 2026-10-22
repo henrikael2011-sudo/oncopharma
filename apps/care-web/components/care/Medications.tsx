@@ -1,19 +1,46 @@
 'use client';
 // M15.2 — somente leitura + adesão relatada. Nunca exibe dose nem permite alterar a prescrição.
+// M22 — itens transcritos pela equipe aparecem só depois da liberação da farmácia, com os horários do dia e as
+// orientações da equipe; "Tomei / Tomei só parte / Não tomei" é registrado POR HORÁRIO. Cuidador só visualiza.
 import { useCallback, useEffect, useState } from 'react';
 import { care } from '../../lib/care-client';
-type M = { id: string; name: string; schedule: string; atHome: boolean; today: 'taken' | 'missed' | 'partial' | null };
+import { Skeleton, TEAM_DECIDES, useMe } from './CareShell';
+import { Icon, Tile } from './Icons';
+import { MEDICATION_RULE } from '../../lib/care-guidance';
+type Status = 'taken' | 'missed' | 'partial';
+type M = { id: string; name: string; schedule: string; times: { time: string; today: Status | null }[] | null; instructions: string | null; atHome: boolean; canReport: boolean; today: Status | null };
 const LABEL = { taken: 'Tomei', partial: 'Tomei só parte', missed: 'Não tomei' } as const;
+const DONE = { taken: 'Tomado', partial: 'Tomado em parte', missed: 'Não tomado' } as const;
+function Choices({ m, time, value, onPick }: { m: M; time: string | null; value: Status | null; onPick: (m: M, s: Status, t: string | null) => void }) {
+  const [open, setOpen] = useState(false);
+  if (value && !open) return <button type="button" className="cm-link" onClick={() => setOpen(true)} aria-label={`Alterar registro${time ? ` das ${time}` : ''} de ${m.name}`}>Alterar</button>;
+  return <div role="group" aria-label={`Como foi ${time ? `às ${time}` : 'hoje'} com ${m.name}?`} className="cm-choices">{(Object.keys(LABEL) as Status[]).map((k) => <button key={k} type="button" className={value === k ? 'btn-primary' : 'btn-secondary'} aria-pressed={value === k} onClick={() => { setOpen(false); onPick(m, k, time); }}>{LABEL[k]}</button>)}</div>;
+}
 export function Medications() {
+  const { me } = useMe();
   const [list, setList] = useState<M[] | null>(null), [msg, setMsg] = useState(''), [err, setErr] = useState('');
   const load = useCallback(() => care<{ medications: M[] }>('me/medications').then((r) => setList(r.medications)).catch((e) => setErr(e.message)), []);
   useEffect(() => { void load(); }, [load]);
-  async function report(m: M, status: keyof typeof LABEL) { setErr(''); try { await care(`me/medications/${m.id}/adherence`, { method: 'POST', body: { status, requestId: crypto.randomUUID() } }); setMsg(`${m.name}: registrado "${LABEL[status]}" hoje.`); await load(); } catch (e) { setErr(e instanceof Error ? e.message : 'Erro'); } }
-  return <section aria-labelledby="m-title"><h1 id="m-title">Meus medicamentos</h1>
-    <p className="care-lead">Siga sempre a orientação da sua equipe. Não altere doses por conta própria.</p>
+  async function report(m: M, status: Status, time: string | null) { setErr(''); try { await care(`me/medications/${m.id}/adherence`, { method: 'POST', body: { status, requestId: crypto.randomUUID(), ...(time ? { scheduledTime: time } : {}) } }); setMsg(`${m.name}${time ? ` (${time})` : ''}: registrado "${LABEL[status]}" hoje.`); await load(); } catch (e) { setErr(e instanceof Error ? e.message : 'Erro'); } }
+  // Contador do dia: conta só doses com horário liberado; prescrições antigas sem horário entram apenas se não houver nenhuma com horário.
+  const home = (list ?? []).filter((m) => m.atHome), timed = home.filter((m) => m.times);
+  const doses = timed.length ? timed.flatMap((m) => m.times!.map((t) => t.today)) : home.map((m) => m.today);
+  return <section aria-labelledby="m-title"><div><h1 id="m-title">{me.actor === 'caregiver' ? `Remédios de ${me.patientName ?? 'quem você acompanha'}` : 'Meus medicamentos'}</h1>
+    <p className="care-lead">{list && doses.length ? `Remédios de hoje · ${doses.filter(Boolean).length} de ${doses.length} registrados` : 'Remédios de hoje'}</p></div>
     {err && <p role="alert">{err}</p>}{msg && <p role="status">{msg}</p>}
-    {list && (list.length ? <ul className="care-med-list">{list.map((m) => <li key={m.id} className="care-card"><h2>{m.name}</h2><p>{m.schedule}</p>
-      {m.atHome ? <div role="group" aria-label={`Como foi hoje com ${m.name}?`} className="care-actions">{(Object.keys(LABEL) as (keyof typeof LABEL)[]).map((k) => <button key={k} type="button" className={m.today === k ? 'btn-primary' : 'btn-secondary'} aria-pressed={m.today === k} onClick={() => void report(m, k)}>{LABEL[k]}</button>)}</div> : <p className="care-note">Feito no hospital.</p>}
-    </li>)}</ul> : <p>Nenhum medicamento registrado pela sua equipe.</p>)}
+    {!list && !err && <Skeleton label="Carregando seus remédios…" />}
+    {list && (list.length ? <ul className="care-med-list">{list.map((m) => <li key={m.id} className="care-card" data-med={m.name}>
+      <h2><Tile name="pill" />{m.name}</h2>
+      {m.instructions && <p className="cm-sub" data-med-instructions>{m.instructions}</p>}
+      {!m.atHome ? <><p className="cm-sub">{m.schedule}</p><p className="care-note">Feito no hospital.</p></>
+        : m.times ? m.times.map((t) => <div key={t.time} className="cm-dose" data-dose={t.time}>
+            <div className="cm-row"><span className={t.today ? 'cm-chk on' : 'cm-chk'} aria-hidden="true">{t.today && <Icon name="check" size={18} />}</span><div><b className="cm-dose-time">{t.time}</b></div><span className="cm-pill">{t.today ? DONE[t.today] : 'A registrar'}</span></div>
+            {m.canReport && <Choices m={m} time={t.time} value={t.today} onPick={(a, b, c) => void report(a, b, c)} />}</div>)
+        : <><p className="cm-sub">{m.schedule}</p>{m.canReport ? <Choices m={m} time={null} value={m.today} onPick={(a, b, c) => void report(a, b, c)} /> : <p className="cm-sub">Hoje: {m.today ? DONE[m.today] : 'ainda não registrado'}</p>}</>}
+    </li>)}</ul> : <p>Nenhum medicamento liberado pela sua equipe.</p>)}
+    {me.actor === 'caregiver' && <p className="care-note">Quem registra se tomou é o próprio paciente.</p>}
+    <section className="cm-alert" aria-labelledby="m-dose"><h2 id="m-dose"><Tile name="warn" gold />Orientação</h2><p>{MEDICATION_RULE}</p>
+      <a className="btn-secondary" href="/care/equipe"><Icon name="message" />Falar com a equipe</a></section>
+    <p className="cm-note">{TEAM_DECIDES}</p>
   </section>;
 }

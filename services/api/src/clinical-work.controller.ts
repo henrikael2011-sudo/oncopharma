@@ -7,6 +7,8 @@ import type { PoolClient } from 'pg';
 import { AuthGuard, AuthenticatedRequest } from './auth.guard';
 import { DatabaseService } from './database.service';
 import { syntheticApiEnabled } from './synthetic-mode';
+import { careKey, openText } from './care-crypto';
+import { isFever as careIsFever } from './care-rules';
 import { encryptFile, importKey, MAX_PDF_BYTES, previewAction, readHospitalPdf, sameName, type PdfRow } from './pdf-import';
 import { type Allocation, allocationLabel, FORMAT_LABEL, normalizeAllocation, syncOutcome, validateFeed } from './allocation-rules';
 import { FEVER_THRESHOLD_C, EXPIRING_SOON_HOURS, STABILITY_NOTICE, isFever, remainingLabel, stability } from './overview-rules';
@@ -502,7 +504,12 @@ export class ClinicalWorkController {
       await this.linked(c, org, req, patientId);
       const P = [org, patientId];
       const q = async (sql: string) => (await c.query(sql, P)).rows;
+      // M21.2: temperaturas do Care (cifradas em repouso) entram na linha do tempo pelo mesmo controle de vínculo (linked).
+      let temps: { at: string | null; kind: string; title: string; detail: string; source: string; urgent: boolean }[] = [];
+      try { const k = careKey().key; temps = (await q(`SELECT measured_at AS at,value_encrypted,value_iv,value_tag,recorded_by FROM patient_temperature_readings WHERE organization_id=$1 AND patient_id=$2 ORDER BY measured_at DESC LIMIT 50`))
+        .map((r) => { const v = Number(openText({ ciphertext: r.value_encrypted, iv: r.value_iv, tag: r.value_tag }, k)); return { at: iso(r.at), kind: 'symptom', title: 'Temperatura no Care', detail: `${v.toFixed(1).replace('.', ',')} °C`, source: r.recorded_by === 'caregiver' ? 'Care — cuidador' : 'Care — paciente', urgent: careIsFever(v) }; }); } catch { temps = []; }
       const items = [
+        ...temps,
         ...(await q(`SELECT reported_at AS at,symptom_code,description,triage_status,details->>'reported_by' AS by FROM patient_symptom_reports WHERE organization_id=$1 AND patient_id=$2 ORDER BY reported_at DESC LIMIT 50`))
           .map((r) => ({ at: iso(r.at), kind: 'symptom', title: 'Relato no Care', detail: r.description, source: r.by === 'caregiver' ? 'Care — cuidador' : 'Care — paciente', urgent: r.triage_status === 'urgent_review' })),
         ...(await q(`SELECT t.at,t.from_status,t.to_status,t.actor_role,t.justification,a.code FROM clinical_alert_transitions t JOIN clinical_alerts a ON a.id=t.alert_id AND a.organization_id=t.organization_id WHERE t.organization_id=$1 AND a.patient_id=$2 ORDER BY t.at DESC LIMIT 100`))
