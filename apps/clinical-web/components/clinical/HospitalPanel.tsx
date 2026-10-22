@@ -2,9 +2,12 @@
 // M24 — painel base do farmacêutico hospitalar. Atualização quase em tempo real por consulta periódica (intervalo da API,
 // pausa com a aba oculta). Fila: gravidade e depois tempo de espera. Somente leitura e priorização visual:
 // o ONCOPHARMA não decide conduta — a equipe avalia. Integração hospitalar SIMULADA, rotulada em toda a tela.
+// Mockup aprovado clinical-visao-geral-farmaceutico-marca-v3h: menu lateral verde-petróleo com logo dourado e bloco
+// 'Resumo com IA · rascunho' (IA SIMULADA: texto montado no navegador a partir dos dados fictícios; a IA não decide).
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { when, work } from '../../lib/work-client';
+import { useStaff } from './ClinicalShell';
 
 type Meta = { simulated: true; integrationNotice: string; teamNotice: string; feverThresholdC: number; pollSeconds: number; lastSync: { source: string; at: string } | null; generatedAt: string };
 type QItem = { id: string; patientId: string; patientName: string; record: string | null; location: string | null; locationSource: string | null; code: string; level: string; levelLabel: string; status: string; statusLabel: string; explanation: string; description: string | null; reportedBy: string | null; createdAt: string; waitingMinutes: number };
@@ -20,10 +23,57 @@ const hhmmss = (d: string) => new Date(d).toLocaleTimeString('pt-BR');
 
 function SimBadge({ text }: { text: string }) { return <p className="hp-sim" role="note"><b>Integração simulada</b> · {text}</p>; }
 
+const DAY = 24 * 3600e3;
+type Change = { at: string; kind: string; text: string; flagged: boolean };
+function changes(d: Detail, now: number): Change[] {
+  const out: Change[] = [];
+  for (const a of d.alerts) if (now - Date.parse(a.createdAt) <= DAY) out.push({ at: a.createdAt, kind: a.open ? 'Alerta aberto' : 'Alerta', text: `${a.levelLabel} · ${a.explanation}`, flagged: a.level === 'urgent_review' });
+  for (const c of d.checkins) if (now - Date.parse(c.at) <= DAY) out.push({ at: c.at, kind: c.label, text: c.detail, flagged: c.flagged });
+  return out.sort((x, y) => Date.parse(y.at) - Date.parse(x.at));
+}
+// Rascunho SIMULADO: texto montado por regras simples a partir dos dados fictícios (nenhum modelo é chamado aqui).
+function aiDraft(d: Detail, ch: Change[]): string {
+  const first = d.patient.name.split(' ')[0];
+  if (!ch.length) return `Nas últimas 24 h não há registros novos de ${first}. A equipe confere o histórico abaixo.`;
+  const temps = d.checkins.filter((c) => c.kind === 'temperature' && Date.now() - Date.parse(c.at) <= DAY);
+  const flaggedTemps = temps.filter((c) => c.flagged).length;
+  const symptoms = d.checkins.filter((c) => c.kind === 'symptom' && Date.now() - Date.parse(c.at) <= DAY).map((c) => c.detail.toLowerCase());
+  const adh = d.checkins.filter((c) => c.kind === 'adherence' && Date.now() - Date.parse(c.at) <= DAY).length;
+  const open = d.alerts.filter((a) => a.open).length;
+  const parts = [`Nas últimas 24 h, ${first} teve ${ch.length} registro${ch.length === 1 ? '' : 's'} novo${ch.length === 1 ? '' : 's'}.`];
+  if (temps.length) parts.push(`${temps.length} medida${temps.length === 1 ? '' : 's'} de temperatura, ${flaggedTemps ? `${flaggedTemps} igual ou acima de ${celsius(d.feverThresholdC)}` : `nenhuma igual ou acima de ${celsius(d.feverThresholdC)}`}.`);
+  if (symptoms.length) parts.push(`Sintomas relatados: ${[...new Set(symptoms)].slice(0, 3).join('; ')}.`);
+  if (adh) parts.push(`${adh} registro${adh === 1 ? '' : 's'} de adesão aos orais.`);
+  parts.push(`${open} alerta${open === 1 ? '' : 's'} aguardando a equipe. Pontos para a equipe conferir no prontuário.`);
+  return parts.join(' ');
+}
+
+function SideNav({ open, setOpen }: { open: boolean; setOpen: (v: boolean) => void }) {
+  const me = useStaff();
+  return <aside className={`hp-nav${open ? ' is-open' : ''}`} aria-label="Menu do painel">
+    <div className="hp-nav-top">
+      <Link href="/clinical" className="hp-nav-brand"><img src="/brand/mark.svg" width={40} height={40} alt="" /><span><strong>ONCOPHARMA</strong><small>Farmácia hospitalar</small></span></Link>
+      <button type="button" className="hp-nav-toggle" aria-expanded={open} aria-controls="hp-nav-links" onClick={() => setOpen(!open)}>{open ? 'Fechar menu' : 'Menu'}</button>
+    </div>
+    <nav id="hp-nav-links" className="hp-nav-links" aria-label="Áreas do Clinical">
+      <p className="hp-nav-sec">Neste painel</p>
+      <a href="#hp-q-title" onClick={() => setOpen(false)}>Fila priorizada</a>
+      <a href="#hp-ia" onClick={() => setOpen(false)}>Resumo com IA</a>
+      <p className="hp-nav-sec">Clinical</p>
+      <Link href="/clinical/painel" aria-current="page">Painel hospitalar</Link>
+      <Link href="/clinical">Pacientes</Link>
+      {me.role !== 'clinical_manager' && <Link href="/clinical/cadastros">Cadastros por convite</Link>}
+      {me.roles?.includes('physician') && <Link href="/clinical/solicitacoes">Solicitações recebidas</Link>}
+      <p className="hp-nav-foot">Dados fictícios · integração simulada</p>
+    </nav>
+  </aside>;
+}
+
 export function HospitalPanel() {
   const [q, setQ] = useState<Queue | null>(null), [err, setErr] = useState(''), [sel, setSel] = useState<string | null>(null);
-  const [d, setD] = useState<Detail | null>(null), [dErr, setDErr] = useState('');
+  const [d, setD] = useState<Detail | null>(null), [dErr, setDErr] = useState(''), [menu, setMenu] = useState(false);
   const selRef = useRef<string | null>(null); selRef.current = sel;
+  
   const loadQueue = useCallback(async () => { try { setQ(await work<Queue>('panel/queue')); setErr(''); } catch (e) { setErr(e instanceof Error ? e.message : 'Erro'); } }, []);
   const loadDetail = useCallback(async (id: string) => { try { const x = await work<Detail>(`panel/patients/${id}`); if (selRef.current === id) { setD(x); setDErr(''); } } catch (e) { setDErr(e instanceof Error ? e.message : 'Erro'); } }, []);
   useEffect(() => { void loadQueue(); }, [loadQueue]);
@@ -32,8 +82,14 @@ export function HospitalPanel() {
     const t = setInterval(() => { if (document.visibilityState === 'visible') { void loadQueue(); if (selRef.current) void loadDetail(selRef.current); } }, every);
     return () => clearInterval(t);
   }, [every, loadQueue, loadDetail]);
-  const open = (id: string) => { setSel(id); setD(null); void loadDetail(id); };
-  return <section aria-labelledby="hp-title" className="hp">
+  const open = useCallback((id: string) => {
+    selRef.current = id; setSel(id); setD(null); void loadDetail(id);
+  }, [loadDetail]);
+  // Primeiro paciente da fila selecionado por padrão.
+  useEffect(() => { if (!selRef.current && q?.items.length) open(q.items[0].patientId); }, [q, open]);
+  return <div className={`hp-shell${menu ? ' menu-open' : ''}`}>
+    <SideNav open={menu} setOpen={setMenu} />
+    <section aria-labelledby="hp-title" className="hp">
     <div className="hp-head">
       <div><p className="kicker">ONCOPHARMA Clinical · Farmácia hospitalar</p><h1 id="hp-title">Painel de alertas</h1></div>
       <p className="hp-live" aria-live="polite">{q ? <>Atualizado às {hhmmss(q.generatedAt)} · atualiza a cada {q.pollSeconds} s</> : 'Carregando…'}</p>
@@ -54,6 +110,12 @@ export function HospitalPanel() {
             <span className="hp-side"><span className={a.level === 'urgent_review' ? 'sev sev-urgent' : 'sev sev-review'}>{a.levelLabel}</span><span className="hp-wait">espera {wait(a.waitingMinutes)}</span><span className="hp-status">{a.statusLabel}</span></span>
           </button></li>)}</ol>
       </div>
+      <div className="hp-col">
+      {d && <section id="hp-ia" className="hp-ai" aria-labelledby="hp-ia-title">
+        <h2 id="hp-ia-title" className="hp-ai-label">Resumo com IA · rascunho <span className="hp-sim-tag">rascunho</span></h2>
+        <p className="hp-ai-text">{aiDraft(d, changes(d, Date.now()))}</p>
+        <p className="hp-ai-notice">IA não decide — revisão e decisão são do farmacêutico e da equipe médica. IA simulada na demonstração (dados fictícios).</p>
+      </section>}
       <div className="hp-detail" aria-live="polite">
         {!sel && <p className="hp-empty">Selecione um paciente na fila para ver check-ins, alertas e medicamentos.</p>}
         {sel && dErr && <p className="clin-error" role="alert">{dErr}</p>}
@@ -70,7 +132,9 @@ export function HospitalPanel() {
             <p className="hp-meta">Fonte: {d.hospitalMeds.source ?? 'Hospital simulado'} (dados fictícios). Conferência e conduta são da equipe.</p></section>
         </article>}
       </div>
+      </div>
     </div>
     <p className="hp-foot">Dados fictícios · ambiente de teste · não liberado para uso clínico.{q?.lastSync ? ` Última sincronização de alocação: ${when(q.lastSync.at)} (${q.lastSync.source}).` : ''}</p>
-  </section>;
+  </section>
+  </div>;
 }

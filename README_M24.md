@@ -22,3 +22,10 @@
 - Texto do consentimento do cadastro é provisório (`cadastro-ficticio-v1`) — revisão jurídica/LGPD.
 - Envio do link por SMS/WhatsApp/e-mail não implementado (equipe copia o link ou mostra o QR).
 - Tempo real por SSE/WebSocket e alerta sonoro: avaliar após o piloto (hoje consulta periódica).
+
+## 3. Painel hospitalar no padrão do mockup aprovado (v3h)
+- Referência: `mockup/marca-nova-v3h/clinical-visao-geral-farmaceutico-marca-v3h` (aprovado 21/10).
+- Menu lateral verde-petróleo (gradiente verde→azul, logo dourado, ativo em esmeralda com detalhe dourado); no celular recolhe atrás do botão "Menu".
+- Bloco **Resumo com IA · rascunho** (selo "rascunho") com aviso "IA não decide — revisão e decisão são do farmacêutico e da equipe médica" e "IA simulada na demonstração": texto montado no navegador a partir dos dados fictícios; nenhum modelo é chamado.
+- Mantidos: fila (gravidade→espera), atualização a cada 15 s, detalhe, limiar 37,8 °C, rótulo de integração SIMULADA. O primeiro paciente da fila abre selecionado.
+- Fora do mockup (não implementado; sugestões): cartão do paciente no topo, seção "O que mudou", QR maior (~320 px), rolagem automática até o detalhe no celular.
