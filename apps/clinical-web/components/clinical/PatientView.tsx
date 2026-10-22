@@ -10,8 +10,9 @@ import { TimelineTab } from './TimelineTab';
 import { RecordTab, MEDICATION_KEYS, LAB_KEYS } from './RecordTab';
 import { MedicalRequestList } from './MedicalRequests';
 import { AllocationPanel } from './AllocationPanel';
+import { MedTranscriptionTab } from './MedTranscriptionTab';
 
-const TABS = [['visao', 'Visão geral'], ['alertas', 'Alertas'], ['tarefas', 'Tarefas'], ['preciclo', 'Pré-ciclo'], ['linha', 'Linha do tempo'], ['prontuario', 'Prontuário'], ['medicamentos', 'Medicamentos'], ['exame', 'Exame'], ['solicitacoes', 'Solicitações médicas']] as const;
+const TABS = [['visao', 'Visão geral'], ['alertas', 'Alertas'], ['tarefas', 'Tarefas'], ['preciclo', 'Pré-ciclo'], ['linha', 'Linha do tempo'], ['prontuario', 'Prontuário'], ['medicamentos', 'Medicamentos'], ['exame', 'Exame'], ['solicitacoes', 'Solicitações médicas'], ['transcricao', 'Transcrição de medicamentos']] as const;
 type Tab = (typeof TABS)[number][0];
 export function PatientView({ id }: { id: string }) {
   const [d, setD] = useState<PatientData | null>(null), [err, setErr] = useState(''), [tab, setTab] = useState<Tab>('alertas');
@@ -37,6 +38,7 @@ export function PatientView({ id }: { id: string }) {
       {tab === 'preciclo' && <PreCycleTab id={id} />}
       {tab === 'linha' && <TimelineTab id={id} />}
       {tab === 'solicitacoes' && <MedicalRequestList patientId={id} />}
+      {tab === 'transcricao' && <MedTranscriptionTab patientId={id} />}
       {tab === 'prontuario' && <RecordTab id={id} />}
       {tab === 'medicamentos' && <RecordTab id={id} only={MEDICATION_KEYS} />}
       {tab === 'exame' && <RecordTab id={id} only={LAB_KEYS} />}

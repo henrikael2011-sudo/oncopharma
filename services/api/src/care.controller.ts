@@ -8,7 +8,8 @@ import type { PoolClient } from 'pg';
 import { AuthGuard, AuthenticatedRequest } from './auth.guard';
 import { DatabaseService } from './database.service';
 import { syntheticApiEnabled } from './synthetic-mode';
-import { assessSymptom, SYMPTOMS, CONSENT_TERMS_VERSION, parseSymptomAnswers, reportStatusLabel } from './care-rules';
+import { assessSymptom, SYMPTOMS, CONSENT_TERMS_VERSION, parseSymptomAnswers, reportStatusLabel, parseTemperature, isFever, temperatureAsSymptom, FEVER_THRESHOLD_C, ROUTINE_MESSAGE } from './care-rules';
+import { careKey, openText, sealText } from './care-crypto';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 function syntheticOnly() { if (!syntheticApiEnabled()) throw new ServiceUnavailableException('Care disponível somente em ambiente não produtivo com dados sintéticos'); }
@@ -127,11 +128,23 @@ export class CareController {
   medications(@Req() req: AuthenticatedRequest, @Headers('x-organization-id') org: string) {
     return this.run(req, org, async (c, s) => {
       CareController.need(s, 'ver_medicamentos');
-      // Sem dose/via ao paciente (Plano v3: Care não exibe dose nem sugere ajuste); somente nome e horário em linguagem simples.
-      const rows = (await c.query(`SELECT o.id,o.medication,o.frequency_text,o.route,(SELECT a.status FROM patient_adherence_reports a WHERE a.organization_id=o.organization_id AND a.order_id=o.id AND a.reported_on=current_date ORDER BY a.created_at DESC LIMIT 1) AS today
-        FROM clinical_medication_orders o WHERE o.organization_id=$1 AND o.patient_id=$2 AND o.status='active' ORDER BY o.medication`, [org, s.patientId])).rows;
+      // Sem dose/via ao paciente (Plano v3: Care não exibe dose nem sugere ajuste); somente nome, horários e orientações aprovadas.
+      // M22: pedidos vindos de transcrição só aparecem DEPOIS da liberação farmacêutica (status released) e dentro do período.
+      const rows = (await c.query(`SELECT o.id,o.medication,o.frequency_text,o.route,t.times,t.instructions_encrypted,t.instructions_iv,t.instructions_tag,
+          (SELECT a.status FROM patient_adherence_reports a WHERE a.organization_id=o.organization_id AND a.order_id=o.id AND a.reported_on=current_date AND a.scheduled_time IS NULL ORDER BY a.created_at DESC LIMIT 1) AS today,
+          (SELECT json_object_agg(x.scheduled_time,x.status) FROM (SELECT DISTINCT ON (a.scheduled_time) a.scheduled_time,a.status FROM patient_adherence_reports a WHERE a.organization_id=o.organization_id AND a.order_id=o.id AND a.reported_on=current_date AND a.scheduled_time IS NOT NULL ORDER BY a.scheduled_time,a.created_at DESC) x) AS doses
+        FROM clinical_medication_orders o
+        LEFT JOIN LATERAL (SELECT tr.times,tr.instructions_encrypted,tr.instructions_iv,tr.instructions_tag,tr.start_date,tr.end_date FROM clinical_med_transcriptions tr WHERE tr.organization_id=o.organization_id AND tr.order_id=o.id AND tr.status='released' ORDER BY tr.version DESC LIMIT 1) t ON true
+        WHERE o.organization_id=$1 AND o.patient_id=$2 AND o.status='active'
+          AND (o.source_reference NOT LIKE 'transcr:%' OR (t.times IS NOT NULL AND t.start_date<=current_date AND (t.end_date IS NULL OR t.end_date>=current_date)))
+        ORDER BY (t.times)[1] NULLS LAST, o.medication`, [org, s.patientId])).rows;
+      let key: Buffer | null = null; if (rows.some((r) => r.instructions_encrypted)) { try { key = careKey().key; } catch { throw new ServiceUnavailableException('Medicamentos indisponíveis: chave de cifra não configurada'); } }
       await this.audit(c, org, req, 'care.medications.read', s);
-      return { medications: rows.map((m) => ({ id: m.id, name: m.medication, schedule: m.frequency_text ?? 'Conforme orientação da equipe', atHome: ['VO', 'oral', 'SC-casa'].includes(m.route) && s.actor === 'patient', today: m.today ?? null })) };
+      return { medications: rows.map((m) => ({ id: m.id, name: m.medication,
+        schedule: m.times ? (m.times as string[]).join(' · ') : (m.frequency_text ?? 'Conforme orientação da equipe'),
+        times: m.times ? (m.times as string[]).map((t) => ({ time: t, today: (m.doses ?? {})[t] ?? null })) : null,
+        instructions: m.instructions_encrypted && key ? openText({ ciphertext: m.instructions_encrypted, iv: m.instructions_iv, tag: m.instructions_tag }, key) : null,
+        atHome: ['VO', 'oral', 'SC-casa', 'topica'].includes(m.route), canReport: s.actor === 'patient', today: m.today ?? null })) };
     });
   }
 
@@ -140,16 +153,19 @@ export class CareController {
     if (!UUID.test(orderId)) throw new BadRequestException('Medicamento inválido');
     const status = String(body?.status), requestId = String(body?.requestId);
     if (!['taken', 'missed', 'partial'].includes(status) || !UUID.test(requestId)) throw new BadRequestException('Relato de uso inválido');
+    const scheduledTime = body?.scheduledTime === undefined ? null : String(body.scheduledTime);
+    if (scheduledTime !== null && !/^([01]\d|2[0-3]):[0-5]\d$/.test(scheduledTime)) throw new BadRequestException('Horário inválido');
     return this.run(req, org, async (c, s) => {
       CareController.need(s, 'patient'); // adesão é relato do próprio paciente
-      const o = await c.query(`SELECT 1 FROM clinical_medication_orders WHERE id=$1 AND organization_id=$2 AND patient_id=$3 AND status='active'`, [orderId, org, s.patientId]);
+      const o = await c.query(`SELECT (SELECT tr.times FROM clinical_med_transcriptions tr WHERE tr.organization_id=o.organization_id AND tr.order_id=o.id AND tr.status='released' ORDER BY tr.version DESC LIMIT 1) AS times FROM clinical_medication_orders o WHERE o.id=$1 AND o.organization_id=$2 AND o.patient_id=$3 AND o.status='active'`, [orderId, org, s.patientId]);
       if (!o.rowCount) throw new ForbiddenException('Medicamento não localizado');
+      if (scheduledTime !== null && !((o.rows[0].times as string[] | null) ?? []).includes(scheduledTime)) throw new BadRequestException('Horário não consta na orientação liberada');
       const dup = await c.query(`SELECT id FROM patient_adherence_reports WHERE organization_id=$1 AND source_reference=$2`, [org, requestId]);
       if (dup.rowCount) return { id: dup.rows[0].id, duplicate: true };
       const id = randomUUID();
-      await c.query(`INSERT INTO patient_adherence_reports(id,organization_id,patient_id,order_id,status,source_reference,actor_issuer,actor_sub) VALUES($1,$2,$3,$4,$5,$6,$7,$8)`, [id, org, s.patientId, orderId, status, requestId, req.principal.issuer, req.principal.sub]);
-      await this.audit(c, org, req, 'care.adherence.reported', s, { order_id: orderId, status });
-      return { id, status };
+      await c.query(`INSERT INTO patient_adherence_reports(id,organization_id,patient_id,order_id,status,source_reference,actor_issuer,actor_sub,scheduled_time) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)`, [id, org, s.patientId, orderId, status, requestId, req.principal.issuer, req.principal.sub, scheduledTime]);
+      await this.audit(c, org, req, 'care.adherence.reported', s, { order_id: orderId, status, ...(scheduledTime ? { scheduled_time: scheduledTime } : {}) });
+      return { id, status, scheduledTime };
     });
   }
 
@@ -168,6 +184,44 @@ export class CareController {
         [alertId, org, s.patientId, reportId, `symptom.${answers.symptomCode}`, a.urgent ? 'urgent_review' : 'needs_review', a.ruleVersion, a.explanation]);
       await this.audit(c, org, req, 'symptom.created', s, { report_id: reportId, urgent: String(a.urgent) });
       return { reportId, urgent: a.urgent, message: a.patientMessage, clinicalAdvice: false };
+    });
+  }
+
+  // ---------- M21.2: temperatura (°C). Paciente ou cuidador com registrar_sintoma. Valor cifrado em repouso. ----------
+  @Post('me/temperatures')
+  temperature(@Req() req: AuthenticatedRequest, @Headers('x-organization-id') org: string, @Body() body: Record<string, unknown>) {
+    const t = parseTemperature(body); // lança BadRequest com mensagem pt-BR
+    let key: ReturnType<typeof careKey>; try { key = careKey(); } catch { throw new ServiceUnavailableException('Registro de temperatura indisponível: chave de cifra não configurada'); }
+    return this.run(req, org, async (c, s) => {
+      CareController.need(s, 'registrar_sintoma');
+      const existing = await c.query(`SELECT id,symptom_report_id FROM patient_temperature_readings WHERE organization_id=$1 AND source_reference=$2`, [org, t.requestId]);
+      const fever = isFever(t.celsius);
+      const a = fever ? assessSymptom(temperatureAsSymptom(t)) : null;
+      if (existing.rowCount) return { readingId: existing.rows[0].id, duplicate: true, urgent: fever, message: a ? a.patientMessage : ROUTINE_MESSAGE, clinicalAdvice: false };
+      let reportId: string | null = null;
+      if (a) { // mesmo caminho do relato de sintoma com sinal de alerta "febre" (regra care-demo-v1)
+        const ans = temperatureAsSymptom(t); reportId = randomUUID();
+        await c.query(`INSERT INTO patient_symptom_reports(id,organization_id,patient_id,symptom_code,description,source,source_reference,triage_status,details,actor_issuer,actor_sub) VALUES($1,$2,$3,$4,$5,'care-portal',$6,$7,$8::jsonb,$9,$10)`,
+          [reportId, org, s.patientId, ans.symptomCode, ans.description, `temp:${t.requestId}`, 'urgent_review', JSON.stringify({ ...a.details, reported_by: s.actor, source: 'temperature' }), req.principal.issuer, req.principal.sub]);
+        await c.query(`INSERT INTO clinical_alerts(id,organization_id,patient_id,source_report_id,code,level,status,rule_version,explanation) VALUES($1,$2,$3,$4,$5,'urgent_review','awaiting_review',$6,$7)`,
+          [randomUUID(), org, s.patientId, reportId, 'symptom.fever', a.ruleVersion, a.explanation]);
+      }
+      const enc = sealText(t.celsius.toFixed(1), key.key);
+      const r = await c.query(`INSERT INTO patient_temperature_readings(organization_id,patient_id,value_encrypted,value_iv,value_tag,key_id,measured_at,recorded_by,actor_issuer,actor_sub,source_reference,symptom_report_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id`,
+        [org, s.patientId, enc.ciphertext, enc.iv, enc.tag, key.id, t.measuredAt, s.actor, req.principal.issuer, req.principal.sub, t.requestId, reportId]);
+      await this.audit(c, org, req, 'care.temperature.created', s, { reading_id: r.rows[0].id, urgent: String(fever) }); // valor não vai para a auditoria
+      return { readingId: r.rows[0].id, reportId, urgent: fever, message: a ? a.patientMessage : ROUTINE_MESSAGE, clinicalAdvice: false };
+    });
+  }
+
+  @Get('me/temperatures')
+  temperatures(@Req() req: AuthenticatedRequest, @Headers('x-organization-id') org: string) {
+    let key: ReturnType<typeof careKey>; try { key = careKey(); } catch { throw new ServiceUnavailableException('Leitura de temperatura indisponível: chave de cifra não configurada'); }
+    return this.run(req, org, async (c, s) => {
+      if (s.actor === 'caregiver' && !s.scopes.includes('registrar_sintoma') && !s.scopes.includes('ver_jornada')) CareController.need(s, 'ver_jornada');
+      const rows = (await c.query(`SELECT id,value_encrypted,value_iv,value_tag,measured_at,recorded_by FROM patient_temperature_readings WHERE organization_id=$1 AND patient_id=$2 AND measured_at >= now() - interval '7 days' ORDER BY measured_at ASC LIMIT 200`, [org, s.patientId])).rows;
+      await this.audit(c, org, req, 'care.temperature.read', s);
+      return { thresholdC: FEVER_THRESHOLD_C, readings: rows.map((x) => { const celsius = Number(openText({ ciphertext: x.value_encrypted, iv: x.value_iv, tag: x.value_tag }, key.key)); return { id: x.id, celsius, measuredAt: x.measured_at, recordedBy: x.recorded_by, fever: isFever(celsius) }; }) };
     });
   }
 

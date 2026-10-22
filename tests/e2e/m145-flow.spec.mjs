@@ -143,16 +143,16 @@ test.describe.serial('M14.5 E2E sintético', () => {
     // M15.2 — consentimento na primeira entrada (gravado e auditado), depois o Início com nome do IdP (sem UUID na tela).
     await expect(page.getByRole('heading', { name: 'Antes de começar' })).toBeVisible(); await shot(page, 'care-consent');
     await page.getByLabel('Li e concordo').check(); await page.getByRole('button', { name: 'Continuar' }).click();
-    await expect(page.getByRole('heading', { level: 1 })).toContainText('Olá, Ana. Como você está hoje?');
+    await expect(page.getByRole('heading', { level: 1 })).toContainText(/(Bom dia|Boa tarde|Boa noite), Ana! Como você está hoje\?/); // mockups oficiais 21/10 (desktop)
     await expect(page.getByText('Um passo de cada vez. Juntos no cuidado.')).toBeVisible();
     await expect(page.locator('input#care-patient')).toHaveCount(0); await expect(page.locator('main').getByText(/UUID|fictíci|de teste/i)).toHaveCount(0); // a faixa do ambiente de teste (M16) fica fora do conteúdo
-    await expect(page.getByRole('heading', { name: 'Próxima sessão' })).toBeVisible(); await expect(page.getByText('Ciclo 3 ·')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Próxima consulta' })).toBeVisible(); await expect(page.getByText('Ciclo 3 ·')).toBeVisible();
     await expect(page.getByText('Evite bebidas e alimentos muito gelados')).toBeVisible(); // orientação approved
     await expect(page.getByText('Rascunho não aprovado')).toHaveCount(0); // draft nunca aparece
     expect(sql(`SELECT count(*) FROM audit_events WHERE action='care.consent.accepted' AND actor_sub='${sub('paciente.a')}'`)).not.toBe('0');
     await shot(page, 'care-home');
     // Relato estruturado operado por teclado: uma pergunta por tela.
-    await page.getByRole('link', { name: 'Registrar como estou' }).click(); await expect(page.getByRole('heading', { name: 'Como estou hoje' })).toBeVisible();
+    await page.getByRole('link', { name: 'Sintomas e febre' }).click(); await expect(page.getByRole('heading', { name: 'Como você se sente agora?' })).toBeVisible();
     await page.getByLabel('Enjoo ou vômito').focus(); await page.keyboard.press('Space'); await page.keyboard.press('Enter');
     await page.getByLabel(/Leve —/).check(); await page.getByRole('button', { name: 'Continuar' }).click();
     await page.getByLabel('Hoje', { exact: true }).check(); await page.getByRole('button', { name: 'Continuar' }).click();
@@ -190,7 +190,7 @@ test.describe.serial('M14.5 E2E sintético', () => {
     expect(sql(`SELECT r.triage_status||'|'||a.level FROM patient_symptom_reports r JOIN clinical_alerts a ON a.source_report_id=r.id WHERE r.id='${urgentId}'`)).toBe('urgent_review|urgent_review');
     // Minha jornada, Meus medicamentos (sem dose; adesão relatada), Ajuda, Preferências.
     await page.getByRole('link', { name: 'Minha jornada' }).click(); await expect(page.getByText(/Ciclo 1/)).toBeVisible(); await expect(page.getByText(/Enjoo ou vômito · Registrado — aguardando avaliação da equipe/).first()).toBeVisible(); await shot(page, 'care-journey');
-    await page.getByRole('link', { name: 'Meus medicamentos' }).click(); await expect(page.getByRole('heading', { name: 'Ondansetrona (comprimido)' })).toBeVisible();
+    await page.getByRole('link', { name: 'Medicação do dia' }).click(); await expect(page.locator('[data-med="Ondansetrona (comprimido)"]').first()).toBeVisible();
     await expect(page.getByText(/\b8 ?mg\b/)).toHaveCount(0);
     await page.getByRole('group', { name: /Ondansetrona \(comprimido\)/ }).getByRole('button', { name: 'Tomei', exact: true }).click();
     await expect(page.getByRole('status')).toContainText('registrado "Tomei"'); await shot(page, 'care-medications');
@@ -623,10 +623,10 @@ test.describe.serial('M14.5 E2E sintético', () => {
     await expect(cg.p.getByRole('alert').filter({ hasText: 'Código inválido' })).toBeVisible();
     expect(sql(`SELECT count(*) FROM audit_events WHERE action='care.caregiver.invite.rejected' AND actor_sub='${sub('cuidador.a')}'`)).not.toBe('0');
     await cg.p.fill('#invite-code', code.toLowerCase()); await cg.p.getByRole('button', { name: 'Usar código' }).click();
-    await expect(cg.p.getByRole('heading', { level: 1 })).toContainText('Olá, Carla. Você acompanha Ana.');
+    await expect(cg.p.getByRole('heading', { level: 1 })).toContainText(/(Bom dia|Boa tarde|Boa noite), Carla! Você acompanha Ana\./);
     await expect(cg.p.getByText('Ana ainda não liberou nenhuma informação para você.')).toBeVisible();
     await expect(cg.p.getByRole('link', { name: 'Minha jornada' })).toHaveCount(0); await expect(cg.p.getByRole('link', { name: 'Cuidador e privacidade' })).toHaveCount(0);
-    await expect(cg.p.getByText('Próxima sessão')).toHaveCount(0); await shot(cg.p, 'care-caregiver-nothing-shared');
+    await expect(cg.p.getByText('Próxima consulta')).toHaveCount(0); await expect(cg.p.getByText('Próxima dose')).toHaveCount(0); await shot(cg.p, 'care-caregiver-nothing-shared');
     // Sem escopo: API recusa jornada, medicamentos, relato e qualquer gestão de cuidador.
     for (const path of ['me/journey', 'me/medications', 'me/caregivers']) expect((await cg.p.request.get(`${CARE}/api/care/${path}`)).status(), path).toBe(403);
     expect((await post(cg.p, 'me/symptoms', { symptomCode: 'nausea', intensity: 'leve', onset: 'hoje', requestId: randomUUID() })).status()).toBe(403);
@@ -639,7 +639,7 @@ test.describe.serial('M14.5 E2E sintético', () => {
     await expect(card.getByLabel('Ver minha jornada (sessões e relatos)')).toBeChecked();
     await card.getByLabel('Registrar sintomas por mim').click(); await expect(card.getByLabel('Registrar sintomas por mim')).toBeChecked();
     expect(sql(`SELECT array_to_string(scopes, ',' ) FROM caregiver_links WHERE revoked_at IS NULL AND caregiver_sub='${sub('cuidador.a')}'`)).toBe('ver_jornada,registrar_sintoma');
-    await cg.p.reload(); await expect(cg.p.getByRole('link', { name: 'Minha jornada' })).toBeVisible(); await expect(cg.p.getByRole('link', { name: 'Meus medicamentos' })).toHaveCount(0);
+    await cg.p.reload(); await expect(cg.p.getByRole('link', { name: 'Minha jornada' })).toBeVisible(); await expect(cg.p.getByRole('link', { name: 'Medicação do dia' })).toHaveCount(0);
     await cg.p.getByRole('link', { name: 'Minha jornada' }).click(); await expect(cg.p.getByText(/Ciclo 1/)).toBeVisible();
     expect((await cg.p.request.get(`${CARE}/api/care/me/medications`)).status()).toBe(403);
     const rid = randomUUID(); const sym = await post(cg.p, 'me/symptoms', { symptomCode: 'fatigue', intensity: 'leve', onset: 'hoje', requestId: rid });

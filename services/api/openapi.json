@@ -2252,6 +2252,515 @@
           }
         }
       }
+    },
+    "/care/me/temperatures": {
+      "get": {
+        "summary": "Temperaturas registradas nos últimos 7 dias (paciente ou cuidador com permissão).",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ]
+      },
+      "post": {
+        "summary": "Registra temperatura (°C, 34,0–43,0, uma casa decimal). >= 37,8 °C segue a regra de febre existente (relato + alerta).",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Conta sem vínculo de paciente ativo (R3)"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "symptomCode",
+                  "intensity",
+                  "onset",
+                  "requestId"
+                ],
+                "properties": {
+                  "symptomCode": {
+                    "enum": [
+                      "nausea",
+                      "neuropathy",
+                      "fever",
+                      "diarrhea",
+                      "fatigue",
+                      "pain",
+                      "mouth",
+                      "other"
+                    ]
+                  },
+                  "intensity": {
+                    "enum": [
+                      "leve",
+                      "moderada",
+                      "forte"
+                    ]
+                  },
+                  "onset": {
+                    "enum": [
+                      "hoje",
+                      "1-3-dias",
+                      "mais-3-dias"
+                    ]
+                  },
+                  "redFlags": {
+                    "type": "array",
+                    "maxItems": 5,
+                    "items": {
+                      "enum": [
+                        "febre",
+                        "falta_ar",
+                        "sangramento",
+                        "nao_bebe",
+                        "confusao"
+                      ]
+                    }
+                  },
+                  "description": {
+                    "type": "string",
+                    "maxLength": 1000
+                  },
+                  "requestId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/clinical/patients/{patientId}/med-transcriptions": {
+      "get": {
+        "summary": "M22 — transcrições de medicamentos do paciente (versões, situação, trilha de liberação). Somente paciente vinculado.",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem MFA, sem vínculo profissional ou paciente não atribuído"
+          }
+        }
+      },
+      "post": {
+        "summary": "M22 — transcreve a prescrição médica (medicamento, dose como texto, via, horários, período, orientações ao paciente sem dose). Fica aguardando liberação da farmácia.",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem MFA, sem vínculo profissional ou paciente não atribuído"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "kind",
+                  "title",
+                  "assigneeRole"
+                ],
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "task",
+                      "referral"
+                    ]
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 160
+                  },
+                  "details": {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  "assigneeRole": {
+                    "enum": [
+                      "pharmacist",
+                      "physician",
+                      "nurse",
+                      "clinical_manager"
+                    ]
+                  },
+                  "dueAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "alertId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/clinical/patients/{patientId}/med-transcriptions/{lineageId}/discontinue": {
+      "post": {
+        "summary": "M22 — transcreve a suspensão prescrita pelo médico (aguarda liberação da farmácia).",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem MFA, sem vínculo profissional ou paciente não atribuído"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "kind",
+                  "title",
+                  "assigneeRole"
+                ],
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "task",
+                      "referral"
+                    ]
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 160
+                  },
+                  "details": {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  "assigneeRole": {
+                    "enum": [
+                      "pharmacist",
+                      "physician",
+                      "nurse",
+                      "clinical_manager"
+                    ]
+                  },
+                  "dueAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "alertId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/clinical/med-transcriptions/{id}/release": {
+      "post": {
+        "summary": "M22 — farmácia confere e libera; só então o Care mostra/atualiza/remove o item.",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem MFA, sem vínculo profissional ou paciente não atribuído"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "kind",
+                  "title",
+                  "assigneeRole"
+                ],
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "task",
+                      "referral"
+                    ]
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 160
+                  },
+                  "details": {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  "assigneeRole": {
+                    "enum": [
+                      "pharmacist",
+                      "physician",
+                      "nurse",
+                      "clinical_manager"
+                    ]
+                  },
+                  "dueAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "alertId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/clinical/med-transcriptions/{id}/reject": {
+      "post": {
+        "summary": "M22 — farmácia devolve a transcrição com motivo.",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem MFA, sem vínculo profissional ou paciente não atribuído"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "kind",
+                  "title",
+                  "assigneeRole"
+                ],
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "task",
+                      "referral"
+                    ]
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 160
+                  },
+                  "details": {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  "assigneeRole": {
+                    "enum": [
+                      "pharmacist",
+                      "physician",
+                      "nurse",
+                      "clinical_manager"
+                    ]
+                  },
+                  "dueAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "alertId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/clinical/patients/{patientId}/med-transcriptions/hospital-oral": {
+      "get": {
+        "summary": "M22: medicações ORAIS ativas do sistema do hospital (gateway simulado, FHIR R4) como rascunhos para revisão; nada é gravado",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem MFA, sem vínculo profissional ou paciente não atribuído"
+          }
+        }
+      }
     }
   }
 }

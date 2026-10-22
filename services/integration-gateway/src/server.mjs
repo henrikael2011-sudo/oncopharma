@@ -5,6 +5,7 @@ import { timingSafeEqual } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
 import { LOCATION_ADAPTER_VERSION, parseFhirLocations, parseHl7Adt } from './location-feed.mjs';
 import { createHospitalSimulator, SIM_SOURCE } from '../simulator/hospital-sim.mjs';
+import { MED_ADAPTER_VERSION, parseFhirOralMedications } from './med-feed.mjs';
 
 export function createGateway({ token, simulator = createHospitalSimulator(), now = () => new Date() }) {
   if (typeof token !== 'string' || token.length < 32) throw Error('INTEGRATION_GATEWAY_TOKEN ausente ou curto (mín. 32)');
@@ -20,6 +21,11 @@ export function createGateway({ token, simulator = createHospitalSimulator(), no
         const f = simulator.feed();
         const items = f.format === 'fhir_r4' ? parseFhirLocations(f.payload) : parseHl7Adt(f.payload);
         return send(res, 200, { source: SIM_SOURCE, format: f.format, adapterVersion: LOCATION_ADAPTER_VERSION, fetchedAt: now().toISOString(), syntheticOnly: true, items });
+      }
+      // M22: medicações orais ativas de um prontuário (FHIR R4 MedicationRequest) — rascunho para revisão da equipe.
+      if (req.method === 'GET' && url.pathname === '/v1/medications') {
+        const r = parseFhirOralMedications(simulator.medications(), url.searchParams.get('record'));
+        return send(res, 200, { source: SIM_SOURCE, format: 'fhir_r4', adapterVersion: MED_ADAPTER_VERSION, fetchedAt: now().toISOString(), syntheticOnly: true, ...r });
       }
       // Controle do simulador (somente testes/dev): fase do feed.
       if (req.method === 'POST' && url.pathname === '/v1/sim/reset') { simulator.reset(); return send(res, 200, { phase: simulator.phase }); }
