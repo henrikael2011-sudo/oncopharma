@@ -949,6 +949,32 @@
         }
       }
     },
+    "/clinical/overview": {
+      "get": {
+        "summary": "M20 — Visão geral do farmacêutico: contagens do dia, febre (última temperatura >= 37,8 °C) e prazos de estabilidade (ilustrativos) somente dos pacientes vinculados; dados sintéticos",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem MFA ou sem vínculo profissional"
+          }
+        }
+      }
+    },
     "/clinical/patients/{patientId}": {
       "get": {
         "summary": "Paciente aberto: alertas com transições permitidas ao papel e tarefas (auditado)",
@@ -2758,6 +2784,396 @@
           },
           "403": {
             "description": "Sem MFA, sem vínculo profissional ou paciente não atribuído"
+          }
+        }
+      }
+    },
+    "/public/registration/{token}": {
+      "get": {
+        "summary": "M24 — valida o convite de autocadastro (público, sem login; limite de tentativas).",
+        "security": [],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 400
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Convite válido"
+          },
+          "404": {
+            "description": "Convite inválido, expirado ou já utilizado (mensagem única)"
+          },
+          "429": {
+            "description": "Limite de tentativas"
+          }
+        }
+      },
+      "post": {
+        "summary": "M24 — envia o autocadastro; nasce 'pending_review' (pendente de conferência). Convite de uso único.",
+        "security": [],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 400
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "submittedBy",
+                  "fullName",
+                  "birthDate",
+                  "phone",
+                  "diagnosis",
+                  "consent"
+                ],
+                "properties": {
+                  "submittedBy": {
+                    "enum": [
+                      "patient",
+                      "caregiver"
+                    ]
+                  },
+                  "fullName": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 80
+                  },
+                  "birthDate": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "phone": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "nullable": true
+                  },
+                  "caregiver": {
+                    "type": "object",
+                    "nullable": true,
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "relationship": {
+                        "type": "string"
+                      },
+                      "phone": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "diagnosis": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 120
+                  },
+                  "regimen": {
+                    "type": "string",
+                    "maxLength": 120,
+                    "nullable": true
+                  },
+                  "treatmentStart": {
+                    "type": "string",
+                    "format": "date",
+                    "nullable": true
+                  },
+                  "hospitalName": {
+                    "type": "string",
+                    "maxLength": 80,
+                    "nullable": true
+                  },
+                  "consent": {
+                    "type": "boolean",
+                    "enum": [
+                      true
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Recebido, pendente de conferência"
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "404": {
+            "description": "Convite inválido, expirado ou já utilizado (mensagem única)"
+          },
+          "429": {
+            "description": "Limite de tentativas"
+          }
+        }
+      }
+    },
+    "/clinical/registration-invites": {
+      "post": {
+        "summary": "M24 — equipe emite convite de uso único (link + QR SVG). Farmácia, enfermagem ou medicina.",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "hours": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 168
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem MFA, sem vínculo profissional ou sem permissão do papel"
+          }
+        }
+      }
+    },
+    "/clinical/registrations": {
+      "get": {
+        "summary": "M24 — cadastros recebidos (pendentes primeiro).",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem MFA, sem vínculo profissional ou sem permissão do papel"
+          }
+        }
+      }
+    },
+    "/clinical/registrations/{id}/confirm": {
+      "post": {
+        "summary": "M24 — equipe confere e confirma: cria o paciente sintético com os dados enviados + prontuário.",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "record",
+                  "confirm"
+                ],
+                "properties": {
+                  "record": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9-]{3,30}$"
+                  },
+                  "confirm": {
+                    "type": "boolean",
+                    "enum": [
+                      true
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "OK"
+          },
+          "409": {
+            "description": "Já conferido ou prontuário duplicado"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem MFA, sem vínculo profissional ou sem permissão do papel"
+          }
+        }
+      }
+    },
+    "/clinical/registrations/{id}/reject": {
+      "post": {
+        "summary": "M24 — equipe devolve o cadastro com motivo.",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "note"
+                ],
+                "properties": {
+                  "note": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 500
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem MFA, sem vínculo profissional ou sem permissão do papel"
+          }
+        }
+      }
+    },
+    "/clinical/panel/queue": {
+      "get": {
+        "summary": "M24 — fila de alertas abertos (gravidade, depois espera). Integração hospitalar simulada. O app não decide: a equipe avalia.",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem MFA, sem vínculo profissional ou sem permissão do papel"
+          }
+        }
+      }
+    },
+    "/clinical/panel/patients/{patientId}": {
+      "get": {
+        "summary": "M24 — detalhe: check-ins (14 dias), alertas, medicamentos ativos e orais do hospital simulado.",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem MFA, sem vínculo profissional ou sem permissão do papel"
           }
         }
       }
