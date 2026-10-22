@@ -59,3 +59,11 @@ test('migração 0015 e seed: somente DEV, RLS, leitura para o app, prazos ilust
   assert.match(r('infra/scripts/bootstrap-ci-db.sh'), /0015_preparation_stability\.sql/);
   assert.match(r('infra/seeds/seed_m20_preparation_stability.sql'), /DEMO-PREP-/);
 });
+test('identidade v3h: menu lateral com ícones Lucide, itens sem tela desabilitados "em breve", fontes locais só no Clinical', () => {
+  const shell = r('apps/clinical-web/components/clinical/ClinicalShell.tsx');
+  for (const t of ["'Prescrições'", "'Relatórios'", "'Pedidos ao médico'", 'aria-disabled="true"', 'em breve', '<ClinTile name={icon} />']) assert.ok(shell.includes(t), t);
+  assert.doesNotMatch(r('apps/clinical-web/components/clinical/PharmacistOverview.tsx'), /🤖|📋|🌡|⏳|✨|🛡/);
+  const lay = r('apps/clinical-web/app/clinical/layout.tsx'); assert.match(lay, /bricolage\.variable/); assert.match(lay, /clinical-v3h\.css/);
+  assert.match(r('apps/clinical-web/app/clinical/clinical-fonts.ts'), /next\/font\/local/);
+  const css = r('apps/clinical-web/app/clinical/clinical-v3h.css'); assert.match(css, /Bricolage|--cv-font-title/); assert.doesNotMatch(css, /@import|https?:\/\//);
+});

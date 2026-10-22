@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { celsius, work, type Overview } from '../../lib/work-client';
 import { useStaff } from './ClinicalShell';
+import { ClinTile } from './ClinIcons';
 
 const TZ = 'America/Sao_Paulo';
 const hour = (d: string) => new Date(d).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: TZ });
@@ -19,10 +20,10 @@ export function PharmacistOverview() {
   const load = useCallback(async () => { setErr(''); try { setD(await work<Overview>('overview')); } catch (e) { setErr(e instanceof Error ? e.message : 'Erro'); } }, []);
   useEffect(() => { void load(); }, [load]);
   const p = d?.pending;
-  const stats: [number | undefined, string, string][] = [
-    [p?.prescriptionChecks, 'conferências de prescrição', ''], [p?.openAlerts, 'alertas clínicos a revisar', 'n-err'],
-    [p?.awaitingPhysician, 'pedidos aguardando médico', 'n-warn'], [p?.openTasks, 'tarefas abertas da farmácia', ''],
-    [p?.fever, 'alertas de febre', 'n-err'], [p?.expiringSoon, 'preparos vencendo < 6 h', 'n-warn']];
+  const stats: [number | undefined, string, string, string][] = [
+    [p?.prescriptionChecks, 'conferências de prescrição', '', 'pill'], [p?.openAlerts, 'alertas clínicos a revisar', 'n-err', 'warn'],
+    [p?.awaitingPhysician, 'pedidos aguardando médico', 'n-warn', 'doctor'], [p?.openTasks, 'tarefas abertas da farmácia', '', 'label'],
+    [p?.fever, 'alertas de febre', 'n-err', 'thermo'], [p?.expiringSoon, 'preparos vencendo < 6 h', 'n-warn', 'ivbag']];
   return <section className="vg" aria-labelledby="vg-titulo">
     <img className="vg-watermark" src="/brand/clinical.svg" alt="" aria-hidden="true" />
     <div className="vg-sub">
@@ -33,18 +34,18 @@ export function PharmacistOverview() {
     </div>
     {err && <p role="alert" className="clin-error">{err} <button className="btn-secondary" onClick={() => void load()}>Tentar de novo</button></p>}
     <Link className="vg-short" href="/clinical/conferencia-ia" data-testid="atalho-conferencia-ia">
-      <span className="vg-ic" aria-hidden="true">🤖</span>
+      <span className="vg-ic" aria-hidden="true"><ClinTile name="robot" /></span>
       <span><b>Abrir conferência com IA</b><small>Atalho direto · /clinical/conferencia-ia · abre a fila sem passar pelo menu</small></span>
       <span className="vg-badge">{d ? `${d.aiConference.pending} ${pl(d.aiConference.pending, 'pendente', 'pendentes')}` : '…'}</span>
       <span className="vg-go">Abrir →</span>
     </Link>
     <section className="vg-card" aria-labelledby="vg-pend">
-      <h2 id="vg-pend"><span aria-hidden="true">📋</span> Pendências do dia <span className="tag t-gold">{p ? `${p.total} no total` : '…'}</span></h2>
-      <ul className="vg-stats">{stats.map(([n, label, cls]) => <li key={label} className="vg-stat"><b className={cls}>{n ?? '–'}</b><span>{label}</span></li>)}</ul>
+      <h2 id="vg-pend"><ClinTile name="clip" /> Pendências do dia <span className="tag t-gold">{p ? `${p.total} no total` : '…'}</span></h2>
+      <ul className="vg-stats">{stats.map(([n, label, cls, icon]) => <li key={label} className="vg-stat"><ClinTile name={icon} gold={icon === 'warn'} /><b className={cls}>{n ?? '–'}</b><span>{label}</span></li>)}</ul>
     </section>
     <div className="vg-row">
       <section className="vg-card vg-fever" aria-labelledby="vg-febre">
-        <h2 id="vg-febre"><span aria-hidden="true">🌡</span> Alertas de febre <span className="tag t-err">{d ? `${d.fever.length} ${pl(d.fever.length, 'ativo', 'ativos')}` : '…'}</span></h2>
+        <h2 id="vg-febre"><ClinTile name="thermo" /> Alertas de febre <span className="tag t-err">{d ? `${d.fever.length} ${pl(d.fever.length, 'ativo', 'ativos')}` : '…'}</span></h2>
         {d && (d.fever.length === 0 ? <p className="clin-empty" role="status">Nenhum paciente vinculado com temperatura ≥ 37,8 °C na última medida.</p>
           : <table className="vg-t"><thead><tr><th scope="col">Paciente</th><th scope="col">Leito</th><th scope="col">Temp.</th><th scope="col">Hora (BRT)</th></tr></thead>
             <tbody>{d.fever.map((f) => <tr key={f.patientId}>
@@ -53,7 +54,7 @@ export function PharmacistOverview() {
         <p className="vg-note">Limiar de febre: {d ? celsius(d.feverThresholdC) : '37,8 °C'}. Conduta clínica definida pela equipe médica.</p>
       </section>
       <section className="vg-card" aria-labelledby="vg-vence">
-        <h2 id="vg-vence"><span aria-hidden="true">⏳</span> O que vence <span className="tag t-gold">por estabilidade</span><span className="vg-ill">{d?.stabilityNotice ?? 'Prazos ilustrativos — conferir na bula do fabricante'}</span></h2>
+        <h2 id="vg-vence"><ClinTile name="hour" /> O que vence <span className="tag t-gold">por estabilidade</span><span className="vg-ill">{d?.stabilityNotice ?? 'Prazos ilustrativos — conferir na bula do fabricante'}</span></h2>
         {d && (d.expiring.length === 0 ? <p className="clin-empty" role="status">Nenhum preparo aguardando liberação.</p>
           : <table className="vg-t"><thead><tr><th scope="col">Bolsa / preparo</th><th scope="col">Tempo de estabilidade usado</th><th scope="col">Restante</th></tr></thead>
             <tbody>{d.expiring.map((x) => <tr key={x.id}>
@@ -62,7 +63,7 @@ export function PharmacistOverview() {
               <td><span className={LEVEL[x.level]}>{x.remaining}</span></td></tr>)}</tbody></table>)}
       </section>
     </div>
-    <aside className="vg-ai" aria-label="IA não decide"><p className="vg-ai-h"><span aria-hidden="true">✨</span> Conferência com IA · rascunho <span className="tag t-gold">rascunho</span></p>
-      <p>A IA só gera rascunhos de conferência a partir de dados fictícios. <b>🛡 IA não decide — revisão e decisão são do farmacêutico e da equipe médica.</b></p></aside>
+    <aside className="vg-ai" aria-label="IA não decide"><p className="vg-ai-h"><ClinTile name="spark" gold /> Conferência com IA · rascunho <span className="tag t-gold">rascunho</span></p>
+      <p>A IA só gera rascunhos de conferência a partir de dados fictícios. <b className="vg-no"><ClinTile name="shield" />IA não decide — revisão e decisão são do farmacêutico e da equipe médica.</b></p></aside>
   </section>;
 }
