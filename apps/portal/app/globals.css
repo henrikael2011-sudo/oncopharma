@@ -133,6 +133,24 @@
 .imp-detail{display:grid;grid-template-columns:max-content 1fr;gap:4px 16px;margin:10px 0}
 .imp-detail dt{font-weight:700}
 .imp-detail dd{margin:0}
+
+/* M18 — Prescrição por foto (fase A). Somente tokens/derivados M14.4. Status: conferido=esmeralda, pendente=dourado, desvalidado=riscado. */
+.rx-split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:20px;align-items:start}
+.rx-photo{margin:0;background:#fff;border:1px solid var(--navy-150);border-radius:20px;padding:18px;position:sticky;top:12px}
+.rx-photo-sheet{background:var(--canvas);border:1px dashed var(--navy-300);border-radius:12px;padding:18px;font-family:ui-monospace,monospace;color:var(--ink)}
+.rx-photo figcaption{font-size:13px;color:var(--ink-muted);margin-top:10px}
+.rx-items ul{list-style:none;padding:0;margin:0;display:grid;gap:14px}.rx-meta{color:var(--navy-text);font-weight:700}
+.rx-item{background:#fff;border:1px solid var(--navy-150);border-left:6px solid var(--gold-600);border-radius:16px;padding:16px}
+.rx-item.rx-conferido{border-left-color:var(--emerald)}.rx-item.rx-desvalidado{border-left-color:var(--border-strong)}
+.rx-item.rx-desvalidado :where(.rx-field,.rx-read){text-decoration:line-through;color:var(--ink-muted)}
+.rx-item-head{display:flex;justify-content:space-between;gap:10px}.rx-badge{font-size:12px;font-weight:800;padding:5px 9px;border-radius:8px;background:var(--gold-50);color:var(--gold-ink)}
+.rx-conferido .rx-badge{background:var(--mint-100);color:var(--emerald-ink)}.rx-desvalidado .rx-badge{background:var(--navy-100);color:var(--navy-text)}
+.rx-ai{background:var(--navy-50);border:1px solid var(--navy-150);border-radius:12px;padding:12px;margin:10px 0}.rx-ai p{margin:6px 0}.rx-ai small{color:var(--ink-muted)}
+.rx-draft{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;background:var(--gold-50);color:var(--gold-700);border:1px solid var(--gold-300);border-radius:6px;padding:3px 7px}
+.rx-actions{display:flex;flex-wrap:wrap;gap:8px}.rx-actions button{min-height:44px;min-width:44px}
+.rx-footer{position:sticky;bottom:0;margin-top:20px;background:var(--navy-800);color:var(--mint-on-dark-strong);padding:14px 18px;border-radius:14px;font-weight:700}
+.rx-footer .rx-conferido{color:var(--mint)}.rx-footer .rx-pendente{color:var(--gold-200)}.rx-footer .rx-desvalidado{text-decoration:line-through}
+@media(max-width:900px){.rx-split{grid-template-columns:1fr}.rx-photo{position:static}}
 /* M17 — celular: menu do Care compacto (1 linha rolável), alvos de toque ≥48 px (Care) e ≥44 px (Clinical). Sem novos tokens. */
 .brand{min-height:48px}
 .care-page input[type=checkbox],.care-page input[type=radio]{width:24px;height:24px;flex-shrink:0;margin:0;accent-color:var(--emerald)}

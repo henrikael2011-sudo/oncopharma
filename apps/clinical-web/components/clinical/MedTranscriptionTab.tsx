@@ -5,6 +5,7 @@
 // todas só PRÉ-PREENCHEM o formulário: a equipe revisa/edita e registra; nada chega ao paciente sem a liberação da farmácia.
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { work, when } from '../../lib/work-client';
+import { ClinTile } from './ClinIcons';
 type Status = 'pending_release' | 'released' | 'rejected' | 'superseded' | 'discontinued';
 type Item = { id: string; lineageId: string; version: number; kind: 'new' | 'update' | 'discontinue'; kindLabel: string; medication: string; dose: string; route: string; routeLabel: string; times: string[]; frequency: string; startDate: string; endDate: string | null; instructions: string; prescriptionRef: string; status: Status; statusLabel: string; enteredBy: string; enteredAt: string; reviewedAt: string | null; reviewNote: string | null; mine: boolean; entrySource: Source; entrySourceLabel: string; sourceDetail: string | null };
 type Data = { role: string; canEnter: boolean; canRelease: boolean; routes: Record<string, string>; items: Item[] };
@@ -39,9 +40,9 @@ export function MedTranscriptionTab({ patientId }: { patientId: string }) {
     {!form && mode === 'foto' && <PhotoPanel patientId={patientId} onUse={use} />}
     {!form && mode === 'hospital' && <HospitalPanel patientId={patientId} onUse={use} />}
     {form && <TranscriptionForm form={form} setForm={setForm} routes={d.routes} onCancel={() => setForm(null)} onSubmit={async (f) => { const { warnings: _w, ...b } = f; if (await act(() => work(`patients/${patientId}/med-transcriptions`, { method: 'POST', body: { ...b, endDate: f.endDate || undefined, times: f.times.filter(Boolean) } }), 'Transcrição registrada. Aguardando liberação da farmácia.')) setForm(null); }} />}
-    {d.canRelease && pending.length > 0 && <section aria-labelledby="tr-pend"><h2 id="tr-pend">Aguardando liberação da farmácia ({pending.length})</h2>
+    {d.canRelease && pending.length > 0 && <section aria-labelledby="tr-pend"><h2 id="tr-pend"><ClinTile name="hour" gold />Aguardando liberação da farmácia ({pending.length})</h2>
       {pending.map((i) => <ReleaseCard key={i.id} i={i} act={act} />)}</section>}
-    <section aria-labelledby="tr-list"><h2 id="tr-list">Medicamentos transcritos</h2>
+    <section aria-labelledby="tr-list"><h2 id="tr-list"><ClinTile name="pill" />Medicamentos transcritos</h2>
       {listed.length === 0 ? <p className="clin-empty">{lineages.length ? 'Todos aguardam a liberação da farmácia.' : 'Nenhuma transcrição registrada.'}</p> : <ul className="clin-list">{listed.map((v) => { const cur = v.find((x) => x.status === 'released') ?? v[0]; const hasPending = v.some((x) => x.status === 'pending_release');
         return <li key={cur.lineageId} className="clin-card" aria-label={`Medicamento ${cur.medication}`}>
           <div className="tr-head"><strong>{cur.medication}</strong><span className={SEV[cur.status]}>{cur.statusLabel}</span>{hasPending && cur.status !== 'pending_release' && <span className="sev sev-review">Nova versão aguardando liberação</span>}</div>
@@ -116,7 +117,7 @@ function HospitalPanel({ patientId, onUse }: { patientId: string; onUse: (f: For
 function TranscriptionForm({ form, setForm, routes, onSubmit, onCancel }: { form: Form; setForm: (f: Form) => void; routes: Record<string, string>; onSubmit: (f: Form) => Promise<void>; onCancel: () => void }) {
   const set = (k: keyof Form, v: string) => setForm({ ...form, [k]: v });
   return <form className="workflow-form clin-card" aria-label="Transcrever prescrição" onSubmit={(e) => { e.preventDefault(); void onSubmit(form); }}>
-    <div className="tr-head"><h2>{form.lineageId ? `Transcrever atualização: ${form.medication}` : 'Transcrever prescrição médica'}</h2>{form.entrySource !== 'manual' && <span className="sev sev-review">Rascunho · {ORIGIN[form.entrySource]} — revise todos os campos</span>}</div>
+    <div className="tr-head"><h2><ClinTile name="memo" />{form.lineageId ? `Transcrever atualização: ${form.medication}` : 'Transcrever prescrição médica'}</h2>{form.entrySource !== 'manual' && <span className="sev sev-review">Rascunho · {ORIGIN[form.entrySource]} — revise todos os campos</span>}</div>
     {form.warnings?.map((w) => <p key={w} className="clin-meta">{w}</p>)}
     <div className="tr-grid">
       <div><label htmlFor="tr-med">Medicamento</label><input id="tr-med" required minLength={2} maxLength={120} value={form.medication} onChange={(e) => set('medication', e.target.value)} /></div>
