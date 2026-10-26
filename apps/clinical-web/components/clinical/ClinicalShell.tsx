@@ -1,8 +1,11 @@
 'use client';
 // M15.4 — estrutura do Clinical: sessão institucional, MFA e vínculo profissional antes de qualquer dado de paciente.
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { Brand } from '../Brand';
+import { DemoTag } from './DemoTag';
+import { ClinTile } from './ClinIcons';
 import { TestEnvBanner } from '../TestEnvBanner';
 import { work, WorkError, type StaffMe } from '../../lib/work-client';
 
@@ -12,6 +15,7 @@ export const useStaff = () => { const v = useContext(Ctx); if (!v) throw Error('
 
 export function ClinicalShell({ children, testEnv = false }: { children: React.ReactNode; testEnv?: boolean }) {
   const [state, setState] = useState<State>({ kind: 'loading' });
+  const path = usePathname() || '/clinical';
   const load = useCallback(async () => {
     try { setState({ kind: 'ready', me: await work<StaffMe>('me') }); }
     catch (e) {
@@ -28,15 +32,29 @@ export function ClinicalShell({ children, testEnv = false }: { children: React.R
   else if (state.kind === 'anon') content = <section className="clin-intro"><p className="kicker">Ambiente profissional</p><h1>ONCOPHARMA Clinical</h1>
     <p className="clin-lead">Acompanhamento oncológico multiprofissional: pacientes vinculados, alertas, tarefas e pré-ciclo, com cada ação registrada.</p>
     <a className="btn-primary" href="/api/auth/login">Entrar com identidade institucional</a></section>;
-  else if (state.kind === 'nomfa') content = <section className="clin-card" role="alert"><h1>Confirme o login com o aplicativo autenticador</h1><p>Seu login não comprovou autenticação em dois fatores (MFA). O acesso a pacientes exige o aplicativo autenticador.</p></section>;
+  else if (state.kind === 'nomfa') content = <section className="clin-card" role="alert"><h1>Confirme o login com o aplicativo autenticador</h1><p>Seu login não comprovou autenticação em dois fatores (MFA). O acesso a pacientes exige o aplicativo autenticador.</p><p>Se você acabou de cadastrar o aplicativo, confirme uma vez com o código de 6 dígitos.</p><a className="btn-primary" href="/api/auth/login?mfa=1">Confirmar com o código do aplicativo</a></section>;
   else if (state.kind === 'norole') content = <section className="clin-card" role="alert"><h1>Seu perfil não tem acesso clínico</h1><p>O acesso a pacientes depende de vínculo profissional ativo (farmácia, medicina, enfermagem ou gestão clínica) nesta instituição.</p></section>;
   else if (state.kind === 'error') content = <section className="clin-card" role="alert"><h1>Não foi possível abrir agora</h1><p>{state.message}</p><button className="btn-primary" onClick={() => void load()}>Tentar de novo</button></section>;
   else content = <Ctx.Provider value={state.me}>{children}</Ctx.Provider>;
-  return <div className="clinical-page">
+  // Menu lateral do mockup marca-nova-v3h (Visão geral, Pacientes, Prescrições, Conferência com IA, Pedidos ao médico, Relatórios).
+  // Itens sem tela neste PR ficam desabilitados com "em breve" (nada de botão morto).
+  const ICON: Record<string, string> = { 'Visão geral': 'hosp', Pacientes: 'bed', 'Prescrições': 'memo', 'Conferência com IA': 'robot', 'Pedidos ao médico': 'mail', 'Relatórios': 'bar' };
+  const items: string[][] = me ? [
+    ...(me.role === 'pharmacist' ? [['/clinical/visao-geral', 'Visão geral']] : []), ['/clinical/pacientes', 'Pacientes'], ['', 'Prescrições'],
+    me.role !== 'physician' ? ['/clinical/conferencia-ia', 'Conferência com IA'] : ['', 'Conferência com IA'],
+    me.roles?.includes('physician') ? ['/clinical/solicitacoes', 'Pedidos ao médico'] : ['', 'Pedidos ao médico'], ['', 'Relatórios']] : [];
+  return <div className="clinical-page cv-app">
     {testEnv && <TestEnvBanner />}
-    <header className="clinical-header"><Brand variant="clinical" />
+    <header className={`clinical-header${me?.role === 'pharmacist' && path === '/clinical/visao-geral' ? ' clinical-header--overview' : ''}`}><Brand variant="clinical" />
+      {me && <nav className="clin-nav" aria-label="Seções do Clinical">{items.map(([href, label]) => { const icon = ICON[label];
+        if (!href) return <span key={label} className="cv-soon" aria-disabled="true" title="Em breve: tela ainda não disponível nesta versão"><ClinTile name={icon} />{label}<small> · em breve</small></span>;
+        const on = path.startsWith(href) || (href === '/clinical/pacientes' && path === '/clinical');
+        return <Link key={href} href={href} aria-current={on ? 'page' : undefined}><ClinTile name={icon} />{label}</Link>; })}</nav>}
       {loggedIn && <div className="clin-user">{me && <span>{me.name ? `${me.name} · ` : ''}{me.roleLabel} · MFA confirmado</span>}<form action="/api/auth/logout" method="post"><button type="submit" className="btn-on-dark">Sair</button></form></div>}
     </header>
-    <main id="conteudo" className="clinical-main">{me?.roles?.includes('physician') && <nav aria-label="Solicitações médicas"><Link href="/clinical/solicitacoes">Solicitações recebidas</Link></nav>}{content}</main>
+    <div className="cv-body">
+      <div className="cv-top"><DemoTag /></div>
+      <main id="conteudo" className="clinical-main">{me?.roles?.includes('physician') && <nav aria-label="Solicitações médicas"><Link href="/clinical/solicitacoes">Solicitações recebidas</Link></nav>}{content}</main>
+    </div>
   </div>;
 }
