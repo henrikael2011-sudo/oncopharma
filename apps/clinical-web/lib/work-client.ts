@@ -26,3 +26,10 @@ export type ImportRow = { id: string; line: number; record: string | null; name:
 export type ImportPreview = { importId: string; fileName: string; sha256: string; sizeBytes: number; layout: string; uploadedAt: string; previouslyImportedAt: string | null;
   counts: { create: number; update: number; unchanged: number; conflict: number; not_linked: number; invalid: number }; rows: ImportRow[] };
 export type ImportResult = { importId: string; status: 'confirmed' | 'discarded'; created?: number; updated?: number; conflicts?: number; skipped?: number };
+// M20 — Visão geral do farmacêutico (dados fictícios; somente pacientes vinculados).
+export type Overview = { role: Role; fictional: true; generatedAt: string; lastSync: { at: string; source: string } | null;
+  pending: { prescriptionChecks: number; openAlerts: number; awaitingPhysician: number; openTasks: number; fever: number; expiringSoon: number; total: number };
+  feverThresholdC: number; fever: { patientId: string; name: string; record: string | null; place: string; celsius: number; measuredAt: string }[];
+  stabilityNotice: string; expiring: { id: string; medication: string; container: string; patient: string; place: string; usedPercent: number; remainingMinutes: number; remaining: string; level: 'critico' | 'atencao' | 'ok'; source: string }[];
+  aiConference: { href: string; pending: number } };
+export const celsius = (v: number) => `${v.toFixed(1).replace('.', ',')} °C`;
