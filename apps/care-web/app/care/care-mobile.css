@@ -185,3 +185,19 @@
 .cm-actions-row{display:grid;gap:10px}@media(min-width:1024px){.cm-actions-row{grid-template-columns:auto auto;justify-content:start}.cm-actions-row>*{padding:0 22px}.cm-alert-fever{background:var(--cm-gold-bg)}}
 .cm-emergency{display:grid;gap:10px}@media(min-width:1024px){.cm-cols2{columns:2;column-gap:40px}}
 @media(min-width:1024px){.cm-sym-card .choices{grid-template-columns:1fr 1fr}.cm-sym-card .choices legend{grid-column:1/-1}.cm-sym-card .choices>.care-note{grid-column:1/-1}}
+/* M25 — check-in diário e mensagens com a equipe (identidade Care v1; só tokens --cm-*). */
+.cm-checkin{display:grid;gap:10px;grid-column:1/-1;min-width:0}
+.cm-checkin:empty{display:none}
+.cm-checkin-done{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0;padding:10px 12px;border-radius:12px;background:var(--cm-mint-pill);color:var(--cm-green-800);font-size:14px}
+.cm-checkin-msg{margin:0;padding:10px 12px;border-radius:12px;background:var(--cm-white);color:var(--cm-green-900);border:1px solid var(--cm-line);font-size:14px;line-height:1.45}
+.cm-checkin-msg.is-urgent{border:2px solid var(--cm-red)}
+.cm-checkin-err{margin:0;padding:10px 12px;border-radius:12px;background:var(--cm-white);color:var(--cm-red);font-weight:700}
+.cm-checkin-form{display:grid;gap:10px;padding:16px;border-radius:16px;background:var(--cm-white);color:var(--cm-green-900);border:1px solid var(--cm-line)}
+.cm-checkin-form label,.cm-checkin-form legend{font-weight:800;color:var(--cm-green-900)}
+.cm-checkin-form input:not([type=radio]),.cm-checkin-form textarea{width:100%;padding:12px;border:1px solid var(--cm-line);border-radius:10px;font:inherit;box-sizing:border-box}
+.cm-checkin-form .cm-sub{color:var(--cm-sub)}
+.cm-msg-list{list-style:none;margin:0;padding:0;display:grid;gap:10px;max-height:420px;overflow-y:auto}
+.cm-msg{padding:10px 12px;border-radius:14px;background:var(--cm-mint-50);border:1px solid var(--cm-line-soft);max-width:92%;justify-self:end;overflow-wrap:anywhere}
+.cm-msg.is-team{background:var(--cm-white);border-color:var(--cm-line);justify-self:start}
+.cm-msg p{margin:4px 0 0}
+.cm-msg-form select{width:100%;padding:12px;border:1px solid var(--cm-line);border-radius:10px;font:inherit;background:var(--cm-white)}

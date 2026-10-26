@@ -147,3 +147,14 @@
 .cv-app .hp-ai-notice{background:linear-gradient(135deg,#08402F 0%,#0B5A43 40%,#0E3A5C 75%,#1B4F72 100%)}
 .cv-app .rg-qr{border-color:#D7A858;border-radius:16px}
 .cv-app table th{font-size:11px;color:#5B7083;text-transform:uppercase;letter-spacing:.1em;font-weight:800}
+/* M25 — Conferência com IA: tabela de itens rola dentro do próprio contêiner (sem rolagem lateral da página em 390px). */
+.cv-app .ia-table-wrap{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:12px}
+.cv-app .ia-table-wrap:focus-visible{outline:3px solid #10B981;outline-offset:2px}
+.cv-app .ia-table-wrap .ia-table{min-width:520px}
+.cv-app .ia-table caption{text-align:left;overflow-wrap:anywhere}
+.cv-app .workflow-form{min-width:0;max-width:100%}.cv-app .workflow-form>p{overflow-wrap:anywhere}
+/* M25 — conversa Care ↔ equipe na aba "Check-in e mensagens". */
+.cv-app .cv-msg-list{list-style:none;margin:0;padding:0;display:grid;gap:10px;max-height:460px;overflow-y:auto}
+.cv-app .cv-msg{padding:10px 12px;border-radius:12px;background:#F6FBF7;border:1px solid #CFE8DC;max-width:92%;justify-self:start;overflow-wrap:anywhere}
+.cv-app .cv-msg.is-team{background:#FFFFFF;justify-self:end;border-color:#0B5A43}
+.cv-app .cv-msg p{margin:2px 0}

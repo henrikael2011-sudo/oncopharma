@@ -10,6 +10,7 @@ import { DatabaseService } from './database.service';
 import { syntheticApiEnabled } from './synthetic-mode';
 import { assessSymptom, SYMPTOMS, CONSENT_TERMS_VERSION, parseSymptomAnswers, reportStatusLabel, parseTemperature, isFever, temperatureAsSymptom, FEVER_THRESHOLD_C, ROUTINE_MESSAGE } from './care-rules';
 import { careKey, openText, sealText } from './care-crypto';
+import { alertCodeLabel, CHECKIN_ROUTINE, CHECKIN_UNWELL, FEELINGS, type Feeling, MESSAGE_DISCLAIMER, MESSAGE_TOPICS, type MessageTopic, parseCheckin, parseMessage } from './care-contact-rules';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 function syntheticOnly() { if (!syntheticApiEnabled()) throw new ServiceUnavailableException('Care disponível somente em ambiente não produtivo com dados sintéticos'); }
@@ -222,6 +223,116 @@ export class CareController {
       const rows = (await c.query(`SELECT id,value_encrypted,value_iv,value_tag,measured_at,recorded_by FROM patient_temperature_readings WHERE organization_id=$1 AND patient_id=$2 AND measured_at >= now() - interval '7 days' ORDER BY measured_at ASC LIMIT 200`, [org, s.patientId])).rows;
       await this.audit(c, org, req, 'care.temperature.read', s);
       return { thresholdC: FEVER_THRESHOLD_C, readings: rows.map((x) => { const celsius = Number(openText({ ciphertext: x.value_encrypted, iv: x.value_iv, tag: x.value_tag }, key.key)); return { id: x.id, celsius, measuredAt: x.measured_at, recordedBy: x.recorded_by, fever: isFever(celsius) }; }) };
+    });
+  }
+
+  // ---------- M25: check-in diário (um por dia, editável no mesmo dia). Paciente ou cuidador com registrar_sintoma. ----------
+  private checkinView(r: Record<string, any> | undefined, key: Buffer | null, celsius: number | null) {
+    if (!r) return null;
+    return { id: r.id, date: r.checkin_date, feeling: r.feeling as Feeling, feelingLabel: FEELINGS[r.feeling as Feeling], celsius, fever: celsius !== null && isFever(celsius),
+      note: r.note_encrypted && key ? openText({ ciphertext: r.note_encrypted, iv: r.note_iv, tag: r.note_tag }, key) : null,
+      recordedBy: r.recorded_by, createdAt: r.created_at, updatedAt: r.updated_at, edited: Number(r.edit_count) > 0, canEdit: r.is_today === true };
+  }
+  private async readingCelsius(c: PoolClient, id: string | null, key: Buffer) {
+    if (!id) return null; const t = (await c.query(`SELECT value_encrypted,value_iv,value_tag FROM patient_temperature_readings WHERE id=$1`, [id])).rows[0];
+    return t ? Number(openText({ ciphertext: t.value_encrypted, iv: t.value_iv, tag: t.value_tag }, key)) : null;
+  }
+
+  @Get('me/checkins/today')
+  checkinToday(@Req() req: AuthenticatedRequest, @Headers('x-organization-id') org: string) {
+    let key: ReturnType<typeof careKey>; try { key = careKey(); } catch { throw new ServiceUnavailableException('Check-in indisponível: chave de cifra não configurada'); }
+    return this.run(req, org, async (c, s) => {
+      CareController.need(s, 'registrar_sintoma');
+      const r = (await c.query(`SELECT *, checkin_date::text AS checkin_date, (checkin_date=current_date) AS is_today FROM patient_daily_checkins WHERE organization_id=$1 AND patient_id=$2 AND checkin_date=current_date`, [org, s.patientId])).rows[0];
+      await this.audit(c, org, req, 'care.checkin.read', s);
+      return { today: (await c.query(`SELECT current_date::text AS d`)).rows[0].d, thresholdC: FEVER_THRESHOLD_C, checkin: this.checkinView(r, key.key, r ? await this.readingCelsius(c, r.temperature_reading_id, key.key) : null), feelings: FEELINGS };
+    });
+  }
+
+  @Put('me/checkins/today')
+  checkin(@Req() req: AuthenticatedRequest, @Headers('x-organization-id') org: string, @Body() body: Record<string, unknown>) {
+    const ci = parseCheckin(body); // BadRequest pt-BR (temperatura: mesma faixa e casa decimal do registro de temperatura)
+    let key: ReturnType<typeof careKey>; try { key = careKey(); } catch { throw new ServiceUnavailableException('Check-in indisponível: chave de cifra não configurada'); }
+    return this.run(req, org, async (c, s) => {
+      CareController.need(s, 'registrar_sintoma');
+      const prev = (await c.query(`SELECT id,temperature_reading_id,symptom_report_id,edit_count FROM patient_daily_checkins WHERE organization_id=$1 AND patient_id=$2 AND checkin_date=current_date FOR UPDATE`, [org, s.patientId])).rows[0];
+      const prevC = prev ? await this.readingCelsius(c, prev.temperature_reading_id, key.key) : null;
+      let readingId: string | null = prev?.temperature_reading_id ?? null, reportId: string | null = prev?.symptom_report_id ?? null, urgent = false;
+      // Temperatura nova/alterada => nova leitura imutável; >= 37,8 °C => relato "febre" + alerta urgente (regra care-demo-v1, mesmo caminho de me/temperatures).
+      if (ci.temperature && ci.temperature.celsius !== prevC) {
+        const t = ci.temperature, fever = isFever(t.celsius); let feverReport: string | null = null;
+        if (fever) {
+          const a = assessSymptom(temperatureAsSymptom(t)), ans = temperatureAsSymptom(t); feverReport = randomUUID(); urgent = true;
+          await c.query(`INSERT INTO patient_symptom_reports(id,organization_id,patient_id,symptom_code,description,source,source_reference,triage_status,details,actor_issuer,actor_sub) VALUES($1,$2,$3,$4,$5,'care-portal',$6,'urgent_review',$7::jsonb,$8,$9)`,
+            [feverReport, org, s.patientId, ans.symptomCode, ans.description, `checkin-temp:${randomUUID()}`, JSON.stringify({ ...a.details, reported_by: s.actor, source: 'checkin' }), req.principal.issuer, req.principal.sub]);
+          await c.query(`INSERT INTO clinical_alerts(id,organization_id,patient_id,source_report_id,code,level,status,rule_version,explanation) VALUES($1,$2,$3,$4,'symptom.fever','urgent_review','awaiting_review',$5,$6)`,
+            [randomUUID(), org, s.patientId, feverReport, a.ruleVersion, a.explanation]);
+        }
+        const enc = sealText(t.celsius.toFixed(1), key.key);
+        readingId = (await c.query(`INSERT INTO patient_temperature_readings(organization_id,patient_id,value_encrypted,value_iv,value_tag,key_id,measured_at,recorded_by,actor_issuer,actor_sub,source_reference,symptom_report_id) VALUES($1,$2,$3,$4,$5,$6,now(),$7,$8,$9,$10,$11) RETURNING id`,
+          [org, s.patientId, enc.ciphertext, enc.iv, enc.tag, key.id, s.actor, req.principal.issuer, req.principal.sub, `checkin:${randomUUID()}`, feverReport])).rows[0].id;
+      } else if (!ci.temperature) readingId = null;
+      else urgent = prevC !== null && isFever(prevC);
+      // "Não estou bem" => um relato + alerta de revisão por dia (não duplica ao editar).
+      if (ci.feeling === 'mal' && !reportId) {
+        reportId = randomUUID();
+        await c.query(`INSERT INTO patient_symptom_reports(id,organization_id,patient_id,symptom_code,description,source,source_reference,triage_status,details,actor_issuer,actor_sub) VALUES($1,$2,$3,'other',$4,'care-portal',$5,'pending',$6::jsonb,$7,$8)`,
+          [reportId, org, s.patientId, 'Check-in diário: não estou bem', `checkin-unwell:${randomUUID()}`, JSON.stringify({ reported_by: s.actor, source: 'checkin', questionnaire: 'care-demo-v1' }), req.principal.issuer, req.principal.sub]);
+        await c.query(`INSERT INTO clinical_alerts(id,organization_id,patient_id,source_report_id,code,level,status,rule_version,explanation) VALUES($1,$2,$3,$4,'checkin.unwell','needs_review','awaiting_review','care-demo-v1',$5)`,
+          [randomUUID(), org, s.patientId, reportId, 'Regra demonstrativa: check-in diário "não estou bem". Exige avaliação profissional; não representa diagnóstico ou conduta.']);
+      }
+      const n = ci.note ? sealText(ci.note, key.key) : null;
+      const vals = [ci.feeling, n?.ciphertext ?? null, n?.iv ?? null, n?.tag ?? null, n ? key.id : null, readingId, reportId, s.actor, req.principal.issuer, req.principal.sub];
+      let id: string;
+      if (prev) { id = prev.id; await c.query(`UPDATE patient_daily_checkins SET feeling=$1,note_encrypted=$2,note_iv=$3,note_tag=$4,key_id=$5,temperature_reading_id=$6,symptom_report_id=$7,recorded_by=$8,actor_issuer=$9,actor_sub=$10,updated_at=now(),edit_count=edit_count+1 WHERE id=$11 AND checkin_date=current_date`, [...vals, id]); }
+      else id = (await c.query(`INSERT INTO patient_daily_checkins(organization_id,patient_id,checkin_date,feeling,note_encrypted,note_iv,note_tag,key_id,temperature_reading_id,symptom_report_id,recorded_by,actor_issuer,actor_sub) VALUES($11,$12,current_date,$1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id`, [...vals, org, s.patientId])).rows[0].id;
+      await this.audit(c, org, req, prev ? 'care.checkin.updated' : 'care.checkin.created', s, { checkin_id: id, feeling: ci.feeling, urgent: String(urgent) }); // texto e valor fora da auditoria
+      const r = (await c.query(`SELECT *, checkin_date::text AS checkin_date, (checkin_date=current_date) AS is_today FROM patient_daily_checkins WHERE id=$1`, [id])).rows[0];
+      return { checkin: this.checkinView(r, key.key, ci.temperature?.celsius ?? null), updated: !!prev, urgent,
+        message: urgent ? assessSymptom(temperatureAsSymptom(ci.temperature ?? { celsius: FEVER_THRESHOLD_C, measuredAt: new Date(), requestId: ci.requestId })).patientMessage : ci.feeling === 'mal' ? CHECKIN_UNWELL : CHECKIN_ROUTINE, clinicalAdvice: false };
+    });
+  }
+
+  // ---------- M25: alertas reais do paciente (clinical_alerts do próprio vínculo), sem conduta. ----------
+  @Get('me/alerts')
+  alerts(@Req() req: AuthenticatedRequest, @Headers('x-organization-id') org: string) {
+    return this.run(req, org, async (c, s) => {
+      if (s.actor === 'caregiver' && !s.scopes.includes('registrar_sintoma') && !s.scopes.includes('ver_jornada')) CareController.need(s, 'ver_jornada');
+      const rows = (await c.query(`SELECT a.id,a.code,a.level,a.status,a.created_at,r.description FROM clinical_alerts a LEFT JOIN patient_symptom_reports r ON r.id=a.source_report_id AND r.organization_id=a.organization_id
+        WHERE a.organization_id=$1 AND a.patient_id=$2 AND a.created_at >= now() - interval '30 days' ORDER BY a.created_at DESC LIMIT 50`, [org, s.patientId])).rows;
+      await this.audit(c, org, req, 'care.alerts.read', s);
+      const FINAL = ['resolved', 'dismissed', 'duplicate'];
+      return { thresholdC: FEVER_THRESHOLD_C, alerts: rows.map((a) => ({ id: a.id, code: a.code, title: alertCodeLabel(a.code), detail: a.description ?? null, urgent: a.level === 'urgent_review', fever: a.code === 'symptom.fever',
+        status: reportStatusLabel(a.status, a.level === 'urgent_review'), active: !FINAL.includes(a.status), at: a.created_at })) };
+    });
+  }
+
+  // ---------- M25: mensagens paciente/cuidador <-> equipe (não urgente; texto cifrado; auditado). ----------
+  @Get('me/messages')
+  messages(@Req() req: AuthenticatedRequest, @Headers('x-organization-id') org: string) {
+    let key: ReturnType<typeof careKey>; try { key = careKey(); } catch { throw new ServiceUnavailableException('Mensagens indisponíveis: chave de cifra não configurada'); }
+    return this.run(req, org, async (c, s) => {
+      const rows = (await c.query(`SELECT id,direction,author_role,author_display,topic,body_encrypted,body_iv,body_tag,read_at,created_at FROM care_team_messages WHERE organization_id=$1 AND patient_id=$2 ORDER BY created_at DESC LIMIT 100`, [org, s.patientId])).rows.reverse();
+      await c.query(`UPDATE care_team_messages SET read_at=now() WHERE organization_id=$1 AND patient_id=$2 AND direction='to_patient' AND read_at IS NULL`, [org, s.patientId]);
+      await this.audit(c, org, req, 'care.messages.read', s);
+      return { disclaimer: MESSAGE_DISCLAIMER, topics: MESSAGE_TOPICS, messages: rows.map((m) => ({ id: m.id, fromTeam: m.direction === 'to_patient', authorRole: m.author_role, author: m.author_display, topic: m.topic as MessageTopic, topicLabel: MESSAGE_TOPICS[m.topic as MessageTopic],
+        body: openText({ ciphertext: m.body_encrypted, iv: m.body_iv, tag: m.body_tag }, key.key), at: m.created_at, readByTeam: m.direction === 'to_team' ? !!m.read_at : undefined })) };
+    });
+  }
+
+  @Post('me/messages')
+  sendMessage(@Req() req: AuthenticatedRequest, @Headers('x-organization-id') org: string, @Body() body: Record<string, unknown>) {
+    const m = parseMessage(body);
+    let key: ReturnType<typeof careKey>; try { key = careKey(); } catch { throw new ServiceUnavailableException('Mensagens indisponíveis: chave de cifra não configurada'); }
+    return this.run(req, org, async (c, s) => {
+      const dup = await c.query(`SELECT id FROM care_team_messages WHERE organization_id=$1 AND source_reference=$2`, [org, `care:${m.requestId}`]);
+      if (dup.rowCount) return { id: dup.rows[0].id, duplicate: true, disclaimer: MESSAGE_DISCLAIMER };
+      const gn = (req.principal.claims as Record<string, unknown>).given_name, name = typeof gn === 'string' ? gn.slice(0, 60) : null;
+      const e = sealText(m.body, key.key);
+      const id = (await c.query(`INSERT INTO care_team_messages(organization_id,patient_id,direction,author_role,author_display,actor_issuer,actor_sub,topic,body_encrypted,body_iv,body_tag,key_id,source_reference) VALUES($1,$2,'to_team',$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id`,
+        [org, s.patientId, s.actor, name, req.principal.issuer, req.principal.sub, m.topic, e.ciphertext, e.iv, e.tag, key.id, `care:${m.requestId}`])).rows[0].id;
+      await this.audit(c, org, req, 'care.message.sent', s, { message_id: id, topic: m.topic }); // texto fora da auditoria
+      return { id, sent: true, disclaimer: MESSAGE_DISCLAIMER };
     });
   }
 

@@ -3177,6 +3177,335 @@
           }
         }
       }
+    },
+    "/care/me/checkins/today": {
+      "get": {
+        "summary": "M25: check-in diário de hoje (paciente ou cuidador com registrar_sintoma).",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem vínculo/permissão"
+          }
+        }
+      },
+      "put": {
+        "summary": "M25: cria ou altera (mesmo dia) o check-in diário: feeling bem|mais_ou_menos|mal, celsius opcional (>= 37,8 °C => regra de febre existente), note opcional; texto cifrado.",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem vínculo/permissão"
+          },
+          "400": {
+            "description": "Dados inválidos (mensagem pt-BR)"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/care/me/alerts": {
+      "get": {
+        "summary": "M25: alertas reais do próprio paciente (30 dias), estado derivado da equipe; sem conduta.",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem vínculo/permissão"
+          }
+        }
+      }
+    },
+    "/care/me/messages": {
+      "get": {
+        "summary": "M25: conversa paciente/cuidador ↔ equipe (não urgente; marca respostas como lidas).",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem vínculo/permissão"
+          }
+        }
+      },
+      "post": {
+        "summary": "M25: envia mensagem à equipe (2–1000 caracteres, assunto fechado, requestId idempotente; auditado, texto cifrado).",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem vínculo/permissão"
+          },
+          "400": {
+            "description": "Dados inválidos (mensagem pt-BR)"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/clinical/patients/{patientId}/checkins": {
+      "get": {
+        "summary": "M25: check-ins diários do Care (14 dias) do paciente vinculado (auditado).",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem vínculo/permissão"
+          }
+        }
+      }
+    },
+    "/clinical/messages/inbox": {
+      "get": {
+        "summary": "M25: caixa de entrada das mensagens do Care (somente pacientes vinculados).",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem vínculo/permissão"
+          }
+        }
+      }
+    },
+    "/clinical/patients/{patientId}/messages": {
+      "get": {
+        "summary": "M25: conversa do Care com o paciente vinculado (auditado).",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem vínculo/permissão"
+          }
+        }
+      },
+      "post": {
+        "summary": "M25: resposta da equipe ao paciente (2–1000 caracteres; auditado; texto cifrado).",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem vínculo/permissão"
+          },
+          "400": {
+            "description": "Dados inválidos (mensagem pt-BR)"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/clinical/patients/{patientId}/messages/read": {
+      "post": {
+        "summary": "M25: marca as mensagens do paciente como lidas pela equipe (auditado).",
+        "security": [
+          {
+            "oidc": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Org"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sem vínculo/permissão"
+          }
+        }
+      }
     }
   }
 }

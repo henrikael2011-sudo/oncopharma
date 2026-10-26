@@ -38,12 +38,12 @@ export function ClinicalShell({ children, testEnv = false }: { children: React.R
   else content = <Ctx.Provider value={state.me}>{children}</Ctx.Provider>;
   // Menu lateral do mockup marca-nova-v3h (Visão geral, Pacientes, Prescrições, Conferência com IA, Pedidos ao médico, Relatórios).
   // Itens sem tela neste PR ficam desabilitados com "em breve" (nada de botão morto).
-  const ICON: Record<string, string> = { 'Visão geral': 'hosp', Pacientes: 'bed', 'Prescrições': 'memo', 'Conferência com IA': 'robot', 'Pedidos ao médico': 'mail', 'Painel hospitalar': 'siren', 'Cadastros por convite': 'qr', 'Relatórios': 'bar' };
+  const ICON: Record<string, string> = { 'Visão geral': 'hosp', Pacientes: 'bed', 'Prescrições': 'memo', 'Conferência com IA': 'robot', 'Pedidos ao médico': 'mail', 'Painel hospitalar': 'siren', 'Cadastros por convite': 'qr', 'Mensagens do Care': 'msg', 'Relatórios': 'bar' };
   const items: string[][] = me ? [
     ...(me.role === 'pharmacist' ? [['/clinical/visao-geral', 'Visão geral']] : []), ['/clinical/pacientes', 'Pacientes'], ['', 'Prescrições'],
     me.role !== 'physician' ? ['/clinical/conferencia-ia', 'Conferência com IA'] : ['', 'Conferência com IA'],
     me.roles?.includes('physician') ? ['/clinical/solicitacoes', 'Pedidos ao médico'] : ['', 'Pedidos ao médico'],
-    ['/clinical/painel', 'Painel hospitalar'], ...(me.role !== 'clinical_manager' ? [['/clinical/cadastros', 'Cadastros por convite']] : []), ['', 'Relatórios']] : [];
+    ['/clinical/painel', 'Painel hospitalar'], ...(me.role !== 'clinical_manager' ? [['/clinical/cadastros', 'Cadastros por convite']] : []), ['/clinical/mensagens', 'Mensagens do Care'], ['', 'Relatórios']] : [];
   return <div className="clinical-page cv-app">
     {testEnv && <TestEnvBanner />}
     <header className={`clinical-header${me?.role === 'pharmacist' && path === '/clinical/visao-geral' ? ' clinical-header--overview' : ''}`}><Brand variant="clinical" />

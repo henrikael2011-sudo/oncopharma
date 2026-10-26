@@ -20,6 +20,8 @@ const ALLOW: [string, RegExp][] = [
   // M24: painel do farmacêutico hospitalar (leitura) + convites/cadastros pendentes de conferência.
   ['GET', /^panel\/queue$/], ['GET', new RegExp(`^panel/patients/${ID}$`)],
   ['POST', /^registration-invites$/], ['GET', /^registrations$/], ['POST', new RegExp(`^registrations/${ID}/(confirm|reject)$`)],
+  // M25: check-ins diários e mensagens do Care (caixa de entrada, conversa, resposta, marcar como lida).
+  ['GET', new RegExp(`^patients/${ID}/(checkins|messages)$`)], ['GET', /^messages\/inbox$/], ['POST', new RegExp(`^patients/${ID}/messages(/read)?$`)],
   ['POST', /^allocations\/sync$/], ['POST', /^imports\/pdf$/], ['POST', new RegExp(`^imports/${ID}/(confirm|discard)$`)], ['POST', new RegExp(`^patients/${ID}/allocation(/conflict)?$`)],
 ];
 export function allowed(method: string, path: string) {
@@ -48,6 +50,8 @@ export async function workProxy(request: Request, segments: string[]) {
   try {
     const up = await fetch(`${base}/v1/clinical/${path}${qs}`, { method, headers: { authorization: `Bearer ${s.token}`, 'x-organization-id': org, ...(body ? { 'content-type': 'application/json' } : {}) }, body, cache: 'no-store', signal: AbortSignal.timeout(15000) });
     const raw = await up.text(); let result: unknown; try { result = JSON.parse(raw); } catch { result = {}; }
+    // M25: 503 da API traz motivo operacional seguro (ex.: chave de cifra não configurada) — repassado; demais 5xx seguem genéricos.
+    if (up.status === 503) { const m = (result as { message?: unknown })?.message; return json(typeof m === 'string' && m.length <= 200 ? m : 'Serviço clínico indisponível no momento', 503); }
     if (up.status >= 500) return json('Serviço clínico indisponível no momento', 503);
     if (up.status >= 400) { const m = (result as { message?: unknown })?.message; return json(typeof m === 'string' && m.length <= 200 ? m : 'Solicitação recusada', up.status); }
     return NextResponse.json(result, { status: up.status, headers: { 'Cache-Control': 'no-store' } });
