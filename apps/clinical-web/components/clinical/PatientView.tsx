@@ -12,13 +12,15 @@ import { MedicalRequestList } from './MedicalRequests';
 import { AllocationPanel } from './AllocationPanel';
 import { MedTranscriptionTab } from './MedTranscriptionTab';
 import { ClinIcon, ClinTile } from './ClinIcons';
+import { CareContactTab } from './CareContactTab';
 
-const TABS = [['visao', 'Visão geral'], ['alertas', 'Alertas'], ['tarefas', 'Tarefas'], ['preciclo', 'Pré-ciclo'], ['linha', 'Linha do tempo'], ['prontuario', 'Prontuário'], ['medicamentos', 'Medicamentos'], ['exame', 'Exame'], ['solicitacoes', 'Solicitações médicas'], ['transcricao', 'Transcrição de medicamentos']] as const;
+const TABS = [['visao', 'Visão geral'], ['alertas', 'Alertas'], ['tarefas', 'Tarefas'], ['preciclo', 'Pré-ciclo'], ['linha', 'Linha do tempo'], ['prontuario', 'Prontuário'], ['medicamentos', 'Medicamentos'], ['exame', 'Exame'], ['solicitacoes', 'Solicitações médicas'], ['transcricao', 'Transcrição de medicamentos'], ['contato', 'Check-in e mensagens']] as const;
 type Tab = (typeof TABS)[number][0];
 export function PatientView({ id }: { id: string }) {
   const [d, setD] = useState<PatientData | null>(null), [err, setErr] = useState(''), [tab, setTab] = useState<Tab>('alertas'), [ask, setAsk] = useState(0);
   const load = useCallback(async () => { try { setD(await work<PatientData>(`patients/${id}`)); setErr(''); } catch (e) { setErr(e instanceof Error ? e.message : 'Erro'); } }, [id]);
   useEffect(() => { void load(); }, [load]);
+  useEffect(() => { if (new URLSearchParams(window.location.search).get('aba') === 'contato') setTab('contato'); }, []); // M25: vindo da caixa de mensagens
   const onKey = (e: React.KeyboardEvent, i: number) => {
     const n = e.key === 'ArrowRight' ? (i + 1) % TABS.length : e.key === 'ArrowLeft' ? (i + TABS.length - 1) % TABS.length : -1;
     if (n >= 0) { e.preventDefault(); setTab(TABS[n][0]); document.getElementById(`tab-${TABS[n][0]}`)?.focus(); }
@@ -46,6 +48,7 @@ export function PatientView({ id }: { id: string }) {
       {tab === 'linha' && <TimelineTab id={id} />}
       {tab === 'solicitacoes' && <MedicalRequestList key={ask} patientId={id} startOpen={ask > 0} />}
       {tab === 'transcricao' && <MedTranscriptionTab patientId={id} />}
+      {tab === 'contato' && <CareContactTab patientId={id} />}
       {tab === 'prontuario' && <RecordTab id={id} />}
       {tab === 'medicamentos' && <RecordTab id={id} only={MEDICATION_KEYS} />}
       {tab === 'exame' && <RecordTab id={id} only={LAB_KEYS} />}

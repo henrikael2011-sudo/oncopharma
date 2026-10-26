@@ -95,10 +95,12 @@ export class RegistrationController {
     const hours = inviteHours(body?.hours); const sec = secret();
     const base = process.env.CARE_PUBLIC_ORIGIN; if (!base || !/^https?:\/\/[^\s/]+$/.test(base.replace(/\/$/, ''))) throw new ServiceUnavailableException('Endereço público do Care não configurado');
     const out = await this.run(req, org, async (c, s) => {
-      const inviteId = randomUUID(), exp = Date.now() + hours * 3_600_000;
+      // M25: validade calculada no banco (now() da transação + horas), igual ao created_at do CHECK invite_max_7d — sem corrida entre relógio do Node e do Postgres.
+      const inviteId = randomUUID();
+      const exp = new Date((await c.query(`SELECT now() + make_interval(hours => $1::int) AS exp`, [hours])).rows[0].exp).getTime();
       const token = signInvite({ inviteId, org, exp }, sec);
-      await c.query(`INSERT INTO patient_registration_invites(id,organization_id,token_sha256,created_by_issuer,created_by_sub,created_by_role,expires_at) VALUES($1,$2,$3,$4,$5,$6,to_timestamp($7/1000.0))`,
-        [inviteId, org, tokenHash(token), req.principal.issuer, req.principal.sub, s.role, exp]);
+      await c.query(`INSERT INTO patient_registration_invites(id,organization_id,token_sha256,created_by_issuer,created_by_sub,created_by_role,created_at,expires_at) VALUES($1,$2,$3,$4,$5,$6,now(),now() + make_interval(hours => $7::int))`,
+        [inviteId, org, tokenHash(token), req.principal.issuer, req.principal.sub, s.role, hours]);
       await this.audit(c, org, req, 'registration.invite.created', s, { invite_id: inviteId, hours });
       return { inviteId, expiresAt: new Date(exp).toISOString(), link: `${base.replace(/\/$/, '')}/cadastro/${token}` };
     });

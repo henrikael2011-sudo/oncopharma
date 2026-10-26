@@ -18,7 +18,9 @@ test('paleta M21 só no bloco .care-page; fora dele apenas var()', () => {
 test('esqueleto em vez de spinner, marcas d\'água 9% e vermelho só no 192', () => {
   assert.match(css, /opacity:\.09/); assert.match(css, /care-gold-deep\.svg/); assert.match(css, /\.care-page::before\{right:/); assert.match(css, /\.care-page::after\{left:/);
   assert.match(r('apps/care-web/components/care/CareShell.tsx'), /<Skeleton label=/);
-  for (const f of ['Team', 'Alerts']) { const s = r(`apps/care-web/components/care/${f}.tsx`); for (const m of s.matchAll(/btn-danger[^>]*href="([^"]+)"/g)) assert.equal(m[1], 'tel:192'); assert.match(s, /\{STATIC_EXAMPLE\}/); }
+  for (const f of ['Team', 'Alerts', 'DailyCheckin']) { const s = r(`apps/care-web/components/care/${f}.tsx`); for (const m of s.matchAll(/btn-danger[^>]*href="([^"]+)"/g)) assert.equal(m[1], 'tel:192'); }
+  assert.match(r('apps/care-web/components/care/Team.tsx'), /\{STATIC_EXAMPLE\}/); // M25: Alertas não tem mais exemplo estático (alertas reais)
+  assert.doesNotMatch(r('apps/care-web/components/care/Alerts.tsx'), /STATIC_EXAMPLE|\(exemplo\)|data-static-demo/);
 });
 test('febre 37,8 °C em todo o Care; nenhum 38,0', () => {
   const walk = (d) => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => ['node_modules', '.next'].includes(e.name) ? [] : e.isDirectory() ? walk(`${d}/${e.name}`) : /\.(tsx?|css)$/.test(e.name) ? [`${d}/${e.name}`] : []);
@@ -53,8 +55,11 @@ test('mockups oficiais 21/10: fontes Bricolage/Manrope locais, menu lateral desk
 });
 test('sem botão morto: ações sem backend ficam desabilitadas ou mostram "Em breve"; ligações só com tel:', () => {
   const team = r('apps/care-web/components/care/Team.tsx'), home = r('apps/care-web/components/care/CareHome.tsx'), al = r('apps/care-web/components/care/Alerts.tsx');
-  assert.match(team, /disabled aria-disabled="true" title="Em breve: mensagens pelo app ainda não disponíveis"/);
+  // M25: mensagens e check-in reais (sem "em breve"): Team usa TeamMessages (me/messages); Início usa DailyCheckin (me/checkins/today).
+  assert.doesNotMatch(team, /Enviar mensagem \(em breve\)/); assert.match(team, /<TeamMessages /);
+  assert.match(r('apps/care-web/components/care/TeamMessages.tsx'), /care\('me\/messages', \{ method: 'POST'/); assert.match(r('apps/care-web/components/care/TeamMessages.tsx'), /192 \(SAMU\)/);
   assert.match(team, /href=\{tel\(phone\)\}/); assert.match(al, /href=\{tel\(phone\)\}/); assert.match(al, /Em breve: o telefone do seu serviço/);
-  assert.match(home, /data-soon="checkin"/); assert.match(home, /me\/medications\/\$\{nd\.med\.id\}\/adherence/);
-  for (const x of [team, home, al]) for (const m of x.matchAll(/<button(?![^>]*\b(onClick|disabled|type="submit")\b)[^>]*>/g)) assert.fail('botão sem ação: ' + m[0]);
+  assert.doesNotMatch(home, /data-soon="checkin"/); assert.match(home, /<DailyCheckin variant="hero"/); assert.match(home, /<DailyCheckin variant="quick"/);
+  const dc = r('apps/care-web/components/care/DailyCheckin.tsx'); assert.match(dc, /'me\/checkins\/today', \{ method: 'PUT'/); assert.match(home, /me\/medications\/\$\{nd\.med\.id\}\/adherence/);
+  for (const x of [team, home, al, r('apps/care-web/components/care/DailyCheckin.tsx'), r('apps/care-web/components/care/TeamMessages.tsx')]) for (const m of x.matchAll(/<button(?![^>]*\b(onClick|disabled|type="submit")\b)[^>]*>/g)) assert.fail('botão sem ação: ' + m[0]);
 });
