@@ -7,8 +7,9 @@ import type { PoolClient } from 'pg';
 import { AuthGuard, AuthenticatedRequest } from './auth.guard';
 import { DatabaseService } from './database.service';
 import { syntheticApiEnabled } from './synthetic-mode';
-import { careKey, openText } from './care-crypto';
+import { careKey, openText, sealText } from './care-crypto';
 import { isFever as careIsFever } from './care-rules';
+import { FEELINGS, type Feeling, MESSAGE_DISCLAIMER, MESSAGE_TOPICS, type MessageTopic, parseMessage } from './care-contact-rules';
 import { encryptFile, importKey, MAX_PDF_BYTES, previewAction, readHospitalPdf, sameName, type PdfRow } from './pdf-import';
 import { type Allocation, allocationLabel, FORMAT_LABEL, normalizeAllocation, syncOutcome, validateFeed } from './allocation-rules';
 import { FEVER_THRESHOLD_C, EXPIRING_SOON_HOURS, STABILITY_NOTICE, isFever, remainingLabel, stability } from './overview-rules';
@@ -531,6 +532,78 @@ export class ClinicalWorkController {
       ].sort((a, b) => String(b.at).localeCompare(String(a.at))).slice(0, 200);
       await this.audit(c, org, req, 'patient.timeline.read', s, 'patient', { patient_id: patientId });
       return { items };
+    });
+  }
+
+  // ---------- M25: check-ins diários e mensagens do Care (somente pacientes vinculados; leitura e resposta auditadas). ----------
+  private ck() { try { return careKey(); } catch { throw new ServiceUnavailableException('Dados do Care indisponíveis: chave de cifra não configurada'); } }
+
+  @Get('patients/:patientId/checkins')
+  checkins(@Req() req: AuthenticatedRequest, @Headers('x-organization-id') org: string, @Param('patientId') patientId: string) {
+    id(patientId, 'Paciente'); const key = this.ck();
+    return this.run(req, org, async (c, s) => {
+      await this.linked(c, org, req, patientId);
+      const rows = (await c.query(`SELECT k.id,k.checkin_date::text AS d,k.feeling,k.note_encrypted,k.note_iv,k.note_tag,k.recorded_by,k.created_at,k.updated_at,k.edit_count,t.value_encrypted,t.value_iv,t.value_tag
+        FROM patient_daily_checkins k LEFT JOIN patient_temperature_readings t ON t.id=k.temperature_reading_id AND t.organization_id=k.organization_id
+        WHERE k.organization_id=$1 AND k.patient_id=$2 ORDER BY k.checkin_date DESC LIMIT 14`, [org, patientId])).rows;
+      await this.audit(c, org, req, 'patient.checkins.read', s, 'patient', { patient_id: patientId });
+      return { feverThresholdC: FEVER_THRESHOLD_C, checkins: rows.map((r) => { const celsius = r.value_encrypted ? Number(openText({ ciphertext: r.value_encrypted, iv: r.value_iv, tag: r.value_tag }, key.key)) : null;
+        return { id: r.id, date: r.d, feeling: r.feeling, feelingLabel: FEELINGS[r.feeling as Feeling], celsius, fever: celsius !== null && careIsFever(celsius),
+          note: r.note_encrypted ? openText({ ciphertext: r.note_encrypted, iv: r.note_iv, tag: r.note_tag }, key.key) : null,
+          recordedBy: r.recorded_by, createdAt: iso(r.created_at), updatedAt: iso(r.updated_at), edited: Number(r.edit_count) > 0 }; }) };
+    });
+  }
+
+  @Get('messages/inbox')
+  inbox(@Req() req: AuthenticatedRequest, @Headers('x-organization-id') org: string) {
+    return this.run(req, org, async (c, s) => {
+      const rows = (await c.query(`SELECT p.id,p.display_name,p.hospital_record,max(m.created_at) AS last_at,
+          count(*) FILTER (WHERE m.direction='to_team' AND m.read_at IS NULL)::int AS unread, count(*)::int AS total
+        FROM care_team_messages m JOIN patients p ON p.id=m.patient_id AND p.organization_id=m.organization_id
+        JOIN care_assignments ca ON ca.patient_id=p.id AND ca.organization_id=p.organization_id AND ca.oidc_issuer=$2 AND ca.oidc_sub=$3 AND ca.active=true
+        WHERE m.organization_id=$1 AND p.synthetic=true GROUP BY p.id,p.display_name,p.hospital_record ORDER BY (count(*) FILTER (WHERE m.direction='to_team' AND m.read_at IS NULL))>0 DESC, max(m.created_at) DESC LIMIT 100`, [org, req.principal.issuer, req.principal.sub])).rows;
+      await this.audit(c, org, req, 'messages.inbox.read', s, 'messages', { threads: rows.length });
+      return { disclaimer: MESSAGE_DISCLAIMER, threads: rows.map((r) => ({ patientId: r.id, name: r.display_name ?? 'Paciente fictício', record: r.hospital_record, lastAt: iso(r.last_at), unread: r.unread, total: r.total })) };
+    });
+  }
+
+  @Get('patients/:patientId/messages')
+  thread(@Req() req: AuthenticatedRequest, @Headers('x-organization-id') org: string, @Param('patientId') patientId: string) {
+    id(patientId, 'Paciente'); const key = this.ck();
+    return this.run(req, org, async (c, s) => {
+      const p = await this.linked(c, org, req, patientId);
+      const rows = (await c.query(`SELECT id,direction,author_role,author_display,topic,body_encrypted,body_iv,body_tag,read_at,created_at FROM care_team_messages WHERE organization_id=$1 AND patient_id=$2 ORDER BY created_at DESC LIMIT 100`, [org, patientId])).rows.reverse();
+      await this.audit(c, org, req, 'patient.messages.read', s, 'patient', { patient_id: patientId });
+      return { patient: { id: p.id, name: p.display_name }, disclaimer: MESSAGE_DISCLAIMER, messages: rows.map((m) => ({ id: m.id, fromTeam: m.direction === 'to_patient', authorRole: m.author_role, author: m.author_display,
+        topic: m.topic, topicLabel: MESSAGE_TOPICS[m.topic as MessageTopic], body: openText({ ciphertext: m.body_encrypted, iv: m.body_iv, tag: m.body_tag }, key.key), at: iso(m.created_at), readAt: iso(m.read_at) })) };
+    });
+  }
+
+  @Post('patients/:patientId/messages/read')
+  markRead(@Req() req: AuthenticatedRequest, @Headers('x-organization-id') org: string, @Param('patientId') patientId: string) {
+    id(patientId, 'Paciente');
+    return this.run(req, org, async (c, s) => {
+      await this.linked(c, org, req, patientId);
+      const r = await c.query(`UPDATE care_team_messages SET read_at=now() WHERE organization_id=$1 AND patient_id=$2 AND direction='to_team' AND read_at IS NULL`, [org, patientId]);
+      await this.audit(c, org, req, 'patient.messages.marked_read', s, 'patient', { patient_id: patientId, count: r.rowCount ?? 0 });
+      return { marked: r.rowCount ?? 0 };
+    });
+  }
+
+  @Post('patients/:patientId/messages')
+  reply(@Req() req: AuthenticatedRequest, @Headers('x-organization-id') org: string, @Param('patientId') patientId: string, @Body() body: Record<string, unknown>) {
+    id(patientId, 'Paciente'); const m = parseMessage(body, false); const key = this.ck();
+    return this.run(req, org, async (c, s) => {
+      await this.linked(c, org, req, patientId);
+      const dup = await c.query(`SELECT id FROM care_team_messages WHERE organization_id=$1 AND source_reference=$2`, [org, `clinical:${m.requestId}`]);
+      if (dup.rowCount) return { id: dup.rows[0].id, duplicate: true };
+      const name = typeof req.principal.claims.given_name === 'string' ? `${req.principal.claims.given_name.slice(0, 50)} · ${ROLE_LABEL[s.role]}` : ROLE_LABEL[s.role];
+      const e = sealText(m.body, key.key);
+      const mid = (await c.query(`INSERT INTO care_team_messages(organization_id,patient_id,direction,author_role,author_display,actor_issuer,actor_sub,topic,body_encrypted,body_iv,body_tag,key_id,source_reference) VALUES($1,$2,'to_patient',$3,$4,$5,$6,'geral',$7,$8,$9,$10,$11) RETURNING id`,
+        [org, patientId, s.role, name, req.principal.issuer, req.principal.sub, e.ciphertext, e.iv, e.tag, key.id, `clinical:${m.requestId}`])).rows[0].id;
+      await c.query(`UPDATE care_team_messages SET read_at=now() WHERE organization_id=$1 AND patient_id=$2 AND direction='to_team' AND read_at IS NULL`, [org, patientId]);
+      await this.audit(c, org, req, 'patient.message.replied', s, 'patient', { patient_id: patientId, message_id: mid }); // texto fora da auditoria
+      return { id: mid, sent: true };
     });
   }
 }

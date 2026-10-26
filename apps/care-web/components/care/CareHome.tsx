@@ -1,12 +1,13 @@
 'use client';
 // Início no padrão dos mockups oficiais (21/10): faixa "Estou bem hoje", próxima dose, próxima consulta, resumo de hoje
-// e aviso de temperatura. Tudo vem das rotas reais (me/home, me/medications, me/temperatures); textos clínicos só das
+// e aviso de temperatura. M25: check-in diário real (DailyCheckin → me/checkins/today). Tudo vem das rotas reais (me/home, me/medications, me/temperatures); textos clínicos só das
 // fontes aprovadas (care-guidance / care-urgency). O app só organiza e registra: quem avalia e decide é a equipe.
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { care, dateBR } from '../../lib/care-client';
 import { SIGNATURE, Skeleton, TEAM_DECIDES, useMe } from './CareShell';
 import { Icon, Tile } from './Icons';
+import { DailyCheckin } from './DailyCheckin';
 import { EMERGENCY_TEXT, FEVER_THRESHOLD_LABEL, WARNING_TITLE } from '../../lib/care-guidance';
 type Home = { sections: { journey: boolean; medications: boolean; symptoms: boolean }; nextCycle: { number: number; date: string; status: string } | null; reminders: { kind: string; text: string; date?: string }[]; guidance: { id: string; text: string }[] };
 type Status = 'taken' | 'missed' | 'partial';
@@ -28,7 +29,7 @@ function nextDose(meds: Med[]): { med: Med; time: string | null } | null {
 export function CareHome() {
   const { me } = useMe();
   const [h, setH] = useState<Home | null>(null), [meds, setMeds] = useState<Med[] | null>(null), [temps, setTemps] = useState<Reading[] | null>(null);
-  const [err, setErr] = useState(''), [msg, setMsg] = useState(''), [checkin, setCheckin] = useState(false), [busy, setBusy] = useState(false);
+  const [err, setErr] = useState(''), [msg, setMsg] = useState(''), [busy, setBusy] = useState(false);
   const first = me.displayName?.split(' ')[0];
   const canMeds = me.actor === 'patient' || me.scopes.includes('ver_medicamentos');
   const canSymptom = me.actor === 'patient' || me.scopes.includes('registrar_sintoma');
@@ -56,8 +57,7 @@ export function CareHome() {
     {canSymptom && <section className="cm-hero" aria-labelledby="h-well">
       <Tile name="smile" gold size={30} />
       <div><h2 id="h-well">{me.actor === 'caregiver' ? `${me.patientName ?? 'A pessoa'} está bem hoje` : 'Estou bem hoje'}</h2><p>Toque para enviar o check-in diário à equipe · leva 10 segundos</p></div>
-      <button type="button" className="btn-hero" onClick={() => setCheckin(true)} aria-expanded={checkin} aria-controls="h-checkin-msg">Enviar check-in →</button>
-      {checkin && <p id="h-checkin-msg" className="cm-soon" role="status" data-soon="checkin">Em breve: o check-in diário ainda não é enviado à equipe nesta versão. Para registrar como você está agora, use <Link href="/care/sintoma">Sintomas e febre</Link>.</p>}
+      <DailyCheckin variant="hero" who={me.actor === 'caregiver' ? me.patientName ?? 'a pessoa' : null} />
     </section>}
     {!h && !err && <Skeleton label="Carregando dados do paciente…" />}
     {me.actor === 'caregiver' && h && !h.sections.journey && !h.sections.medications && !h.sections.symptoms && <p className="care-lead" role="status">{me.patientName ?? 'O paciente'} ainda não liberou nenhuma informação para você.</p>}
@@ -82,8 +82,7 @@ export function CareHome() {
     </section>}
     {h && h.guidance.length > 0 && <section className="care-card" aria-labelledby="h-guid"><h2 id="h-guid"><Tile name="doctor" />Orientações da sua equipe</h2><ul className="care-list">{h.guidance.map((g) => <li key={g.id}>{g.text}</li>)}</ul></section>}
     {canSymptom && <section className="care-card cm-mobile-only" aria-labelledby="h-how"><h2 id="h-how"><Tile name="smile" />{me.actor === 'caregiver' ? `Como ${me.patientName ?? 'a pessoa'} está hoje?` : 'Como você está hoje?'}</h2><p className="cm-sub">Leva menos de 1 minuto.</p>
-      <div className="care-actions"><button type="button" className="btn-primary" onClick={() => setCheckin(true)}><Icon name="circleCheck" />Estou bem hoje</button><Link className="btn-secondary" href="/care/sintoma"><Icon name="notebook" />Registrar sintoma</Link></div>
-      {checkin && <p className="cm-soon" role="status">Em breve: o check-in diário ainda não é enviado à equipe nesta versão. Use “Registrar sintoma”.</p>}</section>}
+      <DailyCheckin variant="quick" who={me.actor === 'caregiver' ? me.patientName ?? 'a pessoa' : null} /></section>}
     <nav aria-label="Mais opções" className="cm-more">
       {(me.actor === 'patient' || me.scopes.includes('ver_jornada')) && <Link href="/care/jornada"><Tile name="heartPulse" />Minha jornada</Link>}
       <Link href="/care/ajuda"><Tile name="siren" />Preciso de ajuda</Link>

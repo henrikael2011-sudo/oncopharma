@@ -12,6 +12,8 @@ const ALLOW: [string, RegExp][] = [
   // M21.2: temperatura (criar + últimos 7 dias).
   ['GET', /^me\/temperatures$/], ['POST', /^me\/temperatures$/],
   ['POST', /^me\/medications\/[0-9a-f-]{36}\/adherence$/],
+  // M25: check-in diário (hoje: ler/criar-editar), alertas reais do paciente e mensagens com a equipe.
+  ['GET', /^me\/checkins\/today$/], ['PUT', /^me\/checkins\/today$/], ['GET', /^me\/alerts$/], ['GET', /^me\/messages$/], ['POST', /^me\/messages$/],
   // M15.3 (R4): gestão do cuidador pelo paciente + aceite do convite pelo cuidador.
   ['GET', /^me\/caregivers$/], ['POST', /^me\/caregivers\/invites$/], ['POST', /^me\/caregivers\/invites\/[0-9a-f-]{36}\/cancel$/],
   ['PUT', /^me\/caregivers\/[0-9a-f-]{36}\/scopes$/], ['POST', /^me\/caregivers\/[0-9a-f-]{36}\/revoke$/], ['POST', /^caregiver\/accept$/],
@@ -40,6 +42,8 @@ export async function careProxy(request: Request, segments: string[]) {
   try {
     const up = await fetch(`${base}/v1/care/${path}`, { method, headers: { authorization: `Bearer ${s.token}`, 'x-organization-id': org, ...(body ? { 'content-type': 'application/json' } : {}) }, body, cache: 'no-store', signal: AbortSignal.timeout(8000) });
     const raw = await up.text(); let result: unknown; try { result = JSON.parse(raw); } catch { result = {}; }
+    // M25: 503 da API traz motivo operacional seguro (ex.: chave de cifra não configurada) — repassado; demais 5xx seguem genéricos.
+    if (up.status === 503) { const m = (result as { message?: unknown })?.message; return json(typeof m === 'string' && m.length <= 200 ? m : 'Serviço indisponível no momento', 503); }
     if (up.status >= 500) return json('Serviço indisponível no momento', 503);
     if (up.status >= 400) { const m = (result as { message?: unknown })?.message; return json(typeof m === 'string' && m.length <= 200 ? m : 'Solicitação recusada', up.status); }
     return NextResponse.json(result, { status: up.status, headers: { 'Cache-Control': 'no-store' } });

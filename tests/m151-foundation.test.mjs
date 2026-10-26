@@ -21,7 +21,8 @@ test('OpenAPI documenta exatamente as rotas da API', () => {
   const actual = routes().map(([m, p]) => `${m} ${p}`).sort();
   assert.deepEqual(documented, actual);
   for (const [p, ops] of Object.entries(spec.paths)) for (const [m, op] of Object.entries(ops))
-    if (!['/health', '/ready'].includes(p)) assert.deepEqual(op.security, [{ oidc: [] }], `${m} ${p} sem segurança`);
+    if (p.startsWith('/public/')) assert.deepEqual(op.security, [], `${m} ${p}: rota pública (M24, convite assinado) deve declarar security: []`);
+    else if (!['/health', '/ready'].includes(p)) assert.deepEqual(op.security, [{ oidc: [] }], `${m} ${p} sem segurança`);
 });
 test('modo sintético: nunca habilita em prod; exige ONCO_ENVIRONMENT conhecido', async () => {
   const src = read('services/api/src/synthetic-mode.ts');
