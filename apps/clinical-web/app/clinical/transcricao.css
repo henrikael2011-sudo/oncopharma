@@ -13,3 +13,6 @@
 .clin-transcr .workflow-form .btn-secondary{background:#fff;color:var(--navy);border:2px solid var(--navy)}
 .clin-transcr .workflow-form .tr-x{background:none;color:var(--ink-muted);margin:0;padding:0 6px}
 .clin-transcr .clin-times .btn-secondary{margin:0}
+/* Identidade v3h (sem mockup próprio): seções da transcrição em cartões elevados com ladrilhos Lucide nos títulos. */
+.cv-app .clin-transcr>section,.cv-app .clin-transcr .tr-form{background:#fff;border:1px solid #E3F4EA;border-radius:16px;padding:20px 22px;box-shadow:0 18px 40px -18px #0b5a4340;margin-bottom:18px}
+.cv-app .clin-transcr h2{display:flex;align-items:center;gap:12px;font-size:22px}

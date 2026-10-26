@@ -45,7 +45,7 @@
     "test:e2e": "bash tests/e2e/run-e2e.sh",
     "idp:test:setup": "node infra/idp-test/setup-keycloak-test.mjs",
     "build:packages": "npm run build -w @oncopharma/clinical-rules",
-    "test:api:security": "node --test tests/m145-api.security.mjs tests/m15-oidc-providers.mjs tests/m151-synthetic-mode.mjs tests/m152-care.mjs tests/m153-caregiver.mjs tests/m154-clinical.mjs tests/m154b-allocation.mjs tests/m154c-pdf-import.mjs tests/m155-medical-requests.mjs tests/m212-care-temperature.mjs tests/m22-med-transcription.mjs tests/m20-visao-geral.mjs",
+    "test:api:security": "node --test tests/m145-api.security.mjs tests/m15-oidc-providers.mjs tests/m151-synthetic-mode.mjs tests/m152-care.mjs tests/m153-caregiver.mjs tests/m154-clinical.mjs tests/m154b-allocation.mjs tests/m154c-pdf-import.mjs tests/m155-medical-requests.mjs tests/m212-care-temperature.mjs tests/m22-med-transcription.mjs tests/m23-orientacoes-urgencia.mjs tests/m20-visao-geral.mjs",
     "check:brand": "node tools/check-brand.mjs",
     "fixtures:pdf": "node tools/gen-synthetic-pdfs.mjs"
   },

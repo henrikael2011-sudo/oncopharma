@@ -5,7 +5,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { care } from '../../lib/care-client';
 import { isFeverLocal, LOCAL_URGENT_TEXT, LOCAL_URGENT_TITLE, SEND_FAILED_TEXT } from '../../lib/care-urgency';
 import { FEVER_THRESHOLD_C, FEVER_THRESHOLD_LABEL } from '../../lib/care-guidance';
-import { Skeleton } from './CareShell';
+import { Skeleton, useMe } from './CareShell';
+import { AlertGuidanceList } from './AlertGuidanceList';
 import { chartGeometry, H, L, R, W } from '../../lib/temp-chart';
 import { Icon, Tile } from './Icons';
 export type Reading = { id: string; celsius: number; measuredAt: string; recordedBy: 'patient' | 'caregiver'; fever: boolean };
@@ -20,7 +21,7 @@ export function TemperatureSection() {
   useEffect(() => { void load(); }, [load]);
   const step = (d: number) => { setSaved(null); setValue((v) => Math.min(43, Math.max(34, Math.round((v + d) * 10) / 10))); };
   async function save() { setBusy(true); setSendErr(''); try { const r = await care<Saved>('me/temperatures', { method: 'POST', body: { celsius: value, requestId } }); setSaved(r); setRequestId(crypto.randomUUID()); await load(); } catch (e) { setSendErr(`${SEND_FAILED_TEXT}${e instanceof Error && e.message ? ` (${e.message})` : ''}`); } finally { setBusy(false); } }
-  const urgentNow = isFeverLocal(value);
+  const urgentNow = isFeverLocal(value); const { me } = useMe();
   return <div id="temperatura" className="cm-temp-grid">
     {err ? <p role="alert">{err}</p> : !list ? <Skeleton label="Carregando temperaturas…" /> : <TempChart readings={list} />}
     <div className="cm-side-col">
@@ -34,7 +35,7 @@ export function TemperatureSection() {
       <button type="button" className="btn-primary" disabled={busy} onClick={() => void save()}><Icon name="circleCheck" />Salvar temperatura</button>
       {sendErr && <p role="alert">{sendErr}</p>}
     </section>
-    {(saved?.urgent || (urgentNow && !saved)) && <div className="care-panel care-urgent" role="alert" data-temp-urgent><h2>{LOCAL_URGENT_TITLE}</h2><p className="care-lead">{saved?.urgent ? saved.message : LOCAL_URGENT_TEXT}</p><p><a className="btn-primary" href="tel:192">Ligar 192</a></p></div>}
+    {(saved?.urgent || (urgentNow && !saved)) && <div className="care-panel care-urgent" role="alert" data-temp-urgent><h2>{LOCAL_URGENT_TITLE}</h2><p className="care-lead">{saved?.urgent ? saved.message : LOCAL_URGENT_TEXT}</p><AlertGuidanceList keys={['febre']} caregiver={me.actor === 'caregiver'} /><p><a className="btn-primary" href="tel:192">Ligar 192</a></p></div>}
     {saved && !saved.urgent && <p role="status" className="care-note">{saved.message}</p>}
     </div>
   </div>;
