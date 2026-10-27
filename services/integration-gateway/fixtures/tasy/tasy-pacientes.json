@@ -1,0 +1,16 @@
+[
+  {
+    "_aviso": "FICTÍCIO — demonstração não clínica. Nenhum dado real.",
+    "paciente": { "cd_pessoa_fisica": "900001", "nr_prontuario": "PR-10021", "nm_pessoa_fisica": "ANA SINTETICO", "ie_sexo": "F", "dt_nascimento": "12/03/1970" },
+    "atendimentos": [ { "nr_atendimento": "700101", "ie_tipo_atendimento": "I", "ie_status": "A", "dt_entrada": "10/10/2026 08:30", "ds_setor_atendimento": "Oncologia Clínica" } ],
+    "prescricoes": [ { "nr_prescricao": "550001", "nr_atendimento": "700101", "ie_status": "L", "dt_prescricao": "11/10/2026 09:00", "nm_medico": "DR. FICTICIO EXEMPLO",
+      "itens": [
+        { "nr_sequencia": 1, "cd_material": "SIM-0101", "ds_material": "Medicamento Fictício A 50 mg", "qt_dose": 50, "cd_unidade_medida": "mg", "ds_via": "IV", "ds_posologia": "1x ao dia (exemplo)" },
+        { "nr_sequencia": 2, "cd_material": "SIM-0202", "ds_material": "Antiemético Fictício B 8 mg", "qt_dose": 8, "cd_unidade_medida": "mg", "ds_via": "VO", "ds_posologia": "8/8h (exemplo)" }
+      ] } ],
+    "resultados": [
+      { "nr_seq_resultado": "330001", "ds_exame": "Hemoglobina (fictício)", "cd_loinc": "718-7", "vl_resultado": "11,8", "ds_unidade": "g/dL", "vl_referencia_min": 12, "vl_referencia_max": 16, "dt_coleta": "11/10/2026 06:00", "ie_status": "F" },
+      { "nr_seq_resultado": "330002", "ds_exame": "Neutrófilos (fictício)", "cd_loinc": "751-8", "vl_resultado": "1.9", "ds_unidade": "10*3/uL", "dt_coleta": "11/10/2026 06:00", "ie_status": "P" }
+    ]
+  }
+]
